@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wiki</title>
+</head>
+<body>
+    <div id="contents">
+        <h2>Contents</h2>
+        <ul>
+            <li><a href="#gameInstance">Installation (Steam)</a></li>
+            <ol>
+                <li><a href="#downloading-files">Download game files</a></li>
+                <li><a href="#adding-files-to-archive">Add files to a .zip archive</a></li>
+                <li><a href="#copying-archive-to-device">Copy the .zip archive to your device</a></li>
+            </ol>
+        </ul>
+    </div>
+
+    <section id="gameInstance">
+        <h2>Installation (Steam)</h2>
+        
+        <section id="downloading-files">
+        	<h3>Download game files</h3>
+        	Zomdroid requires Project Zomboid files for Linux in order to run. If you're using Linux, simply download the game as usual through the Steam client. If you're using Windows or macOS, follow these steps::
+		    <ol>
+                <li>Open the Steam console. One way to do this is by typing <i>steam://open/console</i> into your browser’s address bar</li>
+                <li>Enter the following task: <i>download_depot 108600 108603</i>. This will download the latest stable version of Project Zomboid for Linux. If you want to download a specific version, you'll also need to provide a manifest id. For example, to download the unstable version from March 24, 2025, use: <i>download_depot 108600 108603 2006259071304963476</i>. You can find a list of all manifests on the <a href=https://steamdb.info/depot/108603/manifests/>SteamDB</a> website (not affiliated with Steam or Valve) </li>
+                <img src="steam_console.png" style="width: 100%; height: auto;">
+            </ol>
+    	</section>
+    	<section id="adding-files-to-archive">
+        	<h3>Add files to a .zip archive</h3>
+            Navigate to folder containing game files (folder with ProjectZomboid64 executable). On Linux it will most likely be located at <i>~/.local/share/Steam/steamapps/common/ProjectZomboid/projectzomboid</i>. On Windows or macOS you need to note the depot download directory from the previous step (it will appear in the console once the download is finished). E.g. on Windows it is usually <i>C:\Program Files (x86)\Steam\steamapps\content\app_108600\depot_108603\projectzomboid</i>. Select all contents and add them to a .zip archive
+    	</section>
+    	<section id="copying-archive-to-device">
+        	<h3>Copy the .zip archive to your device</h3>
+            Copy the .zip archive from the previous step to any folder on your android device. Further gameInstance will be handled by Zomdroid application.
+    	</section>
+    </section>
+</body>
+</html>

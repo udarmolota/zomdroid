@@ -1,0 +1,5 @@
+<resources>
+    <dimen name="list_item_height">56dp</dimen>
+    <dimen name="list_item_leading_space">16dp</dimen>
+    <dimen name="list_item_trailing_space">0dp</dimen>
+</resources>

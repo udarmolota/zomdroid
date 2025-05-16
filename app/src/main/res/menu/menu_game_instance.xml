@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_game_instance_manage_storage"
+        android:icon="@drawable/mt_icon_folder"
+        android:title="@string/game_instance_manage_storage"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_game_instance_delete"
+        android:icon="@drawable/mt_icon_delete"
+        android:title="@string/game_instance_delete"
+        app:showAsAction="never"/>
+</menu>

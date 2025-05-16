@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/launcher_fragment">
+
+    <fragment
+        android:id="@+id/launcher_fragment"
+        android:name="com.zomdroid.fragments.LauncherFragment"
+        android:label="@string/fragment_label_launcher"
+        tools:layout="@layout/fragment_launcher">
+        <action
+            android:id="@+id/action_open_new_game_instance_fragment"
+            app:destination="@id/new_game_instance_fragment" />
+        <action
+            android:id="@id/action_open_settings_fragment"
+            app:destination="@id/settings_fragment"/>
+        <action
+            android:id="@id/action_open_wiki_fragment"
+            app:destination="@id/wiki_fragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/new_game_instance_fragment"
+        android:name="com.zomdroid.fragments.NewGameInstanceFragment"
+        android:label="@string/fragment_label_new_game_instance"
+        tools:layout="@layout/fragment_new_game_instance">
+    </fragment>
+
+    <fragment
+        android:id="@+id/settings_fragment"
+        android:name="com.zomdroid.fragments.SettingsFragment"
+        android:label="@string/fragment_label_settings"
+        tools:layout="@layout/fragment_settings">
+    </fragment>
+
+    <fragment
+        android:id="@+id/wiki_fragment"
+        android:name="com.zomdroid.fragments.WikiFragment"
+        android:label="@string/fragment_label_wiki">
+    </fragment>
+
+</navigation>

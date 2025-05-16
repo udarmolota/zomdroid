@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/new_game_instance_cl"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/new_game_instance_name_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="@string/game_instance_name"/>
+
+    <EditText
+        android:id="@+id/new_game_instance_name_et"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/new_game_instance_name_tv"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:imeOptions="actionDone"
+        android:inputType="text|textNoSuggestions"
+        android:maxLength="40"
+        android:maxLines="1"
+        android:text="Project Zomboid">
+    </EditText>
+
+    <TextView
+        android:id="@+id/new_game_instance_preset_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/new_game_instance_name_et"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="@string/game_instance_preset"/>
+
+    <Spinner
+        android:id="@+id/new_game_instance_preset_s"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/new_game_instance_preset_tv"
+        android:text="@string/game_instance_preset"/>
+
+    <TextView
+        android:id="@+id/new_game_instance_files_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/new_game_instance_preset_s"
+        android:text="@string/game_instance_files"/>
+
+    <ImageButton
+        style="@style/AppTheme.ImageButton"
+        android:id="@+id/new_game_instance_files_help_ib"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="4dp"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
+        app:layout_constraintStart_toEndOf="@id/new_game_instance_files_tv"
+        app:layout_constraintTop_toTopOf="@id/new_game_instance_files_tv"
+        app:layout_constraintBottom_toBottomOf="@id/new_game_instance_files_tv"
+        app:layout_constraintWidth_default="wrap"
+        app:layout_constraintHeight_default="wrap"
+        android:src="@drawable/mt_icon_help"/>
+
+    <EditText
+        android:id="@+id/new_game_instance_files_path_et"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/new_game_instance_files_tv"
+        app:layout_constraintEnd_toStartOf="@id/new_game_instance_files_browse_ib"
+        android:hint="@string/game_instance_browse_files_hint"
+        android:enabled="false">
+    </EditText>
+
+    <ImageButton
+        style="@style/AppTheme.ImageButton"
+        android:id="@+id/new_game_instance_files_browse_ib"
+        app:layout_constraintTop_toTopOf="@id/new_game_instance_files_path_et"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/new_game_instance_files_path_et"
+        android:src="@drawable/mt_icon_folder_open"/>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

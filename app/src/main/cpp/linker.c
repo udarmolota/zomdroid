@@ -1,0 +1,671 @@
+#include <string.h>
+#include <stdio.h>
+#include <dlfcn.h>
+#include <android/dlext.h>
+#include <malloc.h>
+
+#include "logger.h"
+#include "emulation.h"
+#include "zomdroid_globals.h"
+
+#include "liblinkernsbypass/android_linker_ns.h"
+
+#include "box64/src/include/librarian.h"
+#include "box64/src/include/myalign.h"
+#include "box64/src/include/elfloader.h"
+#include "box64/src/include/library.h"
+
+
+#define LOG_TAG "zomdroid-linker"
+
+#define BUF_SIZE 1024
+
+static void* (*__loader_dlopen)(const char* filename, int flags, const void* caller);
+static void* (*__loader_dlsym)(void* handle, const char* symbol, const void* caller);
+
+static void* (*__loader_android_dlopen_ext)(const char* filename,
+                                            int flag,
+                                            const android_dlextinfo* extinfo,
+                                            const void* caller_addr);
+static void* vulkan_driver_handle;
+static void* vulkan_loader_handle;
+
+static EmulatedLib jni_libs[] = {{.name = "PZClipper64"}, {.name = "PZBullet64"}, {.name = "PZBulletNoOpenGL64"}, {.name = "Lighting64"}, {.name = "PZPathFind64"}, {.name = "PZPopMan64"}, {.name = "fmodintegration64"}, { .name = "zomdroidtest"} };
+static int jni_lib_count = sizeof (jni_libs) / sizeof (EmulatedLib);
+
+
+__attribute__((visibility("default"), used))
+void zomdroid_linker_set_vulkan_driver_handle(void* handle) {
+    vulkan_driver_handle = handle;
+}
+
+__attribute__((visibility("default"), used))
+void zomdroid_linker_set_vulkan_loader_handle(void* handle) {
+    vulkan_loader_handle = handle;
+}
+
+__attribute__((visibility("default"), used))
+void zomdroid_linker_set_proc_addrs(void* __loader_dlopen_fn, void* __loader_dlsym_fn,
+                                    void* __loader_android_dlopen_ext_fn) {
+    __loader_dlopen = __loader_dlopen_fn;
+    __loader_dlsym = __loader_dlsym_fn;
+    __loader_android_dlopen_ext = __loader_android_dlopen_ext_fn;
+}
+
+
+
+__attribute__((visibility("default"), used))
+int zomdroid_linker_init() {
+    if (zomdroid_emulation_init() != 0) {
+        LOGE("Failed to initialize emulation");
+        return -1;
+    }
+
+    return 0;
+}
+
+// returns next box64 type from jni method signature
+/*static char get_next_type_from_sigature(char** sig) {
+    char type;
+    if (**sig == 0) return 0;
+    switch (**sig) {
+        case 'B': // jbyte
+            type = 'c';
+            break;
+        case 'C': // jchar
+            type = 'W';
+            break;
+        case 'D': // jdouble
+            type = 'd';
+            break;
+        case 'F': // jfloat
+            type = 'f';
+            break;
+        case 'I': // jint
+            type = 'i';
+            break;
+        case 'J': // jlong
+            type = 'I';
+            break;
+        case 'S': // jshort
+            type = 'w';
+            break;
+        case 'Z': // jboolean
+            type = 'C';
+            break;
+        case 'L': // reference to object
+            int escaped = 0;
+            (*sig)++;
+            while(**sig) {
+                if (**sig == '_') {
+                    escaped = 1;
+                } else if (**sig == '2' && escaped) {
+                    type = 'p';
+                    break;
+                } else {
+                    escaped = 0;
+                }
+                (*sig)++;
+            }
+            if (**sig == 0) {
+                LOGE("Signature string ended before complete class name could be read");
+                return -1;
+            }
+            break;
+        case '_': // reference to array
+            (*sig)++;
+            if (**sig != '3') {
+                LOGE("Unexpected character '%c' after _", **sig);
+                return -1;
+            }
+            (*sig)++;
+            get_next_type_from_sigature(sig); // skip enclosed type
+            (*sig)--;
+            type = 'p';
+            break;
+        default:
+            LOGE("Unexpected first character '%c'", **sig);
+            return -1;
+    }
+    (*sig)++;
+    return type;
+}*/
+
+static void parse_jni_sym_name(const char* sym_name, char** class_name, char** method_name, char** method_sig_short) {
+    LOGV("Parsing %s", sym_name);
+
+    char buf[BUF_SIZE];
+
+    if (strncmp(sym_name, "Java_", 5) != 0) {
+        LOGE("Name doesn't start with Java_");
+        return;
+    }
+
+    sym_name += 5;
+
+    int i = 0;
+    int sig = 0;
+    int method = 0;
+    while (*sym_name != '\0') {
+        if (i + 1 >= BUF_SIZE) {
+            LOGE("Class + method name string is more than %d characters long", BUF_SIZE);
+            return;
+        }
+        switch (*sym_name) {
+            case '_':
+                sym_name++;
+                switch (*sym_name) {
+                    case '0':
+                        LOGE("Unexpected _0");
+                        return;
+                    case '1':
+                        buf[i] = '_';
+                        i++;
+                        sym_name++;
+                        break;
+                    case '2':
+                        if (!sig) {
+                            LOGE("Unexpected _2 not in signature");
+                            return;
+                        }
+                        buf[i] = ';';
+                        i++;
+                        sym_name++;
+                        break;
+                    case '3':
+                        if (!sig) {
+                            LOGE("Unexpected _3 not in signature");
+                            return;
+                        }
+                        buf[i] = '[';
+                        i++;
+                        sym_name++;
+                        break;
+                    case '_':
+                        sig = i + 1;
+                        buf[i] = '\0';
+                        i++;
+                        sym_name++;
+                        break;
+                    default:
+                        if (sig) {
+                            buf[i] = '/';
+                        } else  {
+                            if (method) buf[method - 1] = '/';
+                            buf[i] = '\0';
+                            method = i + 1;
+                        }
+                        i++;
+                        break;
+                }
+                break;
+            default:
+                buf[i] = *sym_name;
+                i++;
+                sym_name++;
+                break;
+        }
+    }
+    buf[i++] = '\0';
+    if (!method) {
+        LOGE("JNI name doesn't contain method name");
+        return;
+    }
+    *class_name = malloc(method);
+    strcpy(*class_name, buf);
+
+    if (sig) {
+        *method_name = malloc(sig - method);
+    } else {
+        *method_name = malloc(i - method);
+    }
+    strcpy(*method_name, &buf[method]);
+
+    if (sig) {
+        *method_sig_short = calloc(i - sig + 2, sizeof (char));
+        strcat(*method_sig_short, "(");
+        strcat(*method_sig_short, &buf[sig]);
+        strcat(*method_sig_short, ")");
+    }
+
+    LOGV("className=%s methodName=%s methodSignatureShort=%s", *class_name, *method_name, (*method_sig_short == NULL) ? "<null>" : *method_sig_short);
+}
+
+static int method_signature_to_types(char* sig, char** arg_types, char* return_type) {
+    char buf[BUF_SIZE];
+    int i = 0;
+    buf[i++] = 'p'; // JNIEnv*
+    buf[i++] = 'p'; // jobject
+
+    sig++; // skip (
+
+    char array = false;
+
+    while(*sig != ')') {
+        if (i + 1 >= BUF_SIZE) {
+            LOGE("Method signature is too long");
+            return -1;
+        }
+        while(*sig == '[') {
+            array = true;
+            sig++;
+        }
+        switch (*sig) {
+            case '\0':
+                LOGE("Encountered end of string before )");
+                return -1;
+            case 'B': // jbyte
+                if (array) {
+                    buf[i++] = 'p';
+                    array = false;
+                    break;
+                }
+                buf[i++] = 'c';
+                break;
+            case 'C': // jchar
+                if (array) {
+                    buf[i++] = 'p';
+                    array = false;
+                    break;
+                }
+                buf[i++] = 'W';
+                break;
+            case 'D': // jdouble
+                if (array) {
+                    buf[i++] = 'p';
+                    array = false;
+                    break;
+                }
+                buf[i++] = 'd';
+                break;
+            case 'F': // jfloat
+                if (array) {
+                    buf[i++] = 'p';
+                    array = false;
+                    break;
+                }
+                buf[i++] = 'f';
+                break;
+            case 'I': // jint
+                if (array) {
+                    buf[i++] = 'p';
+                    array = false;
+                    break;
+                }
+                buf[i++] = 'i';
+                break;
+            case 'J': // jlong
+                if (array) {
+                    buf[i++] = 'p';
+                    array = false;
+                    break;
+                }
+                buf[i++] = 'I';
+                break;
+            case 'S': // jshort
+                if (array) {
+                    buf[i++] = 'p';
+                    array = false;
+                    break;
+                }
+                buf[i++] = 'w';
+                break;
+            case 'Z': // jboolean
+                if (array) {
+                    buf[i++] = 'p';
+                    array = false;
+                    break;
+                }
+                buf[i++] = 'C';
+                break;
+            case 'L': // reference to object
+                (*sig)++;
+                while(*sig != ';') {
+                    if (*sig == '\0') {
+                        LOGE("Encountered end of string before ;");
+                        return -1;
+                    }
+                    sig++;
+                }
+                buf[i++] ='p';
+                array = false;
+                break;
+            default:
+                LOGE("Unexpected character %c", *sig);
+                return -1;
+        }
+        sig++;
+    }
+
+    buf[i] = '\0';
+
+    sig++; // skip )
+
+    while(*sig == '[') {
+        array = true;
+        sig++;
+    }
+    switch (*sig) {
+        case '\0':
+        LOGE("Encountered end of string before return type");
+            return -1;
+        case 'B': // jbyte
+            if (array) {
+                *return_type = 'p';
+                array = false;
+                break;
+            }
+            *return_type = 'c';
+            break;
+        case 'C': // jchar
+            if (array) {
+                *return_type = 'p';
+                array = false;
+                break;
+            }
+            *return_type = 'W';
+            break;
+        case 'D': // jdouble
+            if (array) {
+                *return_type = 'p';
+                array = false;
+                break;
+            }
+            *return_type = 'd';
+            break;
+        case 'F': // jfloat
+            if (array) {
+                *return_type = 'p';
+                array = false;
+                break;
+            }
+            *return_type = 'f';
+            break;
+        case 'I': // jint
+            if (array) {
+                *return_type = 'p';
+                array = false;
+                break;
+            }
+            *return_type = 'i';
+            break;
+        case 'J': // jlong
+            if (array) {
+                *return_type = 'p';
+                array = false;
+                break;
+            }
+            *return_type = 'I';
+            break;
+        case 'S': // jshort
+            if (array) {
+                *return_type = 'p';
+                array = false;
+                break;
+            }
+            *return_type = 'w';
+            break;
+        case 'Z': // jboolean
+            if (array) {
+                *return_type = 'p';
+                array = false;
+                break;
+            }
+            *return_type = 'C';
+            break;
+        case 'L': // reference to object
+            (*sig)++;
+            while(*sig != ';') {
+                if (*sig == '\0') {
+                    LOGE("Encountered end of string before ;");
+                    return -1;
+                }
+                sig++;
+            }
+            *return_type = 'p';
+            array = false;
+            break;
+        case 'V': // void - only for return type
+            *return_type = 'v';
+            break;
+        default:
+            LOGE("Unexpected character %c", *sig);
+            return -1;
+    }
+
+    *arg_types = malloc(i + 1);
+    strcpy(*arg_types, buf);
+
+    return 0;
+}
+
+// if we don't need return types there is a better and faster way to do this without JVMTI by just parsing JNI long name
+// LIAMELUI this function is unoptimized and experimental, should roll back to long name parsing asap or at least cache classes and methods
+static char* method_signature_from_symbol_name(const char* sym) {
+    char* class_name = NULL;
+    char* class_sig = NULL;
+    char* method_name = NULL;
+    char* method_sig = NULL; // argument types + return type
+    char* method_sig_short = NULL; // only argument types
+    jvmtiError jvmti_err = 0;
+    jint class_count = 0;
+    jclass* classes = NULL;
+    jclass target_class = NULL;
+    jint method_count = 0;
+    jmethodID *methods = NULL;
+    jmethodID target_method = NULL;
+
+    parse_jni_sym_name(sym, &class_name, &method_name, &method_sig_short);
+
+    class_sig = calloc(strlen(class_name) + 3, sizeof(char));
+    strcat(class_sig, "L");
+    strcat(class_sig, class_name);
+    strcat(class_sig, ";");
+
+
+    jvmti_err = (*g_zomdroid_jvmti_env)->GetClassLoaderClasses(g_zomdroid_jvmti_env, g_zomdroid_main_class_loader, &class_count, &classes);
+    if (jvmti_err != JVMTI_ERROR_NONE) {
+        LOGE("Failed to get class loader classes, error code: %d", jvmti_err);
+        goto FAIL;
+    }
+    for (int a = 0; a < class_count; a++) {
+        char* signature = NULL;
+        char match = false;
+        jvmti_err = (*g_zomdroid_jvmti_env)->GetClassSignature(g_zomdroid_jvmti_env, classes[a], &signature, NULL);
+        if (jvmti_err != JVMTI_ERROR_NONE) {
+            LOGW("Failed to get class methodSignatureShort, error code %d", jvmti_err);
+            continue;
+        }
+        if (strcmp(signature, class_sig) == 0) {
+            target_class = classes[a];
+            match = true;
+        }
+        jvmti_err = (*g_zomdroid_jvmti_env)->Deallocate(g_zomdroid_jvmti_env, (unsigned char*)signature);
+        if (jvmti_err != JVMTI_ERROR_NONE) LOGW("Failed to deallocate JVM TI memory, error code: %d", jvmti_err);
+        if (match) break;
+    }
+
+    jvmti_err = (*g_zomdroid_jvmti_env)->Deallocate(g_zomdroid_jvmti_env, (unsigned char*)classes);
+    if (jvmti_err != JVMTI_ERROR_NONE) LOGW("Failed to deallocate JVM TI memory, error code: %d", jvmti_err);
+
+    if (target_class == NULL) {
+        LOGE("Failed to find class %s by it's signature %s", class_name, class_sig);
+        goto FAIL;
+    }
+
+    jvmti_err = (*g_zomdroid_jvmti_env)->GetClassMethods(g_zomdroid_jvmti_env, target_class, &method_count, &methods);
+    if (jvmti_err != JVMTI_ERROR_NONE) {
+        LOGE("Failed to get methods for class %s", class_name);
+        goto FAIL;
+    }
+    for (int a = 0; a < method_count; a++) {
+        char* mName = NULL;
+        char* mSig = NULL;
+        char match = false;
+        jvmti_err = (*g_zomdroid_jvmti_env)->GetMethodName(g_zomdroid_jvmti_env, methods[a], &mName, &mSig, NULL);
+        if (jvmti_err != JVMTI_ERROR_NONE) {
+            LOGW("Failed to get method name, error code %d", jvmti_err);
+            continue;
+        }
+        if (strcmp(method_name, mName) == 0 && (method_sig_short == NULL || strstr(mSig, method_sig_short) != NULL)) {
+            target_method = methods[a];
+            method_sig = strdup(mSig);
+            match = true;
+        }
+        jvmti_err = (*g_zomdroid_jvmti_env)->Deallocate(g_zomdroid_jvmti_env, (unsigned char*)mName);
+        if (jvmti_err != JVMTI_ERROR_NONE) LOGW("Failed to deallocate JVM TI memory, error code: %d", jvmti_err);
+        jvmti_err = (*g_zomdroid_jvmti_env)->Deallocate(g_zomdroid_jvmti_env, (unsigned char*)mSig);
+        if (jvmti_err != JVMTI_ERROR_NONE) LOGW("Failed to deallocate JVM TI memory, error code: %d", jvmti_err);
+        if (match) break;
+    }
+
+    if (target_method == NULL) {
+        LOGE("Failed to find method %s with signature %s in class %s", method_name, (method_sig_short == NULL) ? "<null>" : method_sig_short, class_name);
+        goto FAIL;
+    }
+
+    free(class_name);
+    free(class_sig);
+    free(method_name);
+    free(method_sig_short);
+    return method_sig;
+FAIL:
+    free(class_name);
+    free(class_sig);
+    free(method_name);
+    free(method_sig);
+    free(method_sig_short);
+    return NULL;
+}
+
+
+__attribute__((visibility("default"), used))
+void *dlopen(const char* filename, int flags) {
+    LOGD("dlopen(name=%s)", filename);
+
+    if (filename == NULL) return __loader_dlopen(NULL, flags, __builtin_return_address(0));
+
+    for (int i = 0; i < jni_lib_count; i++) {
+        if (!strstr(filename, jni_libs[i].name)) continue;
+
+        LOGI("Loading %s in box64...", filename);
+        needed_libs_t* needed_lib = new_neededlib(1);
+        needed_lib->names[0] = strdup(filename);
+        int bindnow = (flags & 0x2) ? 1 : 0;
+        int islocal = (flags & 0x100) ? 0 : 1;
+        int deepbind = (flags & 0x8) ? 1 : 0;
+        if (AddNeededLib(NULL, islocal, bindnow, 1, needed_lib, NULL, my_context, thread_get_emu()) != 0) {
+            LOGE("Failed to load %s in box64", jni_libs[i].name);
+            RemoveNeededLib(NULL, islocal, needed_lib, my_context, thread_get_emu());
+            free_neededlib(needed_lib);
+            return NULL;
+        }
+        jni_libs[i].handle = needed_lib->libs[0];
+        free_neededlib(needed_lib);
+
+        int old_deferredInit = my_context->deferredInit;
+        my_context->deferredInit = 1;
+        elfheader_t** old_deferredInitList = my_context->deferredInitList;
+        my_context->deferredInitList = NULL;
+        int old_deferredInitSz = my_context->deferredInitSz;
+        int old_deferredInitCap = my_context->deferredInitCap;
+        my_context->deferredInitSz = my_context->deferredInitCap = 0;
+        RunDeferredElfInit(thread_get_emu());
+        my_context->deferredInit = old_deferredInit;
+        my_context->deferredInitList = old_deferredInitList;
+        my_context->deferredInitSz = old_deferredInitSz;
+        my_context->deferredInitCap = old_deferredInitCap;
+
+        return jni_libs[i].handle;
+    }
+
+    if (strcmp(filename, "libvulkan.so") == 0 && vulkan_loader_handle) {
+        return vulkan_loader_handle;
+    }
+
+    return __loader_dlopen(filename, flags, __builtin_return_address(0));
+}
+
+__attribute__((visibility("default"), used))
+void *dlsym(void *handle, const char *sym_name) {
+    LOGD("dlsym(handle=%p name=%s)", handle, sym_name);
+
+    for (int i = 0; i < jni_lib_count; i++) {
+        struct library_s* lib = jni_libs[i].handle;
+        if (sym_name == NULL || handle == NULL || lib != handle) continue;
+
+        struct lib_s* maplib = GetMaplib(lib);
+        uintptr_t box64_sym = FindGlobalSymbol(maplib, sym_name, -1, NULL, 0);
+        if (box64_sym == 0) {
+            LOGE("Failed to locate %s in box64 global symbols", sym_name);
+            return NULL;
+        }
+
+        if (strcmp(sym_name, "Java_fmod_javafmodJNI_FMOD_1System_1Create") == 0) {
+            JNIEnv* papa_env = NULL;
+            (*g_zomdroid_art_vm)->GetEnv(g_zomdroid_art_vm, (void **) &papa_env, JNI_VERSION_1_6) ;
+            if (papa_env == NULL){
+                (*g_zomdroid_art_vm)->AttachCurrentThread(g_zomdroid_art_vm,
+                                                          (void **) &papa_env, NULL);
+            }
+            if (papa_env == NULL) {
+                LOGE("Failed to attach game fmod thread to android jvm");
+            } else {
+                LOGD("Successfully attached game fmod thread to android jvm");
+            }
+        }
+
+        char* method_sig = method_signature_from_symbol_name(sym_name);
+
+        if (method_sig == NULL) return NULL;
+
+        char* arg_types = NULL;
+        char ret_type = 0;
+        if (method_signature_to_types(method_sig, &arg_types, &ret_type) != 0) {
+            free(method_sig);
+            return NULL;
+        }
+        free(method_sig);
+
+        void* sym = zomdroid_emulation_bridge_jni_symbol(&jni_libs[i], box64_sym,
+                                                         arg_types, ret_type);
+        if (sym == NULL) {
+            LOGE("Failed to create emulation bridge for jni symbol %s", sym_name);
+            free(arg_types);
+            return NULL;
+        }
+        free(arg_types);
+        LOGD("Successfully created emulation bridge for jni symbol %s at %p (target=%ld)", sym_name, sym, box64_sym);
+        return sym;
+    }
+
+    return __loader_dlsym(handle, sym_name, __builtin_return_address(0));
+}
+
+__attribute__((visibility("default"), used))
+void *android_dlopen_ext(const char *filename, int flags, const android_dlextinfo *extinfo) {
+    LOGD("android_dlopen_ext(filename=%s)", filename);
+    if(strstr(filename, "vulkan.") && vulkan_driver_handle) {
+        return vulkan_driver_handle;
+    }
+    return __loader_android_dlopen_ext(filename, flags, extinfo, &android_dlopen_ext);
+}
+
+__attribute__((visibility("default"), used))
+void *android_load_sphal_library(const char *filename, int flags) {
+    LOGD("android_load_sphal_library(filename=%s)", filename);
+    if(strstr(filename, "vulkan.") && vulkan_driver_handle) {
+        return vulkan_driver_handle;
+    }
+    char* ns_names[] = {"sphal", "vendor", "default"};
+    struct android_namespace_t* sphal_ns = NULL;
+    int i = 0;
+    for (i = 0; i < sizeof(ns_names) / sizeof (char*); i++) {
+        sphal_ns = android_get_exported_namespace(ns_names[i]);
+        if (sphal_ns) break;
+    }
+    android_dlextinfo info;
+    info.flags = ANDROID_DLEXT_USE_NAMESPACE;
+    info.library_namespace = sphal_ns;
+    return android_dlopen_ext(filename, flags, &info);
+}

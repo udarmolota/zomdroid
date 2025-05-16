@@ -1,0 +1,72 @@
+<resources>
+    <string name="app_name" translatable="false">zomdroid</string>
+
+    <string name="percentage_format">%d%%</string>
+
+    <string name="legal_notice_title">Legal notice</string>
+    <string name="legal_notice_message">This launcher is a third-party tool and requires original Project Zomboid files to function. You must own a legally licensed copy of the game to use this software. The developer of this launcher is not affiliated with the original game creators and assumes no responsibility for any legal consequences arising from the use of this software.</string>
+
+    <string name="fragment_label_legal_notice">Legal notice</string>
+    <string name="fragment_label_launcher">Launcher</string>
+    <string name="fragment_label_new_game_instance">New game instance</string>
+    <string name="fragment_label_settings">Settings</string>
+    <string name="fragment_label_controls_editor">Controls editor</string>
+    <string name="fragment_label_wiki">Wiki</string>
+
+    <string name="controls_editor_instructions">Long press on empty space to open context menu. Changes are saved automatically once you are finished</string>
+    <string name="controls_editor_add_element">Add control element</string>
+    <string name="control_element_scale">Scale</string>
+    <string name="control_element_text">Text</string>
+    <string name="control_element_text_empty">Empty</string>
+    <string name="control_element_bindings">Bindings</string>
+    <string name="control_element_select_binding">Select binding</string>
+    <string name="control_element_binding_invalid">Invalid binding</string>
+    <string name="control_element_opacity">Opacity</string>
+    <string name="control_element_binding_left">Binding Left</string>
+    <string name="control_element_binding_up">Binding Up</string>
+    <string name="control_element_binding_right">Binding Right</string>
+    <string name="control_element_binding_down">Binding Down</string>
+    <string name="control_element_input_type_mnk">Mouse &amp; Keyboard</string>
+    <string name="control_element_input_type_gamepad">Gamepad</string>
+
+    <string name="game_instance_name">Name</string>
+    <string name="game_instance_preset">Preset</string>
+    <string name="game_instance_files">Game files (.zip)</string>
+    <string name="game_instance_browse_files_hint">Browse for files…</string>
+    <string name="game_instance_no_file_selected">No files selected</string>
+    <string name="game_instance_name_invalid">Invalid name</string>
+    <string name="game_instance_name_already_exists">Already exists</string>
+    <string name="game_instance_unsupported_extension">Only .zip archives are supported</string>
+
+    <string name="dialog_button_ok">OK</string>
+    <string name="dialog_button_accept">Accept</string>
+    <string name="dialog_title_error">Error</string>
+    <string name="dialog_title_info">Info</string>
+    <string name="dialog_title_creating_instance">Creating instance…</string>
+    <string name="dialog_title_instance_created">Instance successfully created</string>
+    <string name="dialog_title_failed_to_create_instance">Failed to create instance</string>
+    <string name="dialog_title_deleting_instance">Deleting instance…</string>
+    <string name="dialog_title_instance_deleted">Instance successfully deleted</string>
+    <string name="dialog_title_failed_to_delete_instance">Failed to delete instance</string>
+    <string name="dialog_title_installing_dependencies">Installing dependencies…</string>
+    <string name="dialog_title_dependencies_installed">Dependencies successfully installed</string>
+    <string name="dialog_title_failed_to_install_dependencies">Failed to install dependencies</string>
+
+    <string name="game_instance_not_installed">This game instance is not installed</string>
+    <string name="dependencies_not_installed">Zomdroid dependencies are not installed</string>
+
+    <string name="settings_renderer">Renderer</string>
+    <string name="settings_vulkan_driver">Vulkan driver</string>
+    <string name="settings_resolution_scale">Resolution scale</string>
+
+    <string name="nav_menu_controls_editor">Controls editor</string>
+    <string name="nav_menu_manage_storage">Manage storage</string>
+    <string name="control_element_delete">Delete element</string>
+    <string name="control_element_input_type">Input type</string>
+    <string name="control_element_stick_binding">Stick Binding</string>
+    <string name="control_element_icon">Icon</string>
+
+    <string name="game_instance_manage_storage">Manage storage</string>
+    <string name="game_instance_delete">Delete</string>
+
+</resources>

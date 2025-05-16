@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_open_settings_fragment"
+        android:title="@string/fragment_label_settings"
+        android:icon="@drawable/mt_icon_settings"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_open_controls_editor"
+        android:title="@string/nav_menu_controls_editor"
+        android:icon="@drawable/mt_icon_controller"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_open_wiki_fragment"
+        android:title="@string/fragment_label_wiki"
+        android:icon="@drawable/mt_icon_menu_book"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_manage_storage"
+        android:title="@string/nav_menu_manage_storage"
+        android:icon="@drawable/mt_icon_folder"
+        app:showAsAction="never"/>
+
+</menu>
