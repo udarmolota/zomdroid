@@ -29,6 +29,7 @@ android {
                 storePassword = localProperties["RELEASE_STORE_PASSWORD"].toString()
                 keyAlias = localProperties["RELEASE_KEY_ALIAS"].toString()
                 keyPassword = localProperties["RELEASE_KEY_PASSWORD"].toString()
+
             }
         }
     }
@@ -56,13 +57,15 @@ android {
     }
 
     buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-            signingConfig = signingConfigs.getByName("release")
+        if (hasSigningConfig) {
+            release {
+                isMinifyEnabled = false
+                proguardFiles(
+                    getDefaultProguardFile("proguard-android-optimize.txt"),
+                    "proguard-rules.pro"
+                )
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
         debug {
             isDebuggable = true
