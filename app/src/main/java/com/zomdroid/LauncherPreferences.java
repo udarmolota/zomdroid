@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.File;
 import java.lang.reflect.Type;
 
 public class LauncherPreferences {
@@ -19,9 +20,21 @@ public class LauncherPreferences {
     transient private Gson gson;
 
     private float renderScale = 1.f;
-    private Renderer renderer = Renderer.ZINK_ZFA;
-    private VulkanDriver vulkanDriver = VulkanDriver.FREEDRENO;
+    private Renderer renderer = Renderer.GL4ES;
+    private VulkanDriver vulkanDriver = VulkanDriver.SYSTEM_DEFAULT;
     private boolean isDebug = false;
+
+    LauncherPreferences() {
+        if (isKgslSupported()) {
+            this.renderer = Renderer.ZINK_ZFA;
+            this.vulkanDriver = VulkanDriver.FREEDRENO;
+        }
+    }
+
+    private static boolean isKgslSupported() {
+        File kgsl = new File("/dev/kgsl-3d0");
+        return kgsl.exists();
+    }
 
     public static void init(@NonNull Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(C.shprefs.NAME, MODE_PRIVATE);
@@ -98,8 +111,8 @@ public class LauncherPreferences {
 
     public enum Renderer {
         ZINK_ZFA("libzfa.so"),
-        ZINK_OSMESA("libOSMesa.so");
-        //GL4ES("libgl4es.so");
+        ZINK_OSMESA("libOSMesa.so"),
+        GL4ES("libgl4es.so");
 
         final String libName;
         Renderer(String libName) {

@@ -180,7 +180,7 @@ public class InstallerService extends Service implements TaskProgressListener {
                 Long jreHashNew = FileUtils.generateCRC32ForAsset(this, C.assets.BUNDLES_JRE);
                 newBundlesHashesMap.put(C.assets.BUNDLES_JRE, jreHashNew);
                 if (jreHashOld == null || !jreHashOld.equals(jreHashNew)) {
-                    String jrePath = AppStorage.requireSingleton().getHomePath() + "/dependencies/jre";
+                    String jrePath = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.JRE;
                     File jreDir = new File(jrePath);
                     if (jreDir.exists())
                         FileUtils.deleteDirectory(jreDir);
@@ -199,7 +199,7 @@ public class InstallerService extends Service implements TaskProgressListener {
                 Long libsHashNew = FileUtils.generateCRC32ForAsset(this, C.assets.BUNDLES_LIBS);
                 newBundlesHashesMap.put(C.assets.BUNDLES_LIBS, libsHashNew);
                 if (libsHashOld == null || !libsHashOld.equals(libsHashNew)) {
-                    String libsPath = AppStorage.requireSingleton().getHomePath() + "/dependencies/libs";
+                    String libsPath = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.LIBS;
                     File libsDir = new File(libsPath);
                     if (libsDir.exists())
                         FileUtils.deleteDirectory(libsDir);
@@ -218,7 +218,7 @@ public class InstallerService extends Service implements TaskProgressListener {
                 Long jarsHashNew = FileUtils.generateCRC32ForAsset(this, C.assets.BUNDLES_JARS);
                 newBundlesHashesMap.put(C.assets.BUNDLES_JARS, jarsHashNew);
                 if (jarsHashOld == null || !jarsHashOld.equals(jarsHashNew)) {
-                    String jarsPath = AppStorage.requireSingleton().getHomePath() + "/dependencies/jars";
+                    String jarsPath = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.JARS;
                     File jarsDir = new File(jarsPath);
                     if (jarsDir.exists())
                         FileUtils.deleteDirectory(jarsDir);

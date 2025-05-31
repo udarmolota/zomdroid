@@ -39,6 +39,17 @@ public class SettingsFragment extends Fragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 LauncherPreferences.Renderer renderer = (LauncherPreferences.Renderer) parent.getSelectedItem();
                 LauncherPreferences.requireSingleton().setRenderer(renderer);
+                switch (renderer) {
+                    case ZINK_ZFA:
+                    case ZINK_OSMESA:
+                        binding.settingsVulkanDriverTv.setVisibility(View.VISIBLE);
+                        binding.settingsVulkanDriverS.setVisibility(View.VISIBLE);
+                        break;
+                    default:
+                        binding.settingsVulkanDriverTv.setVisibility(View.GONE);
+                        binding.settingsVulkanDriverS.setVisibility(View.GONE);
+                        break;
+                }
             }
 
             @Override

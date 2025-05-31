@@ -51,7 +51,12 @@ static int log_stdout() {
     ssize_t i;
     while ((i = read(pipefd[0], buffer, sizeof(buffer) - 1)) > 0) {
         buffer[i] = '\0';
-        LOGI("%s", buffer);
+        // splitting output into individual lines makes it easier for logcat to process and avoids truncation
+        char* line = strtok(buffer, "\n");
+        while (line) {
+            LOGI("%s", line);
+            line = strtok(NULL, "\n");
+        }
     }
     close(pipefd[0]);
     return 0;

@@ -25,6 +25,9 @@ public class GameLauncher {
         Os.setenv("BOX64_LOG", "3", false);
         Os.setenv("BOX64_DYNAREC", "0", false);*/
 
+/*        Os.setenv("LIBGL_NOERROR", "1", false);
+        Os.setenv("LIBGL_LOGSHADERERROR", "1", false);
+        Os.setenv("ZINK_DEBUG", "spirv", false);*/
 
         Os.setenv("BOX64_LOG", "1", false);
         Os.setenv("BOX64_SHOWBT", "1", false);
@@ -35,8 +38,11 @@ public class GameLauncher {
 
         Os.setenv("ZOMDROID_CACHE_DIR", AppStorage.requireSingleton().getCachePath(), false);
         Os.setenv("ZOMDROID_RENDERER", LauncherPreferences.requireSingleton().getRenderer().name(), false);
-        if (LauncherPreferences.requireSingleton().getVulkanDriver() != LauncherPreferences.VulkanDriver.SYSTEM_DEFAULT) {
-            Os.setenv("ZOMDROID_VULKAN_DRIVER_NAME", LauncherPreferences.requireSingleton().getVulkanDriver().libName, false);
+        switch (LauncherPreferences.requireSingleton().getRenderer()) {
+            case ZINK_ZFA:
+            case ZINK_OSMESA:
+                Os.setenv("ZOMDROID_VULKAN_DRIVER_NAME", LauncherPreferences.requireSingleton().getVulkanDriver().libName, false);
+                break;
         }
 
         initZomdroidWindow();
@@ -44,10 +50,13 @@ public class GameLauncher {
 
         ArrayList<String> jvmArgs = gameInstance.getJvmArgsAsList();
         jvmArgs.add("-Dorg.lwjgl.opengl.libname=" + LauncherPreferences.requireSingleton().getRenderer().libName);
+        jvmArgs.add("-Dzomdroid.renderer=" + LauncherPreferences.requireSingleton().getRenderer().name());
 
         ArrayList<String> args = gameInstance.getArgsAsList();
+/*        args.add("-debug");
+        args.add("-debuglog=Shader");*/
 
-        String javaHomePath = AppStorage.requireSingleton().getHomePath() + "/dependencies/jre";
+        String javaHomePath = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.JRE;
         String ldLibraryPath = AppStorage.requireSingleton().getLibraryPath() + ":/system/lib64:"
                 + javaHomePath + "/lib:" + javaHomePath + "/lib/server:" + gameInstance.getJavaLibraryPath();
         GameLauncher.startGame(gameInstance.getGamePath(), ldLibraryPath, jvmArgs.toArray(new String[0]),
