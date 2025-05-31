@@ -1,8 +1,9 @@
 # Zomdroid
 
-**Zomdroid** is a launcher for [Project Zomboid](https://projectzomboid.com) on Android devices.
+**Zomdroid** is a launcher for [Project Zomboid](https://projectzomboid.com) on mobile Android devices.
 
->  This application is **not developed by The Indie Stone** and is **not affiliated with them** in any way.
+> [!NOTE]
+> This application is **not developed by The Indie Stone** and is **not affiliated with them** in any way.
 
 ## Features
 
@@ -11,14 +12,11 @@
 - Currently **single-player only**
 
 ## Technical Limitations
+Zomdroid supports two rendering backends: **GL4ES** and **Mesa Zink**.
 
-Zomdroid uses the **Mesa Zink driver**, which translates OpenGL calls to Vulkan. For Zink to function correctly, a **compatible Vulkan driver** is required.
+**GL4ES** translates OpenGL to OpenGL ES 2.0 which makes it compatible with most Android devices released in the past decade. However, it's currently limited to supporting **Project Zomboid Build 41** and may exhibit graphical bugs or instability.
 
-One such driver is **Freedreno Turnip**, which is **bundled with the application**. However, it will **only work on modern devices with Adreno GPU**.
-
-An option exists in the launcher to use the **default system driver**, but:
-  - **Zink may fail to initialize** and **application will crash**, or
-  - You may experience **visual glitches**
+**Mesa Zink** is a mature and feature-rich library which translates OpenGL to Vulkan. It provides a more stable experience and supports **Build 42**, but requires a compatible Vulkan driver to run. One such driver is **Freedreno Turnip**, which is bundled with the application but will only work on modern devices with **Adreno GPUs** (Qualcomm Snapdragon SoCs).
 
 ## Roadmap
 
@@ -32,19 +30,33 @@ Planned features in order of priority:
 ## Prebuilt binaries and JARs
 
 Prebuilt binaries and JARs are located in the `app/src/main/assets/dependencies` folder,  
-**except** for **Box64** and **GLFW**, which are built alongside the zomdroid APK.
+**except** for **Box64** and **GLFW**, which are built alongside the Zomdroid APK.
 
 All Zomdroid dependencies—**except Box64 and GLFW**—can be either:
 - Built from the [zomdroid-dependencies](https://github.com/liamelui/zomdroid-dependencies) repository  
-  (Mesa, LWJGL, Assimp, JNIWrapper), or
+  (Mesa, LWJGL, Assimp, JNIWrapper, GL4ES, zomdroid-agent), or
 - Downloaded from official sources (FMOD, standard GNU/Linux libraries, JRE from PojavLauncherTeam, SQLite JDBC)
   
+## Supporting Development
+
+This is an independent project. To help keep it going, financial contributions are welcome via [Ko-Fi](https://ko-fi.com/liamelui).
+
+## Feedback
+
+Please report issues or suggest features via [GitHub Issues](https://github.com/liamelui/zomdroid/issues)
+
 ## Credits & Third-Party Sources
 - [OpenJDK](https://github.com/openjdk/jdk) (Android port by [PojavLauncherTeam](https://github.com/PojavLauncherTeam/android-openjdk-build-multiarch)) - Used as the Java backend
 
 - [Box64](https://github.com/ptitSeb/box64) - Used as the emulation backend
 
+- [GL4ES](https://github.com/ptitSeb/gl4es) - Used as the rendering backend
+
 - [Mesa](https://gitlab.freedesktop.org/mesa/mesa) - Used as the rendering backend (Zink, Freedreno Turnip driver)
+
+- [ByteBuddy](https://github.com/raphw/byte-buddy) - Used for java agent creation and runtime code generation
+
+- [ANTLR](https://github.com/antlr/antlr4) - Used for shader parsing and lexing
 
 - [GLFW](https://github.com/glfw/glfw) - Library for OpenGL, OpenGL ES and Vulkan development on the desktop (required by Project Zomboid)
 
@@ -59,9 +71,4 @@ All Zomdroid dependencies—**except Box64 and GLFW**—can be either:
 - [liblinkernsbypass](https://github.com/bylaws/liblinkernsbypass) - Library that provides access to the hidden linker namespace functionality on Android 9+
 
 - [Winlator](https://github.com/brunodev85/winlator), [Termux](https://github.com/termux/termux-app), and [PojavLauncher](https://github.com/PojavLauncherTeam/PojavLauncher) - Served as inspiration and guidance
-
-## Feedback
-
-Please report issues or suggest features via [GitHub Issues](https://github.com/liamelui/zomdroid/issues)
-
 
