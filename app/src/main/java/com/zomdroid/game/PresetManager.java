@@ -49,7 +49,7 @@ public class PresetManager {
                         "-novoip"
                 })
                 .setMainClassName("zombie/gameStates/MainScreenState")
-                //.setJavaAgentPath(C.deps.JARS_ZOMDROID_AGENT)
+                .setJavaAgentPath(C.deps.JARS_ZOMDROID_AGENT)
                 //.setJavaAgentArgs("build=42")
                 .build()
         );
@@ -89,7 +89,7 @@ public class PresetManager {
                         "-novoip"
                 })
                 .setMainClassName("zombie/gameStates/MainScreenState")
-                //.setJavaAgentPath(C.deps.JARS_ZOMDROID_AGENT)
+                .setJavaAgentPath(C.deps.JARS_ZOMDROID_AGENT)
                 //.setJavaAgentArgs("build=41")
                 .build()
         );
