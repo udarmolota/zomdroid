@@ -173,8 +173,6 @@ public class InstallerService extends Service implements TaskProgressListener {
 
             HashMap<String, Long> newBundlesHashesMap = new HashMap<>();
 
-            Log.d(LOG_TAG, "Installing jre...");
-
             Long jreHashOld = oldBundlesHashesMap.get(C.assets.BUNDLES_JRE);
             try {
                 Long jreHashNew = FileUtils.generateCRC32ForAsset(this, C.assets.BUNDLES_JRE);
@@ -191,8 +189,6 @@ public class InstallerService extends Service implements TaskProgressListener {
                 finishWithError(getString(R.string.dialog_title_failed_to_install_dependencies), e.toString());
                 return;
             }
-
-            Log.d(LOG_TAG, "Installing libs...");
 
             Long libsHashOld = oldBundlesHashesMap.get(C.assets.BUNDLES_LIBS);
             try {
@@ -211,8 +207,6 @@ public class InstallerService extends Service implements TaskProgressListener {
                 return;
             }
 
-            Log.d(LOG_TAG, "Installing jars...");
-
             Long jarsHashOld = oldBundlesHashesMap.get(C.assets.BUNDLES_JARS);
             try {
                 Long jarsHashNew = FileUtils.generateCRC32ForAsset(this, C.assets.BUNDLES_JARS);
@@ -230,8 +224,6 @@ public class InstallerService extends Service implements TaskProgressListener {
                 return;
             }
 
-            Log.d(LOG_TAG, "Dependencies installed");
-
             bundlesJson = gson.toJson(newBundlesHashesMap);
             prefs.edit()
                     .putString(C.shprefs.keys.INSTALLED_BUNDLES, bundlesJson)
@@ -243,10 +235,6 @@ public class InstallerService extends Service implements TaskProgressListener {
     }
 
     private void finish(String title, String message) {
-//        Intent serviceStartedBroadcast = new Intent(ACTION_STOPPED);
-//        LocalBroadcastManager.getInstance(this).sendBroadcast(serviceStartedBroadcast);
-//
-//        stopSelf();
         this.taskState.postValue(new TaskState(title, message, -1, 0, true, false));
     }
 
@@ -300,7 +288,7 @@ public class InstallerService extends Service implements TaskProgressListener {
                 .setOngoing(true)
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)
                 .setContentIntent(pendingIntent)
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setSmallIcon(R.mipmap.ic_launcher_foreground)
                 .setAutoCancel(false);
         return notificationBuilder.build();
     }
