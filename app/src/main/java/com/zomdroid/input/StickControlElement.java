@@ -25,7 +25,6 @@ public class StickControlElement extends AbstractControlElement {
         this.bindings.addAll(Arrays.asList(elementDescription.bindings));
     }
 
-
     @Override
     public void setInputType(InputType inputType) {
         clearBindings();
@@ -42,7 +41,7 @@ public class StickControlElement extends AbstractControlElement {
 
     private void dispatchEvent() {
         float dx = this.drawable.innerCenterX - this.drawable.outerCenterX;
-        float dy = this.drawable.innerCenterY- this.drawable.outerCenterY;
+        float dy = this.drawable.innerCenterY - this.drawable.outerCenterY;
         float r = this.drawable.outerRadius;
         float nx = Math.clamp(dx * SQRT_2 / r, -1.f, 1.f);
         float ny = Math.clamp(dy * SQRT_2 / r, -1.f, 1.f);
@@ -158,6 +157,7 @@ public class StickControlElement extends AbstractControlElement {
         this.drawable.setCenterPosition(x, y);
         this.parentView.invalidate();
     }
+
     @Override
     public void moveCenterPosition(float dx, float dy) {
         this.drawable.moveCenterPosition(dx, dy);
@@ -166,7 +166,7 @@ public class StickControlElement extends AbstractControlElement {
 
     @Override
     public void setBindingLeft(GLFWBinding binding) {
-       this.bindings.set(0, binding);
+        this.bindings.set(0, binding);
     }
 
     @Override
@@ -311,7 +311,7 @@ public class StickControlElement extends AbstractControlElement {
 
         private void updateDimensions() {
             this.outerRadius = OUTER_CIRCLE_RADIUS * parentView.pixelScale * this.scale;
-            this.innerRadius =  INNER_CIRCLE_RADIUS * parentView.pixelScale * this.scale;
+            this.innerRadius = INNER_CIRCLE_RADIUS * parentView.pixelScale * this.scale;
             updateBounds();
         }
 

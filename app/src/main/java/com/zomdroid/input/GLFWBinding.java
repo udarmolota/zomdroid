@@ -62,7 +62,7 @@ public enum GLFWBinding {
     MOUSE_BUTTON_6(5),
     MOUSE_BUTTON_7(6),
     MOUSE_BUTTON_8(7),
-    
+
     /* gamepad buttons*/
     GAMEPAD_BUTTON_A(0),
     GAMEPAD_BUTTON_B(1),

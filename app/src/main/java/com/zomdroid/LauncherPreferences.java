@@ -9,10 +9,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import java.io.File;
-import java.lang.reflect.Type;
 
 public class LauncherPreferences {
     private static LauncherPreferences singleton;
@@ -23,6 +21,7 @@ public class LauncherPreferences {
     private Renderer renderer = Renderer.GL4ES;
     private VulkanDriver vulkanDriver = VulkanDriver.SYSTEM_DEFAULT;
     private boolean isDebug = false;
+    private AudioAPI audioAPI = AudioAPI.AAUDIO;
 
     LauncherPreferences() {
         if (isKgslSupported()) {
@@ -44,8 +43,7 @@ public class LauncherPreferences {
         if (json == null) {
             launcherPreferences = new LauncherPreferences();
         } else {
-            Type type = new TypeToken<LauncherPreferences>(){}.getType();
-            launcherPreferences = gson.fromJson(json, type);
+            launcherPreferences = gson.fromJson(json, LauncherPreferences.class);
         }
         launcherPreferences.sharedPreferences = sharedPreferences;
         launcherPreferences.gson = gson;
@@ -65,7 +63,7 @@ public class LauncherPreferences {
         return singleton;
     }
 
-    public void saveToDisk() {
+    public void saveToPreferences() {
         String json = gson.toJson(this);
         this.sharedPreferences
                 .edit()
@@ -79,7 +77,7 @@ public class LauncherPreferences {
 
     public void setRenderScale(float renderScale) {
         this.renderScale = Math.clamp(renderScale, 0.25f, 1.f);
-        saveToDisk();
+        saveToPreferences();
     }
 
     public Renderer getRenderer() {
@@ -88,7 +86,7 @@ public class LauncherPreferences {
 
     public void setRenderer(Renderer renderer) {
         this.renderer = renderer;
-        saveToDisk();
+        saveToPreferences();
     }
 
     public VulkanDriver getVulkanDriver() {
@@ -97,7 +95,7 @@ public class LauncherPreferences {
 
     public void setVulkanDriver(VulkanDriver vulkanDriver) {
         this.vulkanDriver = vulkanDriver;
-        saveToDisk();
+        saveToPreferences();
     }
 
     public boolean isDebug() {
@@ -106,7 +104,16 @@ public class LauncherPreferences {
 
     public void setDebug(boolean debug) {
         isDebug = debug;
-        saveToDisk();
+        saveToPreferences();
+    }
+
+    public AudioAPI getAudioAPI() {
+        return audioAPI;
+    }
+
+    public void setAudioAPI(AudioAPI audioAPI) {
+        this.audioAPI = audioAPI;
+        saveToPreferences();
     }
 
     public enum Renderer {
@@ -115,6 +122,7 @@ public class LauncherPreferences {
         GL4ES("libgl4es.so");
 
         final String libName;
+
         Renderer(String libName) {
             this.libName = libName;
         }
@@ -125,8 +133,14 @@ public class LauncherPreferences {
         FREEDRENO("libvulkan_freedreno.so");
 
         final String libName;
+
         VulkanDriver(String libName) {
             this.libName = libName;
         }
+    }
+
+    public enum AudioAPI {
+        AAUDIO,
+        OPENSL
     }
 }

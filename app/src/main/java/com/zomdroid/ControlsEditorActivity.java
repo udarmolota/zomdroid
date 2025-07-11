@@ -30,7 +30,6 @@ import com.zomdroid.databinding.ElementBindingFieldBinding;
 
 public class ControlsEditorActivity extends AppCompatActivity {
     private ActivityControlsEditorBinding binding;
-
     private TextWatcher controlElementTextWatcher = null;
 
     @Override
@@ -69,13 +68,15 @@ public class ControlsEditorActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onStartTrackingTouch(SeekBar seekBar) {}
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                    }
 
                     @Override
-                    public void onStopTrackingTouch(SeekBar seekBar) {}
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                    }
                 });
 
-                int opacityProgressValue = Math.round((float)element.getAlpha() / 255 * 100);
+                int opacityProgressValue = Math.round((float) element.getAlpha() / 255 * 100);
                 binding.elementOpacityPercentTv.setText(getResources().getString(R.string.percentage_format,
                         opacityProgressValue));
                 binding.elementOpacitySb.setOnSeekBarChangeListener(null);
@@ -84,14 +85,16 @@ public class ControlsEditorActivity extends AppCompatActivity {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                         binding.elementOpacityPercentTv.setText(getResources().getString(R.string.percentage_format, progress));
-                        element.setAlpha(Math.round((float)progress / 100 * 255));
+                        element.setAlpha(Math.round((float) progress / 100 * 255));
                     }
 
                     @Override
-                    public void onStartTrackingTouch(SeekBar seekBar) {}
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                    }
 
                     @Override
-                    public void onStopTrackingTouch(SeekBar seekBar) {}
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                    }
                 });
 
 
@@ -230,6 +233,7 @@ public class ControlsEditorActivity extends AppCompatActivity {
                 }
 
             }
+
             @Override
             public void open() {
                 AbstractControlElement element = binding.inputControlsV.getSelectedElement();
@@ -290,7 +294,7 @@ public class ControlsEditorActivity extends AppCompatActivity {
                 .setTitle(R.string.dialog_title_info)
                 .setMessage(R.string.controls_editor_instructions)
                 .setCancelable(true)
-                .setPositiveButton(R.string.dialog_button_ok, (dialog, which) -> dialog.dismiss())
+                .setPositiveButton(R.string.dialog_button_ok, null)
                 .create()
                 .show();
     }
@@ -417,7 +421,7 @@ public class ControlsEditorActivity extends AppCompatActivity {
             case GAMEPAD: {
                 switch (element.getType()) {
                     case BUTTON_CIRCLE:
-                    case BUTTON_RECT:  {
+                    case BUTTON_RECT: {
                         binding.elementBindingsTv.setVisibility(View.VISIBLE);
                         binding.elementBindingsAddIb.setVisibility(View.VISIBLE);
                         binding.elementBindingsContainerLl.removeAllViews();
@@ -454,7 +458,7 @@ public class ControlsEditorActivity extends AppCompatActivity {
 
                         ArrayAdapter<GLFWBinding> adapterStick = new ArrayAdapter<>(this,
                                 android.R.layout.simple_spinner_dropdown_item,
-                                new GLFWBinding[] { GLFWBinding.LEFT_JOYSTICK, GLFWBinding.RIGHT_JOYSTICK});
+                                new GLFWBinding[]{GLFWBinding.LEFT_JOYSTICK, GLFWBinding.RIGHT_JOYSTICK});
                         binding.elementStickBindingS.setAdapter(adapterStick);
                         binding.elementStickBindingS.setOnItemSelectedListener(null);
                         binding.elementStickBindingS.setSelection(adapterStick.getPosition(element.getBindingStick()));
@@ -496,6 +500,7 @@ public class ControlsEditorActivity extends AppCompatActivity {
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     element.setBinding(bindingIndex, (GLFWBinding) parent.getSelectedItem());
                 }
+
                 @Override
                 public void onNothingSelected(AdapterView<?> parent) {
 

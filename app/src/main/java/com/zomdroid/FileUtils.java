@@ -78,17 +78,17 @@ public class FileUtils {
 
     static void extractArchiveEntry(ArchiveInputStream<?> archiveInStream, ArchiveEntry archiveEntry, String destPath) throws IOException {
         if (!archiveInStream.canReadEntryData(archiveEntry)) {
-            throw new RuntimeException("Failed to read JRE archive entry");
+            throw new RuntimeException("Failed to read archive entry");
         }
         File file = new File(destPath + "/" + archiveEntry.getName());
         if (archiveEntry.isDirectory()) {
             if (!file.isDirectory() && !file.mkdirs()) {
-                throw new IOException("failed to create directory " + file);
+                throw new IOException("Failed to create directory " + file);
             }
         } else {
             File parent = file.getParentFile();
             if (parent != null && !parent.isDirectory() && !parent.mkdirs()) {
-                throw new IOException("failed to create directory " + parent);
+                throw new IOException("Failed to create directory " + parent);
             }
             try (OutputStream fileOutStream = new BufferedOutputStream(new FileOutputStream(file), 1024 * 1024)) {
                 IOUtils.copy(archiveInStream, fileOutStream);
@@ -98,9 +98,11 @@ public class FileUtils {
 
     public static long queryFileSize(ContentResolver contentResolver, Uri uri) {
         try (Cursor cursor = contentResolver.query(uri, null, null, null, null)) {
-            if (cursor == null) throw new RuntimeException("cursor is null");
+            if (cursor == null)
+                throw new RuntimeException("Cursor from content resolver query is null");
             int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
-            if (sizeIndex == -1) throw new RuntimeException("size column doesn't exist in cursor");
+            if (sizeIndex == -1)
+                throw new RuntimeException("Size column doesn't exist in cursor from content resolver query");
             cursor.moveToFirst();
             return cursor.getLong(sizeIndex);
         }

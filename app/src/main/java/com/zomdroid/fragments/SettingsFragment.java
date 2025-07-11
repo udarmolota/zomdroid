@@ -16,15 +16,12 @@ import com.zomdroid.R;
 import com.zomdroid.databinding.FragmentSettingsBinding;
 
 public class SettingsFragment extends Fragment {
-
     private FragmentSettingsBinding binding;
-
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentSettingsBinding.inflate(inflater, container, false);
         return binding.getRoot();
-
     }
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
@@ -95,9 +92,24 @@ public class SettingsFragment extends Fragment {
         });
 
         binding.settingsResolutionScaleSb.setProgress((int) (LauncherPreferences.requireSingleton().getRenderScale() * 100));
+
+        ArrayAdapter<LauncherPreferences.AudioAPI> audioAPIAdapter = new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_spinner_dropdown_item, LauncherPreferences.AudioAPI.values());
+        binding.settingsAudioApiS.setAdapter(audioAPIAdapter);
+        binding.settingsAudioApiS.setSelection(audioAPIAdapter.getPosition(LauncherPreferences.requireSingleton().getAudioAPI()));
+        binding.settingsAudioApiS.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                LauncherPreferences.AudioAPI audioAPI = (LauncherPreferences.AudioAPI) parent.getSelectedItem();
+                LauncherPreferences.requireSingleton().setAudioAPI(audioAPI);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
     }
-
-
 
     @Override
     public void onDestroyView() {
@@ -108,6 +120,6 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        LauncherPreferences.requireSingleton().saveToDisk();
+        LauncherPreferences.requireSingleton().saveToPreferences();
     }
 }

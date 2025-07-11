@@ -25,9 +25,11 @@ public class GameLauncher {
         Os.setenv("BOX64_LOG", "3", false);
         Os.setenv("BOX64_DYNAREC", "0", false);*/
 
-/*        Os.setenv("LIBGL_NOERROR", "1", false);
-        Os.setenv("LIBGL_LOGSHADERERROR", "1", false);
+        //Os.setenv("LIBGL_NOERROR", "1", false);
+/*        Os.setenv("LIBGL_LOGSHADERERROR", "1", false);
         Os.setenv("ZINK_DEBUG", "spirv", false);*/
+
+        Os.setenv("LIBGL_MIPMAP", "1", false);
 
         Os.setenv("BOX64_LOG", "1", false);
         Os.setenv("BOX64_SHOWBT", "1", false);
@@ -45,12 +47,25 @@ public class GameLauncher {
                 break;
         }
 
+        Os.setenv("ZOMDROID_AUDIO_API", LauncherPreferences.requireSingleton().getAudioAPI().name(), false);
+
+        Os.setenv("ZOMDROID_GLES_MAJOR", "2", false);
+        Os.setenv("ZOMDROID_GLES_MINOR", "1", false);
+
+        // for debugging GL calls, only supported on GL ES 3.2+ with GL_KHR_debug extension present
+/*        Os.setenv("ZOMDROID_DEBUG_GL", "1", false);
+        Os.setenv("LIBGL_GLES", "libGLESv3.so", false);
+        Os.setenv("ZOMDROID_GLES_MAJOR", "3", true);
+        Os.setenv("ZOMDROID_GLES_MINOR", "2", true);*/
+
         initZomdroidWindow();
         InputNativeInterface.sendJoystickConnected();
 
         ArrayList<String> jvmArgs = gameInstance.getJvmArgsAsList();
         jvmArgs.add("-Dorg.lwjgl.opengl.libname=" + LauncherPreferences.requireSingleton().getRenderer().libName);
         jvmArgs.add("-Dzomdroid.renderer=" + LauncherPreferences.requireSingleton().getRenderer().name());
+        //jvmArgs.add("-XX:+PrintFlagsFinal"); // for debugging
+        jvmArgs.add("-XX:ErrorFile=/dev/stdout"); // print jvm crash report to stdout for now
 
         ArrayList<String> args = gameInstance.getArgsAsList();
 /*        args.add("-debug");
@@ -65,8 +80,12 @@ public class GameLauncher {
 
 
     public static native int initZomdroidWindow();
+
     public static native void destroyZomdroidWindow();
+
     public static native int setSurface(Surface surface, int width, int height);
+
     public static native void destroySurface();
+
     static native void startGame(String gameDirPath, String libraryDirPath, String[] jvmArgs, String mainClassName, String[] args);
 }

@@ -48,18 +48,27 @@ public abstract class AbstractControlElement {
     public InputType getInputType() {
         return this.inputType;
     }
+
     public abstract void setInputType(InputType inputType);
+
     public float getCenterX() {
         throw new UnsupportedOperationException();
     }
+
     public abstract boolean handleMotionEvent(MotionEvent e);
 
     public abstract void draw(Canvas canvas);
+
     public abstract boolean isPointOver(float x, float y);
+
     public abstract void setHighlighted(boolean highlighted);
+
     public abstract void setAlpha(int alpha);
+
     public abstract int getAlpha();
+
     public abstract void setScale(float value);
+
     public abstract float getScale();
 
     public void setText(String text) {
@@ -81,6 +90,7 @@ public abstract class AbstractControlElement {
     public void setCenterPosition(float x, float y) {
         throw new UnsupportedOperationException();
     }
+
     public void moveCenterPosition(float dx, float dy) {
         throw new UnsupportedOperationException();
     }
@@ -96,39 +106,51 @@ public abstract class AbstractControlElement {
     public void addBinding(GLFWBinding binding) {
         throw new UnsupportedOperationException();
     }
+
     public void setBinding(int index, GLFWBinding binding) {
         throw new UnsupportedOperationException();
     }
+
     public void removeBinding(int index) {
         throw new UnsupportedOperationException();
     }
+
     public void setBindingLeft(GLFWBinding binding) {
         throw new UnsupportedOperationException();
     }
+
     public GLFWBinding getBindingLeft() {
         throw new UnsupportedOperationException();
     }
+
     public void setBindingUp(GLFWBinding binding) {
         throw new UnsupportedOperationException();
     }
+
     public GLFWBinding getBindingUp() {
         throw new UnsupportedOperationException();
     }
+
     public void setBindingRight(GLFWBinding binding) {
         throw new UnsupportedOperationException();
     }
+
     public GLFWBinding getBindingRight() {
         throw new UnsupportedOperationException();
     }
+
     public void setBindingDown(GLFWBinding binding) {
         throw new UnsupportedOperationException();
     }
+
     public GLFWBinding getBindingDown() {
         throw new UnsupportedOperationException();
     }
+
     public void setBindingStick(GLFWBinding binding) {
         throw new UnsupportedOperationException();
     }
+
     public GLFWBinding getBindingStick() {
         throw new UnsupportedOperationException();
     }

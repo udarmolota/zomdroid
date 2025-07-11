@@ -15,16 +15,17 @@ import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.zomdroid.input.GLFWBinding;
 import com.zomdroid.input.InputNativeInterface;
 import com.zomdroid.databinding.ActivityGameBinding;
 import com.zomdroid.game.GameInstance;
-import com.zomdroid.game.GameInstancesManager;
+import com.zomdroid.game.GameInstanceManager;
 
 import org.fmod.FMOD;
+
+import java.lang.ref.WeakReference;
 
 
 public class GameActivity extends AppCompatActivity {
@@ -57,7 +58,7 @@ public class GameActivity extends AppCompatActivity {
         String gameInstanceName = getIntent().getStringExtra(EXTRA_GAME_INSTANCE_NAME);
         if (gameInstanceName == null)
             throw new RuntimeException("Expected game instance name to be passed as intent extra");
-        GameInstance gameInstance = GameInstancesManager.requireSingleton().getInstanceByName(gameInstanceName);
+        GameInstance gameInstance = GameInstanceManager.requireSingleton().getInstanceByName(gameInstanceName);
         if (gameInstance == null)
             throw new RuntimeException("Game instance with name " + gameInstanceName + " not found");
 
@@ -65,6 +66,8 @@ public class GameActivity extends AppCompatActivity {
 
         System.load(AppStorage.requireSingleton().getHomePath() + "/" + gameInstance.getFmodLibraryPath() + "/libfmod.so");
         System.load(AppStorage.requireSingleton().getHomePath() + "/" + gameInstance.getFmodLibraryPath() + "/libfmodstudio.so");
+/*        System.loadLibrary("fmod");
+        System.loadLibrary("fmodstudio");*/
 
         FMOD.init(this);
 
@@ -162,6 +165,7 @@ public class GameActivity extends AppCompatActivity {
         binding.gameSv.setOnTouchListener(new View.OnTouchListener() {
             float renderScale = LauncherPreferences.requireSingleton().getRenderScale();
             int pointerId = -1;
+
             @Override
             public boolean onTouch(View v, MotionEvent e) { // this should be in InputControlsView
                 int action = e.getActionMasked();
@@ -200,5 +204,4 @@ public class GameActivity extends AppCompatActivity {
             }
         });
     }
-
 }

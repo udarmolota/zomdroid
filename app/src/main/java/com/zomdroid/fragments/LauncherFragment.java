@@ -53,18 +53,15 @@ import com.zomdroid.R;
 import com.zomdroid.databinding.FragmentLauncherBinding;
 import com.zomdroid.databinding.TaskProgressDialogBinding;
 import com.zomdroid.game.GameInstance;
-import com.zomdroid.game.GameInstancesManager;
+import com.zomdroid.game.GameInstanceManager;
 
 public class LauncherFragment extends Fragment {
     private static final String LOG_TAG = LauncherFragment.class.getName();
-
     private FragmentLauncherBinding binding;
     private RecyclerView.Adapter<?> adapter;
-
     private TaskProgressDialogBinding taskProgressDialogBinding;
     private BroadcastReceiver taskProgressReceiver;
     private AlertDialog taskProgressDialog;
-
     private boolean isInstallerServiceBound;
 
     private final ServiceConnection installerServiceConnection = new ServiceConnection() {
@@ -121,18 +118,19 @@ public class LauncherFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        adapter = new RecyclerView.Adapter<>() {
+        adapter = new RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             @NonNull
             @Override
             public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
                 View view = LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.game_instance_item, parent, false);
-                return new RecyclerView.ViewHolder(view) {};
+                return new RecyclerView.ViewHolder(view) {
+                };
             }
 
             @Override
             public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-                GameInstance gameInstance = GameInstancesManager.requireSingleton().getInstances().get(position);
+                GameInstance gameInstance = GameInstanceManager.requireSingleton().getInstances().get(position);
                 View itemView = holder.itemView;
 
                 TextView nameTv = itemView.findViewById(R.id.game_instance_item_name_tv);
@@ -142,9 +140,33 @@ public class LauncherFragment extends Fragment {
                 nameTv.setText(gameInstance.getName());
 
                 launchIb.setOnClickListener(v -> {
-                    if (!gameInstance.isInstalled()) {
-                        Toast.makeText(getContext(), R.string.game_instance_not_installed,
+                    if (!gameInstance.isInstallationFinished()) {
+                        Toast.makeText(getContext(), R.string.installation_not_finished,
                                 Toast.LENGTH_SHORT).show();
+                        return;
+                    } else if (!gameInstance.hasGameFiles()) {
+                        new MaterialAlertDialogBuilder(requireContext())
+                                .setTitle(R.string.dialog_title_game_files_missing)
+                                .setMessage(R.string.game_files_missing)
+                                .setCancelable(true)
+                                .setPositiveButton(R.string.dialog_button_view_guide, (dialog, which) -> {
+                                    Navigation.findNavController(v).navigate(R.id.wiki_fragment);
+                                })
+                                .setNegativeButton(R.string.dialog_button_close, null)
+                                .create()
+                                .show();
+                        return;
+                    } else if (!gameInstance.hasFilesForLinux()) {
+                        new MaterialAlertDialogBuilder(requireContext())
+                                .setTitle(R.string.dialog_title_game_files_not_for_linux)
+                                .setMessage(R.string.game_files_not_for_linux)
+                                .setCancelable(true)
+                                .setPositiveButton(R.string.dialog_button_view_guide, (dialog, which) -> {
+                                    Navigation.findNavController(v).navigate(R.id.wiki_fragment);
+                                })
+                                .setNegativeButton(R.string.dialog_button_close, null)
+                                .create()
+                                .show();
                         return;
                     }
                     boolean areDependenciesInstalled = requireContext().getSharedPreferences(C.shprefs.NAME, MODE_PRIVATE)
@@ -179,10 +201,19 @@ public class LauncherFragment extends Fragment {
                                 Intent chooserIntent = Intent.createChooser(intent, null);
                                 startActivity(chooserIntent);
                             } else if (itemId == R.id.action_game_instance_delete) {
-                                Intent gameInstallerIntent = new Intent(requireContext(), InstallerService.class);
-                                gameInstallerIntent.putExtra(InstallerService.EXTRA_COMMAND, InstallerService.Task.DELETE_GAME_INSTANCE.ordinal());
-                                gameInstallerIntent.putExtra(InstallerService.EXTRA_GAME_INSTANCE_NAME, gameInstance.getName());
-                                requireContext().startForegroundService(gameInstallerIntent);
+                                new MaterialAlertDialogBuilder(requireContext())
+                                        .setTitle(R.string.dialog_title_delete_game_instance)
+                                        .setMessage(R.string.delete_game_instance)
+                                        .setCancelable(true)
+                                        .setPositiveButton(R.string.dialog_button_confirm, (dialog, which) -> {
+                                            Intent gameInstallerIntent = new Intent(requireContext(), InstallerService.class);
+                                            gameInstallerIntent.putExtra(InstallerService.EXTRA_COMMAND, InstallerService.Task.DELETE_GAME_INSTANCE.ordinal());
+                                            gameInstallerIntent.putExtra(InstallerService.EXTRA_GAME_INSTANCE_NAME, gameInstance.getName());
+                                            requireContext().startForegroundService(gameInstallerIntent);
+                                        })
+                                        .setNegativeButton(R.string.dialog_button_cancel, null)
+                                        .create()
+                                        .show();
                             }
                             return false;
                         }
@@ -194,7 +225,7 @@ public class LauncherFragment extends Fragment {
 
             @Override
             public int getItemCount() {
-                return GameInstancesManager.requireSingleton().getInstances().size();
+                return GameInstanceManager.requireSingleton().getInstances().size();
             }
         };
         binding.gameInstancesRv.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -272,7 +303,6 @@ public class LauncherFragment extends Fragment {
                 .setMessage(R.string.legal_notice_message)
                 .setCancelable(false)
                 .setPositiveButton(R.string.dialog_button_accept, (dialog, which) -> {
-                    dialog.dismiss();
                     requireContext().getSharedPreferences(C.shprefs.NAME, MODE_PRIVATE)
                             .edit().putBoolean(C.shprefs.keys.IS_LEGAL_NOTICE_ACCEPTED, true).apply();
                     requireActivity().findViewById(android.R.id.content).setVisibility(View.VISIBLE);
@@ -285,8 +315,7 @@ public class LauncherFragment extends Fragment {
 
     private void requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-                && ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED)
-        {
+                && ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
         }
     }

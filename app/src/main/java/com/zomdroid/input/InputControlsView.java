@@ -124,7 +124,7 @@ public class InputControlsView extends View {
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
 
-        for (AbstractControlElement controlElement: controlElements) {
+        for (AbstractControlElement controlElement : controlElements) {
             controlElement.draw(canvas);
         }
     }
@@ -152,7 +152,7 @@ public class InputControlsView extends View {
             }
             return gestureDetector.onTouchEvent(e);
         } else {
-            for (AbstractControlElement controlElement: controlElements) {
+            for (AbstractControlElement controlElement : controlElements) {
                 if (controlElement.handleMotionEvent(e)) {
                     return true;
                 }
@@ -217,10 +217,11 @@ public class InputControlsView extends View {
                 return;
             }
         }
-        Type type = new TypeToken<ArrayList<ControlElementDescription>>(){}.getType();
+        Type type = new TypeToken<ArrayList<ControlElementDescription>>() {
+        }.getType();
         ArrayList<ControlElementDescription> savedDescriptions = gson.fromJson(json, type);
         if (savedDescriptions != null) {
-            for (ControlElementDescription description: savedDescriptions) {
+            for (ControlElementDescription description : savedDescriptions) {
                 this.controlElements.add(AbstractControlElement.fromDescription(this, description));
             }
         }
@@ -228,7 +229,7 @@ public class InputControlsView extends View {
 
     public void saveControlElementsToDisk() {
         ArrayList<ControlElementDescription> descriptions = new ArrayList<>();
-        for (AbstractControlElement element: controlElements) {
+        for (AbstractControlElement element : controlElements) {
             descriptions.add(element.describe());
         }
         if (descriptions.isEmpty()) return;
@@ -251,8 +252,11 @@ public class InputControlsView extends View {
 
     public abstract static class ElementSettingsController {
         protected boolean fromLeft;
+
         protected abstract void open();
+
         protected abstract void close();
+
         protected abstract void hide();
     }
 }

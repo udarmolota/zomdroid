@@ -6,11 +6,13 @@ import androidx.annotation.NonNull;
 
 import com.zomdroid.R;
 
-public class ControlElementDescription { public enum Icon {
+public class ControlElementDescription {
+    public enum Icon {
         NO_ICON(R.drawable.ic_void),
         GAMEPAD_BACK_ICON(R.drawable.mt_icon_stack),
         GAMEPAD_START_ICON(R.drawable.mt_icon_menu);
         public final int resId;
+
         Icon(int resId) {
             this.resId = resId;
         }
@@ -74,7 +76,7 @@ public class ControlElementDescription { public enum Icon {
                     " got centerX=" + this.centerXRelative + " centerY=" + this.centerYRelative);
         if (this.alpha < 0 || this.alpha > 255)
             throw new IllegalStateException("Alpha is supposed to be in range [0, 255], got " + this.alpha);
-        for (GLFWBinding binding: this.bindings) {
+        for (GLFWBinding binding : this.bindings) {
             if (binding == null)
                 throw new IllegalStateException("Null binding is not allowed");
         }

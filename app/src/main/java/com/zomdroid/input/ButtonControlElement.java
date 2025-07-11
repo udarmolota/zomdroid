@@ -38,18 +38,17 @@ public class ButtonControlElement extends AbstractControlElement {
     private void dispatchEvent(boolean isPressed) {
         switch (this.inputType) {
             case MNK:
-                for (GLFWBinding binding: bindings) {
+                for (GLFWBinding binding : bindings) {
                     handleMNKBinding(binding, isPressed);
                 }
                 break;
             case GAMEPAD:
-                for (GLFWBinding binding: bindings) {
+                for (GLFWBinding binding : bindings) {
                     handleGamepadBinding(binding, isPressed);
                 }
                 break;
         }
     }
-
 
 
     @Override
@@ -81,6 +80,7 @@ public class ButtonControlElement extends AbstractControlElement {
     public float getCenterX() {
         return this.drawable.centerX;
     }
+
     @Override
     public void draw(Canvas canvas) {
         this.drawable.draw(canvas);
@@ -185,7 +185,7 @@ public class ButtonControlElement extends AbstractControlElement {
                 this.drawable.icon);
     }
 
-    public  class ButtonControlDrawable {
+    public class ButtonControlDrawable {
         private static final int PAINT_STROKE_WIDTH = 6;
         private static final float BUTTON_CIRCLE_DIAMETER = 160.f;
         private static final float BUTTON_RECT_WIDTH = 240.f;
@@ -380,7 +380,7 @@ public class ButtonControlElement extends AbstractControlElement {
             if (this.iconDrawable == null) return;
             RectF bounds = getContentBounds();
 
-            float iconAspect = (float)this.iconDrawable.getIntrinsicWidth() / this.iconDrawable.getIntrinsicHeight();
+            float iconAspect = (float) this.iconDrawable.getIntrinsicWidth() / this.iconDrawable.getIntrinsicHeight();
             float boundsAspect = bounds.width() / bounds.height();
 
             float scaledWidth, scaledHeight;
