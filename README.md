@@ -14,9 +14,9 @@
 ## Technical Limitations
 Zomdroid supports two rendering backends: **GL4ES** and **Mesa Zink**.
 
-**GL4ES** translates OpenGL to OpenGL ES 2.0 which makes it compatible with most Android devices released in the past decade. However, it's currently limited to supporting **Project Zomboid Build 41** and may exhibit graphical bugs or instability.
+**GL4ES** translates OpenGL to OpenGL ES 2.0 which makes it compatible with most Android devices released in the past decade. However, it may exhibit graphical bugs or instability.
 
-**Mesa Zink** is a mature and feature-rich library which translates OpenGL to Vulkan. It provides a more stable experience and supports **Build 42**, but requires a compatible Vulkan driver to run. One such driver is **Freedreno Turnip**, which is bundled with the application but will only work on modern devices with **Adreno GPUs** (Qualcomm Snapdragon SoCs).
+**Mesa Zink** is a mature and feature-rich library which translates OpenGL to Vulkan. It provides a more stable experience, but requires a compatible Vulkan driver to run. One such driver is **Freedreno Turnip**, which is bundled with the application but will only work on modern devices with **Adreno GPUs** (Qualcomm Snapdragon SoCs).
 
 ## Roadmap
 
