@@ -40,7 +40,7 @@ public class PresetManager {
                         C.deps.LIBS_ANDROID_ARM64_v8a,
                         C.deps.LIBS_LWJGL_336
                 })
-                .setLibraryPathForEmulationArray(new String[] {
+                .setLibraryPathForEmulationArray(new String[]{
                         C.deps.LIBS_LINUX_X86_64
                 })
                 .setFmodLibraryPath(C.deps.LIBS_FMOD_20224)
@@ -73,14 +73,14 @@ public class PresetManager {
                         "trove-3.0.3.jar",
                         "uncommons-maths-1.2.3.jar"
                 })
-                .setExtraJars(new String[] {
+                .setExtraJars(new String[]{
                         C.deps.JARS_SQLITE_JDBC_34800
                 })
                 .setLibraryPathArray(new String[]{
                         C.deps.LIBS_ANDROID_ARM64_v8a,
                         C.deps.LIBS_LWJGL_323
                 })
-                .setLibraryPathForEmulationArray(new String[] {
+                .setLibraryPathForEmulationArray(new String[]{
                         C.deps.LIBS_LINUX_X86_64
                 })
                 .setFmodLibraryPath(C.deps.LIBS_FMOD_20206)

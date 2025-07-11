@@ -20,10 +20,10 @@
 
 #define BUF_SIZE 1024
 
-static void* (*__loader_dlopen)(const char* filename, int flags, const void* caller);
-static void* (*__loader_dlsym)(void* handle, const char* symbol, const void* caller);
+static void* (*loader_dlopen)(const char* filename, int flags, const void* caller);
+static void* (*loader_dlsym)(void* handle, const char* symbol, const void* caller);
 
-static void* (*__loader_android_dlopen_ext)(const char* filename,
+static void* (*loader_android_dlopen_ext)(const char* filename,
                                             int flag,
                                             const android_dlextinfo* extinfo,
                                             const void* caller_addr);
@@ -45,11 +45,11 @@ void zomdroid_linker_set_vulkan_loader_handle(void* handle) {
 }
 
 __attribute__((visibility("default"), used))
-void zomdroid_linker_set_proc_addrs(void* __loader_dlopen_fn, void* __loader_dlsym_fn,
-                                    void* __loader_android_dlopen_ext_fn) {
-    __loader_dlopen = __loader_dlopen_fn;
-    __loader_dlsym = __loader_dlsym_fn;
-    __loader_android_dlopen_ext = __loader_android_dlopen_ext_fn;
+void zomdroid_linker_set_proc_addrs(void* _loader_dlopen_fn, void* _loader_dlsym_fn,
+                                    void* _loader_android_dlopen_ext_fn) {
+    loader_dlopen = _loader_dlopen_fn;
+    loader_dlsym = _loader_dlsym_fn;
+    loader_android_dlopen_ext = _loader_android_dlopen_ext_fn;
 }
 
 
@@ -543,7 +543,7 @@ __attribute__((visibility("default"), used))
 void *dlopen(const char* filename, int flags) {
     LOGD("dlopen(name=%s)", filename);
 
-    if (filename == NULL) return __loader_dlopen(NULL, flags, __builtin_return_address(0));
+    if (filename == NULL) return loader_dlopen(NULL, flags, __builtin_return_address(0));
 
     for (int i = 0; i < jni_lib_count; i++) {
         if (!strstr(filename, jni_libs[i].name)) continue;
@@ -553,7 +553,7 @@ void *dlopen(const char* filename, int flags) {
         needed_lib->names[0] = strdup(filename);
         int bindnow = (flags & 0x2) ? 1 : 0;
         int islocal = (flags & 0x100) ? 0 : 1;
-        int deepbind = (flags & 0x8) ? 1 : 0;
+        // int deepbind = (flags & 0x8) ? 1 : 0;
         if (AddNeededLib(NULL, islocal, bindnow, 1, needed_lib, NULL, my_context, thread_get_emu()) != 0) {
             LOGE("Failed to load %s in box64", jni_libs[i].name);
             RemoveNeededLib(NULL, islocal, needed_lib, my_context, thread_get_emu());
@@ -583,7 +583,7 @@ void *dlopen(const char* filename, int flags) {
         return vulkan_loader_handle;
     }
 
-    return __loader_dlopen(filename, flags, __builtin_return_address(0));
+    return loader_dlopen(filename, flags, __builtin_return_address(0));
 }
 
 __attribute__((visibility("default"), used))
@@ -597,21 +597,21 @@ void *dlsym(void *handle, const char *sym_name) {
         struct lib_s* maplib = GetMaplib(lib);
         uintptr_t box64_sym = FindGlobalSymbol(maplib, sym_name, -1, NULL, 0);
         if (box64_sym == 0) {
-            LOGE("Failed to locate %s in box64 global symbols", sym_name);
             return NULL;
         }
 
+        // On Android FMOD relies on Java for initialization, so we need to attach the game audio thread to ART VM
         if (strcmp(sym_name, "Java_fmod_javafmodJNI_FMOD_1System_1Create") == 0) {
-            JNIEnv* papa_env = NULL;
-            (*g_zomdroid_art_vm)->GetEnv(g_zomdroid_art_vm, (void **) &papa_env, JNI_VERSION_1_6) ;
-            if (papa_env == NULL){
+            JNIEnv* art_jni_env = NULL;
+            (*g_zomdroid_art_vm)->GetEnv(g_zomdroid_art_vm, (void **) &art_jni_env, JNI_VERSION_1_6) ;
+            if (art_jni_env == NULL){
                 (*g_zomdroid_art_vm)->AttachCurrentThread(g_zomdroid_art_vm,
-                                                          (void **) &papa_env, NULL);
+                                                          (void **) &art_jni_env, NULL);
             }
-            if (papa_env == NULL) {
-                LOGE("Failed to attach game fmod thread to android jvm");
+            if (art_jni_env == NULL) {
+                LOGE("Failed to attach game FMOD thread to ART VM");
             } else {
-                LOGD("Successfully attached game fmod thread to android jvm");
+                LOGD("Successfully attached game FMOD thread to ART VM");
             }
         }
 
@@ -639,7 +639,7 @@ void *dlsym(void *handle, const char *sym_name) {
         return sym;
     }
 
-    return __loader_dlsym(handle, sym_name, __builtin_return_address(0));
+    return loader_dlsym(handle, sym_name, __builtin_return_address(0));
 }
 
 __attribute__((visibility("default"), used))
@@ -648,7 +648,7 @@ void *android_dlopen_ext(const char *filename, int flags, const android_dlextinf
     if(strstr(filename, "vulkan.") && vulkan_driver_handle) {
         return vulkan_driver_handle;
     }
-    return __loader_android_dlopen_ext(filename, flags, extinfo, &android_dlopen_ext);
+    return loader_android_dlopen_ext(filename, flags, extinfo, &android_dlopen_ext);
 }
 
 __attribute__((visibility("default"), used))

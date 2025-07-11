@@ -7,27 +7,38 @@ import android.graphics.Insets;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
+import android.text.Html;
+import android.text.SpannableString;
+import android.text.method.LinkMovementMethod;
+import android.text.util.Linkify;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowInsets;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import androidx.core.text.HtmlCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.zomdroid.databinding.ActivityLauncherBinding;
+import com.zomdroid.game.GameInstanceManager;
+import com.zomdroid.input.AbstractControlElement;
+import com.zomdroid.input.ControlElementDescription;
 
 public class LauncherActivity extends AppCompatActivity {
     private static final String LOG_TAG = LauncherActivity.class.getName();
     ActivityLauncherBinding binding;
     private NavController navController;
     private AppBarConfiguration appBarConfiguration;
-
+    private boolean inited = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +58,8 @@ public class LauncherActivity extends AppCompatActivity {
                         v.getPaddingLeft(),
                         insets.top,
                         v.getPaddingRight(),
-                        v.getPaddingBottom()
+                        //v.getPaddingBottom()
+                        insets.bottom
                 );
 
                 return windowInsets;
@@ -67,7 +79,6 @@ public class LauncherActivity extends AppCompatActivity {
 
 
         binding.launcherNv.setNavigationItemSelectedListener(item -> {
-            binding.drawerLayout.close();
             if (item.getItemId() == R.id.action_manage_storage) {
                 Uri folderUri = DocumentsContract.buildDocumentUri(C.STORAGE_PROVIDER_AUTHORITY, AppStorage.requireSingleton().getHomePath());
                 Intent intent = new Intent();
@@ -82,23 +93,32 @@ public class LauncherActivity extends AppCompatActivity {
                 Intent intent = new Intent(this, ControlsEditorActivity.class);
                 startActivity(intent);
                 return true;
+            } else if (item.getItemId() == R.id.action_donate) {
+                final SpannableString s = new SpannableString(getString(R.string.donate_message));
+                Linkify.addLinks(s, Linkify.WEB_URLS);
+                AlertDialog dialog = new MaterialAlertDialogBuilder(this)
+                        .setTitle(R.string.dialog_title_donate)
+                        .setMessage(s)
+                        .setPositiveButton(getString(R.string.dialog_button_ok), null)
+                        .create();
+                dialog.show();
+                TextView messageView = dialog.findViewById(android.R.id.message);
+                if (messageView != null) {
+                    messageView.setMovementMethod(LinkMovementMethod.getInstance());
+                }
+                return true;
             }
-             return NavigationUI.onNavDestinationSelected(item, navController)
+
+            binding.drawerLayout.close();
+
+            return NavigationUI.onNavDestinationSelected(item, navController)
                     || super.onOptionsItemSelected(item);
         });
     }
-
-
 
     @Override
     public boolean onSupportNavigateUp() {
         return NavigationUI.navigateUp(navController, appBarConfiguration)
                 || super.onSupportNavigateUp();
     }
-
-
-
-
-
-
 }

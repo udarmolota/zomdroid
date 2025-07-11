@@ -103,6 +103,7 @@ public class DpadControlElement extends AbstractControlElement {
     public float getCenterX() {
         return this.drawable.centerX;
     }
+
     @Override
     public void draw(Canvas canvas) {
         this.drawable.draw(canvas);
@@ -141,6 +142,7 @@ public class DpadControlElement extends AbstractControlElement {
         this.drawable.setCenterPosition(x, y);
         this.parentView.invalidate();
     }
+
     @Override
     public void moveCenterPosition(float dx, float dy) {
         this.drawable.moveCenterPosition(dx, dy);
@@ -293,6 +295,7 @@ public class DpadControlElement extends AbstractControlElement {
             this.size = DPAD_SIZE * parentView.pixelScale * this.scale;
             updateBounds();
         }
+
         private void updateBounds() {
             this.x = this.centerX - this.size / 2;
             this.y = this.centerY - this.size / 2;
@@ -312,6 +315,7 @@ public class DpadControlElement extends AbstractControlElement {
             this.centerY = y;
             updateBounds();
         }
+
         public void moveCenterPosition(float dx, float dy) {
             setCenterPosition(this.centerX + dx, this.centerY + dy);
         }

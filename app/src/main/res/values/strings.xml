@@ -1,12 +1,11 @@
 <resources>
-    <string name="app_name" translatable="false">zomdroid</string>
+    <string name="app_name" translatable="false">Zomdroid</string>
 
-    <string name="percentage_format">%d%%</string>
+    <string name="percentage_format" translatable="false">%d%%</string>
 
     <string name="legal_notice_title">Legal notice</string>
     <string name="legal_notice_message">This launcher is a third-party tool and requires original Project Zomboid files to function. You must own a legally licensed copy of the game to use this software. The developer of this launcher is not affiliated with the original game creators and assumes no responsibility for any legal consequences arising from the use of this software.</string>
 
-    <string name="fragment_label_legal_notice">Legal notice</string>
     <string name="fragment_label_launcher">Launcher</string>
     <string name="fragment_label_new_game_instance">New game instance</string>
     <string name="fragment_label_settings">Settings</string>
@@ -40,27 +39,38 @@
 
     <string name="dialog_button_ok">OK</string>
     <string name="dialog_button_accept">Accept</string>
-    <string name="dialog_title_error">Error</string>
+    <string name="dialog_button_quit">Quit</string>
+    <string name="dialog_button_view_guide">View guide</string>
+    <string name="dialog_button_close">Close</string>
+    <string name="dialog_button_confirm">Confirm</string>
+    <string name="dialog_button_cancel">Cancel</string>
+    <string name="dialog_title_delete_game_instance">Delete game instance?</string>
     <string name="dialog_title_info">Info</string>
-    <string name="dialog_title_creating_instance">Creating instance…</string>
+    <string name="dialog_title_fatal_error">Fatal error</string>
+    <string name="dialog_title_creating_instance">Creating game instance…</string>
     <string name="dialog_title_instance_created">Instance successfully created</string>
     <string name="dialog_title_failed_to_create_instance">Failed to create instance</string>
-    <string name="dialog_title_deleting_instance">Deleting instance…</string>
+    <string name="dialog_title_deleting_game_instance">Deleting game instance…</string>
     <string name="dialog_title_instance_deleted">Instance successfully deleted</string>
     <string name="dialog_title_failed_to_delete_instance">Failed to delete instance</string>
     <string name="dialog_title_installing_dependencies">Installing dependencies…</string>
     <string name="dialog_title_dependencies_installed">Dependencies successfully installed</string>
     <string name="dialog_title_failed_to_install_dependencies">Failed to install dependencies</string>
+    <string name="dialog_title_donate">Donate</string>
+    <string name="dialog_title_game_files_missing">Game files are missing</string>
+    <string name="dialog_title_game_files_not_for_linux">Installed files are not supported</string>
 
-    <string name="game_instance_not_installed">This game instance is not installed</string>
+    <string name="installation_not_finished">Installation is not finished</string>
     <string name="dependencies_not_installed">Zomdroid dependencies are not installed</string>
 
     <string name="settings_renderer">Renderer</string>
     <string name="settings_vulkan_driver">Vulkan driver</string>
     <string name="settings_resolution_scale">Resolution scale</string>
+    <string name="settings_audio_api">Audio API</string>
 
     <string name="nav_menu_controls_editor">Controls editor</string>
     <string name="nav_menu_manage_storage">Manage storage</string>
+    <string name="nav_menu_donate">Donate</string>
     <string name="control_element_delete">Delete element</string>
     <string name="control_element_input_type">Input type</string>
     <string name="control_element_stick_binding">Stick Binding</string>
@@ -69,4 +79,12 @@
     <string name="game_instance_manage_storage">Manage storage</string>
     <string name="game_instance_delete">Delete</string>
 
+    <string name="donate_message">Enjoying the app and want to help it grow? Support its development on ko-fi.com/liamelui</string>
+
+    <string name="app_aborted">The app ran into an unexpected issue and had to close</string>
+    <string name="share_logs">Share log file</string>
+
+    <string name="delete_game_instance">All game files and data (saves, mods, favorite servers, etc.) associated with this instance will be permanently lost</string>
+    <string name="game_files_missing">Make sure ProjectZomboid64 is at the top level of the .zip archive used for installation. You can follow the guide on the wiki to ensure the files are packaged correctly</string>
+    <string name="game_files_not_for_linux">Project Zomboid version for Linux is required. You can follow the guide on the wiki to ensure the correct files are downloaded</string>
 </resources>

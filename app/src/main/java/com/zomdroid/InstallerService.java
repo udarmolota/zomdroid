@@ -27,7 +27,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.zomdroid.game.GameInstance;
-import com.zomdroid.game.GameInstancesManager;
+import com.zomdroid.game.GameInstanceManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -94,7 +94,7 @@ public class InstallerService extends Service implements TaskProgressListener {
                     "Game instance name intent extra is missing");
             return;
         }
-        GameInstance gameInstance = GameInstancesManager.requireSingleton().getInstanceByName(gameInstanceName);
+        GameInstance gameInstance = GameInstanceManager.requireSingleton().getInstanceByName(gameInstanceName);
         if (gameInstance == null) {
             finishWithError(getString(R.string.dialog_title_failed_to_create_instance),
                     "Game instance with name " + gameInstanceName + " not found");
@@ -107,7 +107,7 @@ public class InstallerService extends Service implements TaskProgressListener {
                     "Game files archive URI intent extra is missing");
             return;
         }
-        executorService.submit(()-> {
+        executorService.submit(() -> {
             try {
                 installGameFromZip(gameInstance, gameFilesArchiveUri);
             } catch (Exception e) {
@@ -115,14 +115,14 @@ public class InstallerService extends Service implements TaskProgressListener {
                 return;
             }
 
-            GameInstancesManager.requireSingleton().setInstanceInstalled(gameInstance);
+            GameInstanceManager.requireSingleton().markInstallationFinished(gameInstance);
 
             finish(getString(R.string.dialog_title_instance_created), null);
         });
     }
 
     private void doDeleteGameInstance(Intent intent) {
-        String taskTitle = getString(R.string.dialog_title_deleting_instance);
+        String taskTitle = getString(R.string.dialog_title_deleting_game_instance);
 
         startForeground(NOTIFICATION_ID, buildNotification(taskTitle));
 
@@ -134,14 +134,14 @@ public class InstallerService extends Service implements TaskProgressListener {
                     "Game instance name intent extra is missing");
             return;
         }
-        GameInstance gameInstance = GameInstancesManager.requireSingleton().getInstanceByName(gameInstanceName);
+        GameInstance gameInstance = GameInstanceManager.requireSingleton().getInstanceByName(gameInstanceName);
         if (gameInstance == null) {
             finishWithError(getString(R.string.dialog_title_failed_to_delete_instance),
                     "Game instance with name " + gameInstanceName + " not found");
             return;
         }
 
-        executorService.submit(()-> {
+        executorService.submit(() -> {
             try {
                 FileUtils.deleteDirectory(new File(gameInstance.getHomePath()));
             } catch (Exception e) {
@@ -149,7 +149,7 @@ public class InstallerService extends Service implements TaskProgressListener {
                 return;
             }
 
-            GameInstancesManager.requireSingleton().unregisterInstance(gameInstance);
+            GameInstanceManager.requireSingleton().unregisterInstance(gameInstance);
 
             finish(getString(R.string.dialog_title_instance_deleted), null);
         });
@@ -168,7 +168,8 @@ public class InstallerService extends Service implements TaskProgressListener {
 
             String bundlesJson = prefs.getString(C.shprefs.keys.INSTALLED_BUNDLES, "[]");
 
-            Type mapType = new TypeToken<HashMap<String, Long>>(){}.getType();
+            Type mapType = new TypeToken<HashMap<String, Long>>() {
+            }.getType();
             HashMap<String, Long> oldBundlesHashesMap = gson.fromJson(bundlesJson, mapType);
 
             HashMap<String, Long> newBundlesHashesMap = new HashMap<>();

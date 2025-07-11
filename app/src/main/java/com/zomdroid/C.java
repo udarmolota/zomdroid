@@ -25,8 +25,10 @@ public class C {
         public static final String BUNDLES_JARS = BUNDLES + "/jars.tar";
         public static final String DEFAULT_CONTROLS = "default_controls.json";
     }
+
     public static class shprefs {
         public static final String NAME = "com.zomdroid.PREFS";
+
         public static class keys {
             public static final String LAUNCHER_VERSION = "launcherVersion";
             public static final String INPUT_CONTROLS = "inputControls";

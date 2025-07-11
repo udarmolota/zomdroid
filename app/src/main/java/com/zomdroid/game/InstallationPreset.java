@@ -38,7 +38,7 @@ public class InstallationPreset {
     public static class Builder {
         private String name = "";
         private String[] classPathArray = new String[0];
-        private String[] extraJars  = new String[0];
+        private String[] extraJars = new String[0];
         private String[] libraryPathArray = new String[0];
         private String[] libraryPathForEmulationArray = new String[0];
         private String fmodLibraryPath = "";

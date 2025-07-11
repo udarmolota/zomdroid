@@ -12,6 +12,8 @@
 #include <stdlib.h>
 #include <sys/system_properties.h>
 #include <bits/stdatomic.h>
+#include <sys/sysinfo.h>
+#include <asm-generic/fcntl.h>
 #include "logger.h"
 
 #define LOG_TAG "zomdroid-main"
@@ -32,13 +34,31 @@ Renderer g_zomdroid_renderer;
 
 ZomdroidEventQueue g_zomdroid_event_queue;
 
+static long get_mem_available_mb() {
+    FILE* f = fopen("/proc/meminfo", "r");
+    if (!f) return -1;
 
-static int log_stdout() {
+    char line[256];
+    long memAvailableKb = -1;
+
+    while (fgets(line, sizeof(line), f)) {
+        if (sscanf(line, "MemAvailable: %ld kB", &memAvailableKb) == 1) {
+            break;
+        }
+    }
+    fclose(f);
+
+    return (memAvailableKb > 0) ? (memAvailableKb / 1024) : -1;
+}
+
+__attribute__((noreturn))
+static void monitor_stdio_and_memory() {
     int pipefd[2];
     char buffer[8192];
+
     if (pipe(pipefd) == -1) {
-        LOGE("pipe failed");
-        return -1;
+        LOGE("Failed to create pipe for monitoring stdio");
+        abort();
     }
 
     setvbuf(stdout, NULL, _IONBF, 0);
@@ -48,22 +68,59 @@ static int log_stdout() {
     dup2(pipefd[1], STDERR_FILENO);
     close(pipefd[1]);
 
-    ssize_t i;
-    while ((i = read(pipefd[0], buffer, sizeof(buffer) - 1)) > 0) {
-        buffer[i] = '\0';
-        // splitting output into individual lines makes it easier for logcat to process and avoids truncation
-        char* line = strtok(buffer, "\n");
-        while (line) {
-            LOGI("%s", line);
-            line = strtok(NULL, "\n");
+    fcntl(pipefd[0], F_SETFL, O_NONBLOCK);
+
+    time_t last_mem_check = 0;
+    time_t last_mem_log = 0;
+
+    while (1) {
+        ssize_t i = read(pipefd[0], buffer, sizeof(buffer) - 1);
+        if (i > 0) {
+            buffer[i] = '\0';
+            // splitting output into individual lines makes it easier for logcat to process and avoids truncation
+            char* line = strtok(buffer, "\n");
+            while (line) {
+                LOGI("%s", line);
+                line = strtok(NULL, "\n");
+            }
         }
+
+        time_t now = time(NULL);
+        if ((now - last_mem_check >= 1) && (now - last_mem_log >= 30)) {
+            last_mem_check = now;
+
+            long free_mb = get_mem_available_mb();
+            if (free_mb != -1 && free_mb < 300) {
+                last_mem_log = now;
+                LOGW("Low memory: only %ld MB available", free_mb);
+            }
+        }
+
+        usleep(10000);
     }
-    close(pipefd[0]);
-    return 0;
 }
 
 void zomdroid_set_art_vm(void* vm) {
     g_zomdroid_art_vm = vm;
+}
+
+_Noreturn void handle_abort() {
+    signal(SIGABRT, SIG_DFL);
+
+    JNIEnv* jni_env = NULL;
+    (*g_zomdroid_art_vm)->AttachCurrentThread(g_zomdroid_art_vm, (void**)&jni_env, NULL);
+    if (jni_env == NULL) _exit(1);
+
+    jclass handler_class = (*jni_env)->FindClass(jni_env, "com/zomdroid/CrashHandler");
+    if (handler_class == NULL) _exit(1);
+
+    jmethodID handler_method = (*jni_env)->GetStaticMethodID(jni_env, handler_class, "handleAbort", "()V");
+    if (handler_method == NULL) _exit(1);
+
+    (*jni_env)->CallStaticVoidMethod(jni_env, handler_class, handler_method);
+
+    pause();
+    _exit(1);
 }
 
 static void create_jvm_and_launch_main(int jvm_argc, const char** jvm_argv, const char* main_class_name, int argc, const char** argv) {
@@ -71,13 +128,6 @@ static void create_jvm_and_launch_main(int jvm_argc, const char** jvm_argv, cons
     if (libjvm == NULL) {
         LOGE("%s", dlerror());
         return;
-    }
-
-    struct sigaction sa = { 0 };
-    for(int sig = SIGHUP; sig < NSIG; sig++) {
-        if(sig == SIGSEGV) sa.sa_handler = SIG_IGN; // let jvm handle segfault
-        else sa.sa_handler = SIG_DFL;
-        sigaction(sig, &sa, NULL);
     }
 
     jint(*JNI_CreateJavaVM)(JavaVM**, void**, void*) = dlsym(libjvm, "JNI_CreateJavaVM");
@@ -88,7 +138,7 @@ static void create_jvm_and_launch_main(int jvm_argc, const char** jvm_argv, cons
     JavaVMOption options[jvm_argc];
     if (jvm_argv != NULL) {
         for (int i = 0; i < jvm_argc; i++) {
-            options[i].optionString = jvm_argv[i];
+            options[i].optionString = (char*) jvm_argv[i];
         }
     }
     vm_args.version = JNI_VERSION_1_6;
@@ -181,6 +231,7 @@ static void create_jvm_and_launch_main(int jvm_argc, const char** jvm_argv, cons
     if ((*env)->ExceptionCheck(env)) {
         (*env)->ExceptionDescribe(env);
         (*env)->ExceptionClear(env);
+        abort();
     }
 
     (*jvm)->DestroyJavaVM(jvm);
@@ -224,16 +275,16 @@ static int load_linker_hook() {
         LOGE("%s", dlerror());
         return -1;
     }
-    void* __loader_dlopen_fn = dlsym(libdl, "__loader_dlopen");
-    void* __loader_dlsym_fn = dlsym(libdl, "__loader_dlsym");
-    void* __loader_android_dlopen_ext_fn = dlsym(libdl, "__loader_android_dlopen_ext");
-    if (!__loader_dlopen_fn || !__loader_dlsym_fn || ! __loader_android_dlopen_ext_fn) {
+    void* _loader_dlopen_fn = dlsym(libdl, "__loader_dlopen");
+    void* _loader_dlsym_fn = dlsym(libdl, "__loader_dlsym");
+    void* _loader_android_dlopen_ext_fn = dlsym(libdl, "__loader_android_dlopen_ext");
+    if (!_loader_dlopen_fn || !_loader_dlsym_fn || ! _loader_android_dlopen_ext_fn) {
         dlclose(libdl);
         LOGE("Failed to locate symbols for libdl.so");
         return -1;
     }
 
-    zomdroid_linker_set_proc_addrs(__loader_dlopen_fn, __loader_dlsym_fn, __loader_android_dlopen_ext_fn);
+    zomdroid_linker_set_proc_addrs(_loader_dlopen_fn, _loader_dlsym_fn, _loader_android_dlopen_ext_fn);
     if (zomdroid_linker_init() != 0 ) {
         LOGE("Failed to initialise zomdroid linker");
         return -1;
@@ -262,13 +313,14 @@ static int load_linker_hook() {
 void zomdroid_start_game(const char* game_dir_path, const char* library_dir_path, int jvm_argc,
                          const char** jvm_argv, const char* main_class_name, int argc, const char** argv) {
 
+    signal(SIGABRT, handle_abort);
+
     pthread_t logging_thread;
-    if (pthread_create(&logging_thread, NULL, (void *(*)(void *)) &log_stdout, NULL) != 0) {
+    if (pthread_create(&logging_thread, NULL, (void *(*)(void *)) &monitor_stdio_and_memory, NULL) != 0) {
         LOGW("Failed to create stdout logging thread");
     } else {
         pthread_detach(logging_thread);
     }
-
 
     if (init_zomdroid_namespace(library_dir_path) != 0) {
         LOGE("Failed to initialize zomdroid namespace");
@@ -283,6 +335,15 @@ void zomdroid_start_game(const char* game_dir_path, const char* library_dir_path
     if (chdir(game_dir_path) != 0) {
         LOGE("Failed to change cwd with error: %s", strerror(errno));
         return;
+    }
+
+    // we handle abort, jvm handles segfault, clear other handlers possibly set by box64
+    struct sigaction sa = { 0 };
+    for(int sig = SIGHUP; sig < NSIG; sig++) {
+        if(sig == SIGSEGV) sa.sa_handler = SIG_IGN;
+        else if(sig == SIGABRT) continue;
+        else sa.sa_handler = SIG_DFL;
+        sigaction(sig, &sa, NULL);
     }
 
     create_jvm_and_launch_main(jvm_argc, jvm_argv, main_class_name, argc, argv);
@@ -312,7 +373,7 @@ int zomdroid_init() {
     return 0;
 }
 
-void jvm_pause_all_threads() {
+/*void jvm_pause_all_threads() {
     jint thread_count;
     jthread* threads;
     jvmtiEnv* jvmti = g_zomdroid_jvmti_env;
@@ -341,7 +402,7 @@ void jvm_resume_all_threads() {
         LOGE("SuspendThreadList() failed, error code: %d", err);
         return;
     }
-}
+}*/
 
 void zomdroid_surface_deinit() {
     pthread_mutex_lock(&g_zomdroid_surface.mutex);

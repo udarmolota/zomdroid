@@ -22,4 +22,10 @@
         android:icon="@drawable/mt_icon_folder"
         app:showAsAction="never"/>
 
+    <item
+        android:id="@+id/action_donate"
+        android:title="@string/nav_menu_donate"
+        android:icon="@drawable/mt_icon_heart"
+        app:showAsAction="never"/>
+
 </menu>

@@ -27,13 +27,13 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 /*
-* Originally from Termux app with a few modifications
-* */
+ * Originally from Termux app with a few modifications
+ * */
 public class AppStorageProvider extends DocumentsProvider {
     private static final String TAG = "AppStorageProvider";
     private static final String ALL_MIME_TYPES = "*/*";
 
-    private  File baseDir;
+    private File baseDir;
 
 
     // The default columns to return information about a root if no specific
@@ -336,7 +336,8 @@ public class AppStorageProvider extends DocumentsProvider {
 
         final String displayName = file.getName();
         final String mimeType = getMimeType(file);
-        if (mimeType.startsWith("image/")) flags |= DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL;
+        if (mimeType.startsWith("image/"))
+            flags |= DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL;
 
         var row = result.newRow();
         row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, docId);

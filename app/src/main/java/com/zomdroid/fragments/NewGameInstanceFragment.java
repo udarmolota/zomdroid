@@ -1,7 +1,5 @@
 package com.zomdroid.fragments;
 
-import static androidx.core.content.ContextCompat.registerReceiver;
-
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
@@ -34,21 +32,16 @@ import com.zomdroid.R;
 import com.zomdroid.databinding.FragmentNewGameInstanceBinding;
 import com.zomdroid.game.GameInstance;
 import com.zomdroid.game.InstallationPreset;
-import com.zomdroid.game.GameInstancesManager;
+import com.zomdroid.game.GameInstanceManager;
 import com.zomdroid.game.PresetManager;
 
 import java.nio.file.FileSystemException;
 import java.util.Objects;
 
 public class NewGameInstanceFragment extends Fragment {
-
     private FragmentNewGameInstanceBinding binding;
-
-
     private final String ZIP_MIME = "application/zip";
     private Uri gameFilesZipUri = null;
-
-
     private final ActivityResultLauncher<String> actionOpenDocumentLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(),
             uri -> {
                 if (uri == null) return;
@@ -118,7 +111,7 @@ public class NewGameInstanceFragment extends Fragment {
                         throw new RuntimeException(e);
                     }
 
-                    GameInstancesManager.requireSingleton().registerInstance(gameInstance);
+                    GameInstanceManager.requireSingleton().registerInstance(gameInstance);
 
                     Intent installerIntent = new Intent(requireContext(), InstallerService.class);
                     installerIntent.putExtra(InstallerService.EXTRA_COMMAND, InstallerService.Task.CREATE_GAME_INSTANCE.ordinal());
@@ -171,9 +164,6 @@ public class NewGameInstanceFragment extends Fragment {
         binding.newGameInstanceFilesBrowseIb.setOnClickListener(v -> {
             actionOpenDocumentLauncher.launch(ZIP_MIME);
         });
-
-
-
     }
 
     @Override
