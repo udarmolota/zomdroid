@@ -7,7 +7,7 @@
 
 ## Features
 
-- Supports **Project Zomboid Build 41** and **Build 42**
+- Supports **Project Zomboid Build 41** and **Build 42** (up to 42.7, versions 42.8 and later are not supported) 
 - Theoretically supports **Lua mods** (not fully tested)
 - Currently **single-player only**
 
