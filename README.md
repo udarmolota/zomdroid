@@ -1,3 +1,7 @@
+> [!WARNING] 
+> Development is currently on hold pending an official response from The Indie Stone. 
+
+
 # Zomdroid
 
 **Zomdroid** is a launcher for [Project Zomboid](https://projectzomboid.com) on mobile Android devices.
