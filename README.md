@@ -1,6 +1,5 @@
 > [!WARNING] 
-> Development is currently on hold pending an official response from The Indie Stone. 
-
+> Development is currently on hold while I wait for an official response from The Indie Stone regarding potential sponsorship. Just to clarify — TIS is not blocking or interfering with development in any way. I'm simply waiting to hear back, as I don’t have the resources to continue without financial support.
 
 # Zomdroid
 
