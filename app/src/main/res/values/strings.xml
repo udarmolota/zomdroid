@@ -69,6 +69,7 @@
     <string name="settings_audio_api">Audio API</string>
 
     <string name="nav_menu_controls_editor">Controls editor</string>
+    <string name="nav_menu_gamepad_mapper">Gamepad mapper</string>
     <string name="nav_menu_manage_storage">Manage storage</string>
     <string name="nav_menu_donate">Donate</string>
     <string name="control_element_delete">Delete element</string>
@@ -87,4 +88,31 @@
     <string name="delete_game_instance">All game files and data (saves, mods, favorite servers, etc.) associated with this instance will be permanently lost</string>
     <string name="game_files_missing">Make sure ProjectZomboid64 is at the top level of the .zip archive used for installation. You can follow the guide on the wiki to ensure the files are packaged correctly</string>
     <string name="game_files_not_for_linux">Project Zomboid version for Linux is required. You can follow the guide on the wiki to ensure the correct files are downloaded</string>
+
+    <!-- Gamepad Mapper Strings -->
+    <string name="gamepad_mapper_title">Gamepad Button Mapping</string>
+    <string name="gamepad_mapper_description">Press the buttons on your gamepad in the requested order to customize your controls.</string>
+    <string name="gamepad_mapper_start">Start Mapping</string>
+    <string name="gamepad_mapper_reset">Reset to Default</string>
+    <string name="gamepad_mapper_step">Press: %s</string>
+    <string name="gamepad_mapper_save">Mapping Complete!</string>
+    <string name="gamepad_mapper_success">Gamepad mapping saved successfully</string>
+    <string name="gamepad_mapper_reset_confirmation">Gamepad mapping reset to default</string>
+    
+    <!-- Gamepad Button Names -->
+    <string name="gamepad_mapper_button_a">A Button</string>
+    <string name="gamepad_mapper_button_b">B Button</string>
+    <string name="gamepad_mapper_button_x">X Button</string>
+    <string name="gamepad_mapper_button_y">Y Button</string>
+    <string name="gamepad_mapper_button_lb">Left Bumper</string>
+    <string name="gamepad_mapper_button_rb">Right Bumper</string>
+    <string name="gamepad_mapper_button_select">Select/Back</string>
+    <string name="gamepad_mapper_button_start">Start/Menu</string>
+    <string name="gamepad_mapper_button_guide">Guide/Home</string>
+    <string name="gamepad_mapper_button_lstk">Left Stick Click</string>
+    <string name="gamepad_mapper_button_rstk">Right Stick Click</string>
+    <string name="gamepad_mapper_button_dpad_up">D-Pad Up</string>
+    <string name="gamepad_mapper_button_dpad_down">D-Pad Down</string>
+    <string name="gamepad_mapper_button_dpad_left">D-Pad Left</string>
+    <string name="gamepad_mapper_button_dpad_right">D-Pad Right</string>
 </resources>

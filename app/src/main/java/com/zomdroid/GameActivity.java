@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.system.ErrnoException;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -15,9 +16,11 @@ import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.zomdroid.input.GLFWBinding;
+import com.zomdroid.input.GamepadManager;
 import com.zomdroid.input.InputNativeInterface;
 import com.zomdroid.databinding.ActivityGameBinding;
 import com.zomdroid.game.GameInstance;
@@ -28,7 +31,12 @@ import org.fmod.FMOD;
 import java.lang.ref.WeakReference;
 
 
-public class GameActivity extends AppCompatActivity {
+/**
+ * Main game activity. Handles UI, surface, and input.
+ * Integrates GamepadManager for hotplug and routes all gamepad input to the native interface.
+ * Hides the virtual controller UI when a physical gamepad is connected.
+ */
+public class GameActivity extends AppCompatActivity implements GamepadManager.GamepadListener {
     public static final String EXTRA_GAME_INSTANCE_NAME = "com.zomdroid.GameActivity.EXTRA_GAME_INSTANCE_NAME";
     private static final String LOG_TAG = GameActivity.class.getName();
 
@@ -37,6 +45,11 @@ public class GameActivity extends AppCompatActivity {
     private static boolean isGameStarted = false;
     private GestureDetector gestureDetector;
 
+    // Handles all gamepad connection/disconnection and input events
+    private GamepadManager gamepadManager;
+    // Tracks whether a physical gamepad is currently connected (for UI logic)
+    private boolean isGamepadConnected = false;
+
     @SuppressLint({"UnsafeDynamicallyLoadedCode", "ClickableViewAccessibility"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +57,15 @@ public class GameActivity extends AppCompatActivity {
 
         binding = ActivityGameBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // Initialize and register GamepadManager for gamepad hotplug and input events
+        try {
+            gamepadManager = new GamepadManager(this, this);
+            gamepadManager.register();
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Failed to initialize GamepadManager", e);
+            gamepadManager = null;
+        }
 
         getWindow().setDecorFitsSystemWindows(false);
         final WindowInsetsController controller = getWindow().getInsetsController();
@@ -203,5 +225,81 @@ public class GameActivity extends AppCompatActivity {
                 return false;
             }
         });
+
+        // Initial state: assume no gamepad connected until GamepadManager notifies otherwise
+        isGamepadConnected = false;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Unregister GamepadManager to avoid leaks
+        if (gamepadManager != null) {
+            gamepadManager.unregister();
+        }
+    }
+
+    // GamepadManager.GamepadListener implementation
+
+    // Called when any physical gamepad is connected: hide the virtual controller UI
+    @Override
+    public void onGamepadConnected() {
+        isGamepadConnected = true;
+        if (binding.inputControlsV != null) {
+            binding.inputControlsV.setVisibility(View.GONE);
+        }
+    }
+
+    // Called when all physical gamepads are disconnected: show the virtual controller UI
+    @Override
+    public void onGamepadDisconnected() {
+        isGamepadConnected = false;
+        if (binding.inputControlsV != null) {
+            binding.inputControlsV.setVisibility(View.VISIBLE);
+        }
+    }
+
+    // Forward every gamepad button event to the native input interface
+    @Override
+    public void onGamepadButton(int button, boolean pressed) {
+        InputNativeInterface.sendJoystickButton(button, pressed);
+    }
+
+    // Forward every gamepad axis event to the native input interface
+    @Override
+    public void onGamepadAxis(int axis, float value) {
+        InputNativeInterface.sendJoystickAxis(axis, value);
+    }
+
+    // Forward every gamepad dpad event to the native input interface
+    @Override
+    public void onGamepadDpad(int dpad, char state) {
+        InputNativeInterface.sendJoystickDpad(dpad, state);
+    }
+
+    // Handle gamepad key events
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (gamepadManager != null && gamepadManager.handleKeyEvent(event)) {
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (gamepadManager != null && gamepadManager.handleKeyEvent(event)) {
+            return true;
+        }
+        return super.onKeyUp(keyCode, event);
+    }
+
+    // Handle gamepad motion events
+    @Override
+    public boolean onGenericMotionEvent(MotionEvent event) {
+        if (gamepadManager != null && gamepadManager.handleMotionEvent(event)) {
+            return true;
+        }
+        return super.onGenericMotionEvent(event);
     }
 }

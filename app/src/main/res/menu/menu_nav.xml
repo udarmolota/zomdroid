@@ -12,6 +12,11 @@
         android:icon="@drawable/mt_icon_controller"
         app:showAsAction="never"/>
     <item
+        android:id="@+id/action_open_gamepad_mapper"
+        android:title="@string/nav_menu_gamepad_mapper"
+        android:icon="@drawable/mt_icon_controller"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/action_open_wiki_fragment"
         android:title="@string/fragment_label_wiki"
         android:icon="@drawable/mt_icon_menu_book"

@@ -43,7 +43,10 @@ public class GameLauncher {
         switch (LauncherPreferences.requireSingleton().getRenderer()) {
             case ZINK_ZFA:
             case ZINK_OSMESA:
-                Os.setenv("ZOMDROID_VULKAN_DRIVER_NAME", LauncherPreferences.requireSingleton().getVulkanDriver().libName, false);
+                String vulkanDriverName = LauncherPreferences.requireSingleton().getVulkanDriver().libName;
+                if (vulkanDriverName != null) {
+                    Os.setenv("ZOMDROID_VULKAN_DRIVER_NAME", vulkanDriverName, false);
+                }
                 break;
         }
 

@@ -93,6 +93,11 @@ public class LauncherActivity extends AppCompatActivity {
                 Intent intent = new Intent(this, ControlsEditorActivity.class);
                 startActivity(intent);
                 return true;
+            } else if (item.getItemId() == R.id.action_open_gamepad_mapper) {
+                // Navigate to gamepad mapper using NavController
+                binding.drawerLayout.close();
+                navController.navigate(R.id.action_open_gamepad_mapper);
+                return true;
             } else if (item.getItemId() == R.id.action_donate) {
                 final SpannableString s = new SpannableString(getString(R.string.donate_message));
                 Linkify.addLinks(s, Linkify.WEB_URLS);
