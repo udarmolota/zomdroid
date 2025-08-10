@@ -10,25 +10,24 @@
 
 ## Features
 
-- Supports **Project Zomboid Build 41** and **Build 42** (up to 42.7, versions 42.8 and later are not supported) 
-- Theoretically supports **Lua mods** (not fully tested)
+- Supports **Project Zomboid Build 41** (tested on 41.78.16) and **Build 42** (up to 42.7, versions 42.8 and later are not supported) 
+- Supports **Lua mods**
 - Currently **single-player only**
 
-## Technical Limitations
-Zomdroid supports two rendering backends: **GL4ES** and **Mesa Zink**.
+## System requirements 
 
-**GL4ES** translates OpenGL to OpenGL ES 2.0 which makes it compatible with most Android devices released in the past decade. However, it may exhibit graphical bugs or instability.
-
-**Mesa Zink** is a mature and feature-rich library which translates OpenGL to Vulkan. It provides a more stable experience, but requires a compatible Vulkan driver to run. One such driver is **Freedreno Turnip**, which is bundled with the application but will only work on modern devices with **Adreno GPUs** (Qualcomm Snapdragon SoCs).
+- Android 11
+- 3GB of free RAM (usually achievable on devices with at least 5-6GB of total RAM)
+- 10-15 GB of free internal storage for downloading and installing the game
 
 ## Roadmap
 
 Planned features in order of priority:
 
-1. Add support for additional rendering backends  
-   → This will expand GPU and device compatibility
+1. Expand GPU and device compatibility
 2. Optimize and improve performance
-3. Add multiplayer support
+3. Add external input support (mouse and keyboard, physical controller) 
+4. Add multiplayer support
 
 ## Prebuilt binaries and JARs
 
