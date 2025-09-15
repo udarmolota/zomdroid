@@ -16,11 +16,15 @@ import com.zomdroid.R;
 import com.zomdroid.input.GamepadManager;
 
 /**
- * Fragment for step-by-step mapping of 11 gamepad buttons (including GUIDE).
+ * Fragment for step-by-step mapping of 10 gamepad buttons (NOT including GUIDE).
  * User maps each button in order. Mapping is saved at the end or reset to default.
  */
 public class GamepadMapperFragment extends Fragment {
-    private static final int STEP_COUNT = 11; // 11 buttons (including GUIDE)
+    private static final int STEP_COUNT = 10;
+
+    // 0 A, 1 B, 2 X, 3 Y, 4 LB, 5 RB, 6 SELECT, 7 START, 8 GUIDE, 9 L3, 10 R3
+    private static final int GUIDE_INDEX = 8;
+    
     private int currentStep = 0;
     private int[] mapping = new int[STEP_COUNT];
     private boolean[] mapped = new boolean[STEP_COUNT];
@@ -47,7 +51,6 @@ public class GamepadMapperFragment extends Fragment {
                 getString(R.string.gamepad_mapper_button_rb),
                 getString(R.string.gamepad_mapper_button_select),
                 getString(R.string.gamepad_mapper_button_start),
-                getString(R.string.gamepad_mapper_button_guide),
                 getString(R.string.gamepad_mapper_button_lstk),
                 getString(R.string.gamepad_mapper_button_rstk)
         };
@@ -85,13 +88,14 @@ public class GamepadMapperFragment extends Fragment {
         return view;
     }
 
-    private void resetMapping() {
+     private void resetMapping() {
         int[] defaultMap = GamepadManager.getCurrentMapping();
-        // Copy all buttons (including GUIDE)
-        for (int i = 0; i < STEP_COUNT && i < defaultMap.length; i++) {
-            mapping[i] = defaultMap[i];
+        int[] logicalOrder = {0,1,2,3,4,5,6,7,9,10};
+
+        for (int i = 0; i < STEP_COUNT; i++) {
+            mapping[i] = defaultMap[logicalOrder[i]];
+            mapped[i] = false;
         }
-        for (int i = 0; i < STEP_COUNT; i++) mapped[i] = false;
         currentStep = 0;
         if (mappingActive) {
             updateStepLabel();
@@ -124,9 +128,7 @@ public class GamepadMapperFragment extends Fragment {
         mapped[currentStep] = true;
         currentStep++;
         if (currentStep >= STEP_COUNT) {
-            // Save mapping, insert GUIDE at index 8
-            int[] fullMapping = fullMappingFromCurrent();
-            saveMapping(fullMapping);
+            saveFullMapping();
             if (isAdded() && startButton != null) startButton.setVisibility(View.VISIBLE);
             mappingActive = false;
         }
@@ -134,16 +136,19 @@ public class GamepadMapperFragment extends Fragment {
         return true;
     }
 
-    private int[] fullMappingFromCurrent() {
-        // Simply return our mapping since it now includes all buttons
-        return java.util.Arrays.copyOf(mapping, mapping.length);
-    }
-
-    private void saveMapping(int[] fullMapping) {
+    private void saveFullMapping() {
         Context ctx = getContext();
         if (ctx == null) return;
-        GamepadManager.setCustomMapping(fullMapping, ctx);
-        Toast.makeText(ctx, R.string.gamepad_mapper_success, Toast.LENGTH_SHORT).show();
+
+        int[] base = GamepadManager.getCurrentMapping().clone();
+
+        int[] logicalOrder = {0,1,2,3,4,5,6,7,9,10};
+        for (int i = 0; i < STEP_COUNT; i++) {
+            base[logicalOrder[i]] = mapping[i];
+        }
+
+        GamepadManager.setCustomMapping(base, ctx);
+        Toast.makeText(ctx, "Success", Toast.LENGTH_SHORT).show();
     }
 
     @Override
