@@ -37,8 +37,8 @@ public class PresetManager {
                 })
                 .setExtraJars(new String[0])
                 .setLibraryPathArray(new String[0]
-                //        {C.deps.LIBS_ANDROID_ARM64_v8a,
-                //        C.deps.LIBS_LWJGL_336}
+                        //{C.deps.LIBS_ANDROID_ARM64_v8a,
+                        {C.deps.LIBS_LWJGL_336}
                 )
                 .setLibraryPathForEmulationArray(new String[]{
                         C.deps.LIBS_LINUX_X86_64
@@ -48,8 +48,7 @@ public class PresetManager {
                 .setArgs(new String[]{
                         "-novoip"
                 })
-                .setMainClassName("")                 // important: hasGameFiles() must be false
-                //.setMainClassName("zombie/gameStates/MainScreenState")
+                .setMainClassName("zombie/gameStates/MainScreenState")
                 .setJavaAgentPath(C.deps.JARS_ZOMDROID_AGENT)
                 //.setJavaAgentArgs("build=42")
                 .build()
