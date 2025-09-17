@@ -36,10 +36,13 @@ public class PresetManager {
                         "core-3.2.1.jar"
                 })
                 .setExtraJars(new String[0])
-                .setLibraryPathArray(new String[0]
-                        //{C.deps.LIBS_ANDROID_ARM64_v8a,
-                        {C.deps.LIBS_LWJGL_336}
-                )
+                .setLibraryPathArray(new String[]{
+                    C.deps.LIBS_LWJGL_336
+                })
+                //.setLibraryPathArray(new String[0]{
+                //        C.deps.LIBS_ANDROID_ARM64_v8a,
+                //        C.deps.LIBS_LWJGL_336
+                //})
                 .setLibraryPathForEmulationArray(new String[]{
                         C.deps.LIBS_LINUX_X86_64
                 })
