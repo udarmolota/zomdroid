@@ -239,6 +239,6 @@ public class GamepadManager implements InputManager.InputDeviceListener {
     // True if MotionEvent is from a gamepad or joystick
     public boolean isGamepadMotionEvent(MotionEvent event) {
         int source = event.getSource();
-        return ((source & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD)
+        return ((source & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD);
     }
 }
