@@ -97,10 +97,10 @@ public class GameLauncher {
         // Increasing RAM only for build 42
         LauncherPreferences.Renderer renderer = LauncherPreferences.requireSingleton().getRenderer();
         if (build42 && (renderer == LauncherPreferences.Renderer.ZINK_ZFA || renderer == LauncherPreferences.Renderer.ZINK_OSMESA)) {
-            jvmArgs.add("-Xms256m");           
-            jvmArgs.add("-Xmx512m");          
-            jvmArgs.add("-XX:MaxDirectMemorySize=256m");  
-            jvmArgs.add("-XX:+UseStringDeduplication");  
+            //jvmArgs.add("-Xms256m");           
+            //jvmArgs.add("-Xmx512m");          
+            //jvmArgs.add("-XX:MaxDirectMemorySize=256m");  
+            //jvmArgs.add("-XX:+UseStringDeduplication");  
         }
         // Linking the right libs for LWJGL only for build 42
         if (build42) {
