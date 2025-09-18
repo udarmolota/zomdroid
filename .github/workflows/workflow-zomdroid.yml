@@ -1,4 +1,4 @@
-name: Android Studio Build
+name: Zomdroid (Android Studio Build)
 
 on:
   workflow_dispatch:
@@ -9,8 +9,6 @@ on:
         default: 'gamepad-support'
         type: choice
         options:
-        - master
-        - fix-vulkan-driver-nullpointer
         - gamepad-support
         - keyboard-experimental
         
@@ -22,6 +20,7 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
       with:
+        ref: ${{ github.event.inputs.branch }}
         submodules: 'recursive'
 
     - name: Set up JDK 17
@@ -60,13 +59,13 @@ jobs:
     - name: Upload Debug APK
       uses: actions/upload-artifact@v4
       with:
-        name: debug-apk
+        name: debug-apk-${{ github.event.inputs.branch }}
         path: app/build/outputs/apk/debug/*.apk
 
     - name: Upload Release APK
       uses: actions/upload-artifact@v4
       with:
-        name: release-apk
+        name: release-apk-${{ github.event.inputs.branch }}
         path: app/build/outputs/apk/release/*.apk
 
   test:
@@ -76,6 +75,8 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.inputs.branch }}
 
     - name: Set up JDK 17
       uses: actions/setup-java@v4
@@ -90,5 +91,5 @@ jobs:
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: test-results
+        name: test-results-${{ github.event.inputs.branch }}
         path: app/build/test-results/
