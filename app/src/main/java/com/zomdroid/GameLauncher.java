@@ -13,8 +13,10 @@ import java.io.File;
 import com.zomdroid.C;
 
 public class GameLauncher {
+    private static final String TAG = "GameLauncher";
+    
     public static void launch(GameInstance gameInstance) throws ErrnoException {
-        private static final String TAG = "GameLauncher";
+        
 /*        // for debug
         Os.setenv("MESA_DEBUG", "1", false);
         Os.setenv("MESA_LOG_LEVEL", "debug", false);
