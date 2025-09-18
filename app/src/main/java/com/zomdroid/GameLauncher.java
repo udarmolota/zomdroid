@@ -68,13 +68,14 @@ public class GameLauncher {
 
         initZomdroidWindow();
         InputNativeInterface.sendJoystickConnected();
-
+        
         ArrayList<String> jvmArgs = gameInstance.getJvmArgsAsList();
         jvmArgs.add("-Dorg.lwjgl.opengl.libname=" + LauncherPreferences.requireSingleton().getRenderer().libName);
         jvmArgs.add("-Dzomdroid.renderer=" + LauncherPreferences.requireSingleton().getRenderer().name());
         //jvmArgs.add("-XX:+PrintFlagsFinal"); // for debugging
         jvmArgs.add("-XX:ErrorFile=/dev/stdout"); // print jvm crash report to stdout for now
-
+        
+        jvmArgs.add("-Dorg.lwjgl.system.allocator=system");
         jvmArgs.add("-Dorg.lwjgl.util.Debug=true");
         jvmArgs.add("-Dorg.lwjgl.util.DebugLoader=true");
 
@@ -88,10 +89,18 @@ public class GameLauncher {
         
         String depsLibRoot = AppStorage.requireSingleton().getLibraryPath(); // => .../dependencies/libs
         String baseJvmLibs = "/system/lib64:" + javaHomePath + "/lib:" + javaHomePath + "/lib/server";
-        String lwjgl336Abs = depsLibRoot + "/android-arm64-v8a/lwjgl-3.3.6";
+        String lwjgl336Abs = new File(depsLibRoot, C.deps.LIBS_LWJGL_336).getAbsolutePath();
+        //String lwjgl336Abs = depsLibRoot + "/android-arm64-v8a/lwjgl-3.3.6";
         String ldLibraryPath;
 
         boolean build42 = isBuild42(gameInstance);
+        // Increasing RAM only for build 42
+        LauncherPreferences.Renderer renderer = LauncherPreferences.requireSingleton().getRenderer();
+        if (build42 && (renderer == LauncherPreferences.Renderer.ZINK_ZFA || renderer == LauncherPreferences.Renderer.ZINK_OSMESA)) {
+            jvmArgs.add("-Xmx512m");
+            jvmArgs.add("-XX:MaxDirectMemorySize=256m");
+        }
+        // Linking the right libs for LWJGL only for build 42
         if (build42) {
             // if exists
             boolean exists = new File(lwjgl336Abs).isDirectory();
@@ -99,6 +108,7 @@ public class GameLauncher {
 
             // if not
             if (exists) {
+                jvmArgs.add("-Dorg.lwjgl.librarypath=" + lwjgl336Abs);
                 ldLibraryPath = lwjgl336Abs + ":" + baseJvmLibs + ":" + gameInstance.getJavaLibraryPath() + ":" + depsLibRoot;
             } else {
                 Log.w(TAG, "LWJGL 3.3.6 directory not found, falling back to default order");
