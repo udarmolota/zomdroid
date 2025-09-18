@@ -74,10 +74,9 @@ public class GameLauncher {
         jvmArgs.add("-Dzomdroid.renderer=" + LauncherPreferences.requireSingleton().getRenderer().name());
         //jvmArgs.add("-XX:+PrintFlagsFinal"); // for debugging
         jvmArgs.add("-XX:ErrorFile=/dev/stdout"); // print jvm crash report to stdout for now
-        
+        jvmArgs.add("-Dzomboid.steam=0");
+        jvmArgs.add("-Dsteam.enabled=false");
         jvmArgs.add("-Dorg.lwjgl.system.allocator=system");
-        //jvmArgs.add("-Dorg.lwjgl.util.Debug=true");
-        //jvmArgs.add("-Dorg.lwjgl.util.DebugLoader=true");
 
         ArrayList<String> args = gameInstance.getArgsAsList();
 /*      args.add("-debug");
@@ -90,25 +89,13 @@ public class GameLauncher {
         String depsLibRoot = AppStorage.requireSingleton().getLibraryPath(); // => .../dependencies/libs
         String baseJvmLibs = "/system/lib64:" + javaHomePath + "/lib:" + javaHomePath + "/lib/server";
         String lwjgl336Abs = new File(depsLibRoot, C.deps.LIBS_LWJGL_336).getAbsolutePath();
-        //String lwjgl336Abs = depsLibRoot + "/android-arm64-v8a/lwjgl-3.3.6";
         String ldLibraryPath;
 
-        boolean build42 = isBuild42(gameInstance);
-        // Increasing RAM only for build 42
-        LauncherPreferences.Renderer renderer = LauncherPreferences.requireSingleton().getRenderer();
-        if (build42 && (renderer == LauncherPreferences.Renderer.ZINK_ZFA || renderer == LauncherPreferences.Renderer.ZINK_OSMESA)) {
-            //jvmArgs.add("-Xms256m");           
-            //jvmArgs.add("-Xmx512m");          
-            //jvmArgs.add("-XX:MaxDirectMemorySize=256m");  
-            //jvmArgs.add("-XX:+UseStringDeduplication");  
-        }
-        // Linking the right libs for LWJGL only for build 42
+        boolean build42 = isBuild42(gameInstance);        
+        // Linking the right libs for LWJGL only for build 42, not it's working
         if (build42) {
-            // if exists
+            // trying to put a different order for libs for b42
             boolean exists = new File(lwjgl336Abs).isDirectory();
-            Log.i(TAG, "Detected Build42=" + true + ", LWJGL336 dir=" + lwjgl336Abs + ", exists=" + exists);
-
-            // if not
             if (exists) {
                 jvmArgs.add("-Dorg.lwjgl.librarypath=" + lwjgl336Abs);
                 jvmArgs.add("-Djava.library.path=" + lwjgl336Abs);
@@ -121,9 +108,6 @@ public class GameLauncher {
             Log.i(TAG, "Detected Build42=" + false + " (legacy), using default LD path order");
             ldLibraryPath = depsLibRoot + ":" + baseJvmLibs + ":" + gameInstance.getJavaLibraryPath();
         }
-
-        Log.i(TAG, "LD_LIBRARY_PATH=" + ldLibraryPath);        
-        
         GameLauncher.startGame(gameInstance.getGamePath(), ldLibraryPath, jvmArgs.toArray(new String[0]),
                 gameInstance.getMainClassName(), args.toArray(new String[0]));
     }
