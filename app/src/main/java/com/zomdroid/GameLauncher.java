@@ -72,32 +72,49 @@ public class GameLauncher {
         //jvmArgs.add("-XX:+PrintFlagsFinal"); // for debugging
         jvmArgs.add("-XX:ErrorFile=/dev/stdout"); // print jvm crash report to stdout for now
 
+        jvmArgs.add("-Dorg.lwjgl.util.Debug=true");
+        jvmArgs.add("-Dorg.lwjgl.util.DebugLoader=true");
+
         ArrayList<String> args = gameInstance.getArgsAsList();
-/*        args.add("-debug");
+/*      args.add("-debug");
         args.add("-debuglog=Shader");*/
         
         String javaHomePath = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.JRE;
         //String ldLibraryPath = AppStorage.requireSingleton().getLibraryPath() + ":/system/lib64:"
         //        + javaHomePath + "/lib:" + javaHomePath + "/lib/server:" + gameInstance.getJavaLibraryPath();
         
-        String depsLibRoot = AppStorage.requireSingleton().getLibraryPath(); // .../dependencies/libs
+        String depsLibRoot = AppStorage.requireSingleton().getLibraryPath(); // => .../dependencies/libs
         String baseJvmLibs = "/system/lib64:" + javaHomePath + "/lib:" + javaHomePath + "/lib/server";
+        String lwjgl336Abs = depsLibRoot + "/android-arm64-v8a/lwjgl-3.3.6";
         String ldLibraryPath;
-        if (isBuild42(gameInstance)) {
-            // Trying to put the correct LWJGL libo for build 42.6
-            String lwjgl336 = depsLibRoot + "/" + C.deps.LIBS_LWJGL_336;
-            ldLibraryPath = lwjgl336 + ":" + baseJvmLibs + ":" + gameInstance.getJavaLibraryPath() + ":" + depsLibRoot;
+
+        boolean build42 = isBuild42(gameInstance);
+        if (build42) {
+            // if exists
+            boolean exists = new File(lwjgl336Abs).isDirectory();
+            Log.i(TAG, "Detected Build42=" + true + ", LWJGL336 dir=" + lwjgl336Abs + ", exists=" + exists);
+
+            // if not
+            if (exists) {
+                ldLibraryPath = lwjgl336Abs + ":" + baseJvmLibs + ":" + gameInstance.getJavaLibraryPath() + ":" + depsLibRoot;
+            } else {
+                Log.w(TAG, "LWJGL 3.3.6 directory not found, falling back to default order");
+                ldLibraryPath = depsLibRoot + ":" + baseJvmLibs + ":" + gameInstance.getJavaLibraryPath();
+            }
         } else {
-            // no changes
+            Log.i(TAG, "Detected Build42=" + false + " (legacy), using default LD path order");
             ldLibraryPath = depsLibRoot + ":" + baseJvmLibs + ":" + gameInstance.getJavaLibraryPath();
         }
+
+        Log.i(TAG, "LD_LIBRARY_PATH=" + ldLibraryPath);        
         
         GameLauncher.startGame(gameInstance.getGamePath(), ldLibraryPath, jvmArgs.toArray(new String[0]),
                 gameInstance.getMainClassName(), args.toArray(new String[0]));
     }
     private static boolean isBuild42(com.zomdroid.game.GameInstance gi) {
         String lp = gi.getJavaLibraryPath();
-        return lp != null && lp.contains("lwjgl-3.3.6");
+        String cp = (gi.getClassPath() != null ? gi.getClassPath() : ""); // если есть такой метод
+        return (lp != null && lp.contains("lwjgl-3.3.6")) || (cp.contains("42") || lp.contains("Build 42"));
     }
 
     public static native int initZomdroidWindow();
