@@ -6,9 +6,11 @@ import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
-
 /**
- * Manages gamepad connection and input mapping for Android.
+ * Adds:
+ * - Robust D-Pad HAT (AXIS_HAT_X/Y) → button synthesis with hysteresis
+ * - Flexible trigger axis resolution (LTRIGGER/RTRIGGER, BRAKE/GAS, Z/RZ, split-Z)
+ * - Optional mapping for DPAD keycodes and dedicated LT/RT logical buttons
  */
 public class GamepadManager implements InputManager.InputDeviceListener {
     // Android input manager
@@ -17,24 +19,57 @@ public class GamepadManager implements InputManager.InputDeviceListener {
     private final GamepadListener listener;
 
     // Number of logical gamepad buttons (no D-Pad)
-    public static final int GAMEPAD_BUTTON_COUNT = 11; // 11, D-Pad not included
+    /* -----------------------------
+     * Logical buttons (GLFW-like)
+     * -----------------------------
+     * We extend from 11 → 17 to include D-Pad (4) + LT/RT as buttons.
+     */
+    public static final int GAMEPAD_BUTTON_COUNT = 17;
+
+    public static final int BTN_A = 0, BTN_B = 1, BTN_X = 2, BTN_Y = 3;
+    public static final int BTN_LB = 4, BTN_RB = 5, BTN_BACK = 6, BTN_START = 7, BTN_GUIDE = 8;
+    public static final int BTN_LSTICK = 9, BTN_RSTICK = 10;
+    public static final int BTN_DPAD_UP = 11, BTN_DPAD_RIGHT = 12, BTN_DPAD_DOWN = 13, BTN_DPAD_LEFT = 14;
+    public static final int BTN_LT = 15, BTN_RT = 16;
+
+    /**
+     * Default mapping holds Android KeyCodes for "real" buttons.
+     * D-Pad sometimes arrives as AXIS_HAT_*; we still include DPAD keycodes for pads that emit KeyEvents.
+     * LT/RT are axis-based on most controllers, so keep them as -1 (no KeyCode).
+     */
 
     // Default mapping: [A, B, X, Y, LB, RB, SELECT, START, GUIDE, LSTICK, RSTICK]
     private static final int[] DEFAULT_MAPPING = {
-        KeyEvent.KEYCODE_BUTTON_A,      // 0: A
-        KeyEvent.KEYCODE_BUTTON_B,      // 1: B
-        KeyEvent.KEYCODE_BUTTON_X,      // 2: X
-        KeyEvent.KEYCODE_BUTTON_Y,      // 3: Y
-        KeyEvent.KEYCODE_BUTTON_L1,     // 4: LB
-        KeyEvent.KEYCODE_BUTTON_R1,     // 5: RB
-        KeyEvent.KEYCODE_BUTTON_SELECT, // 6: SELECT
-        KeyEvent.KEYCODE_BUTTON_START,  // 7: START
-        KeyEvent.KEYCODE_BUTTON_MODE,   // 8: GUIDE
-        KeyEvent.KEYCODE_BUTTON_THUMBL, // 9: LSTICK
-        KeyEvent.KEYCODE_BUTTON_THUMBR  // 10: RSTICK
+        KeyEvent.KEYCODE_BUTTON_A,       // 0: A
+        KeyEvent.KEYCODE_BUTTON_B,       // 1: B
+        KeyEvent.KEYCODE_BUTTON_X,       // 2: X
+        KeyEvent.KEYCODE_BUTTON_Y,       // 3: Y
+        KeyEvent.KEYCODE_BUTTON_L1,      // 4: LB
+        KeyEvent.KEYCODE_BUTTON_R1,      // 5: RB
+        KeyEvent.KEYCODE_BUTTON_SELECT,  // 6: BACK/SELECT
+        KeyEvent.KEYCODE_BUTTON_START,   // 7: START
+        KeyEvent.KEYCODE_BUTTON_MODE,    // 8: GUIDE
+        KeyEvent.KEYCODE_BUTTON_THUMBL,  // 9: LSTICK
+        KeyEvent.KEYCODE_BUTTON_THUMBR,  // 10: RSTICK
+        KeyEvent.KEYCODE_DPAD_UP,        // 11: DPAD UP (if emitted as KeyEvent)
+        KeyEvent.KEYCODE_DPAD_RIGHT,     // 12: DPAD RIGHT
+        KeyEvent.KEYCODE_DPAD_DOWN,      // 13: DPAD DOWN
+        KeyEvent.KEYCODE_DPAD_LEFT,      // 14: DPAD LEFT
+        -1,                               // 15: LT (axis, no KeyCode)
+        -1                                // 16: RT (axis, no KeyCode)
     };
 
-    // Custom mapping
+    private float lastHatX = 0f, lastHatY = 0f;
+    private boolean dpadUp=false, dpadRight=false, dpadDown=false, dpadLeft=false;
+    
+    private static final float HAT_ON = 0.5f, HAT_OFF = 0.3f;
+    
+    private static final float TRIGGER_ON = 0.55f, TRIGGER_OFF = 0.40f;
+    private boolean ltPressed = false, rtPressed = false;
+    private float lastLT = 0f, lastRT = 0f;
+    
+    private AxisResolver axisResolver = new AxisResolver();
+
     private static int[] customMapping = null;
 
     // SharedPreferences keys
@@ -49,6 +84,21 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         void onGamepadAxis(int axis, float value);
         void onGamepadDpad(int dpad, char state);
     }
+
+    // HAT → button state with hysteresis
+    private float lastHatX = 0f, lastHatY = 0f;
+    private boolean dpadUp = false, dpadRight = false, dpadDown = false, dpadLeft = false;
+    private static final float HAT_ON = 0.5f;   // turn-on threshold
+    private static final float HAT_OFF = 0.3f;  // turn-off threshold (hysteresis)
+
+    // Trigger → button state with hysteresis
+    private static final float TRIGGER_ON = 0.55f;
+    private static final float TRIGGER_OFF = 0.40f;
+    private boolean ltPressed = false, rtPressed = false;
+    private float lastLT = 0f, lastRT = 0f;
+
+    // Axis resolver adapts to current device capabilities
+    private AxisResolver axisResolver = new AxisResolver();
 
     // Create GamepadManager
     public GamepadManager(Context context, GamepadListener listener) {
@@ -78,16 +128,25 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         String csv = prefs.getString(PREFS_KEY_MAPPING, null);
         if (csv != null) {
             String[] parts = csv.split(",");
-            if (parts.length == GAMEPAD_BUTTON_COUNT) {
-                int[] loaded = new int[GAMEPAD_BUTTON_COUNT];
-                try {
-                    for (int i = 0; i < GAMEPAD_BUTTON_COUNT; i++) {
-                        loaded[i] = Integer.parseInt(parts[i]);
-                    }
+            try {
+                if (parts.length == GAMEPAD_BUTTON_COUNT) {
+                    // Exact match (17)
+                    int[] loaded = new int[GAMEPAD_BUTTON_COUNT];
+                    for (int i = 0; i < GAMEPAD_BUTTON_COUNT; i++) loaded[i] = Integer.parseInt(parts[i]);
                     customMapping = loaded;
-                } catch (NumberFormatException e) {
-                    customMapping = null;
+                } else if (parts.length == 11 || parts.length == 15) {
+                    // Migrate old presets: copy what we have and fill the rest with -1
+                    int[] migrated = new int[GAMEPAD_BUTTON_COUNT];
+                    for (int i = 0; i < GAMEPAD_BUTTON_COUNT; i++) migrated[i] = -1;
+                    int n = Math.min(parts.length, GAMEPAD_BUTTON_COUNT);
+                    for (int i = 0; i < n; i++) migrated[i] = Integer.parseInt(parts[i]);
+                    customMapping = migrated;
+                    // Do not overwrite on disk here; let save happen explicitly when user re-saves.
+                } else {
+                    customMapping = null; // unknown format → fallback to default
                 }
+            } catch (NumberFormatException e) {
+                customMapping = null;
             }
         }
     }
@@ -140,6 +199,7 @@ public class GamepadManager implements InputManager.InputDeviceListener {
     public void onInputDeviceAdded(int deviceId) {
         InputDevice dev = inputManager.getInputDevice(deviceId);
         if (dev != null && isGamepadDevice(dev)) {
+            axisResolver.buildForDevice(dev);
             listener.onGamepadConnected();
         }
     }
@@ -162,7 +222,11 @@ public class GamepadManager implements InputManager.InputDeviceListener {
 
     @Override
     public void onInputDeviceChanged(int deviceId) {
-        // Not used
+        // Rebuild resolver when capabilities change (e.g., different axes available)
+        InputDevice dev = inputManager.getInputDevice(deviceId);
+        if (dev != null && isGamepadDevice(dev)) {
+            axisResolver.buildForDevice(dev);
+        }
     }
 
     // True if KeyEvent is from a gamepad or joystick
@@ -176,58 +240,5 @@ public class GamepadManager implements InputManager.InputDeviceListener {
     public boolean isGamepadMotionEvent(MotionEvent event) {
         int source = event.getSource();
         return ((source & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD)
-                || ((source & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK);
-    }
-
-    // Handle KeyEvent as gamepad button if possible
-    public boolean handleKeyEvent(KeyEvent event) {
-        if (!isGamepadEvent(event)) return false;
-        int keyCode = event.getKeyCode();
-        boolean isPressed = event.getAction() == KeyEvent.ACTION_DOWN;
-        int button = mapKeyCodeToGLFWButton(keyCode);
-        if (button >= 0) {
-            listener.onGamepadButton(button, isPressed);
-            return true;
-        }
-        return false;
-    }
-
-    // Handle MotionEvent: axes and D-Pad
-    public boolean handleMotionEvent(MotionEvent event) {
-        if (!isGamepadMotionEvent(event)) return false;
-        // Sticks
-        float lx = event.getAxisValue(MotionEvent.AXIS_X);
-        float ly = event.getAxisValue(MotionEvent.AXIS_Y);
-        float rx = event.getAxisValue(MotionEvent.AXIS_Z);
-        float ry = event.getAxisValue(MotionEvent.AXIS_RZ);
-        listener.onGamepadAxis(0, lx);
-        listener.onGamepadAxis(1, ly);
-        listener.onGamepadAxis(2, rx);
-        listener.onGamepadAxis(3, ry);
-        // Trigger
-        float lt = event.getAxisValue(MotionEvent.AXIS_LTRIGGER);
-        float rt = event.getAxisValue(MotionEvent.AXIS_RTRIGGER);
-        listener.onGamepadAxis(4, lt);
-        listener.onGamepadAxis(5, rt);
-        // D-Pad - traditional handling (KeyEvents will handle custom mapping)
-        float hatX = event.getAxisValue(MotionEvent.AXIS_HAT_X);
-        float hatY = event.getAxisValue(MotionEvent.AXIS_HAT_Y);
-        char dpadState = 0;
-        if (hatY < -0.5f) dpadState |= 0x01; // up
-        if (hatY > 0.5f) dpadState |= 0x04; // down
-        if (hatX < -0.5f) dpadState |= 0x08; // left
-        if (hatX > 0.5f) dpadState |= 0x02; // right
-        listener.onGamepadDpad(0, dpadState);
-        
-        return true;
-    }
-
-    // Map Android keycode to logical button index (0-10), or -1 if not found
-    private int mapKeyCodeToGLFWButton(int keyCode) {
-        int[] mapping = getCurrentMapping();
-        for (int i = 0; i < mapping.length; i++) {
-            if (mapping[i] == keyCode) return i;
-        }
-        return -1;
     }
 }
