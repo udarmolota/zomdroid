@@ -9,6 +9,8 @@ import com.zomdroid.game.GameInstance;
 
 import java.util.ArrayList;
 
+import com.zomdroid.C;
+
 public class GameLauncher {
     public static void launch(GameInstance gameInstance) throws ErrnoException {
 
@@ -73,14 +75,30 @@ public class GameLauncher {
         ArrayList<String> args = gameInstance.getArgsAsList();
 /*        args.add("-debug");
         args.add("-debuglog=Shader");*/
-
+        
         String javaHomePath = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.JRE;
-        String ldLibraryPath = AppStorage.requireSingleton().getLibraryPath() + ":/system/lib64:"
-                + javaHomePath + "/lib:" + javaHomePath + "/lib/server:" + gameInstance.getJavaLibraryPath();
+        //String ldLibraryPath = AppStorage.requireSingleton().getLibraryPath() + ":/system/lib64:"
+        //        + javaHomePath + "/lib:" + javaHomePath + "/lib/server:" + gameInstance.getJavaLibraryPath();
+        
+        String depsLibRoot = AppStorage.requireSingleton().getLibraryPath(); // .../dependencies/libs
+        String baseJvmLibs = "/system/lib64:" + javaHomePath + "/lib:" + javaHomePath + "/lib/server";
+        String ldLibraryPath;
+        if (isBuild42(gameInstance)) {
+            // Trying to put the correct LWJGL libo for build 42.6
+            String lwjgl336 = depsLibRoot + "/" + C.deps.LIBS_LWJGL_336;
+            ldLibraryPath = lwjgl336 + ":" + baseJvmLibs + ":" + gameInstance.getJavaLibraryPath() + ":" + depsLibRoot;
+        } else {
+            // no changes
+            ldLibraryPath = depsLibRoot + ":" + baseJvmLibs + ":" + gameInstance.getJavaLibraryPath();
+        }
+        
         GameLauncher.startGame(gameInstance.getGamePath(), ldLibraryPath, jvmArgs.toArray(new String[0]),
                 gameInstance.getMainClassName(), args.toArray(new String[0]));
     }
-
+    private static boolean isBuild42(com.zomdroid.game.GameInstance gi) {
+        String lp = gi.getJavaLibraryPath();
+        return lp != null && lp.contains("lwjgl-3.3.6");
+    }
 
     public static native int initZomdroidWindow();
 
