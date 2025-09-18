@@ -3,17 +3,18 @@ package com.zomdroid;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.view.Surface;
+import android.util.Log;
 
 import com.zomdroid.input.InputNativeInterface;
 import com.zomdroid.game.GameInstance;
 
 import java.util.ArrayList;
-
+import java.io.File;
 import com.zomdroid.C;
 
 public class GameLauncher {
     public static void launch(GameInstance gameInstance) throws ErrnoException {
-
+        private static final String TAG = "GameLauncher";
 /*        // for debug
         Os.setenv("MESA_DEBUG", "1", false);
         Os.setenv("MESA_LOG_LEVEL", "debug", false);
@@ -113,8 +114,7 @@ public class GameLauncher {
     }
     private static boolean isBuild42(com.zomdroid.game.GameInstance gi) {
         String lp = gi.getJavaLibraryPath();
-        String cp = (gi.getClassPath() != null ? gi.getClassPath() : ""); // если есть такой метод
-        return (lp != null && lp.contains("lwjgl-3.3.6")) || (cp.contains("42") || lp.contains("Build 42"));
+        return lp != null && (lp.contains("lwjgl-3.3.6") || lp.contains("Build 42"));
     }
 
     public static native int initZomdroidWindow();
