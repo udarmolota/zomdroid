@@ -6,11 +6,9 @@ import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
+
 /**
- * Minimal D-Pad improvement:
- * - Convert HAT axes (AXIS_HAT_X/Y) into D-Pad button presses with hysteresis
- * - Extend logical buttons by 4 (UP/RIGHT/DOWN/LEFT)
- * - Keep everything else unchanged
+ * Manages gamepad connection and input mapping for Android.
  */
 public class GamepadManager implements InputManager.InputDeviceListener {
     // Android input manager
@@ -18,10 +16,10 @@ public class GamepadManager implements InputManager.InputDeviceListener {
     // Gamepad event listener
     private final GamepadListener listener;
 
-    // Number of logical gamepad buttons (now includes D-Pad)
-    public static final int GAMEPAD_BUTTON_COUNT = 15; // was 11
+    // Number of logical gamepad buttons (no D-Pad)
+    public static final int GAMEPAD_BUTTON_COUNT = 11; // 11, D-Pad not included
 
-    // Default mapping: [A, B, X, Y, LB, RB, SELECT, START, GUIDE, LSTICK, RSTICK, DPAD_UP, DPAD_RIGHT, DPAD_DOWN, DPAD_LEFT]
+    // Default mapping: [A, B, X, Y, LB, RB, SELECT, START, GUIDE, LSTICK, RSTICK]
     private static final int[] DEFAULT_MAPPING = {
         KeyEvent.KEYCODE_BUTTON_A,      // 0: A
         KeyEvent.KEYCODE_BUTTON_B,      // 1: B
@@ -29,18 +27,14 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         KeyEvent.KEYCODE_BUTTON_Y,      // 3: Y
         KeyEvent.KEYCODE_BUTTON_L1,     // 4: LB
         KeyEvent.KEYCODE_BUTTON_R1,     // 5: RB
-        KeyEvent.KEYCODE_BUTTON_SELECT, // 6: SELECT/BACK
+        KeyEvent.KEYCODE_BUTTON_SELECT, // 6: SELECT
         KeyEvent.KEYCODE_BUTTON_START,  // 7: START
         KeyEvent.KEYCODE_BUTTON_MODE,   // 8: GUIDE
         KeyEvent.KEYCODE_BUTTON_THUMBL, // 9: LSTICK
-        KeyEvent.KEYCODE_BUTTON_THUMBR, // 10: RSTICK
-        KeyEvent.KEYCODE_DPAD_UP,       // 11: DPAD UP (if controller emits key events)
-        KeyEvent.KEYCODE_DPAD_RIGHT,    // 12: DPAD RIGHT
-        KeyEvent.KEYCODE_DPAD_DOWN,     // 13: DPAD DOWN
-        KeyEvent.KEYCODE_DPAD_LEFT      // 14: DPAD LEFT
+        KeyEvent.KEYCODE_BUTTON_THUMBR  // 10: RSTICK
     };
 
-    // Optional custom mapping (persisted)
+    // Custom mapping
     private static int[] customMapping = null;
 
     // SharedPreferences keys
@@ -55,11 +49,6 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         void onGamepadAxis(int axis, float value);
         void onGamepadDpad(int dpad, char state);
     }
-
-    // HAT → buttons state with hysteresis
-    private boolean dpadUp = false, dpadRight = false, dpadDown = false, dpadLeft = false;
-    private static final float HAT_ON  = 0.5f;  // press threshold
-    private static final float HAT_OFF = 0.3f;  // release threshold (hysteresis)
 
     // Create GamepadManager
     public GamepadManager(Context context, GamepadListener listener) {
@@ -99,9 +88,6 @@ public class GamepadManager implements InputManager.InputDeviceListener {
                 } catch (NumberFormatException e) {
                     customMapping = null;
                 }
-            } else {
-                // If old mapping (length 11) is stored, ignore it to keep things minimal.
-                customMapping = null;
             }
         }
     }
@@ -115,13 +101,13 @@ public class GamepadManager implements InputManager.InputDeviceListener {
             if (i < customMapping.length - 1) sb.append(",");
         }
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-               .edit().putString(PREFS_KEY_MAPPING, sb.toString()).apply();
+                .edit().putString(PREFS_KEY_MAPPING, sb.toString()).apply();
     }
 
     // Remove saved custom mapping from SharedPreferences
     private static void clearCustomMapping(Context context) {
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-               .edit().remove(PREFS_KEY_MAPPING).apply();
+                .edit().remove(PREFS_KEY_MAPPING).apply();
     }
 
     // Register for gamepad device events
@@ -147,7 +133,7 @@ public class GamepadManager implements InputManager.InputDeviceListener {
     private boolean isGamepadDevice(InputDevice device) {
         int sources = device.getSources();
         return ((sources & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD)
-            || ((sources & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK);
+                || ((sources & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK);
     }
 
     @Override
@@ -176,21 +162,21 @@ public class GamepadManager implements InputManager.InputDeviceListener {
 
     @Override
     public void onInputDeviceChanged(int deviceId) {
-        // Not used (kept minimal)
+        // Not used
     }
 
     // True if KeyEvent is from a gamepad or joystick
     public boolean isGamepadEvent(KeyEvent event) {
         int source = event.getSource();
         return ((source & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD)
-            || ((source & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK);
+                || ((source & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK);
     }
 
     // True if MotionEvent is from a gamepad or joystick
     public boolean isGamepadMotionEvent(MotionEvent event) {
         int source = event.getSource();
         return ((source & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD)
-            || ((source & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK);
+                || ((source & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK);
     }
 
     // Handle KeyEvent as gamepad button if possible
@@ -206,11 +192,10 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         return false;
     }
 
-    // Handle MotionEvent: sticks and D-Pad
+    // Handle MotionEvent: axes and D-Pad
     public boolean handleMotionEvent(MotionEvent event) {
         if (!isGamepadMotionEvent(event)) return false;
-
-        // Sticks (unchanged)
+        // Sticks
         float lx = event.getAxisValue(MotionEvent.AXIS_X);
         float ly = event.getAxisValue(MotionEvent.AXIS_Y);
         float rx = event.getAxisValue(MotionEvent.AXIS_Z);
@@ -219,54 +204,30 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         listener.onGamepadAxis(1, ly);
         listener.onGamepadAxis(2, rx);
         listener.onGamepadAxis(3, ry);
-
-        // Triggers (unchanged pass-through as axes)
+        // Trigger
         float lt = event.getAxisValue(MotionEvent.AXIS_LTRIGGER);
         float rt = event.getAxisValue(MotionEvent.AXIS_RTRIGGER);
         listener.onGamepadAxis(4, lt);
         listener.onGamepadAxis(5, rt);
-
-        // D-Pad via HAT → synthesize button presses (new)
+        // D-Pad - traditional handling (KeyEvents will handle custom mapping)
         float hatX = event.getAxisValue(MotionEvent.AXIS_HAT_X);
         float hatY = event.getAxisValue(MotionEvent.AXIS_HAT_Y);
-        emitHatAsButtons(hatX, hatY);
-
-        // Keep legacy D-Pad state callback (unchanged behavior for existing consumers)
         char dpadState = 0;
         if (hatY < -0.5f) dpadState |= 0x01; // up
-        if (hatY >  0.5f) dpadState |= 0x04; // down
+        if (hatY > 0.5f) dpadState |= 0x04; // down
         if (hatX < -0.5f) dpadState |= 0x08; // left
-        if (hatX >  0.5f) dpadState |= 0x02; // right
+        if (hatX > 0.5f) dpadState |= 0x02; // right
         listener.onGamepadDpad(0, dpadState);
-
+        
         return true;
     }
 
-    // Map Android keycode to logical button index (0..14), or -1 if not found
+    // Map Android keycode to logical button index (0-10), or -1 if not found
     private int mapKeyCodeToGLFWButton(int keyCode) {
         int[] mapping = getCurrentMapping();
         for (int i = 0; i < mapping.length; i++) {
             if (mapping[i] == keyCode) return i;
         }
         return -1;
-    }
-
-    // HAT (AXIS_HAT_X/Y) → DPAD buttons with hysteresis
-    private void emitHatAsButtons(float hatX, float hatY) {
-        boolean upNow    = hatY < -HAT_ON;
-        boolean downNow  = hatY >  HAT_ON;
-        boolean leftNow  = hatX < -HAT_ON;
-        boolean rightNow = hatX >  HAT_ON;
-
-        // Hysteresis for releases
-        if (!upNow   && dpadUp)    upNow    = (hatY < -HAT_OFF);
-        if (!downNow && dpadDown)  downNow  = (hatY >  HAT_OFF);
-        if (!leftNow && dpadLeft)  leftNow  = (hatX < -HAT_OFF);
-        if (!rightNow&& dpadRight) rightNow = (hatX >  HAT_OFF);
-
-        if (upNow    != dpadUp)    { dpadUp    = upNow;    listener.onGamepadButton(11, upNow); }
-        if (rightNow != dpadRight) { dpadRight = rightNow; listener.onGamepadButton(12, rightNow); }
-        if (downNow  != dpadDown)  { dpadDown  = downNow;  listener.onGamepadButton(13, downNow); }
-        if (leftNow  != dpadLeft)  { dpadLeft  = leftNow;  listener.onGamepadButton(14, leftNow); }
     }
 }
