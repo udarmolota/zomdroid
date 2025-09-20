@@ -15,6 +15,7 @@
 #include <sys/sysinfo.h>
 #include <asm-generic/fcntl.h>
 #include "logger.h"
+#include <GLFW/glfw3.h>
 
 #define LOG_TAG "zomdroid-main"
 
@@ -312,6 +313,8 @@ static int load_linker_hook() {
 
 void zomdroid_start_game(const char* game_dir_path, const char* library_dir_path, int jvm_argc,
                          const char** jvm_argv, const char* main_class_name, int argc, const char** argv) {
+    
+    glfwInitHint(GLFW_JOYSTICK_HAT_BUTTONS, GLFW_FALSE);
 
     signal(SIGABRT, handle_abort);
 
