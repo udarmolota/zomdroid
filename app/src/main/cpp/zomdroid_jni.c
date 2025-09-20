@@ -112,7 +112,7 @@ Java_com_zomdroid_input_InputNativeInterface_sendJoystickAxis(JNIEnv *env, jclas
 JNIEXPORT void JNICALL
 Java_com_zomdroid_input_InputNativeInterface_sendJoystickDpad(JNIEnv *env, jclass clazz, jint dpad,
                                                jchar state) {
-    zomdroid_event_joystick_dpad(dpad, state);
+   zomdroid_event_joystick_dpad((int)dpad, (char)state);
 }
 
 JNIEXPORT void JNICALL
