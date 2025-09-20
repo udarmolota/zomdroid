@@ -17,8 +17,9 @@ public class GamepadManager implements InputManager.InputDeviceListener {
     private final GamepadListener listener;
 
     // Number of logical gamepad buttons (no D-Pad)
-    public static final int GAMEPAD_BUTTON_COUNT = 15; // D-Pad included
+    public static final int GAMEPAD_BUTTON_COUNT = 11; // 11, D-Pad not included
 
+    // Default mapping: [A, B, X, Y, LB, RB, SELECT, START, GUIDE, LSTICK, RSTICK]
     private static final int[] DEFAULT_MAPPING = {
         KeyEvent.KEYCODE_BUTTON_A,      // 0: A
         KeyEvent.KEYCODE_BUTTON_B,      // 1: B
@@ -30,11 +31,7 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         KeyEvent.KEYCODE_BUTTON_START,  // 7: START
         KeyEvent.KEYCODE_BUTTON_MODE,   // 8: GUIDE
         KeyEvent.KEYCODE_BUTTON_THUMBL, // 9: LSTICK
-        KeyEvent.KEYCODE_BUTTON_THUMBR, // 10: RSTICK
-        KeyEvent.KEYCODE_DPAD_UP,       // 11
-        KeyEvent.KEYCODE_DPAD_RIGHT,    // 12
-        KeyEvent.KEYCODE_DPAD_DOWN,     // 13
-        KeyEvent.KEYCODE_DPAD_LEFT      // 14
+        KeyEvent.KEYCODE_BUTTON_THUMBR  // 10: RSTICK
     };
 
     // Custom mapping
@@ -57,7 +54,6 @@ public class GamepadManager implements InputManager.InputDeviceListener {
     public GamepadManager(Context context, GamepadListener listener) {
         this.inputManager = (InputManager) context.getSystemService(Context.INPUT_SERVICE);
         this.listener = listener;
-        loadCustomMapping(context);
     }
 
     // Set custom mapping, or use default if invalid
@@ -173,16 +169,14 @@ public class GamepadManager implements InputManager.InputDeviceListener {
     public boolean isGamepadEvent(KeyEvent event) {
         int source = event.getSource();
         return ((source & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD)
-                || ((source & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK)
-                || ((source & InputDevice.SOURCE_DPAD)     == InputDevice.SOURCE_DPAD);
+                || ((source & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK);
     }
 
     // True if MotionEvent is from a gamepad or joystick
     public boolean isGamepadMotionEvent(MotionEvent event) {
         int source = event.getSource();
         return ((source & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD)
-                || ((source & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK)
-                || ((source & InputDevice.SOURCE_DPAD)     == InputDevice.SOURCE_DPAD);
+                || ((source & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK);
     }
 
     // Handle KeyEvent as gamepad button if possible
@@ -198,7 +192,6 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         return false;
     }
 
-    private boolean dpadUpPressed, dpadRightPressed, dpadDownPressed, dpadLeftPressed;
     // Handle MotionEvent: axes and D-Pad
     public boolean handleMotionEvent(MotionEvent event) {
         if (!isGamepadMotionEvent(event)) return false;
@@ -219,7 +212,6 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         // D-Pad - traditional handling (KeyEvents will handle custom mapping)
         float hatX = event.getAxisValue(MotionEvent.AXIS_HAT_X);
         float hatY = event.getAxisValue(MotionEvent.AXIS_HAT_Y);
-        synthesizeDpadButtons(hatX, hatY); // D-pad
         char dpadState = 0;
         if (hatY < -0.5f) dpadState |= 0x01; // up
         if (hatY > 0.5f) dpadState |= 0x04; // down
@@ -228,18 +220,6 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         listener.onGamepadDpad(0, dpadState);
         
         return true;
-    }
-
-    private void synthesizeDpadButtons(float hatX, float hatY) {
-        boolean up    = hatY < -0.5f;
-        boolean down  = hatY >  0.5f;
-        boolean left  = hatX < -0.5f;
-        boolean right = hatX >  0.5f;
-    
-        if (up    != dpadUpPressed)    { dpadUpPressed    = up;    listener.onGamepadButton(11, up); }
-        if (right != dpadRightPressed) { dpadRightPressed = right; listener.onGamepadButton(12, right); }
-        if (down  != dpadDownPressed)  { dpadDownPressed  = down;  listener.onGamepadButton(13, down); }
-        if (left  != dpadLeftPressed)  { dpadLeftPressed  = left;  listener.onGamepadButton(14, left); }
     }
 
     // Map Android keycode to logical button index (0-10), or -1 if not found
