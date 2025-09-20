@@ -29,7 +29,11 @@ target_link_libraries(glfw PRIVATE log zomdroid EGL nativewindow)
 
 add_subdirectory(liblinkernsbypass)
 
-add_library(zomdroid SHARED zomdroid.c zomdroid_jni.c)
+add_library(zomdroid SHARED
+    zomdroid.c
+    zomdroid_jni.c
+    InputNativeInterface.cpp
+)
 target_link_libraries(zomdroid log android linkernsbypass)
 
 add_library(zomdroidlinker SHARED linker.c emulation.c wrapped_jni.c)
