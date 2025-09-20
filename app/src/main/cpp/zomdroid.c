@@ -15,8 +15,6 @@
 #include <sys/sysinfo.h>
 #include <asm-generic/fcntl.h>
 #include "logger.h"
-#define GLFW_INCLUDE_NONE   // don't include GL/gl.h or GLES headers
-#include <GLFW/glfw3.h>
 
 #define LOG_TAG "zomdroid-main"
 
@@ -314,8 +312,6 @@ static int load_linker_hook() {
 
 void zomdroid_start_game(const char* game_dir_path, const char* library_dir_path, int jvm_argc,
                          const char** jvm_argv, const char* main_class_name, int argc, const char** argv) {
-    
-    glfwInitHint(GLFW_JOYSTICK_HAT_BUTTONS, GLFW_FALSE);
 
     signal(SIGABRT, handle_abort);
 
@@ -483,8 +479,8 @@ void zomdroid_event_joystick_connected() {
         e->joystickConnected.joystick_name = "Zomdroid Controller";
         e->joystickConnected.joystick_guid = "00000000000000000000000000000000";
         e->joystickConnected.axis_count = 6;
-        e->joystickConnected.button_count = 11;
-        e->joystickConnected.hat_count = 1;
+        e->joystickConnected.button_count = 15;
+        e->joystickConnected.hat_count = 0;
     });
 }
 
