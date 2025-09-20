@@ -32,7 +32,6 @@ add_subdirectory(liblinkernsbypass)
 add_library(zomdroid SHARED
     zomdroid.c
     zomdroid_jni.c
-    InputNativeInterface.cpp
 )
 target_link_libraries(zomdroid log android linkernsbypass)
 
