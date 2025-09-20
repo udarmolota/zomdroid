@@ -1,43 +1,74 @@
-// app/src/main/cpp/InputNativeInterface.cpp
+// InputNativeInterface.cpp
+// JNI bridge: forwards Java InputNativeInterface calls to C event queue in zomdroid.c
+
 #include <jni.h>
-#include <android/log.h>
+#include <stdint.h>
+#include <stdbool.h>
 
-// Include GLFW public and internal headers.
-// Adjust include paths in CMakeLists.txt if needed.
-#include <GLFW/glfw3.h>
-#include "glfw/src/internal.h"
+// Forward declarations of C functions implemented in zomdroid.c.
+// Using extern "C" prevents C++ name mangling so the linker can find them.
+extern "C" {
+    void zomdroid_event_keyboard(int key, bool isPressed);
+    void zomdroid_event_cursor_pos(double x, double y);
+    void zomdroid_event_mouse_button(int button, bool isPressed);
+    void zomdroid_event_joystick_connected(void);
+    void zomdroid_event_joystick_axis(int axis, float state);
+    void zomdroid_event_joystick_dpad(int dpad, char state);
+    void zomdroid_event_joystick_button(int button, bool isPressed);
+}
 
-#define LOG_TAG "JNI-Input"
-#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
-#define LOGW(...) __android_log_print(ANDROID_LOG_WARN,  LOG_TAG, __VA_ARGS__)
+// Helper to convert jboolean to bool
+static inline bool toBool(jboolean b) { return b == JNI_TRUE; }
 
-// Java signature: com.zomdroid.input.InputNativeInterface.sendJoystickDpad(int, char)
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_zomdroid_input_InputNativeInterface_sendJoystickDpad(JNIEnv* /*env*/,
-                                                              jclass /*clazz*/,
-                                                              jint hatIndex,
-                                                              jchar state16)
+// package: com.zomdroid.input.InputNativeInterface
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_zomdroid_input_InputNativeInterface_sendKeyboard
+  (JNIEnv* /*env*/, jclass /*clazz*/, jint key, jboolean isPressed)
 {
-    // Only use the low nibble: 0x01 up, 0x02 right, 0x04 down, 0x08 left
-    const char state = (char)(state16 & 0x0F);
+    zomdroid_event_keyboard((int) key, toBool(isPressed));
+}
 
-    // Send to the first connected joystick (same policy as other input paths)
-    for (int jid = GLFW_JOYSTICK_1; jid <= GLFW_JOYSTICK_LAST; ++jid)
-    {
-        _GLFWjoystick* js = &_glfw.joysticks[jid];
-        if (!js->connected)
-            continue;
+extern "C" JNIEXPORT void JNICALL
+Java_com_zomdroid_input_InputNativeInterface_sendCursorPos
+  (JNIEnv* /*env*/, jclass /*clazz*/, jdouble x, jdouble y)
+{
+    zomdroid_event_cursor_pos((double) x, (double) y);
+}
 
-        if (js->hatCount <= 0)
-        {
-            // Nothing to do; platform-side allocation did not expose any HATs.
-            LOGW("DPAD ignored: hatCount==0 for jid=%d", jid);
-            continue;
-        }
+extern "C" JNIEXPORT void JNICALL
+Java_com_zomdroid_input_InputNativeInterface_sendMouseButton
+  (JNIEnv* /*env*/, jclass /*clazz*/, jint button, jboolean isPressed)
+{
+    zomdroid_event_mouse_button((int) button, toBool(isPressed));
+}
 
-        const int idx = (hatIndex >= 0 && hatIndex < js->hatCount) ? (int)hatIndex : 0;
-        _glfwInputJoystickHat(js, idx, state);
-        break; // done for the first connected joystick
-    }
+extern "C" JNIEXPORT void JNICALL
+Java_com_zomdroid_input_InputNativeInterface_sendJoystickConnected
+  (JNIEnv* /*env*/, jclass /*clazz*/)
+{
+    zomdroid_event_joystick_connected();
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_zomdroid_input_InputNativeInterface_sendJoystickAxis
+  (JNIEnv* /*env*/, jclass /*clazz*/, jint axis, jfloat state)
+{
+    zomdroid_event_joystick_axis((int) axis, (float) state);
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_zomdroid_input_InputNativeInterface_sendJoystickDpad
+  (JNIEnv* /*env*/, jclass /*clazz*/, jint dpad, jchar state)
+{
+    // Java 'char' is 16-bit; native expects 8-bit mask (bits: up/right/down/left).
+    uint8_t s = (uint8_t) (state & 0xFF);
+    zomdroid_event_joystick_dpad((int) dpad, (char) s);
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_zomdroid_input_InputNativeInterface_sendJoystickButton
+  (JNIEnv* /*env*/, jclass /*clazz*/, jint button, jboolean isPressed)
+{
+    zomdroid_event_joystick_button((int) button, toBool(isPressed));
 }
