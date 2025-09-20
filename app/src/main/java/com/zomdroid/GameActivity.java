@@ -49,6 +49,8 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     private GamepadManager gamepadManager;
     // Tracks whether a physical gamepad is currently connected (for UI logic)
     private boolean isGamepadConnected = false;
+    
+    private int lastDpadMask = 0;
 
     @SuppressLint({"UnsafeDynamicallyLoadedCode", "ClickableViewAccessibility"})
     @Override
@@ -271,10 +273,36 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         InputNativeInterface.sendJoystickAxis(axis, value);
     }
 
+    /**
+     * Translate DPAD hat mask into 4 button events (Up/Right/Down/Left).
+     * This avoids sending HAT into GLFW (which crashes on _glfwInputJoystickHat()).
+     *
+     * NOTE: Adjust button indices (11/12/13/14) to whatever your native code expects.
+     * Common mapping is: up=11, right=12, down=13, left=14.
+     */
+    private void sendDpadAsButtons(int mask) {
+        sendIfChanged(11, mask, 0x01); // Up
+        sendIfChanged(12, mask, 0x02); // Right
+        sendIfChanged(13, mask, 0x04); // Down
+        sendIfChanged(14, mask, 0x08); // Left
+        lastDpadMask = mask;
+    }
+    
+    /**
+     * Emits a button press/release only when state actually changes.
+     */
+    private void sendIfChanged(int buttonIndex, int newMask, int bit) {
+        boolean wasPressed = (lastDpadMask & bit) != 0;
+        boolean nowPressed = (newMask & bit) != 0;
+        if (wasPressed == nowPressed) return; // no edge -> no event
+        InputNativeInterface.sendJoystickButton(buttonIndex, nowPressed);
+    }
     // Forward every gamepad dpad event to the native input interface
     @Override
     public void onGamepadDpad(int dpad, char state) {
-        InputNativeInterface.sendJoystickDpad(dpad, state);
+        //InputNativeInterface.sendJoystickDpad(dpad, state);
+        // Convert HAT/DPAD mask to 4 discrete buttons:
+        sendDpadAsButtons(state & 0xFF); // ensure we treat it as unsigned
     }
 
     // Handle gamepad key events
