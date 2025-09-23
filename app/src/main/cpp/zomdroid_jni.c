@@ -110,11 +110,6 @@ Java_com_zomdroid_input_InputNativeInterface_sendJoystickAxis(JNIEnv *env, jclas
 }
 
 JNIEXPORT void JNICALL
-Java_com_zomdroid_input_InputNativeInterface_sendJoystickAxis(JNIEnv *env, jclass clazz, jint axis, jfloat state) {
-    zomdroid_event_joystick_axis(axis, state);
-}
-
-JNIEXPORT void JNICALL
 Java_com_zomdroid_input_InputNativeInterface_sendJoystickButton(JNIEnv *env, jclass clazz, jint button, jboolean pressed) {
     zomdroid_event_joystick_button(button, pressed);
 }
