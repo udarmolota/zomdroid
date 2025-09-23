@@ -519,20 +519,20 @@ static inline bool bit(char state, char mask) {
     return (state & mask) != 0;
 }
 
-// state: 1=up, 2=right, 4=down, 8=left
-void zomdroid_event_joystick_dpad(int dpad, char state) {
-    zomdroid_event_joystick_button(11, bit(state, 0x01));
-    zomdroid_event_joystick_button(14, bit(state, 0x02));
-    zomdroid_event_joystick_button(12, bit(state, 0x04));
-    zomdroid_event_joystick_button(13, bit(state, 0x08));
-}
-
 void zomdroid_event_joystick_button(int button, bool is_pressed) {
     ENQUEUE_EVENT({
         e->type = JOYSTICK_BUTTON;
         e->joystickButton.button = button;
         e->joystickButton.is_pressed = is_pressed;
     });
+}
+
+// state: 1=up, 2=right, 4=down, 8=left
+void zomdroid_event_joystick_dpad(int dpad, char state) {
+    zomdroid_event_joystick_button(11, bit(state, 0x01));
+    zomdroid_event_joystick_button(14, bit(state, 0x02));
+    zomdroid_event_joystick_button(12, bit(state, 0x04));
+    zomdroid_event_joystick_button(13, bit(state, 0x08));
 }
 
 static inline float clamp01(float v) {
