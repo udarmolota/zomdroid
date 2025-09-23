@@ -3,7 +3,7 @@ package com.zomdroid;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.view.Surface;
-
+import android.util.Log;
 import com.zomdroid.input.InputNativeInterface;
 import com.zomdroid.game.GameInstance;
 
