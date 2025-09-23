@@ -472,6 +472,7 @@ void zomdroid_event_mouse_button(int button, bool isPressed) {
     });
 }
 
+typedef int (*PFN_glfwUpdateGamepadMappings)(const char*);
 static void zomdroid_apply_glfw_mapping() {
     const char* mapping =
             "00000000000000000000000000000000,Zomdroid Controller,"
@@ -558,5 +559,3 @@ void zomdroid_event_triggers_combined_axis(float value) {
 // digital trigger as a button input:
 void zomdroid_event_left_trigger_button(bool pressed)  { send_left_trigger_axis(pressed ? 1.f : 0.f); }
 void zomdroid_event_right_trigger_button(bool pressed) { send_right_trigger_axis(pressed ? 1.f : 0.f); }
-
-typedef int (*PFN_glfwUpdateGamepadMappings)(const char*);
