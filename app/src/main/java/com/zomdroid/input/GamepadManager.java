@@ -5,7 +5,7 @@ import android.hardware.input.InputManager;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-
+import android.util.Log;
 
 /**
  * Manages gamepad connection and input mapping for Android.
@@ -230,8 +230,7 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         return true;
       }
 
-      Log.d("GamepadManager", "KeyEvent: " + keyCode + " pressed=" + isPressed);      
-      Log.d("GamepadManager", "MotionEvent: axis LTRIGGER=" + lt + " RTRIGGER=" + rt);
+      Log.d("GamepadManager", "KeyEvent: " + keyCode + " pressed=" + isPressed);   
 
       return false;
     }
@@ -299,7 +298,7 @@ public class GamepadManager implements InputManager.InputDeviceListener {
     // if (hatX < -0.5f) dpadState |= 0x08; // left
     // if (hatX > 0.5f) dpadState |= 0x02; // right
     // listener.onGamepadDpad(0, dpadState);
-    Log.d("GamepadManager", "KeyEvent: " + keyCode + " pressed=" + isPressed);      
+         
       Log.d("GamepadManager", "MotionEvent: axis LTRIGGER=" + lt + " RTRIGGER=" + rt);
     return true;
   }
