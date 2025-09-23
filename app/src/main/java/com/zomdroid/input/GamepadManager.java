@@ -17,9 +17,9 @@ public class GamepadManager implements InputManager.InputDeviceListener {
     private final GamepadListener listener;
 
     // Number of logical gamepad buttons (no D-Pad)
-    public static final int GAMEPAD_BUTTON_COUNT = 11; // 11, D-Pad not included
+    public static final int GAMEPAD_BUTTON_COUNT = 14; 
 
-    // Default mapping: [A, B, X, Y, LB, RB, SELECT, START, GUIDE, LSTICK, RSTICK]
+    // Default mapping: [A, B, X, Y, LB, RB, SELECT, START, GUIDE, LSTICK, RSTICK, DPAD_UP, DPAD_DOWN, DPAD_LEFT, DPAD_RIGHT]
     private static final int[] DEFAULT_MAPPING = {
         KeyEvent.KEYCODE_BUTTON_A,      // 0: A
         KeyEvent.KEYCODE_BUTTON_B,      // 1: B
@@ -31,7 +31,11 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         KeyEvent.KEYCODE_BUTTON_START,  // 7: START
         KeyEvent.KEYCODE_BUTTON_MODE,   // 8: GUIDE
         KeyEvent.KEYCODE_BUTTON_THUMBL, // 9: LSTICK
-        KeyEvent.KEYCODE_BUTTON_THUMBR  // 10: RSTICK
+        KeyEvent.KEYCODE_BUTTON_THUMBR, // 10: RSTICK
+        KeyEvent.KEYCODE_DPAD_UP,       // 11: DPAD_UP
+        KeyEvent.KEYCODE_DPAD_DOWN,     // 12: DPAD_DOWN
+        KeyEvent.KEYCODE_DPAD_LEFT,     // 13: DPAD_LEFT
+        KeyEvent.KEYCODE_DPAD_RIGHT     // 14: DPAD_RIGHT
     };
 
     // Custom mapping
@@ -186,7 +190,7 @@ public class GamepadManager implements InputManager.InputDeviceListener {
       int keyCode = event.getKeyCode();
       boolean isPressed = event.getAction() == KeyEvent.ACTION_DOWN;
 
-      // 🎮 D-Pad → b11–b14
+      // D-Pad → b11–b14
       if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
         listener.onGamepadButton(11, isPressed);
         return true;
@@ -225,6 +229,9 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         listener.onGamepadButton(button, isPressed);
         return true;
       }
+
+      Log.d("GamepadManager", "KeyEvent: " + keyCode + " pressed=" + isPressed);      
+      Log.d("GamepadManager", "MotionEvent: axis LTRIGGER=" + lt + " RTRIGGER=" + rt);
 
       return false;
     }
@@ -292,7 +299,8 @@ public class GamepadManager implements InputManager.InputDeviceListener {
     // if (hatX < -0.5f) dpadState |= 0x08; // left
     // if (hatX > 0.5f) dpadState |= 0x02; // right
     // listener.onGamepadDpad(0, dpadState);
-
+    Log.d("GamepadManager", "KeyEvent: " + keyCode + " pressed=" + isPressed);      
+      Log.d("GamepadManager", "MotionEvent: axis LTRIGGER=" + lt + " RTRIGGER=" + rt);
     return true;
   }
 
