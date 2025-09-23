@@ -487,6 +487,7 @@ static void zomdroid_apply_glfw_mapping() {
     PFN_glfwUpdateGamepadMappings p =
             (PFN_glfwUpdateGamepadMappings)dlsym(RTLD_DEFAULT, "glfwUpdateGamepadMappings");
     if (p) {
+        LOGD("Applying custom GLFW mapping...");
         p(mapping);
     } else {
         LOGW("glfwUpdateGamepadMappings not found; mapping may not update");
