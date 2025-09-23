@@ -482,6 +482,9 @@ void zomdroid_event_joystick_connected() {
         e->joystickConnected.button_count = 15;
         e->joystickConnected.hat_count = 0;
     });
+
+    // update gampead mapping GLFW
+    zomdroid_apply_glfw_mapping();
 }
 
 void zomdroid_event_joystick_axis(int axis, float state) {
@@ -492,12 +495,16 @@ void zomdroid_event_joystick_axis(int axis, float state) {
     });
 }
 
+static inline bool bit(char state, char mask) {
+    return (state & mask) != 0;
+}
+
+// state: 1=up, 2=right, 4=down, 8=left
 void zomdroid_event_joystick_dpad(int dpad, char state) {
-    ENQUEUE_EVENT({
-        e->type = JOYSTICK_DPAD;
-        e->joystickDpad.dpad = dpad;
-        e->joystickDpad.state = state;
-    });
+    zomdroid_event_joystick_button(11, bit(state, 0x01));
+    zomdroid_event_joystick_button(14, bit(state, 0x02));
+    zomdroid_event_joystick_button(12, bit(state, 0x04));
+    zomdroid_event_joystick_button(13, bit(state, 0x08));
 }
 
 void zomdroid_event_joystick_button(int button, bool is_pressed) {
@@ -506,4 +513,50 @@ void zomdroid_event_joystick_button(int button, bool is_pressed) {
         e->joystickButton.button = button;
         e->joystickButton.is_pressed = is_pressed;
     });
+}
+
+static inline float clamp01(float v) {
+    return v < 0.f ? 0.f : (v > 1.f ? 1.f : v);
+}
+
+static void send_left_trigger_axis(float v) {
+    zomdroid_event_joystick_axis(4, clamp01(v)); // a4
+}
+
+static void send_right_trigger_axis(float v) {
+    zomdroid_event_joystick_axis(5, clamp01(v)); // a5
+}
+
+// combined axe input: value [-1, 1]
+void zomdroid_event_triggers_combined_axis(float value) {
+    float left = value < 0 ? -value : 0.f;
+    float right = value > 0 ? value : 0.f;
+    send_left_trigger_axis(left);
+    send_right_trigger_axis(right);
+}
+
+// digital trigger as a button input:
+void zomdroid_event_left_trigger_button(bool pressed)  { send_left_trigger_axis(pressed ? 1.f : 0.f); }
+void zomdroid_event_right_trigger_button(bool pressed) { send_right_trigger_axis(pressed ? 1.f : 0.f); }
+
+typedef int (*PFN_glfwUpdateGamepadMappings)(const char*);
+
+static void zomdroid_apply_glfw_mapping() {
+    const char* mapping =
+            "00000000000000000000000000000000,Zomdroid Controller,"
+            "a:b0,b:b1,back:b6,"
+            "dpdown:b12,dpleft:b13,dpright:b14,dpup:b11,"
+            "leftshoulder:b4,leftstick:b9,"
+            "lefttrigger:a4,leftx:a0,lefty:a1,"
+            "rightshoulder:b5,rightstick:b10,"
+            "righttrigger:a5,rightx:a2,righty:a3,"
+            "start:b7,x:b2,y:b3,platform:Zomdroid,";
+
+    PFN_glfwUpdateGamepadMappings p =
+            (PFN_glfwUpdateGamepadMappings)dlsym(RTLD_DEFAULT, "glfwUpdateGamepadMappings");
+    if (p) {
+        p(mapping);
+    } else {
+        LOGW("glfwUpdateGamepadMappings not found; mapping may not update");
+    }
 }
