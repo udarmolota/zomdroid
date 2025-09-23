@@ -1,7 +1,11 @@
 name: Android CI
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+  push:
+    branches: [ gamepad-support-patch ]
+  pull_request:
+    branches: [ gamepad-support-patch ]
  
 jobs:
   build:
