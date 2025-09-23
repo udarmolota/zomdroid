@@ -472,6 +472,26 @@ void zomdroid_event_mouse_button(int button, bool isPressed) {
     });
 }
 
+static void zomdroid_apply_glfw_mapping() {
+    const char* mapping =
+            "00000000000000000000000000000000,Zomdroid Controller,"
+            "a:b0,b:b1,back:b6,"
+            "dpdown:b12,dpleft:b13,dpright:b14,dpup:b11,"
+            "leftshoulder:b4,leftstick:b9,"
+            "lefttrigger:a4,leftx:a0,lefty:a1,"
+            "rightshoulder:b5,rightstick:b10,"
+            "righttrigger:a5,rightx:a2,righty:a3,"
+            "start:b7,x:b2,y:b3,platform:Zomdroid,";
+
+    PFN_glfwUpdateGamepadMappings p =
+            (PFN_glfwUpdateGamepadMappings)dlsym(RTLD_DEFAULT, "glfwUpdateGamepadMappings");
+    if (p) {
+        p(mapping);
+    } else {
+        LOGW("glfwUpdateGamepadMappings not found; mapping may not update");
+    }
+}
+
 void zomdroid_event_joystick_connected() {
     ENQUEUE_EVENT({
         e->type = JOYSTICK_CONNECTED;
@@ -540,23 +560,3 @@ void zomdroid_event_left_trigger_button(bool pressed)  { send_left_trigger_axis(
 void zomdroid_event_right_trigger_button(bool pressed) { send_right_trigger_axis(pressed ? 1.f : 0.f); }
 
 typedef int (*PFN_glfwUpdateGamepadMappings)(const char*);
-
-static void zomdroid_apply_glfw_mapping() {
-    const char* mapping =
-            "00000000000000000000000000000000,Zomdroid Controller,"
-            "a:b0,b:b1,back:b6,"
-            "dpdown:b12,dpleft:b13,dpright:b14,dpup:b11,"
-            "leftshoulder:b4,leftstick:b9,"
-            "lefttrigger:a4,leftx:a0,lefty:a1,"
-            "rightshoulder:b5,rightstick:b10,"
-            "righttrigger:a5,rightx:a2,righty:a3,"
-            "start:b7,x:b2,y:b3,platform:Zomdroid,";
-
-    PFN_glfwUpdateGamepadMappings p =
-            (PFN_glfwUpdateGamepadMappings)dlsym(RTLD_DEFAULT, "glfwUpdateGamepadMappings");
-    if (p) {
-        p(mapping);
-    } else {
-        LOGW("glfwUpdateGamepadMappings not found; mapping may not update");
-    }
-}
