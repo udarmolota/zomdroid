@@ -274,7 +274,11 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     // Forward every gamepad dpad event to the native input interface
     @Override
     public void onGamepadDpad(int dpad, char state) {
-        InputNativeInterface.sendJoystickDpad(dpad, state);
+        //InputNativeInterface.sendJoystickDpad(dpad, state);
+      InputNativeInterface.sendJoystickButton(11, (state & 0x01) != 0); // UP
+      InputNativeInterface.sendJoystickButton(14, (state & 0x02) != 0); // RIGHT
+      InputNativeInterface.sendJoystickButton(12, (state & 0x04) != 0); // DOWN
+      InputNativeInterface.sendJoystickButton(13, (state & 0x08) != 0); // LEFT
     }
 
     // Handle gamepad key events
