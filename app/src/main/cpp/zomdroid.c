@@ -504,7 +504,7 @@ void zomdroid_event_joystick_connected() {
         e->joystickConnected.button_count = 15;
         e->joystickConnected.hat_count = 0;
     });
-
+    LOGD("zomdroid_event_joystick_connected called");
     // update gampead mapping GLFW
     zomdroid_apply_glfw_mapping();
 }
