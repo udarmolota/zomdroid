@@ -15,7 +15,6 @@
 #include <sys/sysinfo.h>
 #include <asm-generic/fcntl.h>
 #include "logger.h"
-#include <GLFW/glfw3.h>
 
 #define LOG_TAG "zomdroid-main"
 
@@ -311,28 +310,6 @@ static int load_linker_hook() {
     return 0;
 }
 
-typedef int (*PFN_glfwUpdateGamepadMappings)(const char*);
-static void zomdroid_apply_glfw_mapping() {
-    const char* mapping =
-            "00000000000000000000000000000000,Zomdroid Controller,"
-            "a:b0,b:b1,back:b6,"
-            "dpdown:b12,dpleft:b13,dpright:b14,dpup:b11,"
-            "leftshoulder:b4,leftstick:b9,"
-            "lefttrigger:a4,leftx:a0,lefty:a1,"
-            "rightshoulder:b5,rightstick:b10,"
-            "righttrigger:a5,rightx:a2,righty:a3,"
-            "start:b7,x:b2,y:b3,platform:Zomdroid,";
-
-    PFN_glfwUpdateGamepadMappings p =
-            (PFN_glfwUpdateGamepadMappings)dlsym(RTLD_DEFAULT, "glfwUpdateGamepadMappings");
-    if (p) {
-        fprintf(stderr, "zomdroid_apply_glfw_mapping called IF\n");
-        p(mapping);
-    } else {
-        fprintf(stderr, "ELSE glfwUpdateGamepadMappings not found; mapping may not update\n");
-    }
-}
-
 void zomdroid_start_game(const char* game_dir_path, const char* library_dir_path, int jvm_argc,
                          const char** jvm_argv, const char* main_class_name, int argc, const char** argv) {
 
@@ -370,8 +347,6 @@ void zomdroid_start_game(const char* game_dir_path, const char* library_dir_path
     }
 
     create_jvm_and_launch_main(jvm_argc, jvm_argv, main_class_name, argc, argv);
-    // update gampead mapping GLFW
-    zomdroid_apply_glfw_mapping(); // ensure mapping is applied after JVM and GLFW are initialized
 }
 
 
@@ -497,8 +472,6 @@ void zomdroid_event_mouse_button(int button, bool isPressed) {
     });
 }
 
-
-
 void zomdroid_event_joystick_connected() {
     ENQUEUE_EVENT({
         e->type = JOYSTICK_CONNECTED;
@@ -506,9 +479,9 @@ void zomdroid_event_joystick_connected() {
         e->joystickConnected.joystick_name = "Zomdroid Controller";
         e->joystickConnected.joystick_guid = "00000000000000000000000000000000";
         e->joystickConnected.axis_count = 6;
-        e->joystickConnected.button_count = 15;
-        e->joystickConnected.hat_count = 0;
-    });    
+        e->joystickConnected.button_count = 11;
+        e->joystickConnected.hat_count = 1;
+    });
 }
 
 void zomdroid_event_joystick_axis(int axis, float state) {
@@ -519,8 +492,12 @@ void zomdroid_event_joystick_axis(int axis, float state) {
     });
 }
 
-static inline bool bit(char state, char mask) {
-    return (state & mask) != 0;
+void zomdroid_event_joystick_dpad(int dpad, char state) {
+    ENQUEUE_EVENT({
+        e->type = JOYSTICK_DPAD;
+        e->joystickDpad.dpad = dpad;
+        e->joystickDpad.state = state;
+    });
 }
 
 void zomdroid_event_joystick_button(int button, bool is_pressed) {
@@ -530,35 +507,3 @@ void zomdroid_event_joystick_button(int button, bool is_pressed) {
         e->joystickButton.is_pressed = is_pressed;
     });
 }
-
-// state: 1=up, 2=right, 4=down, 8=left
-void zomdroid_event_joystick_dpad(int dpad, char state) {
-    zomdroid_event_joystick_button(11, bit(state, 0x01));
-    zomdroid_event_joystick_button(14, bit(state, 0x02));
-    zomdroid_event_joystick_button(12, bit(state, 0x04));
-    zomdroid_event_joystick_button(13, bit(state, 0x08));
-}
-
-static inline float clamp01(float v) {
-    return v < 0.f ? 0.f : (v > 1.f ? 1.f : v);
-}
-
-static void send_left_trigger_axis(float v) {
-    zomdroid_event_joystick_axis(4, clamp01(v)); // a4
-}
-
-static void send_right_trigger_axis(float v) {
-    zomdroid_event_joystick_axis(5, clamp01(v)); // a5
-}
-
-// combined axe input: value [-1, 1]
-void zomdroid_event_triggers_combined_axis(float value) {
-    float left = value < 0 ? -value : 0.f;
-    float right = value > 0 ? value : 0.f;
-    send_left_trigger_axis(left);
-    send_right_trigger_axis(right);
-}
-
-// digital trigger as a button input:
-void zomdroid_event_left_trigger_button(bool pressed)  { send_left_trigger_axis(pressed ? 1.f : 0.f); }
-void zomdroid_event_right_trigger_button(bool pressed) { send_right_trigger_axis(pressed ? 1.f : 0.f); }
