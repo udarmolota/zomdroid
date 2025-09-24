@@ -62,7 +62,6 @@ public class GameLauncher {
         Os.setenv("ZOMDROID_GLES_MINOR", "2", true);*/
 
         initZomdroidWindow();
-        System.out.println("GameLauncher: sendJoystickConnected called");
         InputNativeInterface.sendJoystickConnected();
 
         ArrayList<String> jvmArgs = gameInstance.getJvmArgsAsList();
