@@ -15,6 +15,7 @@
 #include <sys/sysinfo.h>
 #include <asm-generic/fcntl.h>
 #include "logger.h"
+#include <GLFW/glfw3.h>
 
 #define LOG_TAG "zomdroid-main"
 
