@@ -9,7 +9,7 @@ public class InputNativeInterface {
 
     public static native void sendJoystickAxis(int axis, float state);
 
-    //public static native void sendJoystickDpad(int dpad, char state);
+    public static native void sendJoystickDpad(int dpad, char state);
 
     public static native void sendJoystickButton(int button, boolean isPressed);
 
