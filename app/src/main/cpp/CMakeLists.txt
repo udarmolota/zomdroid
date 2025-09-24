@@ -30,11 +30,10 @@ target_link_libraries(glfw PRIVATE log zomdroid EGL nativewindow)
 add_subdirectory(liblinkernsbypass)
 
 add_library(zomdroid SHARED zomdroid.c zomdroid_jni.c)
-target_include_directories(zomdroid PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/glfw/include)
-target_link_libraries(zomdroid log android linkernsbypass glfw pthread)
+target_link_libraries(zomdroid log android linkernsbypass)
 
 add_library(zomdroidlinker SHARED linker.c emulation.c wrapped_jni.c)
-target_link_libraries(zomdroidlinker PRIVATE c log box64 zomdroid pthread) # link to libc before box64 to prevent mmap override
+target_link_libraries(zomdroidlinker PRIVATE c log box64 zomdroid) # link to libc before box64 to prevent mmap override
 target_link_options(zomdroidlinker PRIVATE "-Wl,-z,global")
 
 set(NOGIT ON)
