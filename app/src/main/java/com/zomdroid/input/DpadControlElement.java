@@ -52,13 +52,9 @@ public class DpadControlElement extends AbstractControlElement {
             if (nx < -DPAD_DEAD_ZONE) state |= 0x8;
         }
 
-        if (this.inputType == InputType.GAMEPAD) {
-          //InputNativeInterface.sendJoystickDpad(0, (char) state);
-          InputNativeInterface.sendJoystickButton(11, (state & 0x01) != 0);
-          InputNativeInterface.sendJoystickButton(14, (state & 0x02) != 0);
-          InputNativeInterface.sendJoystickButton(12, (state & 0x04) != 0);
-          InputNativeInterface.sendJoystickButton(13, (state & 0x08) != 0);
-        } else if (this.inputType == InputType.MNK) {
+        if (this.inputType == InputType.GAMEPAD)
+            InputNativeInterface.sendJoystickDpad(0, (char) state);
+        else if (this.inputType == InputType.MNK) {
             handleMNKBinding(getBindingUp(), (state & 0x1) != 0);
             handleMNKBinding(getBindingRight(), (state & 0x2) != 0);
             handleMNKBinding(getBindingDown(), (state & 0x4) != 0);
