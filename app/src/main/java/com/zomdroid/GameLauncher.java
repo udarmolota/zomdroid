@@ -3,7 +3,7 @@ package com.zomdroid;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.view.Surface;
-import android.util.Log;
+
 import com.zomdroid.input.InputNativeInterface;
 import com.zomdroid.game.GameInstance;
 
@@ -62,7 +62,7 @@ public class GameLauncher {
         Os.setenv("ZOMDROID_GLES_MINOR", "2", true);*/
 
         initZomdroidWindow();
-        Log.d("GameLauncher", "Calling sendJoystickConnected()");
+        System.out.println("GameLauncher: sendJoystickConnected called");
         InputNativeInterface.sendJoystickConnected();
 
         ArrayList<String> jvmArgs = gameInstance.getJvmArgsAsList();
