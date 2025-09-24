@@ -310,6 +310,28 @@ static int load_linker_hook() {
     return 0;
 }
 
+typedef int (*PFN_glfwUpdateGamepadMappings)(const char*);
+static void zomdroid_apply_glfw_mapping() {
+    const char* mapping =
+            "00000000000000000000000000000000,Zomdroid Controller,"
+            "a:b0,b:b1,back:b6,"
+            "dpdown:b12,dpleft:b13,dpright:b14,dpup:b11,"
+            "leftshoulder:b4,leftstick:b9,"
+            "lefttrigger:a4,leftx:a0,lefty:a1,"
+            "rightshoulder:b5,rightstick:b10,"
+            "righttrigger:a5,rightx:a2,righty:a3,"
+            "start:b7,x:b2,y:b3,platform:Zomdroid,";
+
+    PFN_glfwUpdateGamepadMappings p =
+            (PFN_glfwUpdateGamepadMappings)dlsym(RTLD_DEFAULT, "glfwUpdateGamepadMappings");
+    if (p) {
+        fprintf(stderr, "zomdroid_apply_glfw_mapping called IF\n");
+        p(mapping);
+    } else {
+        fprintf(stderr, "ELSE glfwUpdateGamepadMappings not found; mapping may not update\n");
+    }
+}
+
 void zomdroid_start_game(const char* game_dir_path, const char* library_dir_path, int jvm_argc,
                          const char** jvm_argv, const char* main_class_name, int argc, const char** argv) {
 
@@ -347,6 +369,8 @@ void zomdroid_start_game(const char* game_dir_path, const char* library_dir_path
     }
 
     create_jvm_and_launch_main(jvm_argc, jvm_argv, main_class_name, argc, argv);
+    // update gampead mapping GLFW
+    zomdroid_apply_glfw_mapping(); // ensure mapping is applied after JVM and GLFW are initialized
 }
 
 
@@ -472,27 +496,7 @@ void zomdroid_event_mouse_button(int button, bool isPressed) {
     });
 }
 
-typedef int (*PFN_glfwUpdateGamepadMappings)(const char*);
-static void zomdroid_apply_glfw_mapping() {
-    const char* mapping =
-            "00000000000000000000000000000000,Zomdroid Controller,"
-            "a:b0,b:b1,back:b6,"
-            "dpdown:b12,dpleft:b13,dpright:b14,dpup:b11,"
-            "leftshoulder:b4,leftstick:b9,"
-            "lefttrigger:a4,leftx:a0,lefty:a1,"
-            "rightshoulder:b5,rightstick:b10,"
-            "righttrigger:a5,rightx:a2,righty:a3,"
-            "start:b7,x:b2,y:b3,platform:Zomdroid,";
 
-    PFN_glfwUpdateGamepadMappings p =
-            (PFN_glfwUpdateGamepadMappings)dlsym(RTLD_DEFAULT, "glfwUpdateGamepadMappings");
-    if (p) {
-        LOGD("Applying custom GLFW mapping...");
-        p(mapping);
-    } else {
-        LOGW("glfwUpdateGamepadMappings not found; mapping may not update");
-    }
-}
 
 void zomdroid_event_joystick_connected() {
     ENQUEUE_EVENT({
@@ -503,10 +507,7 @@ void zomdroid_event_joystick_connected() {
         e->joystickConnected.axis_count = 6;
         e->joystickConnected.button_count = 15;
         e->joystickConnected.hat_count = 0;
-    });
-    LOGD("zomdroid_event_joystick_connected called");
-    // update gampead mapping GLFW
-    zomdroid_apply_glfw_mapping();
+    });    
 }
 
 void zomdroid_event_joystick_axis(int axis, float state) {
