@@ -6,6 +6,7 @@ import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
+
 /**
  * Manages gamepad connection and input mapping for Android.
  */
@@ -16,9 +17,9 @@ public class GamepadManager implements InputManager.InputDeviceListener {
     private final GamepadListener listener;
 
     // Number of logical gamepad buttons (no D-Pad)
-    public static final int GAMEPAD_BUTTON_COUNT = 14; 
+    public static final int GAMEPAD_BUTTON_COUNT = 11; // 11, D-Pad not included
 
-    // Default mapping: [A, B, X, Y, LB, RB, SELECT, START, GUIDE, LSTICK, RSTICK, DPAD_UP, DPAD_DOWN, DPAD_LEFT, DPAD_RIGHT]
+    // Default mapping: [A, B, X, Y, LB, RB, SELECT, START, GUIDE, LSTICK, RSTICK]
     private static final int[] DEFAULT_MAPPING = {
         KeyEvent.KEYCODE_BUTTON_A,      // 0: A
         KeyEvent.KEYCODE_BUTTON_B,      // 1: B
@@ -30,11 +31,7 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         KeyEvent.KEYCODE_BUTTON_START,  // 7: START
         KeyEvent.KEYCODE_BUTTON_MODE,   // 8: GUIDE
         KeyEvent.KEYCODE_BUTTON_THUMBL, // 9: LSTICK
-        KeyEvent.KEYCODE_BUTTON_THUMBR, // 10: RSTICK
-        KeyEvent.KEYCODE_DPAD_UP,       // 11: DPAD_UP
-        KeyEvent.KEYCODE_DPAD_DOWN,     // 12: DPAD_DOWN
-        KeyEvent.KEYCODE_DPAD_LEFT,     // 13: DPAD_LEFT
-        KeyEvent.KEYCODE_DPAD_RIGHT     // 14: DPAD_RIGHT
+        KeyEvent.KEYCODE_BUTTON_THUMBR  // 10: RSTICK
     };
 
     // Custom mapping
@@ -184,126 +181,48 @@ public class GamepadManager implements InputManager.InputDeviceListener {
 
     // Handle KeyEvent as gamepad button if possible
     public boolean handleKeyEvent(KeyEvent event) {
-      if (!isGamepadEvent(event)) return false;
-
-      int keyCode = event.getKeyCode();
-      boolean isPressed = event.getAction() == KeyEvent.ACTION_DOWN;
-
-      // D-Pad → b11–b14
-      if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
-        listener.onGamepadButton(11, isPressed);
-        return true;
-      } else if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
-        listener.onGamepadButton(12, isPressed);
-        return true;
-      } else if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
-        listener.onGamepadButton(13, isPressed);
-        return true;
-      } else if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
-        listener.onGamepadButton(14, isPressed);
-        return true;
-      }
-
-      // Triggers → a4/a5
-      if (keyCode == KeyEvent.KEYCODE_BUTTON_L2 || keyCode == KeyEvent.KEYCODE_NUMPAD_7) {
-        listener.onGamepadAxis(4, isPressed ? 1.0f : 0.0f);
-        return true;
-      } else if (keyCode == KeyEvent.KEYCODE_BUTTON_R2 || keyCode == KeyEvent.KEYCODE_NUMPAD_9) {
-        listener.onGamepadAxis(5, isPressed ? 1.0f : 0.0f);
-        return true;
-      }
-
-      // Bumpers → b4/b5
-      if (keyCode == KeyEvent.KEYCODE_BUTTON_L1 || keyCode == KeyEvent.KEYCODE_NUMPAD_1) {
-        listener.onGamepadButton(4, isPressed);
-        return true;
-      } else if (keyCode == KeyEvent.KEYCODE_BUTTON_R1 || keyCode == KeyEvent.KEYCODE_NUMPAD_3) {
-        listener.onGamepadButton(5, isPressed);
-        return true;
-      }
-
-      // Fallback: A/B/X/Y/etc.
-      int button = mapKeyCodeToGLFWButton(keyCode);
-      if (button >= 0) {
-        listener.onGamepadButton(button, isPressed);
-        return true;
-      }
-
-      System.out.println("GamepadManager: handleKeyEvent called, keyCode=" + keyCode + ", pressed=" + isPressed);   
-
-      return false;
+        if (!isGamepadEvent(event)) return false;
+        int keyCode = event.getKeyCode();
+        boolean isPressed = event.getAction() == KeyEvent.ACTION_DOWN;
+        int button = mapKeyCodeToGLFWButton(keyCode);
+        if (button >= 0) {
+            listener.onGamepadButton(button, isPressed);
+            return true;
+        }
+        return false;
     }
 
-
-
-  // Handle MotionEvent: axes and D-Pad
-  public boolean handleMotionEvent(MotionEvent event) {
-    if (!isGamepadMotionEvent(event)) return false;
-
-    // Sticks
-    float lx = event.getAxisValue(MotionEvent.AXIS_X);
-    float ly = event.getAxisValue(MotionEvent.AXIS_Y);
-    float rx = event.getAxisValue(MotionEvent.AXIS_Z);
-    float ry = event.getAxisValue(MotionEvent.AXIS_RZ);
-    listener.onGamepadAxis(0, lx); // left stick X
-    listener.onGamepadAxis(1, ly); // left stick Y
-    listener.onGamepadAxis(2, rx); // right stick X
-    listener.onGamepadAxis(3, ry); // right stick Y
-
-    // LTRIGGER/RTRIGGER
-    float lt = event.getAxisValue(MotionEvent.AXIS_LTRIGGER);
-    float rt = event.getAxisValue(MotionEvent.AXIS_RTRIGGER);
-    boolean ltHandled = false;
-    boolean rtHandled = false;
-
-    if (lt > 0.01f || rt > 0.01f) {
-      listener.onGamepadAxis(4, lt); // left trigger
-      listener.onGamepadAxis(5, rt); // right trigger
-      ltHandled = true;
-      rtHandled = true;
+    // Handle MotionEvent: axes and D-Pad
+    public boolean handleMotionEvent(MotionEvent event) {
+        if (!isGamepadMotionEvent(event)) return false;
+        // Sticks
+        float lx = event.getAxisValue(MotionEvent.AXIS_X);
+        float ly = event.getAxisValue(MotionEvent.AXIS_Y);
+        float rx = event.getAxisValue(MotionEvent.AXIS_Z);
+        float ry = event.getAxisValue(MotionEvent.AXIS_RZ);
+        listener.onGamepadAxis(0, lx);
+        listener.onGamepadAxis(1, ly);
+        listener.onGamepadAxis(2, rx);
+        listener.onGamepadAxis(3, ry);
+        // Trigger
+        float lt = event.getAxisValue(MotionEvent.AXIS_LTRIGGER);
+        float rt = event.getAxisValue(MotionEvent.AXIS_RTRIGGER);
+        listener.onGamepadAxis(4, lt);
+        listener.onGamepadAxis(5, rt);
+        // D-Pad - traditional handling (KeyEvents will handle custom mapping)
+        float hatX = event.getAxisValue(MotionEvent.AXIS_HAT_X);
+        float hatY = event.getAxisValue(MotionEvent.AXIS_HAT_Y);
+        char dpadState = 0;
+        if (hatY < -0.5f) dpadState |= 0x01; // up
+        if (hatY > 0.5f) dpadState |= 0x04; // down
+        if (hatX < -0.5f) dpadState |= 0x08; // left
+        if (hatX > 0.5f) dpadState |= 0x02; // right
+        listener.onGamepadDpad(0, dpadState);
+        
+        return true;
     }
 
-    // Fallback: Z/RZ or combined axes
-    if (!ltHandled || !rtHandled) {
-      float z = event.getAxisValue(MotionEvent.AXIS_Z);
-      float rz = event.getAxisValue(MotionEvent.AXIS_RZ);
-
-      if (!ltHandled && z < -0.01f) {
-        listener.onGamepadAxis(4, Math.min(1.0f, -z));
-      }
-      if (!rtHandled && z > 0.01f) {
-        listener.onGamepadAxis(5, Math.min(1.0f, z));
-      }
-      if (!rtHandled && rz > 0.01f) {
-        listener.onGamepadAxis(5, Math.min(1.0f, rz));
-      }
-    }
-
-    // D-Pad hat --> buttons b11–b14
-    float hatX = event.getAxisValue(MotionEvent.AXIS_HAT_X);
-    float hatY = event.getAxisValue(MotionEvent.AXIS_HAT_Y);
-
-    listener.onGamepadButton(11, hatY < -0.5f); // UP
-    listener.onGamepadButton(12, hatY > 0.5f);  // DOWN
-    listener.onGamepadButton(13, hatX < -0.5f); // LEFT
-    listener.onGamepadButton(14, hatX > 0.5f);  // RIGHT
-
-  // No D-Pad as HAT
-    // float hatX = event.getAxisValue(MotionEvent.AXIS_HAT_X);
-    // float hatY = event.getAxisValue(MotionEvent.AXIS_HAT_Y);
-    // char dpadState = 0;
-    // if (hatY < -0.5f) dpadState |= 0x01; // up
-    // if (hatY > 0.5f) dpadState |= 0x04; // down
-    // if (hatX < -0.5f) dpadState |= 0x08; // left
-    // if (hatX > 0.5f) dpadState |= 0x02; // right
-    // listener.onGamepadDpad(0, dpadState);
-         
-      System.out.println("GamepadManager: handleMotionEvent called, LTRIGGER=" + lt + ", RTRIGGER=" + rt);
-    return true;
-  }
-
-
-  // Map Android keycode to logical button index (0-10), or -1 if not found
+    // Map Android keycode to logical button index (0-10), or -1 if not found
     private int mapKeyCodeToGLFWButton(int keyCode) {
         int[] mapping = getCurrentMapping();
         for (int i = 0; i < mapping.length; i++) {
