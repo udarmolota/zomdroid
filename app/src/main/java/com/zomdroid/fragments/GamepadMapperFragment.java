@@ -152,7 +152,7 @@ public class GamepadMapperFragment extends Fragment {
                     // Save as "axis a4/a5" sentinel so GamepadManager can later normalize to a4/a5.
                     int code = encodeAxis(currentStep == STEP_LT ? AXIS_LT_INDEX : AXIS_RT_INDEX);
                     if (isDuplicate(code)) {
-                        Toast.makeText(ctx, "Button already assigned!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Button already assigned!", Toast.LENGTH_SHORT).show();
                         return true;
                     }
                     assignCurrentStep(code);
