@@ -27,6 +27,8 @@
     <string name="control_element_binding_down">Binding Down</string>
     <string name="control_element_input_type_mnk">Mouse &amp; Keyboard</string>
     <string name="control_element_input_type_gamepad">Gamepad</string>
+    <string name="gamepad_mapper_button_lt">LT (Left Trigger)</string>
+    <string name="gamepad_mapper_button_rt">RT (Right Trigger)</string>
 
     <string name="game_instance_name">Name</string>
     <string name="game_instance_preset">Preset</string>
