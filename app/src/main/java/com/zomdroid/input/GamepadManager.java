@@ -5,7 +5,7 @@ import android.hardware.input.InputManager;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-
+import android.view.InputDevice;
 
 /**
  * Manages gamepad connection and input mapping for Android.
@@ -200,34 +200,61 @@ public class GamepadManager implements InputManager.InputDeviceListener {
     // Handle KeyEvent as gamepad button or trigger-as-button (synthesize axis)
     public boolean handleKeyEvent(KeyEvent event) {
         if (!isGamepadEvent(event)) return false;
-
+    
         int keyCode = event.getKeyCode();
         boolean isPressed = event.getAction() == KeyEvent.ACTION_DOWN;
-
+    
+        // DEBUG: raw key event
+        InputDevice dev = event.getDevice(); // <-- да, нужен импорт android.view.InputDevice
+        int src = event.getSource();
+        System.out.println(
+            "[GM] KEY code=" + keyCode +
+            " action=" + (isPressed ? "DOWN" : "UP") +
+            " src=0x" + Integer.toHexString(src) +
+            " dev=" + (dev != null ? (dev.getName() + "#" + dev.getId()) : "null")
+        );
+    
         // --- NEW: trigger-as-button handling based on sentinel mapping ---
         if (isTriggerButton(keyCode, true)) {
-            // LT is configured as a button: synthesize axis a4 (1.0 on down, 0.0 on up)
             listener.onGamepadAxis(AXIS_LT_INDEX, isPressed ? 1.0f : 0.0f);
+            System.out.println("[GM] LT as BUTTON -> synth AXIS[" + AXIS_LT_INDEX + "]=" + (isPressed ? "1.0" : "0.0"));
             return true; // consume
         }
         if (isTriggerButton(keyCode, false)) {
-            // RT is configured as a button: synthesize axis a5
             listener.onGamepadAxis(AXIS_RT_INDEX, isPressed ? 1.0f : 0.0f);
+            System.out.println("[GM] RT as BUTTON -> synth AXIS[" + AXIS_RT_INDEX + "]=" + (isPressed ? "1.0" : "0.0"));
             return true; // consume
         }
-
+    
         // Regular buttons mapping (A,B,X,Y,LB,RB,SELECT,START,GUIDE,L3,R3)
         int button = mapKeyCodeToGLFWButton(keyCode);
         if (button >= 0) {
             listener.onGamepadButton(button, isPressed);
+            System.out.println("[GM] Mapped keyCode " + keyCode + " -> GLFW button idx=" + button);
             return true;
         }
+    
+        System.out.println("[GM] Unmapped keyCode=" + keyCode + " (ignored)");
         return false;
     }
+
 
     // Handle MotionEvent: sticks, triggers (axis mode), and D-Pad (hat)
     public boolean handleMotionEvent(MotionEvent event) {
         if (!isGamepadMotionEvent(event)) return false;
+
+        // DEBUG: dump all motion axes from this device
+        InputDevice dev = event.getDevice();
+        if (dev != null) {
+            for (InputDevice.MotionRange range : dev.getMotionRanges()) {
+                int axis = range.getAxis();
+                float val = event.getAxisValue(axis);
+                System.out.println("[GM] AXIS id=" + axis +
+                    " name=" + MotionEvent.axisToString(axis) +
+                    " val=" + val);
+            }
+        }
+        int src = event.getSource();
 
         // Sticks (keep legacy mapping: X/Y = left, Z/RZ = right)
         float lx = event.getAxisValue(MotionEvent.AXIS_X);
@@ -238,16 +265,21 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         listener.onGamepadAxis(1, ly);
         listener.onGamepadAxis(2, rx);
         listener.onGamepadAxis(3, ry);
+        System.out.println("[GM] MOTION sticks: LX=" + lx + " LY=" + ly + " RX=" + rx + " RY=" + ry +
+            " dev=" + (dev != null ? (dev.getName() + "#" + dev.getId()) : "null") +
+            " src=0x" + Integer.toHexString(src));
 
         // --- NEW: triggers in axis mode only ---
         // If a trigger is configured as AXIS, read analog value (with fallbacks) and send to a4/a5.
         if (isTriggerAxisMode(true)) {
             float lt = readTriggerAxis(event, true);
             listener.onGamepadAxis(AXIS_LT_INDEX, clamp01(lt));
+            System.out.println("[GM] MOTION LT axis=" + lt + " (clamped=" + clamp01(lt) + ")");
         }
         if (isTriggerAxisMode(false)) {
             float rt = readTriggerAxis(event, false);
             listener.onGamepadAxis(AXIS_RT_INDEX, clamp01(rt));
+            System.out.println("[GM] MOTION RT axis=" + rt + " (clamped=" + clamp01(rt) + ")");
         }
 
         // D-Pad (hat) — unchanged
@@ -259,6 +291,7 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         if (hatX < -0.5f) dpadState |= 0x08; // left
         if (hatX > 0.5f) dpadState |= 0x02; // right
         listener.onGamepadDpad(0, dpadState);
+        System.out.println("[GM] MOTION dpad: hatX=" + hatX + " hatY=" + hatY + " state=0x" + Integer.toHexString(dpadState));
 
         return true;
     }
