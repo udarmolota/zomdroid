@@ -11,6 +11,7 @@ on:
         options:
         - gamepad-support
         - keyboard-experimental
+        - gamepad-support-patch-v2
         
 jobs:
   build:
