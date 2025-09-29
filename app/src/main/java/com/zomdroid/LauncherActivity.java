@@ -32,6 +32,7 @@ import com.zomdroid.databinding.ActivityLauncherBinding;
 import com.zomdroid.game.GameInstanceManager;
 import com.zomdroid.input.AbstractControlElement;
 import com.zomdroid.input.ControlElementDescription;
+import com.zomdroid.input.GamepadManager;
 
 public class LauncherActivity extends AppCompatActivity {
     private static final String LOG_TAG = LauncherActivity.class.getName();
@@ -48,6 +49,9 @@ public class LauncherActivity extends AppCompatActivity {
 
         binding = ActivityLauncherBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // >>> ensure custom mapping is loaded at app start <<<
+        GamepadManager.loadCustomMapping(this);
 
         binding.appbarLayout.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
             @NonNull
