@@ -39,7 +39,7 @@ android {
         minSdk = 30
         targetSdk = 35
         versionCode = 3
-        versionName = "1.2.3.v2"
+        versionName = "1.2.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -89,7 +89,7 @@ android {
             useLegacyPackaging = true
         }
     }
-    ndkVersion = "28.0.13004108"
+  ndkVersion = "27.3.13750724"
 }
 
 dependencies {

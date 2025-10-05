@@ -24,13 +24,13 @@ static void* (*loader_dlopen)(const char* filename, int flags, const void* calle
 static void* (*loader_dlsym)(void* handle, const char* symbol, const void* caller);
 
 static void* (*loader_android_dlopen_ext)(const char* filename,
-                                            int flag,
-                                            const android_dlextinfo* extinfo,
-                                            const void* caller_addr);
+                                          int flag,
+                                          const android_dlextinfo* extinfo,
+                                          const void* caller_addr);
 static void* vulkan_driver_handle;
 static void* vulkan_loader_handle;
 
-static EmulatedLib jni_libs[] = {{.name = "PZClipper64"}, {.name = "PZBullet64"}, {.name = "PZBulletNoOpenGL64"}, {.name = "Lighting64"}, {.name = "PZPathFind64"}, {.name = "PZPopMan64"}, {.name = "fmodintegration64"}, { .name = "zomdroidtest"} };
+static EmulatedLib jni_libs[] = {{.name = "PZClipper64"}, {.name = "PZBullet64"}, {.name = "PZBulletNoOpenGL64"}, {.name = "Lighting64"}, {.name = "PZPathFind64"}, {.name = "PZPopMan64"}, {.name = "fmodintegration64"}, { .name = "zomdroidtest"}, { .name = "RakNet64"}, { .name = "ZNetNoSteam"} };
 static int jni_lib_count = sizeof (jni_libs) / sizeof (EmulatedLib);
 
 
@@ -156,7 +156,7 @@ static void parse_jni_sym_name(const char* sym_name, char** class_name, char** m
                 sym_name++;
                 switch (*sym_name) {
                     case '0':
-                        LOGE("Unexpected _0");
+                    LOGE("Unexpected _0");
                         return;
                     case '1':
                         buf[i] = '_';
@@ -252,7 +252,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
         }
         switch (*sig) {
             case '\0':
-                LOGE("Encountered end of string before )");
+            LOGE("Encountered end of string before )");
                 return -1;
             case 'B': // jbyte
                 if (array) {
@@ -331,7 +331,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
                 array = false;
                 break;
             default:
-                LOGE("Unexpected character %c", *sig);
+            LOGE("Unexpected character %c", *sig);
                 return -1;
         }
         sig++;
@@ -429,7 +429,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
             *return_type = 'v';
             break;
         default:
-            LOGE("Unexpected character %c", *sig);
+        LOGE("Unexpected character %c", *sig);
             return -1;
     }
 
@@ -529,7 +529,7 @@ static char* method_signature_from_symbol_name(const char* sym) {
     free(method_name);
     free(method_sig_short);
     return method_sig;
-FAIL:
+    FAIL:
     free(class_name);
     free(class_sig);
     free(method_name);
@@ -541,26 +541,48 @@ FAIL:
 
 __attribute__((visibility("default"), used))
 void *dlopen(const char* filename, int flags) {
-    LOGD("dlopen(name=%s)", filename);
 
     if (filename == NULL) return loader_dlopen(NULL, flags, __builtin_return_address(0));
 
     for (int i = 0; i < jni_lib_count; i++) {
         if (!strstr(filename, jni_libs[i].name)) continue;
 
-        LOGI("Loading %s in box64...", filename);
+        //trying to load native library
+        if (jni_libs[i].name != "fmodintegration64") { //later I should fix that. Java for some reason didn't see classes inside
+            const char* base = strrchr(filename, '/');
+            if (base)
+                base++;
+            else
+                base = filename;
+
+            char android_filename[BUF_SIZE];
+            //LOGD("[linker] Base name: %s", base);
+            snprintf(android_filename, BUF_SIZE,"android/arm64-v8a/%s", base);
+
+            if (access(android_filename, F_OK) == 0) {
+                LOGD(" %s", android_filename);
+                jni_libs[i].handle = loader_dlopen(android_filename, flags, __builtin_return_address(0));
+                jni_libs[i].is_emulated = false;
+                return jni_libs[i].handle;
+            }
+            LOGE("[linker] Native Android version of %s not found, loading through box64...", android_filename);
+        }
+
+        //elsewise loading in box64
+        //LOGE("[linker] Loading %s in box64...", filename);
         needed_libs_t* needed_lib = new_neededlib(1);
         needed_lib->names[0] = strdup(filename);
         int bindnow = (flags & 0x2) ? 1 : 0;
         int islocal = (flags & 0x100) ? 0 : 1;
         // int deepbind = (flags & 0x8) ? 1 : 0;
         if (AddNeededLib(NULL, islocal, bindnow, 1, needed_lib, NULL, my_context, thread_get_emu()) != 0) {
-            LOGE("Failed to load %s in box64", jni_libs[i].name);
+            LOGE("[linker] Failed to load %s in box64", jni_libs[i].name);
             RemoveNeededLib(NULL, islocal, needed_lib, my_context, thread_get_emu());
             free_neededlib(needed_lib);
             return NULL;
         }
         jni_libs[i].handle = needed_lib->libs[0];
+        jni_libs[i].is_emulated = true;
         free_neededlib(needed_lib);
 
         int old_deferredInit = my_context->deferredInit;
@@ -575,7 +597,6 @@ void *dlopen(const char* filename, int flags) {
         my_context->deferredInitList = old_deferredInitList;
         my_context->deferredInitSz = old_deferredInitSz;
         my_context->deferredInitCap = old_deferredInitCap;
-
         return jni_libs[i].handle;
     }
 
@@ -588,55 +609,61 @@ void *dlopen(const char* filename, int flags) {
 
 __attribute__((visibility("default"), used))
 void *dlsym(void *handle, const char *sym_name) {
-    LOGD("dlsym(handle=%p name=%s)", handle, sym_name);
 
     for (int i = 0; i < jni_lib_count; i++) {
         struct library_s* lib = jni_libs[i].handle;
+        EmulatedLib* elib = &jni_libs[i];
         if (sym_name == NULL || handle == NULL || lib != handle) continue;
 
-        struct lib_s* maplib = GetMaplib(lib);
-        uintptr_t box64_sym = FindGlobalSymbol(maplib, sym_name, -1, NULL, 0);
-        if (box64_sym == 0) {
-            return NULL;
-        }
-
-        // On Android FMOD relies on Java for initialization, so we need to attach the game audio thread to ART VM
-        if (strcmp(sym_name, "Java_fmod_javafmodJNI_FMOD_1System_1Create") == 0) {
-            JNIEnv* art_jni_env = NULL;
-            (*g_zomdroid_art_vm)->GetEnv(g_zomdroid_art_vm, (void **) &art_jni_env, JNI_VERSION_1_6) ;
-            if (art_jni_env == NULL){
-                (*g_zomdroid_art_vm)->AttachCurrentThread(g_zomdroid_art_vm,
-                                                          (void **) &art_jni_env, NULL);
+        if (elib->is_emulated) {
+            struct lib_s* maplib = GetMaplib(lib);
+            uintptr_t box64_sym = FindGlobalSymbol(maplib, sym_name, -1, NULL, 0);
+            if (box64_sym == 0) {
+                return NULL;
             }
-            if (art_jni_env == NULL) {
-                LOGE("Failed to attach game FMOD thread to ART VM");
-            } else {
-                LOGD("Successfully attached game FMOD thread to ART VM");
+
+            // On Android FMOD relies on Java for initialization, so we need to attach the game audio thread to ART VM
+            if (strcmp(sym_name, "Java_fmod_javafmodJNI_FMOD_1System_1Create") == 0) {
+                JNIEnv* art_jni_env = NULL;
+                (*g_zomdroid_art_vm)->GetEnv(g_zomdroid_art_vm, (void **) &art_jni_env, JNI_VERSION_1_6) ;
+                if (art_jni_env == NULL){
+                    (*g_zomdroid_art_vm)->AttachCurrentThread(g_zomdroid_art_vm,
+                                                              (void **) &art_jni_env, NULL);
+                }
+                if (art_jni_env == NULL) {
+                    LOGE("Failed to attach game FMOD thread to ART VM");
+                } else {
+                    LOGD("Successfully attached game FMOD thread to ART VM");
+                }
             }
-        }
 
-        char* method_sig = method_signature_from_symbol_name(sym_name);
+            char* method_sig = method_signature_from_symbol_name(sym_name);
 
-        if (method_sig == NULL) return NULL;
+            if (method_sig == NULL) return NULL;
 
-        char* arg_types = NULL;
-        char ret_type = 0;
-        if (method_signature_to_types(method_sig, &arg_types, &ret_type) != 0) {
+            char* arg_types = NULL;
+            char ret_type = 0;
+            if (method_signature_to_types(method_sig, &arg_types, &ret_type) != 0) {
+                free(method_sig);
+                return NULL;
+            }
             free(method_sig);
-            return NULL;
-        }
-        free(method_sig);
 
-        void* sym = zomdroid_emulation_bridge_jni_symbol(&jni_libs[i], box64_sym,
-                                                         arg_types, ret_type);
-        if (sym == NULL) {
-            LOGE("Failed to create emulation bridge for jni symbol %s", sym_name);
+            void* sym = zomdroid_emulation_bridge_jni_symbol(&jni_libs[i], box64_sym,
+                                                             arg_types, ret_type);
+            if (sym == NULL) {
+                LOGE("Failed to create emulation bridge for jni symbol %s", sym_name);
+                free(arg_types);
+                fprintf(stderr, "[linker] ERROR: Emulation bridge failed for symbol %s\n", sym_name);
+                return NULL;
+            }
             free(arg_types);
-            return NULL;
+            LOGD("Successfully created emulation bridge for jni symbol %s at %p (target=%ld)", sym_name, sym, box64_sym);
+            fprintf(stderr, "[linker] OK: Emulation bridge created for symbol %s at %p\n", sym_name, sym);
+            return sym;
+        } else {
+            return loader_dlsym(handle, sym_name, __builtin_return_address(0));
         }
-        free(arg_types);
-        LOGD("Successfully created emulation bridge for jni symbol %s at %p (target=%ld)", sym_name, sym, box64_sym);
-        return sym;
     }
 
     return loader_dlsym(handle, sym_name, __builtin_return_address(0));
@@ -644,7 +671,7 @@ void *dlsym(void *handle, const char *sym_name) {
 
 __attribute__((visibility("default"), used))
 void *android_dlopen_ext(const char *filename, int flags, const android_dlextinfo *extinfo) {
-    LOGD("android_dlopen_ext(filename=%s)", filename);
+    LOGE("android_dlopen_ext(filename=%s)", filename);
     if(strstr(filename, "vulkan.") && vulkan_driver_handle) {
         return vulkan_driver_handle;
     }
