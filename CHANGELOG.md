@@ -1,3 +1,14 @@
+## [1.2.5] - 2025-10-5
+### Added
+- **Better build 42 Support**
+- Added some performance optimizations  
+- Implemented native library support for Build 42  
+- Native libraries are loaded manually and provided separately  
+- Known issue: crash occurs when opening the map on Build 42.8 and above  
+- Changes authored by @Wakort
+  
+---
+
 ## [1.2.3.v2] - 2025-09-29
 ### Added
 - **Extended gamepad support for triggers (LT/RT).**  
