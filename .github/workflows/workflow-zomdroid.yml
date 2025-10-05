@@ -12,6 +12,7 @@ on:
         - gamepad-support
         - keyboard-experimental
         - gamepad-support-patch-v2
+        - native-libs
         
 jobs:
   build:
