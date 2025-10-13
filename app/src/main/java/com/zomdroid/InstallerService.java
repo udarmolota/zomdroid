@@ -95,6 +95,7 @@ public class InstallerService extends Service implements TaskProgressListener {
             return;
         }
         GameInstance gameInstance = GameInstanceManager.requireSingleton().getInstanceByName(gameInstanceName);
+        String buildVersion = gameInstance.getBuildVersion();
         if (gameInstance == null) {
             finishWithError(getString(R.string.dialog_title_failed_to_create_instance),
                     "Game instance with name " + gameInstanceName + " not found");
@@ -110,6 +111,34 @@ public class InstallerService extends Service implements TaskProgressListener {
         executorService.submit(() -> {
             try {
                 installGameFromZip(gameInstance, gameFilesArchiveUri);
+
+                String nativeLibsPath = gameInstance.getGamePath() + "/android/arm64-v8a";
+                File nativeLibsDir = new File(nativeLibsPath);
+                if (nativeLibsDir.exists())
+                  FileUtils.deleteDirectory(nativeLibsDir);
+                nativeLibsDir.mkdirs();
+
+                String nativeLibsBundle;
+                switch (buildVersion) {
+                  case "41":
+                    nativeLibsBundle = C.assets.BUNDLES_NATIVE_LIBS_41;
+                    break;
+                  case "42":
+                    nativeLibsBundle = C.assets.BUNDLES_NATIVE_LIBS_42;
+                    break;
+                  default:
+                    finishWithError(getString(R.string.dialog_title_failed_to_create_instance),
+                      "Unsupported build version: " + buildVersion);
+                    return;
+                }
+
+              try {
+                InputStream nativeLibsStream = getAssets().open(nativeLibsBundle);
+                FileUtils.extractTarToDisk(nativeLibsStream, nativeLibsPath, this, 0);
+              } catch (IOException e) {
+                finishWithError(getString(R.string.dialog_title_failed_to_create_instance),
+                  "Failed to extract native ARM libraries: " + e.getMessage());
+              }
             } catch (Exception e) {
                 finishWithError(getString(R.string.dialog_title_failed_to_create_instance), e.toString());
                 return;

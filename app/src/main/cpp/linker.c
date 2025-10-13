@@ -560,7 +560,7 @@ void *dlopen(const char* filename, int flags) {
             snprintf(android_filename, BUF_SIZE,"android/arm64-v8a/%s", base);
 
             if (access(android_filename, F_OK) == 0) {
-                LOGD(" %s", android_filename);
+                LOGD("[linker] Native Android version of %s is found", android_filename);
                 jni_libs[i].handle = loader_dlopen(android_filename, flags, __builtin_return_address(0));
                 jni_libs[i].is_emulated = false;
                 return jni_libs[i].handle;

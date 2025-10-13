@@ -10,6 +10,7 @@ public class PresetManager {
     static {
         presets.add(new InstallationPreset.Builder()
                 .setName("Build 42")
+                .setBuildVersion("42")
                 .setClassPathArray(new String[]{
                         ".",
                         "commons-compress-1.27.1.jar",
@@ -56,6 +57,7 @@ public class PresetManager {
 
         presets.add(new InstallationPreset.Builder()
                 .setName("Build 41")
+                .setBuildVersion("41")
                 .setClassPathArray(new String[]{
                         ".",
                         "commons-compress-1.18.jar",
