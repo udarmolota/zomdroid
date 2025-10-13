@@ -1,12 +1,18 @@
-## [1.2.5] - 2025-10-5
+## [1.2.4] - 2025-10-13
 ### Added
-**Better build 42 Support**
-- Added some performance optimizations  
-- Implemented native library support for Build 42  
-- Native libraries are loaded manually and provided separately  
+**🛠 Fixes**
+- Integrated some error fixes by @Wakort (v1.2.2), improving overall stability and compatibility.
+
+**🎮 Gamepad Enhancements**
+- Integrated extended gamepad support for broader device compatibility (from v1.2.3.v2).
+- Integrated mapping configuration now persists after exiting the game (from v1.2.3.v2).
+
+**🚀 Native Library Integration**
+- Added native libraries from Project Zomboid developers (PZ build 42.12).
+- Significant performance improvements, especially on build 42.
+- Faster loading times and smoother gameplay experience.
 - Known issue: crash occurs when opening the map on Build 42.8 and above  
-- Changes authored by @Wakort
-  
+
 ---
 
 ## [1.2.3.v2] - 2025-09-29
