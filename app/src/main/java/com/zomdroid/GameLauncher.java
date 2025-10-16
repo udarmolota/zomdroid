@@ -4,7 +4,6 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.view.Surface;
 import android.content.Context;
-import android.hardware.input.InputManager;
 import android.view.InputDevice;
 
 import com.zomdroid.input.InputNativeInterface;
@@ -68,25 +67,21 @@ public class GameLauncher {
         initZomdroidWindow();
         
         // Check if any device connected to the phone through InputManager
-        Context context = InputControlsView.getStaticContext();
-        if (context != null) {
-            InputManager inputManager = (InputManager) context.getSystemService(Context.INPUT_SERVICE);
-            boolean hasRealGamepad = false;
-            int[] deviceIds = inputManager.getInputDeviceIds();
-            for (int id : deviceIds) {
-                InputDevice device = inputManager.getInputDevice(id);
-                if (device != null && (device.getSources() & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD) {
-                    String name = device.getName().toLowerCase();
-                    if (!name.contains("uinput") && !name.contains("virtual") && !name.contains("pon")) {
-                        hasRealGamepad = true;
-                        break;
-                    }
+        boolean hasRealGamepad = false;
+        int[] deviceIds = InputDevice.getDeviceIds();
+        for (int id : deviceIds) {
+            InputDevice device = InputDevice.getDevice(id);
+            if (device != null && !device.isVirtual()) {
+                int sources = device.getSources();
+                if ((sources & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD ||
+                    (sources & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK) {
+                    hasRealGamepad = true;
+                    break;
                 }
             }
-        
-            if (hasRealGamepad) {
-                InputNativeInterface.sendJoystickConnected();
-            }
+        }        
+        if (hasRealGamepad) {
+            InputNativeInterface.sendJoystickConnected();
         } 
 
         ArrayList<String> jvmArgs = gameInstance.getJvmArgsAsList();
