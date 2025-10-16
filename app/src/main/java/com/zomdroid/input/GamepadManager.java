@@ -150,8 +150,13 @@ public class GamepadManager implements InputManager.InputDeviceListener {
     // True if InputDevice is a gamepad or joystick
     private boolean isGamepadDevice(InputDevice device) {
         int sources = device.getSources();
-        return ((sources & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD)
+        boolean isGamepadSource = ((sources & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD)
                 || ((sources & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK);
+    
+        // Added: check if device has usable motion ranges (sticks or triggers)  - MIUI check
+        boolean hasMotion = device.getMotionRanges() != null && !device.getMotionRanges().isEmpty();
+    
+        return isGamepadSource && hasMotion;
     }
 
     @Override
