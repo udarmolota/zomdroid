@@ -8,6 +8,7 @@ import android.hardware.input.InputManager;
 import android.view.InputDevice;
 
 import com.zomdroid.input.InputNativeInterface;
+import com.zomdroid.input.InputControlsView;
 import com.zomdroid.game.GameInstance;
 
 import java.util.ArrayList;
