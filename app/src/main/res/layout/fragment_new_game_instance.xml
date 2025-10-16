@@ -89,5 +89,43 @@
         app:layout_constraintBottom_toBottomOf="@id/new_game_instance_files_path_et"
         android:src="@drawable/mt_icon_folder_open"/>
 
+    <!-- Native Libraries Label -->
+    <TextView
+        android:id="@+id/newGameInstanceNativeLibsLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/game_instance_native_libs_label"
+        android:textColor="@color/white"
+        app:layout_constraintTop_toBottomOf="@id/new_game_instance_files_path_et"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp" />
+    
+    <!-- Native Libraries File Path -->
+    <EditText
+        android:id="@+id/newGameInstanceNativeLibsPathEt"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/game_instance_no_file_selected"
+        android:enabled="false"
+        android:focusable="false"
+        android:inputType="none"
+        app:layout_constraintTop_toBottomOf="@id/newGameInstanceNativeLibsLabel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/newGameInstanceNativeLibsBrowseIb"
+        android:layout_marginTop="8dp" />
+    
+    <!-- Browse Button -->
+    <ImageButton
+        android:id="@+id/newGameInstanceNativeLibsBrowseIb"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_folder"
+        android:contentDescription="@string/game_instance_browse_native_libs"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        app:layout_constraintTop_toTopOf="@id/newGameInstanceNativeLibsPathEt"
+        app:layout_constraintBottom_toBottomOf="@id/newGameInstanceNativeLibsPathEt"
+        app:layout_constraintEnd_toEndOf="parent" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
