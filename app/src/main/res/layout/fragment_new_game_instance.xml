@@ -90,48 +90,33 @@
         android:src="@drawable/mt_icon_folder_open"/>
 
     <!-- Native Libraries Label -->
-<TextView
-    android:id="@+id/new_game_instance_native_libs_tv"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/new_game_instance_files_path_et"
-    app:layout_constraintEnd_toEndOf="parent"
-    android:text="@string/game_instance_native_libs_label" />
+  <TextView
+      android:id="@+id/new_game_instance_native_libs_tv"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/new_game_instance_files_path_et"
+      app:layout_constraintEnd_toEndOf="parent"
+      android:text="@string/game_instance_native_libs_label" />
 
-<ImageButton
-    style="@style/AppTheme.ImageButton"
-    android:id="@+id/new_game_instance_native_libs_help_ib"
-    android:layout_width="0dp"
-    android:layout_height="0dp"
-    android:layout_marginStart="4dp"
-    android:scaleType="fitCenter"
-    android:adjustViewBounds="true"
-    app:layout_constraintStart_toEndOf="@id/new_game_instance_native_libs_tv"
-    app:layout_constraintTop_toTopOf="@id/new_game_instance_native_libs_tv"
-    app:layout_constraintBottom_toBottomOf="@id/new_game_instance_native_libs_tv"
-    app:layout_constraintWidth_default="wrap"
-    app:layout_constraintHeight_default="wrap"
-    android:src="@drawable/mt_icon_help" />
+  <EditText
+      android:id="@+id/new_game_instance_native_libs_path_et"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/new_game_instance_native_libs_tv"
+      app:layout_constraintEnd_toStartOf="@id/new_game_instance_native_libs_browse_ib"
+      android:hint="@string/game_instance_no_file_selected"
+      android:enabled="false"
+      android:focusable="false"
+      android:inputType="none" />
 
-<EditText
-    android:id="@+id/new_game_instance_native_libs_path_et"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/new_game_instance_native_libs_tv"
-    app:layout_constraintEnd_toStartOf="@id/new_game_instance_native_libs_browse_ib"
-    android:hint="@string/game_instance_no_file_selected"
-    android:enabled="false"
-    android:focusable="false"
-    android:inputType="none" />
-
-<ImageButton
-    style="@style/AppTheme.ImageButton"
-    android:id="@+id/new_game_instance_native_libs_browse_ib"
-    app:layout_constraintTop_toTopOf="@id/new_game_instance_native_libs_path_et"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintBottom_toBottomOf="@id/new_game_instance_native_libs_path_et"
-    android:src="@drawable/mt_icon_folder_open" />
+  <ImageButton
+      style="@style/AppTheme.ImageButton"
+      android:id="@+id/new_game_instance_native_libs_browse_ib"
+      app:layout_constraintTop_toTopOf="@id/new_game_instance_native_libs_path_et"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintBottom_toBottomOf="@id/new_game_instance_native_libs_path_et"
+      android:src="@drawable/mt_icon_folder_open" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

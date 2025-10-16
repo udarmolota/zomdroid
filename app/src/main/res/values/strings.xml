@@ -100,7 +100,7 @@
     <string name="gamepad_mapper_save">Mapping Complete!</string>
     <string name="gamepad_mapper_success">Gamepad mapping saved successfully</string>
     <string name="gamepad_mapper_reset_confirmation">Gamepad mapping reset to default</string>
-    
+
     <!-- Gamepad Button Names -->
     <string name="gamepad_mapper_button_a">A Button</string>
     <string name="gamepad_mapper_button_b">B Button</string>
@@ -122,6 +122,5 @@
     <string name="game_instance_native_libs_label">Native Libraries (.zip)</string>
     <string name="game_instance_no_native_libs_selected">Please select native libraries ZIP (opt. for MP)</string>
     <string name="game_instance_browse_native_libs">Browse native libraries ZIP</string>
-    <string name="game_instance_no_file_selected">No file selected</string>
 
 </resources>

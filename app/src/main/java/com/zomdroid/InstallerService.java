@@ -110,7 +110,8 @@ public class InstallerService extends Service implements TaskProgressListener {
                     "Game files archive URI intent extra is missing");
             return;
         }
-        executorService.submit(() -> {
+
+      executorService.submit(() -> {
             try {
                 installGameFromZip(gameInstance, gameFilesArchiveUri);
 
@@ -133,14 +134,6 @@ public class InstallerService extends Service implements TaskProgressListener {
                     System.out.println("No native libraries provided — skipping multiplayer setup");
                 }
 
-
-              try {
-                InputStream nativeLibsStream = getAssets().open(nativeLibsBundle);
-                FileUtils.extractTarToDisk(nativeLibsStream, nativeLibsPath, this, 0);
-              } catch (IOException e) {
-                finishWithError(getString(R.string.dialog_title_failed_to_create_instance),
-                  "Failed to extract native ARM libraries: " + e.getMessage());
-              }
             } catch (Exception e) {
                 finishWithError(getString(R.string.dialog_title_failed_to_create_instance), e.toString());
                 return;

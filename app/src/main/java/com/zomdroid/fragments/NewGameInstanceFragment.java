@@ -6,12 +6,16 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -28,6 +32,8 @@ import com.zomdroid.R;
 import com.zomdroid.databinding.FragmentNewGameInstanceBinding;
 import com.zomdroid.game.GameInstance;
 import com.zomdroid.game.InstallationPreset;
+import com.zomdroid.game.GameInstanceManager;
+import com.zomdroid.game.PresetManager;
 
 import java.nio.file.FileSystemException;
 import java.util.Objects;
@@ -90,7 +96,6 @@ public class NewGameInstanceFragment extends Fragment {
             public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
                 if (menuItem.getItemId() == R.id.action_install) {
                     String name = binding.newGameInstanceNameEt.getText().toString();
-
                     if (!GameInstance.isValidName(name)) {
                         Toast.makeText(requireContext(), R.string.game_instance_name_invalid, Toast.LENGTH_SHORT).show();
                         return false;
@@ -104,7 +109,7 @@ public class NewGameInstanceFragment extends Fragment {
                         return false;
                     }
 
-                    GameInstance gameInstance;
+                    GameInstance gameInstance = null;
                     try {
                         gameInstance = new GameInstance(name, (InstallationPreset) binding.newGameInstancePresetS.getSelectedItem());
                     } catch (FileSystemException e) {
@@ -112,31 +117,82 @@ public class NewGameInstanceFragment extends Fragment {
                     }
 
                     // Start InstallerService with both ZIPs
-                    Intent intent = new Intent(requireContext(), InstallerService.class);
-                    intent.putExtra(InstallerService.EXTRA_GAME_INSTANCE_NAME, name);
-                    intent.putExtra(InstallerService.EXTRA_GAME_FILES_URI, gameFilesZipUri);
-                    if (nativeLibsZipUri != null) {
-                        intent.putExtra(InstallerService.EXTRA_NATIVE_LIBS_URI, nativeLibsZipUri);
-                    }
+                  GameInstanceManager.requireSingleton().registerInstance(gameInstance);
 
-                    requireContext().startService(intent);
-                    Navigation.findNavController(requireView()).navigateUp();
+                  Intent installerIntent = new Intent(requireContext(), InstallerService.class);
+                  installerIntent.putExtra(InstallerService.EXTRA_COMMAND, InstallerService.Task.CREATE_GAME_INSTANCE.ordinal());
+                  installerIntent.putExtra(InstallerService.EXTRA_GAME_INSTANCE_NAME, gameInstance.getName());
+                  installerIntent.putExtra(InstallerService.EXTRA_ARCHIVE_URI, gameFilesZipUri);
+                  if (nativeLibsZipUri != null) {
+                    installerIntent.putExtra(InstallerService.EXTRA_NATIVE_LIBS_URI, nativeLibsZipUri);
+                  }
+                  Navigation.findNavController(binding.getRoot()).navigateUp();
+                  requireContext().startForegroundService(installerIntent);
+
                     return true;
                 }
                 return false;
             }
         }, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
 
-        // Browse button for game ZIP
-        binding.newGameInstanceFilesBrowseIb.setOnClickListener(v -> {
-            actionOpenDocumentLauncher.launch(ZIP_MIME);
+        // Hide keyboard when user presses "Done"
+        binding.newGameInstanceNameEt.setOnEditorActionListener((v, actionId, event) -> {
+          if (actionId == EditorInfo.IME_ACTION_DONE) {
+            v.clearFocus();
+          }
+          return false;
         });
 
-        // Browse button for native libs ZIP
-        binding.newGameInstanceNativeLibsBrowseIb.setOnClickListener(v -> {
-            actionOpenNativeLibsLauncher.launch(ZIP_MIME);
+        // Validate game instance name as user types
+        binding.newGameInstanceNameEt.addTextChangedListener(new TextWatcher() {
+          @Override
+          public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+          @Override
+          public void onTextChanged(CharSequence s, int start, int before, int count) {
+            if (!GameInstance.isValidName(s.toString())) {
+              binding.newGameInstanceNameEt.setError(getString(R.string.game_instance_name_invalid));
+            } else if (!GameInstance.isUniqueName(s.toString())) {
+              binding.newGameInstanceNameEt.setError(getString(R.string.game_instance_name_already_exists));
+            } else {
+              binding.newGameInstanceNameEt.setError(null);
+            }
+          }
+
+          @Override
+          public void afterTextChanged(Editable s) {}
         });
+
+      // Populate version selection spinner
+      binding.newGameInstancePresetS.setAdapter(new ArrayAdapter<>(
+        requireContext(),
+        android.R.layout.simple_spinner_dropdown_item,
+        PresetManager.getPresets()
+      ));
+
+      // Help button opens wiki fragment
+      binding.newGameInstanceFilesHelpIb.setOnClickListener(v -> {
+        Navigation.findNavController(v).navigate(R.id.wiki_fragment);
+      });
+
+      // Browse button for game ZIP
+      binding.newGameInstanceFilesBrowseIb.setOnClickListener(v -> {
+        actionOpenDocumentLauncher.launch(ZIP_MIME);
+      });
+
+      // Browse button for native libs ZIP
+      binding.newGameInstanceNativeLibsBrowseIb.setOnClickListener(v -> {
+        actionOpenNativeLibsLauncher.launch(ZIP_MIME);
+      });
+
+
     }
+
+  @Override
+  public void onDestroyView() {
+    super.onDestroyView();
+    binding = null;
+  }
 
     // Helper to extract file name from URI
     private String extractFileName(Uri uri) {
