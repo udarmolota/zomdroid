@@ -87,9 +87,7 @@ public class GameLauncher {
             if (hasRealGamepad) {
                 InputNativeInterface.sendJoystickConnected();
             }
-        } else {
-            Log.w("GameLauncher", "Context is null, skipping joystick check");
-        }
+        } 
 
         ArrayList<String> jvmArgs = gameInstance.getJvmArgsAsList();
         jvmArgs.add("-Dorg.lwjgl.opengl.libname=" + LauncherPreferences.requireSingleton().getRenderer().libName);
