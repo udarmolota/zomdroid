@@ -40,7 +40,7 @@ public class InputControlsView extends View {
     private SharedPreferences sharedPreferences;
 
     private ElementSettingsController elementSettingsController;
-
+    private static Context staticContext;
 
     public InputControlsView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -82,6 +82,7 @@ public class InputControlsView extends View {
                 return false;
             }
         });
+        staticContext = context;
     }
 
     private void showAddElementDialog() {
@@ -258,5 +259,12 @@ public class InputControlsView extends View {
         protected abstract void close();
 
         protected abstract void hide();
+    }
+
+    public static Context getStaticContext() {
+        if (staticContext == null) {
+            Log.w(LOG_TAG, "Static Context is null");
+        }
+        return staticContext;
     }
 }
