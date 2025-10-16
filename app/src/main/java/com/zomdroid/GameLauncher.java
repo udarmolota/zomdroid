@@ -67,22 +67,27 @@ public class GameLauncher {
         initZomdroidWindow();
         
         // Check if any device connected to the phone through InputManager
-        InputManager inputManager = (InputManager) AppStorage.requireSingleton().getSystemService(Context.INPUT_SERVICE);
-        boolean hasRealGamepad = false;
-        int[] deviceIds = inputManager.getInputDeviceIds();
-        for (int id : deviceIds) {
-            InputDevice device = inputManager.getInputDevice(id);
-            if (device != null && (device.getSources() & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD) {
-                String name = device.getName().toLowerCase();
-                if (!name.contains("uinput") && !name.contains("virtual") && !name.contains("pon")) {
-                    hasRealGamepad = true;
-                    break;
+        Context context = InputControlsView.getStaticContext();
+        if (context != null) {
+            InputManager inputManager = (InputManager) context.getSystemService(Context.INPUT_SERVICE);
+            boolean hasRealGamepad = false;
+            int[] deviceIds = inputManager.getInputDeviceIds();
+            for (int id : deviceIds) {
+                InputDevice device = inputManager.getInputDevice(id);
+                if (device != null && (device.getSources() & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD) {
+                    String name = device.getName().toLowerCase();
+                    if (!name.contains("uinput") && !name.contains("virtual") && !name.contains("pon")) {
+                        hasRealGamepad = true;
+                        break;
+                    }
                 }
             }
-        }
-
-        if (hasRealGamepad) {
-            InputNativeInterface.sendJoystickConnected();
+        
+            if (hasRealGamepad) {
+                InputNativeInterface.sendJoystickConnected();
+            }
+        } else {
+            Log.w("GameLauncher", "Context is null, skipping joystick check");
         }
 
         ArrayList<String> jvmArgs = gameInstance.getJvmArgsAsList();
