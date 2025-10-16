@@ -262,9 +262,6 @@ public class InputControlsView extends View {
     }
 
     public static Context getStaticContext() {
-        if (staticContext == null) {
-            Log.w(LOG_TAG, "Static Context is null");
-        }
         return staticContext;
     }
 }
