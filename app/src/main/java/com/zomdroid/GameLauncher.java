@@ -3,8 +3,6 @@ package com.zomdroid;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.view.Surface;
-import android.content.Context;
-import android.view.InputDevice;
 
 import com.zomdroid.input.InputNativeInterface;
 import com.zomdroid.input.InputControlsView;
@@ -65,24 +63,7 @@ public class GameLauncher {
         Os.setenv("ZOMDROID_GLES_MINOR", "2", true);*/
 
         initZomdroidWindow();
-        
-        // Check if any device connected to the phone through InputManager
-        boolean hasRealGamepad = false;
-        int[] deviceIds = InputDevice.getDeviceIds();
-        for (int id : deviceIds) {
-            InputDevice device = InputDevice.getDevice(id);
-            if (device != null && !device.isVirtual()) {
-                int sources = device.getSources();
-                if ((sources & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD ||
-                    (sources & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK) {
-                    hasRealGamepad = true;
-                    break;
-                }
-            }
-        }        
-        if (hasRealGamepad) {
-            InputNativeInterface.sendJoystickConnected();
-        } 
+        InputNativeInterface.sendJoystickConnected();
 
         ArrayList<String> jvmArgs = gameInstance.getJvmArgsAsList();
         jvmArgs.add("-Dorg.lwjgl.opengl.libname=" + LauncherPreferences.requireSingleton().getRenderer().libName);
