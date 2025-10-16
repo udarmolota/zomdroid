@@ -45,6 +45,8 @@ public class InstallerService extends Service implements TaskProgressListener {
     public static final String EXTRA_COMMAND = "com.zomdroid.InstallerService.EXTRA_COMMAND";
     public static final String EXTRA_GAME_INSTANCE_NAME = "com.zomdroid.InstallerService.EXTRA_GAME_INSTANCE_NAME";
     public static final String EXTRA_ARCHIVE_URI = "com.zomdroid.InstallerService.EXTRA_ARCHIVE_URI";
+    public static final String EXTRA_NATIVE_LIBS_URI = "com.zomdroid.InstallerService.EXTRA_NATIVE_LIBS_URI";
+
     private final IBinder binder = new LocalBinder();
     private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private NotificationManagerCompat notificationManager;
@@ -118,19 +120,19 @@ public class InstallerService extends Service implements TaskProgressListener {
                   FileUtils.deleteDirectory(nativeLibsDir);
                 nativeLibsDir.mkdirs();
 
-                String nativeLibsBundle;
-                switch (buildVersion) {
-                  case "41":
-                    nativeLibsBundle = C.assets.BUNDLES_NATIVE_LIBS_41;
-                    break;
-                  case "42":
-                    nativeLibsBundle = C.assets.BUNDLES_NATIVE_LIBS_42;
-                    break;
-                  default:
-                    finishWithError(getString(R.string.dialog_title_failed_to_create_instance),
-                      "Unsupported build version: " + buildVersion);
-                    return;
+                Uri nativeLibsArchiveUri = intent.getParcelableExtra(EXTRA_NATIVE_LIBS_URI);
+                if (nativeLibsArchiveUri != null) {
+                    try (InputStream nativeLibsStream = getContentResolver().openInputStream(nativeLibsArchiveUri)) {
+                        FileUtils.extractZipToDisk(nativeLibsStream, nativeLibsPath, this,
+                        FileUtils.queryFileSize(getContentResolver(), nativeLibsArchiveUri));
+                    } catch (IOException e) {
+                        System.out.println("Native libraries not installed: " + e.getMessage());
+                        // Still can work without MP
+                    }
+                } else {
+                    System.out.println("No native libraries provided — skipping multiplayer setup");
                 }
+
 
               try {
                 InputStream nativeLibsStream = getAssets().open(nativeLibsBundle);
