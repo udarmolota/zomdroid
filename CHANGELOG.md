@@ -4,7 +4,7 @@
 - Fixed the issue with missing on-screen controls on MIUI devices.
 
 **🚀 Native Library Integration**
-- Added new field for uploading native libraries from Project Zomboid developers (PZ build 42.12) when adding a new game instance.
+- Added a new field for uploading native libraries from Project Zomboid developers (PZ build 42.12) when adding a new game instance.
 - Multiplayer support (requers 2 native libs: libRakNet64.so, libZNetNoSteam64.so)
 
 ---
