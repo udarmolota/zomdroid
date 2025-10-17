@@ -1,3 +1,14 @@
+## [1.2.4.v2] - 2025-10-17
+### Added
+**🛠 Fixes**
+- Fixed the issue with missing on-screen controls on MIUI devices.
+
+**🚀 Native Library Integration**
+- Added new field for uploading native libraries from Project Zomboid developers (PZ build 42.12) when adding a new game instance.
+- Multiplayer support (requers 2 native libs: libRakNet64.so, libZNetNoSteam64.so)
+
+---
+
 ## [1.2.4] - 2025-10-13
 ### Added
 **🛠 Fixes**
