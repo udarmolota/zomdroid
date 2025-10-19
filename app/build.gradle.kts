@@ -36,10 +36,10 @@ android {
 
     defaultConfig {
         applicationId = "com.zomdroid"
-        minSdk = 30
+        minSdk = 29
         targetSdk = 35
         versionCode = 4
-        versionName = "1.2.4.v2"
+        versionName = "1.2.4.test"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
