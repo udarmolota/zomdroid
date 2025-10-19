@@ -6,7 +6,9 @@ import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.InputDevice;
-
+import android.view.KeyCharacterMap;
+import android.view.InputDevice.MotionRange;
+import android.view.KeyEvent;
 
 /**
  * Manages gamepad connection and input mapping for Android.
@@ -150,24 +152,34 @@ public class GamepadManager implements InputManager.InputDeviceListener {
 
     // True if InputDevice is a gamepad or joystick
     private boolean isGamepadDevice(InputDevice device) {
-        if (device == null) return false;
-    
-        int sources = device.getSources();
-        boolean isGamepadSource = ((sources & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD)
-                || ((sources & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK);
-    
-        boolean hasMotion = device.getMotionRanges() != null && !device.getMotionRanges().isEmpty();
-    
-        // NEW: Check vendor/product ID to exclude virtual or MIUI ghost devices
-        int vendorId = device.getVendorId();
-        int productId = device.getProductId();
-        boolean isKnownGamepad = (vendorId != 0 || productId != 0); // 0 usually means virtual or unknown
-    
-        // NEW: Filter out virtual keyboard masquerading as gamepad
-        boolean isPhysical = !device.isVirtual();
-    
-        return isGamepadSource && hasMotion && isKnownGamepad && isPhysical;
-    }
+    if (device == null) return false;
+
+    // Check if the device reports itself as a gamepad or joystick
+    int sources = device.getSources();
+    boolean isGamepadSource = ((sources & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD)
+            || ((sources & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK);
+
+    // Check if the device has motion ranges (e.g., analog sticks or triggers)
+    boolean hasMotion = device.getMotionRanges() != null && !device.getMotionRanges().isEmpty();
+
+    // Check if the device has physical keys (not just motion input)
+    boolean hasKeys = device.getKeyboardType() != InputDevice.KEYBOARD_TYPE_NONE;
+
+    // Check vendor and product ID — 0 usually means virtual or unknown device
+    int vendorId = device.getVendorId();
+    int productId = device.getProductId();
+    boolean isKnownGamepad = (vendorId != 0 || productId != 0);
+
+    // Filter out virtual devices (e.g., emulated input or MIUI ghost devices)
+    boolean isPhysical = !device.isVirtual();
+
+    // Filter out devices with suspicious names (e.g., "Virtual Input")
+    String name = device.getName();
+    boolean isGhostDevice = name != null && name.toLowerCase().contains("virtual");
+
+    // Final decision: must be gamepad-like, have motion and keys, be physical, and not ghost
+    return isGamepadSource && hasMotion && hasKeys && isKnownGamepad && isPhysical && !isGhostDevice;
+}
 
 
     @Override
