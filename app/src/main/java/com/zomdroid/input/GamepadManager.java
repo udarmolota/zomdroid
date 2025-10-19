@@ -5,6 +5,7 @@ import android.hardware.input.InputManager;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.InputDevice;
 
 
 /**
@@ -149,15 +150,25 @@ public class GamepadManager implements InputManager.InputDeviceListener {
 
     // True if InputDevice is a gamepad or joystick
     private boolean isGamepadDevice(InputDevice device) {
+        if (device == null) return false;
+    
         int sources = device.getSources();
         boolean isGamepadSource = ((sources & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD)
                 || ((sources & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK);
     
-        // Added: check if device has usable motion ranges (sticks or triggers)  - MIUI check
         boolean hasMotion = device.getMotionRanges() != null && !device.getMotionRanges().isEmpty();
     
-        return isGamepadSource && hasMotion;
+        // NEW: Check vendor/product ID to exclude virtual or MIUI ghost devices
+        int vendorId = device.getVendorId();
+        int productId = device.getProductId();
+        boolean isKnownGamepad = (vendorId != 0 || productId != 0); // 0 usually means virtual or unknown
+    
+        // NEW: Filter out virtual keyboard masquerading as gamepad
+        boolean isPhysical = !device.isVirtual();
+    
+        return isGamepadSource && hasMotion && isKnownGamepad && isPhysical;
     }
+
 
     @Override
     public void onInputDeviceAdded(int deviceId) {
