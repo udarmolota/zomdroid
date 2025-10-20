@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import com.zomdroid.GamepadManager;
 import com.zomdroid.LauncherPreferences;
 import com.zomdroid.databinding.FragmentTouchControlsBinding;
+import com.zomdroid.R;
 
 public class TouchControlsFragment extends Fragment {
     private FragmentTouchControlsBinding binding;
