@@ -23,6 +23,8 @@ public class LauncherPreferences {
     private boolean isDebug = false;
     private AudioAPI audioAPI = AudioAPI.AAUDIO;
 
+    private static final String KEY_TOUCH_CONTROLS = "touch_controls_enabled";
+
     LauncherPreferences() {
         if (isKgslSupported()) {
             this.renderer = Renderer.ZINK_ZFA;
