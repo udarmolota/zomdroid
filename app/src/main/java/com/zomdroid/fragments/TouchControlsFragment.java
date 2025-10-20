@@ -37,8 +37,8 @@ public class TouchControlsFragment extends Fragment {
             GamepadManager.setTouchOverride(!isChecked);
 
             Toast.makeText(requireContext(),
-                isChecked ? getString(R.string.touch_controls_enabled_toast)
-                          : getString(R.string.touch_controls_disabled_toast),
+                (CharSequence) (isChecked ? getString(R.string.touch_controls_enabled_toast)
+                              : getString(R.string.touch_controls_disabled_toast)),
                 Toast.LENGTH_SHORT).show();
         });
     }
