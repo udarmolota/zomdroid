@@ -143,4 +143,15 @@ public class LauncherPreferences {
         AAUDIO,
         OPENSL
     }
+
+    private boolean touchControlsEnabled = false;
+
+    public boolean isTouchControlsEnabled() {
+        return touchControlsEnabled;
+    }
+    
+    public void setTouchControlsEnabled(boolean enabled) {
+        touchControlsEnabled = enabled;
+    }
+
 }
