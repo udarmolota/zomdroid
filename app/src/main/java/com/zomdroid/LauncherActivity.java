@@ -116,7 +116,12 @@ public class LauncherActivity extends AppCompatActivity {
                     messageView.setMovementMethod(LinkMovementMethod.getInstance());
                 }
                 return true;
-            }
+            } else if (item.getItemId() == R.id.action_open_touch_controls) {
+                // Navigate to TouchControlsFragment
+                binding.drawerLayout.close();
+                navController.navigate(R.id.action_open_touch_controls);
+                return true;
+            } 
 
             binding.drawerLayout.close();
 
