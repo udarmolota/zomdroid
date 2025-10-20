@@ -9,7 +9,7 @@
         android:id="@+id/touchControlsDescription"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Touch control mode disables gamepad support and enables on-screen buttons only."
+        android:text="@string/touch_controls_description"
         android:textSize="16sp"
         android:paddingBottom="16dp" />
 
@@ -17,5 +17,5 @@
         android:id="@+id/touchControlsSwitch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Enable on-screen controls" />
+        android:text="@string/touch_controls_switch_label" />
 </LinearLayout>
