@@ -35,7 +35,7 @@ public class TouchControlsFragment extends Fragment {
         // Handle switch toggle
         binding.touchControlsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             LauncherPreferences.requireSingleton().setTouchControlsEnabled(isChecked);
-            GamepadManager.setTouchOverride(!isChecked);
+            GamepadManager.setTouchOverride(isChecked);
 
             Toast.makeText(requireContext(),
                 (CharSequence) (isChecked ? getString(R.string.touch_controls_enabled_toast)
