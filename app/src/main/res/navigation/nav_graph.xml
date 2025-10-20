@@ -51,4 +51,11 @@
         android:label="@string/fragment_label_wiki">
     </fragment>
 
+    <fragment
+        android:id="@+id/action_open_touch_controls"
+        android:name="com.zomdroid.fragments.TouchControlsFragment"
+        android:label="@string/fragment_label_touch_controls"
+        tools:layout="@layout/fragment_touch_controls">
+    </fragment>
+
 </navigation>
