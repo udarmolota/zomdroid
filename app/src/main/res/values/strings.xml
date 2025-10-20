@@ -124,4 +124,10 @@
     <string name="game_instance_no_native_libs_selected">Please select native libraries ZIP (opt. for MP)</string>
     <string name="game_instance_browse_native_libs">Browse native libraries ZIP</string>
 
+    <!-- Onscreen controls -->
+    <string name="touch_controls_description">Touch control mode disables gamepad support and enables on-screen buttons only.</string>
+    <string name="touch_controls_switch_label">Enable on-screen controls</string>
+    <string name="touch_controls_enabled_toast">Touch controls enabled</string>
+    <string name="touch_controls_disabled_toast">Touch controls disabled</string>
+
 </resources>
