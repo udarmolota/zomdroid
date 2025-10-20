@@ -31,6 +31,7 @@ public class TouchControlsFragment extends Fragment {
         // Load current preference state
         boolean isEnabled = LauncherPreferences.requireSingleton().isTouchControlsEnabled();
         binding.touchControlsSwitch.setChecked(isEnabled);
+        GamepadManager.setTouchOverride(isEnabled); // must be set before GamepadManager is initialized
 
         // Handle switch toggle
         binding.touchControlsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {

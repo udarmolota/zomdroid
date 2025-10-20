@@ -62,6 +62,10 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         try {
             gamepadManager = new GamepadManager(this, this);
             gamepadManager.register();
+
+          // Apply touch override based on saved preference
+          boolean isTouchEnabled = LauncherPreferences.requireSingleton().isTouchControlsEnabled();
+          GamepadManager.setTouchOverride(isTouchEnabled);
         } catch (Exception e) {
             Log.e(LOG_TAG, "Failed to initialize GamepadManager", e);
             gamepadManager = null;
