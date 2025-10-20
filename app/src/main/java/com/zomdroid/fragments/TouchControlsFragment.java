@@ -9,7 +9,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import com.zomdroid.GamepadManager;
+import com.zomdroid.input.GamepadManager;
 import com.zomdroid.LauncherPreferences;
 import com.zomdroid.databinding.FragmentTouchControlsBinding;
 import com.zomdroid.R;
