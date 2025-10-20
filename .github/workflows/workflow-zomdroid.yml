@@ -9,8 +9,7 @@ on:
         default: 'gamepad-support'
         type: choice
         options:
-        - gamepad-support
-        - keyboard-experimental
+        - only_onscreen
         - gamepad-support-patch-v2
         - native-libs
         
