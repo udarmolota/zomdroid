@@ -126,8 +126,9 @@
 
     <!-- Onscreen controls -->
     <string name="touch_controls_description">Touch control mode disables gamepad support and enables on-screen buttons only.</string>
-    <string name="touch_controls_switch_label">Enable on-screen controls</string>
+    <string name="touch_controls_switch_label">Enable on-screen touch controls</string>
     <string name="touch_controls_enabled_toast">Touch controls enabled</string>
     <string name="touch_controls_disabled_toast">Touch controls disabled</string>
+    <string name="fragment_label_touch_controls">Touch Controls</string>
 
 </resources>
