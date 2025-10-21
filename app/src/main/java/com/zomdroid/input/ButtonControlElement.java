@@ -31,6 +31,7 @@ public class ButtonControlElement extends AbstractControlElement {
 
     @Override
     public void setInputType(InputType inputType) {
+        if (inputType == null || inputType == this.inputType) return;
         clearBindings();
         this.inputType = inputType;
     }
