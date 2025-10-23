@@ -53,6 +53,13 @@ public enum GLFWBinding {
     KEY_WORLD_1(161),
     KEY_WORLD_2(162),
 
+    /* Additional kb keys */
+    KEY_ESCAPE(27),
+    KEY_ENTER(13),
+    KEY_TAB(9),
+    KEY_BACKSPACE(8),
+    KEY_SPACE(32),
+
     /* mouse buttons */
     MOUSE_BUTTON_LEFT(0),
     MOUSE_BUTTON_RIGHT(1),
