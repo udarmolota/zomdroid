@@ -58,7 +58,6 @@ public enum GLFWBinding {
     KEY_ENTER(13),
     KEY_TAB(9),
     KEY_BACKSPACE(8),
-    KEY_SPACE(32),
 
     /* mouse buttons */
     MOUSE_BUTTON_LEFT(0),
