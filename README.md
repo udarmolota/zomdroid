@@ -1,6 +1,6 @@
 > [!NOTE]  
 > While the original development is currently on hold, community-driven updates are being made.  
-> Check the [CHANGELOG](CHANGELOG.md) for the latest improvements.
+> Check the [CHANGELOG](CHANGELOG.md) for the latest improvements. You can support continued development via [Ko-Fi](https://ko-fi.com/udarmolota).
 
 > [!WARNING] 
 > Development is currently on hold while I wait for an official response from The Indie Stone regarding potential sponsorship. Just to clarify — TIS is not blocking or interfering with development in any way. I'm simply waiting to hear back, as I don’t have the resources to continue without financial support.
