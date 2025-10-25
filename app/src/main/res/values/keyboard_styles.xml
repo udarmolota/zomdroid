@@ -8,5 +8,6 @@
         <item name="android:textSize">12sp</item>
         <item name="android:textColor">#FFFFFF</item>
         <item name="android:background">#66444444</item>
+        <item name="android:background">@drawable/keyboard_button_bg</item>
     </style>
 </resources>

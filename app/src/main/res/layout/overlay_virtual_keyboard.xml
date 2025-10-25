@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:background="@android:color/transparent"
+  android:clickable="true"
+  android:focusable="true">
+
+  <!-- Mouse/Touchpad Mode View (Default) -->
+  <LinearLayout
+      android:id="@+id/mouse_mode_layout"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:orientation="vertical"
+      android:background="@android:color/transparent">
+
+    <!-- Touchpad Area - Full Screen -->
+    <FrameLayout
+        android:id="@+id/touchpad_area"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@android:color/transparent">
+
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="Touchpad Area"
+          android:textColor="#80FFFFFF"
+          android:layout_gravity="center"
+          android:gravity="center"
+          android:alpha="0.5"
+          android:textSize="16sp" />
+
+    </FrameLayout>
+
+    <!-- Bottom Control Bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@android:color/transparent"
+        android:padding="8dp">
+
+      <Button
+          android:id="@+id/btn_left_click"
+          android:layout_width="0dp"
+          android:layout_height="50dp"
+          android:layout_weight="1"
+          android:text="L"
+          android:layout_marginEnd="4dp"
+          android:textSize="14sp" />
+
+      <Button
+          android:id="@+id/btn_right_click"
+          android:layout_width="0dp"
+          android:layout_height="50dp"
+          android:layout_weight="1"
+          android:text="R"
+          android:layout_marginStart="4dp"
+          android:layout_marginEnd="4dp"
+          android:textSize="14sp" />
+
+      <Button
+          android:id="@+id/btn_keyboard_mode_quick"
+          android:layout_width="0dp"
+          android:layout_height="50dp"
+          android:layout_weight="1"
+          android:text="KB"
+          android:layout_marginStart="4dp"
+          android:textSize="14sp" />
+
+    </LinearLayout>
+
+  </LinearLayout>
+
+  <!-- Keyboard Mode View -->
+  <LinearLayout
+      android:id="@+id/keyboard_mode_layout"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:orientation="vertical"
+      android:background="@android:color/transparent"
+      android:visibility="gone">
+
+  <!-- Transparent spacer to push keyboard to bottom -->
+  <View
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_weight="1" />
+
+    <!-- Custom Virtual Keyboard -->
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical"
+      android:background="#AA000000"
+      android:padding="8dp">
+
+      <!-- Row 1: Function Keys -->
+      <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="4"
+        android:rowCount="1"
+        android:layout_marginBottom="4dp">
+
+        <Button android:id="@+id/key_tab" android:text="Tab" style="@style/KeyboardButton" />
+        <Button android:id="@+id/key_capslock" android:text="Caps" style="@style/KeyboardButton" />
+        <Button android:id="@+id/key_shift" android:text="Shift" style="@style/KeyboardButton" />
+        <Button android:id="@+id/key_esc" android:text="Esc" style="@style/KeyboardButton" />
+      </GridLayout>
+
+      <!-- Row 2: QWERTY -->
+      <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="10"
+        android:layout_marginBottom="4dp">
+
+        <Button android:id="@+id/key_q" android:text="Q" style="@style/KeyboardButton" />
+        <Button android:id="@+id/key_w" android:text="W" style="@style/KeyboardButton" />
+        <Button android:id="@+id/key_e" android:text="E" style="@style/KeyboardButton" />
+        <Button android:id="@+id/key_r" android:text="R" style="@style/KeyboardButton" />
+        <Button android:id="@+id/key_t" android:text="T" style="@style/KeyboardButton" />
+        <Button android:id="@+id/key_y" android:text="Y" style="@style/KeyboardButton" />
+        <Button android:id="@+id/key_u" android:text="U" style="@style/KeyboardButton" />
+        <Button android:id="@+id/key_i" android:text="I" style="@style/KeyboardButton" />
+        <Button android:id="@+id/key_o" android:text="O" style="@style/KeyboardButton" />
+        <Button android:id="@+id/key_p" android:text="P" style="@style/KeyboardButton" />
+      </GridLayout>
+
+      <!-- Row 3: ASDF -->
+      <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="9"
+        android:layout_marginBottom="4dp">
+
+        <Button android:id="@+id/key_a" android:text="A" style="@style/KeyboardButton" />
+        <Button android:id="@+id/key_s" android:text="S" style="@style/KeyboardButton" />
+        <Button android:id="@+id/key_d" android:text="D" style="@style/KeyboardButton" />
+        <Button android:id="@+id/key_f" android:text="F" style="@style/KeyboardButton" />
+        <Button android:id="@+id/key_g" android:text="G" style="@style/KeyboardButton" />
+        <Button android:id="@+id/key_h" android:text="H" style="@style/KeyboardButton" />
+        <Button android:id="@+id/key_j" android:text="J" style="@style/KeyboardButton" />
+        <Button android:id="@+id/key_k" android:text="K" style="@style/KeyboardButton" />
+        <Button android:id="@+id/key_l" android:text="L" style="@style/KeyboardButton" />
+      </GridLayout>
+
+      <!-- Row 4: ZXCV -->
+      <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="7"
+        android:layout_marginBottom="4dp">
+
+        <Button android:id="@+id/key_z" android:text="Z" style="@style/KeyboardButton" />
+        <Button android:id="@+id/key_x" android:text="X" style="@style/KeyboardButton" />
+        <Button android:id="@+id/key_c" android:text="C" style="@style/KeyboardButton" />
+        <Button android:id="@+id/key_v" android:text="V" style="@style/KeyboardButton" />
+        <Button android:id="@+id/key_b" android:text="B" style="@style/KeyboardButton" />
+        <Button android:id="@+id/key_n" android:text="N" style="@style/KeyboardButton" />
+        <Button android:id="@+id/key_m" android:text="M" style="@style/KeyboardButton" />
+      </GridLayout>
+
+      <!-- Row 5: Special Keys -->
+      <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="4">
+
+        <Button android:id="@+id/key_space" android:text="SPACE"
+          android:layout_width="0dp" android:layout_height="40dp" android:layout_columnSpan="2"
+          android:layout_margin="2dp" android:textSize="12sp" />
+        <Button android:id="@+id/key_enter" android:text="ENTER" style="@style/KeyboardButton" />
+        <Button android:id="@+id/key_backspace" android:text="←" style="@style/KeyboardButton" />
+        <Button android:id="@+id/btn_back_to_touchpad" android:text="DONE" style="@style/KeyboardButton" />
+      </GridLayout>
+
+    </LinearLayout>
+  </LinearLayout>
+</FrameLayout>
