@@ -83,7 +83,7 @@
     <string name="game_instance_manage_storage">Manage storage</string>
     <string name="game_instance_delete">Delete</string>
 
-    <string name="donate_message">Enjoying the app and want to help it grow? Support its development on ko-fi.com/liamelui</string>
+    <string name="donate_message">Enjoying the app and want to help it grow? It was originally created by ko-fi.com/liamelui, and is now maintained and developed by ko-fi.com/udarmolota.</string>
 
     <string name="app_aborted">The app ran into an unexpected issue and had to close</string>
     <string name="share_logs">Share log file</string>
