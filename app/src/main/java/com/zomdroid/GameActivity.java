@@ -25,6 +25,8 @@ import com.zomdroid.input.InputNativeInterface;
 import com.zomdroid.databinding.ActivityGameBinding;
 import com.zomdroid.game.GameInstance;
 import com.zomdroid.game.GameInstanceManager;
+import com.zomdroid.input.AbstractControlElement;
+import com.zomdroid.input.InputControlsView;
 
 import org.fmod.FMOD;
 
@@ -179,6 +181,8 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
                     thread.start();
                     isGameStarted = true;
                 }
+                //binding.inputControlsV.applyInputMode(binding.inputControlsV.getCurrentInputMode());
+                //System.out.println("[mixed b] surfaceChanged → reapply input mode: " + binding.inputControlsV.getCurrentInputMode());
             }
 
             @Override
@@ -249,17 +253,28 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     @Override
     public void onGamepadConnected() {
         isGamepadConnected = true;
+
         if (binding.inputControlsV != null) {
-            binding.inputControlsV.setVisibility(View.GONE);
+            System.out.println("[mixed b] onGamepadConnected");
+            binding.inputControlsV.setVisibility(View.VISIBLE);
+            binding.inputControlsV.setGamepadConnected(true);
+            binding.inputControlsV.applyInputMode(InputControlsView.InputMode.MNK);
         }
+        //if (binding.inputControlsV != null) {
+        //    binding.inputControlsV.setVisibility(View.GONE);
+        //}
     }
 
     // Called when all physical gamepads are disconnected: show the virtual controller UI
     @Override
     public void onGamepadDisconnected() {
         isGamepadConnected = false;
+
         if (binding.inputControlsV != null) {
+            System.out.println("[mixed b] onGamepadDisconnected");
             binding.inputControlsV.setVisibility(View.VISIBLE);
+            binding.inputControlsV.setGamepadConnected(false);
+            binding.inputControlsV.applyInputMode(InputControlsView.InputMode.ALL);
         }
     }
 

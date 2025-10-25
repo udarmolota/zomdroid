@@ -197,4 +197,24 @@ public abstract class AbstractControlElement {
         MNK,
         GAMEPAD
     }
+    private boolean visible = true;
+
+    public void setVisible(boolean value) {
+      this.visible = value;
+    }
+
+    public boolean isVisible() {
+      return visible;
+    }
+
+    private boolean touchable = true;
+
+    public void setTouchable(boolean touchable) {
+      this.touchable = touchable;
+    }
+
+    public boolean isTouchable() {
+      return touchable;
+    }
+
 }

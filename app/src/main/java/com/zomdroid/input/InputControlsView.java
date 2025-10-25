@@ -15,7 +15,6 @@ import android.widget.ArrayAdapter;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -29,20 +28,23 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 
 public class InputControlsView extends View {
-    private static final String LOG_TAG = InputControlsView.class.getName();
-    private ArrayList<AbstractControlElement> controlElements = new ArrayList<>();
-    boolean isEditMode = false;
-    AbstractControlElement selectedElement;
-    AbstractControlElement pointerOverElement;
-    public float pixelScale = 1.f;
-    GestureDetector gestureDetector;
-    private Gson gson = new Gson();
-    private SharedPreferences sharedPreferences;
+  private static final String LOG_TAG = InputControlsView.class.getName();
+  private ArrayList<AbstractControlElement> controlElements = new ArrayList<>();
+  boolean isEditMode = false;
+  AbstractControlElement selectedElement;
+  AbstractControlElement pointerOverElement;
+  public float pixelScale = 1.f;
+  GestureDetector gestureDetector;
+  private Gson gson = new Gson();
+  private SharedPreferences sharedPreferences;
+  private Boolean isGamepadConnected = null;
+  private InputMode currentInputMode = InputMode.ALL;
 
     private ElementSettingsController elementSettingsController;
 
     public InputControlsView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        //this.currentInputMode = InputMode.ALL;
         this.sharedPreferences = context.getSharedPreferences(C.shprefs.NAME, MODE_PRIVATE);
 
         this.gestureDetector = new GestureDetector(context, new GestureDetector.OnGestureListener() {
@@ -116,14 +118,26 @@ public class InputControlsView extends View {
                 this.controlElements.set(i, controlElement);
             }
         }
-
+        if (currentInputMode != null) {
+            applyInputMode(currentInputMode);
+        }
     }
 
     @Override
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
+        System.out.println("[mixed b] onDraw called");
 
         for (AbstractControlElement controlElement : controlElements) {
+            boolean visible = controlElement.isVisible();
+            if (!controlElement.isVisible()) {
+              continue; // skip invisible elements
+            }
+            AbstractControlElement.InputType type = controlElement.getInputType();
+            if (controlElement instanceof ButtonControlElement) {
+                ButtonControlElement button = (ButtonControlElement) controlElement;
+                //System.out.println("[mixed b] drawing button: " + button.getText()+ ", type: " + type+", visible "+visible);
+            }
             controlElement.draw(canvas);
         }
     }
@@ -152,6 +166,7 @@ public class InputControlsView extends View {
             return gestureDetector.onTouchEvent(e);
         } else {
             for (AbstractControlElement controlElement : controlElements) {
+                if (!controlElement.isVisible()) continue;
                 if (controlElement.handleMotionEvent(e)) {
                     return true;
                 }
@@ -249,13 +264,70 @@ public class InputControlsView extends View {
         super.onDetachedFromWindow();
     }
 
-    public abstract static class ElementSettingsController {
-        protected boolean fromLeft;
+  public abstract static class ElementSettingsController {
+    protected boolean fromLeft;
+    protected abstract void open();
+    protected abstract void close();
+    protected abstract void hide();
+  }
 
-        protected abstract void open();
+  public void applyInputMode(InputMode mode) {
+      if (mode == null) {
+        System.out.println("[mixed b] applyInputMode skipped — mode is null");
+        return;
+      }
+      boolean changed = currentInputMode != mode;
+      this.currentInputMode = mode;
+      //System.out.println("[mixed b] mode "+mode+", currentInputMode "+currentInputMode);
+      for (AbstractControlElement element : controlElements) {
+          boolean visible;
+          switch (mode) {
+            case MNK:
+              visible = element.getInputType() == AbstractControlElement.InputType.MNK;
+              break;
+            case GAMEPAD:
+              visible = element.getInputType() == AbstractControlElement.InputType.GAMEPAD;
+              break;
+            case ALL:
+              visible = true;
+              break;
+            default:
+              visible = false;
+          }
+          System.out.println("[mixed b] applyInputType "+element.getInputType()+", visible "+visible);
+          element.setVisible(visible);
+      }
 
-        protected abstract void close();
+      if (changed) {
+          System.out.println("[mixed b] applyInputMode → mode changed to " + mode);
+          invalidate();
+      } else {
+          System.out.println("[mixed b] applyInputMode → mode same, no redraw");
+      }
+  }
 
-        protected abstract void hide();
+    public void setGamepadConnected(boolean connected) {
+        //if (isGamepadConnected != null && isGamepadConnected == connected) return;
+        isGamepadConnected = connected;
+        if (getWindowToken() != null && isShown()) {
+          applyInputMode(connected ? InputMode.MNK : InputMode.ALL);
+        } else {
+          System.out.println("[mixed b] View not ready — skipping applyInputMode");
+        }
+        //if (connected) {
+        //  applyInputMode(InputMode.MNK);
+        //} else {
+        //  applyInputMode(InputMode.ALL);
+        //}
+    }
+
+    public enum InputMode {
+      MNK,
+      GAMEPAD,
+      ALL
+    }
+
+    public InputMode getCurrentInputMode() {
+        return currentInputMode;
     }
 }

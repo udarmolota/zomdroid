@@ -98,7 +98,7 @@ public class GamepadManager implements InputManager.InputDeviceListener {
     public static void setTouchOverride(boolean override) {
         touchOverride = override;
     }
-    
+
     public static boolean isTouchOverrideEnabled() {
         return touchOverride;
     }
@@ -167,30 +167,30 @@ public class GamepadManager implements InputManager.InputDeviceListener {
             return false;
         }
         if (device == null) return false;
-    
+
         // Check if the device reports itself as a gamepad or joystick
         int sources = device.getSources();
         boolean isGamepadSource = ((sources & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD)
                 || ((sources & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK);
-    
+
         // Check if the device has motion ranges (e.g., analog sticks or triggers)
         boolean hasMotion = device.getMotionRanges() != null && !device.getMotionRanges().isEmpty();
-    
+
         // Check if the device has physical keys (not just motion input)
         boolean hasKeys = device.getKeyboardType() != InputDevice.KEYBOARD_TYPE_NONE;
-    
+
         // Check vendor and product ID — 0 usually means virtual or unknown device
         int vendorId = device.getVendorId();
         int productId = device.getProductId();
         boolean isKnownGamepad = (vendorId != 0 || productId != 0);
-    
+
         // Filter out virtual devices (e.g., emulated input or MIUI ghost devices)
         boolean isPhysical = !device.isVirtual();
-    
+
         // Filter out devices with suspicious names (e.g., "Virtual Input")
         String name = device.getName();
         boolean isGhostDevice = name != null && name.toLowerCase().contains("virtual");
-    
+
         // Final decision: must be gamepad-like, have motion and keys, be physical, and not ghost
         return isGamepadSource && hasMotion && hasKeys && isKnownGamepad && isPhysical && !isGhostDevice;
     }
@@ -357,12 +357,12 @@ public class GamepadManager implements InputManager.InputDeviceListener {
     private float readTriggerAxis(MotionEvent ev, boolean left) {
         InputDevice d = ev.getDevice();
         if (d == null) return 0f;
-    
+
         // Preferred axis first, then two common fallbacks
         final int[] axes = left
                 ? new int[]{ MotionEvent.AXIS_LTRIGGER, MotionEvent.AXIS_Z,     MotionEvent.AXIS_BRAKE }
                 : new int[]{ MotionEvent.AXIS_RTRIGGER, MotionEvent.AXIS_RZ,    MotionEvent.AXIS_GAS   };
-    
+
         final int src = ev.getSource();
         for (int ax : axes) {
             // Check support: with source (more strict) and without (broader)
