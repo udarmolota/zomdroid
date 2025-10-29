@@ -8,9 +8,13 @@ import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -39,11 +43,13 @@ public class InputControlsView extends View {
   private SharedPreferences sharedPreferences;
   private Boolean isGamepadConnected = null;
   private InputMode currentInputMode = InputMode.ALL;
+  private final Context context;
 
     private ElementSettingsController elementSettingsController;
 
     public InputControlsView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        this.context = context;
         //this.currentInputMode = InputMode.ALL;
         this.sharedPreferences = context.getSharedPreferences(C.shprefs.NAME, MODE_PRIVATE);
 
@@ -272,10 +278,7 @@ public class InputControlsView extends View {
   }
 
   public void applyInputMode(InputMode mode) {
-      if (mode == null) {
-        System.out.println("[mixed b] applyInputMode skipped — mode is null");
-        return;
-      }
+      if (mode == null) {return;}
       boolean changed = currentInputMode != mode;
       this.currentInputMode = mode;
       //System.out.println("[mixed b] mode "+mode+", currentInputMode "+currentInputMode);
@@ -294,40 +297,57 @@ public class InputControlsView extends View {
             default:
               visible = false;
           }
-          System.out.println("[mixed b] applyInputType "+element.getInputType()+", visible "+visible);
+          //System.out.println("[mixed b] applyInputType "+element.getInputType()+", visible "+visible);
           element.setVisible(visible);
       }
 
       if (changed) {
-          System.out.println("[mixed b] applyInputMode → mode changed to " + mode);
           invalidate();
-      } else {
-          System.out.println("[mixed b] applyInputMode → mode same, no redraw");
       }
   }
 
     public void setGamepadConnected(boolean connected) {
-        //if (isGamepadConnected != null && isGamepadConnected == connected) return;
+        //if (isGamepadConnected != null && isGamepadConnected View.Visible== connected) return;
         isGamepadConnected = connected;
         if (getWindowToken() != null && isShown()) {
           applyInputMode(connected ? InputMode.MNK : InputMode.ALL);
-        } else {
-          System.out.println("[mixed b] View not ready — skipping applyInputMode");
         }
-        //if (connected) {
-        //  applyInputMode(InputMode.MNK);
-        //} else {
-        //  applyInputMode(InputMode.ALL);
-        //}
     }
 
+    public void showTextInputOverlay() {
+      TextInputOverlayView keyboard = new TextInputOverlayView(getContext());
+
+      keyboard.setOnTextInputListener(text -> {
+        //chatInputField.append(text); // или другой обработчик
+      });
+
+      keyboard.attachTo(this); // если нужно использовать BaseInputConnection
+
+      ViewGroup parent = (ViewGroup) getParent();
+      if (parent == null) {
+        Toast.makeText(context, "InputControlsView, Parent view is null — cannot show keyboard", Toast.LENGTH_SHORT).show();
+        System.out.println("[keyboard] InputControlsView, Parent view is null — cannot show keyboard");
+        return;
+      }
+
+      FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+        FrameLayout.LayoutParams.MATCH_PARENT,
+        FrameLayout.LayoutParams.WRAP_CONTENT
+      );
+      params.gravity = Gravity.BOTTOM;
+
+      parent.addView(keyboard, params);
+    }
+
+
     public enum InputMode {
-      MNK,
-      GAMEPAD,
-      ALL
+        MNK,
+        GAMEPAD,
+        ALL
     }
 
     public InputMode getCurrentInputMode() {
         return currentInputMode;
     }
+
 }

@@ -2,6 +2,7 @@ package com.zomdroid.input;
 
 import android.content.Context;
 import android.hardware.input.InputManager;
+import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -163,6 +164,7 @@ public class GamepadManager implements InputManager.InputDeviceListener {
 
     // True if InputDevice is a gamepad or joystick
     public static boolean isGamepadDevice(InputDevice device) {
+        Log.d("[keyboadrd]", "isGamepadDevice: " + device);
         if (isTouchOverrideEnabled()) {
             return false;
         }
@@ -176,23 +178,8 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         // Check if the device has motion ranges (e.g., analog sticks or triggers)
         boolean hasMotion = device.getMotionRanges() != null && !device.getMotionRanges().isEmpty();
 
-        // Check if the device has physical keys (not just motion input)
-        boolean hasKeys = device.getKeyboardType() != InputDevice.KEYBOARD_TYPE_NONE;
-
-        // Check vendor and product ID — 0 usually means virtual or unknown device
-        int vendorId = device.getVendorId();
-        int productId = device.getProductId();
-        boolean isKnownGamepad = (vendorId != 0 || productId != 0);
-
-        // Filter out virtual devices (e.g., emulated input or MIUI ghost devices)
-        boolean isPhysical = !device.isVirtual();
-
-        // Filter out devices with suspicious names (e.g., "Virtual Input")
-        String name = device.getName();
-        boolean isGhostDevice = name != null && name.toLowerCase().contains("virtual");
-
         // Final decision: must be gamepad-like, have motion and keys, be physical, and not ghost
-        return isGamepadSource && hasMotion && hasKeys && isKnownGamepad && isPhysical && !isGhostDevice;
+        return isGamepadSource && hasMotion;
     }
 
 
@@ -383,4 +370,18 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         return v;
     }
     /* ======================= end of NEW helpers ======================= */
+
+    public boolean hasAnyGamepad() {
+      for (int id : inputManager.getInputDeviceIds()) {
+        InputDevice dev = inputManager.getInputDevice(id);
+        if (dev == null) continue;
+
+        if (GamepadManager.isGamepadDevice(dev)) {
+          // Toast.makeText(context, "Detected gamepad: " + dev.getName(), Toast.LENGTH_SHORT).show();
+          return true;
+        }
+      }
+
+      return false;
+    }
 }

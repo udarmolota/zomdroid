@@ -7,6 +7,8 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.widget.Toast;
+import android.content.Context;
 
 import java.util.ArrayList;
 
@@ -20,11 +22,13 @@ public abstract class AbstractControlElement {
     protected static final ColorFilter HIGHLIGHT_COLOR_FILTER = new PorterDuffColorFilter(Color.CYAN, PorterDuff.Mode.SRC_ATOP);
     protected final Type type;
     protected InputType inputType;
+    protected Context context;
 
     AbstractControlElement(InputControlsView parentView, ControlElementDescription description) {
         this.parentView = parentView;
         this.type = description.type;
         this.inputType = description.inputType;
+        this.context = parentView.getContext();
     }
 
     public static AbstractControlElement fromDescription(InputControlsView parentView, ControlElementDescription description) {
@@ -175,8 +179,9 @@ public abstract class AbstractControlElement {
         }
     }
 
-    void handleMNKBinding(GLFWBinding binding, boolean isPressed) {
-        Log.v(LOG_TAG, "handleMNKBinding binding=" + binding + " isPressed=" + isPressed);
+  public static void handleMNKBinding(GLFWBinding binding, boolean isPressed) {
+        //Toast.makeText(context, "MNK → " + binding.name() + " code=" + binding.code, Toast.LENGTH_SHORT).show();
+        //Log.v(LOG_TAG, "handleMNKBinding binding=" + binding + " isPressed=" + isPressed);
         if (binding.ordinal() >= GLFWBinding.MOUSE_BUTTON_LEFT.ordinal()
                 && binding.ordinal() <= GLFWBinding.MOUSE_BUTTON_8.ordinal()) {
             InputNativeInterface.sendMouseButton(binding.code, isPressed);
