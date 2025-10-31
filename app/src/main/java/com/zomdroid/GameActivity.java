@@ -34,9 +34,6 @@ import com.zomdroid.input.AbstractControlElement;
 
 import org.fmod.FMOD;
 
-import java.lang.ref.WeakReference;
-
-
 /**
  * Main game activity. Handles UI, surface, and input.
  * Integrates GamepadManager for hotplug and routes all gamepad input to the native interface.
@@ -54,8 +51,9 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     // Handles all gamepad connection/disconnection and input events
     private GamepadManager gamepadManager;
     private KeyboardManager keyboardManager;
-    // Tracks whether a physical gamepad is currently connected (for UI logic)
+    // Tracks whether a physical gamepad/kb is currently connected (for UI logic)
     private boolean isGamepadConnected = false;
+    private boolean isKeyboardConnected = false;
 
     private void t(String msg) {
       runOnUiThread(() -> Toast.makeText(this, msg, Toast.LENGTH_SHORT).show());
@@ -69,10 +67,6 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         binding = ActivityGameBinding.inflate(getLayoutInflater());
         // Give focus to game surface to ensure it receives input events
         setContentView(binding.getRoot());
-        binding.gameSv.setFocusable(true);
-        binding.gameSv.setFocusableInTouchMode(true);
-        binding.gameSv.requestFocus();
-        Toast.makeText(this, "[GameSV] requestFocus()", Toast.LENGTH_SHORT).show();
 
         // Initialize and register GamepadManager for gamepad hotplug and input events
         try {
@@ -90,20 +84,16 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         try {
             keyboardManager = new KeyboardManager(this, this);
             keyboardManager.register();
+
+          // Apply touch override based on saved preference
+          boolean isTouchEnabled = LauncherPreferences.requireSingleton().isTouchControlsEnabled();
+          KeyboardManager.setTouchOverride(isTouchEnabled);
         } catch (Exception e) {
             Toast.makeText(this, "Failed to initialize keyboardManager", Toast.LENGTH_SHORT).show();
             keyboardManager = null;
         }
-
-        updateInputUiInitial();
-        InputManager inputManager = (InputManager) getSystemService(this.INPUT_SERVICE);
-
-        for (int id : inputManager.getInputDeviceIds()) {
-            InputDevice dev = inputManager.getInputDevice(id);
-            if (dev != null) {
-              //Toast.makeText(this, "Device " + dev.getName()+ ", keyboardType=" + dev.getKeyboardType(), Toast.LENGTH_SHORT).show();
-            }
-        }
+        // Display on/off buttons overlay
+        applyInputOverlay();
 
         getWindow().setDecorFitsSystemWindows(false);
         final WindowInsetsController controller = getWindow().getInsetsController();
@@ -176,13 +166,12 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
       binding.gameSv.setOnTouchListener(new View.OnTouchListener() {
         float renderScale = LauncherPreferences.requireSingleton().getRenderScale();
         int activePointerId = -1;
+        boolean leftPressed = false;
 
         @Override
         public boolean onTouch(View v, MotionEvent e) {
-          boolean isPointerDevice =
-            e.isFromSource(InputDevice.SOURCE_MOUSE) ||
-              e.isFromSource(InputDevice.SOURCE_TOUCHPAD) ||
-              e.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE;
+          boolean isPointerDevice = e.isFromSource(InputDevice.SOURCE_MOUSE) || e.isFromSource(InputDevice.SOURCE_TOUCHPAD)
+              || e.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE;
 
           if (isPointerDevice) {
             //Toast.makeText(v.getContext(), "[onTouch] pointer device -> pass", Toast.LENGTH_SHORT).show();
@@ -198,7 +187,8 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
               activePointerId = e.getPointerId(idx);
               float x = e.getX(idx), y = e.getY(idx);
               InputNativeInterface.sendCursorPos(x * renderScale, y * renderScale);
-              //Toast.makeText(v.getContext(), "[onTouch] FINGER DOWN -> LEFT", Toast.LENGTH_SHORT).show();
+              //Toast.makeText(v.getContext(), "LEFT DOWN @" + (int)x + "," + (int)y, Toast.LENGTH_SHORT).show();
+              leftPressed = true;
               InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, true);
               return true;
             }
@@ -207,18 +197,25 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
               int p = e.findPointerIndex(activePointerId);
               if (p < 0) { activePointerId = -1; return false; }
               float x = e.getX(p), y = e.getY(p);
+              if (leftPressed) {
+                // just keep pressed — GLFW assume as drag
+              }
               InputNativeInterface.sendCursorPos(x * renderScale, y * renderScale);
               return true;
             }
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_POINTER_UP: {
               if (activePointerId < 0) return false;
-              int p = e.findPointerIndex(activePointerId);
               float x = e.getX(idx), y = e.getY(idx);
+              if (leftPressed) {
+                InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, false);
+                //Toast.makeText(v.getContext(), "LEFT UP @" + (int)x + "," + (int)y, Toast.LENGTH_SHORT).show();
+              }
+              leftPressed = false;
               InputNativeInterface.sendCursorPos(x * renderScale, y * renderScale); // безопасно синхронизируем
               activePointerId = -1;
               //Toast.makeText(v.getContext(), "[onTouch] FINGER UP -> LEFT", Toast.LENGTH_SHORT).show();
-              InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, false);
+              //InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, false);
               return true;
             }
           }
@@ -227,16 +224,21 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
       });
 
       // Initial state: assume no gamepad connected until GamepadManager notifies otherwise
-        isGamepadConnected = false;
+      //isGamepadConnected = false;
     }
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
-        // Unregister GamepadManager to avoid leaks
-        if (gamepadManager != null) {
-            gamepadManager.unregister();
-        }
+      super.onDestroy();
+      // Unregister GamepadManager to avoid leaks
+      if (gamepadManager != null) {
+          gamepadManager.unregister();
+      }
+
+      // Unregister Keyboard to avoid leaks
+      if (keyboardManager != null) {
+          keyboardManager.unregister();
+      }
     }
 
     // GamepadManager.GamepadListener implementation
@@ -245,13 +247,13 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     @Override
     public void onGamepadConnected() {
         isGamepadConnected = true;
-
-        if (binding.inputControlsV != null) {
-            System.out.println("[mixed b] onGamepadConnected");
-            binding.inputControlsV.setVisibility(View.VISIBLE);
-            binding.inputControlsV.setGamepadConnected(true);
-            binding.inputControlsV.applyInputMode(InputControlsView.InputMode.MNK);
-        }
+        applyInputOverlay();
+        //if (binding.inputControlsV != null) {
+        //    System.out.println("[mixed b] onGamepadConnected");
+        //    binding.inputControlsV.setVisibility(View.VISIBLE);
+        //    binding.inputControlsV.setGamepadConnected(true);
+        //    binding.inputControlsV.applyInputMode(InputControlsView.InputMode.MNK);
+        //}
         //if (binding.inputControlsV != null) {
         //    binding.inputControlsV.setVisibility(View.GONE);
         //}
@@ -261,13 +263,13 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     @Override
     public void onGamepadDisconnected() {
         isGamepadConnected = false;
-
-        if (binding.inputControlsV != null) {
-            System.out.println("[mixed b] onGamepadDisconnected");
-            binding.inputControlsV.setVisibility(View.VISIBLE);
-            binding.inputControlsV.setGamepadConnected(false);
-            binding.inputControlsV.applyInputMode(InputControlsView.InputMode.ALL);
-        }
+        applyInputOverlay();
+        //if (binding.inputControlsV != null) {
+        //    System.out.println("[mixed b] onGamepadDisconnected");
+        //    binding.inputControlsV.setVisibility(View.VISIBLE);
+        //    binding.inputControlsV.setGamepadConnected(false);
+        //    binding.inputControlsV.applyInputMode(InputControlsView.InputMode.ALL);
+        //}
     }
 
     // Forward every gamepad button event to the native input interface
@@ -291,28 +293,20 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     // Handle gamepad key events
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE) {
-          if (keyboardManager != null && keyboardManager.handleKeyEvent(event)) return true;
-          return true;
-        }
-
         boolean handled = false;
-        if (gamepadManager != null) handled |= gamepadManager.handleKeyEvent(event);
-        if (keyboardManager != null) handled |= keyboardManager.handleKeyEvent(event);
-        return handled || super.onKeyDown(keyCode, event);
+        if (isKeyboardConnected && (keyboardManager != null)) handled |= keyboardManager.handleKeyEvent(event);
+        if (isGamepadConnected && (gamepadManager  != null)) handled |= gamepadManager.handleKeyEvent(event);
+        if (handled) return true;
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE) {
-            if (keyboardManager != null && keyboardManager.handleKeyEvent(event)) return true;
-            return true;
-        }
-
         boolean handled = false;
-        if (gamepadManager != null) handled |= gamepadManager.handleKeyEvent(event);
-        if (keyboardManager != null) handled |= keyboardManager.handleKeyEvent(event);
-        return handled || super.onKeyUp(keyCode, event);
+        if (isKeyboardConnected && (keyboardManager != null)) handled |= keyboardManager.handleKeyEvent(event);
+        if (isGamepadConnected && (gamepadManager  != null)) handled |= gamepadManager.handleKeyEvent(event);
+        if (handled) return true;
+        return super.onKeyUp(keyCode, event);
     }
 
 
@@ -334,128 +328,79 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
       int btn = event.getActionButton();
       int mask = event.getButtonState();
 
-      //Toast.makeText(this,
-      //  "[GEN] act=" + action +
-      //    " btn=" + btn +
-      //    " mask=" + mask +
-      //    " P=" + (((mask & MotionEvent.BUTTON_PRIMARY)!=0)?1:0) +
-      //    " S=" + (((mask & MotionEvent.BUTTON_SECONDARY)!=0)?1:0), //+
-          //" T=" + (((mask & MotionEvent.BUTTON_TERTIARY)!=0)?1:0),
-      //  Toast.LENGTH_SHORT).show();
-
       if (action == MotionEvent.ACTION_HOVER_MOVE) {
-        InputNativeInterface.sendCursorPos(event.getX() * renderScale, event.getY() * renderScale);
-        //Toast.makeText(this, "[GEN] HOVER_MOVE cursor sync", Toast.LENGTH_SHORT).show();
+          InputNativeInterface.sendCursorPos(event.getX() * renderScale, event.getY() * renderScale);
+
+          // If 'pressed' it's drag
+          if ((mask & MotionEvent.BUTTON_PRIMARY) != 0 || (mask & MotionEvent.BUTTON_SECONDARY) != 0) {
+            return true; // drag обработан
+          }
+          return true;
+      }
+
+      if (action == MotionEvent.ACTION_SCROLL) {
+        // float v = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
+        // float h = event.getAxisValue(MotionEvent.AXIS_HSCROLL);
+        // Toast.makeText(this, "SCROLL v="+v+" h="+h, Toast.LENGTH_SHORT).show();
         return true;
       }
 
       if (action == MotionEvent.ACTION_BUTTON_PRESS || action == MotionEvent.ACTION_BUTTON_RELEASE) {
-        boolean pressed = (action == MotionEvent.ACTION_BUTTON_PRESS);
-        InputNativeInterface.sendCursorPos(event.getX() * renderScale, event.getY() * renderScale);
+          boolean pressed = (action == MotionEvent.ACTION_BUTTON_PRESS);
+          InputNativeInterface.sendCursorPos(event.getX() * renderScale, event.getY() * renderScale);
+
         if (btn == MotionEvent.BUTTON_PRIMARY) {
-          //Toast.makeText(this, "[GEN] PRIMARY -> LEFT " + pressed, Toast.LENGTH_SHORT).show();
-          InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, pressed);
-          return true;
+            //Toast.makeText(this, "PRIMARY ignored", Toast.LENGTH_SHORT).show();
+            InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, pressed);
+            return true;
         } else if (btn == MotionEvent.BUTTON_SECONDARY) {
-          //Toast.makeText(this, "[GEN] SECONDARY -> RIGHT " + pressed +
-          //  " (glfw=" + GLFWBinding.MOUSE_BUTTON_RIGHT.code + ")", Toast.LENGTH_SHORT).show();
-          InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_RIGHT.code, pressed);
-          return true;
-        } else if (btn == MotionEvent.BUTTON_TERTIARY) {
-          Toast.makeText(this, "[GEN] TERTIARY -> MIDDLE " + pressed, Toast.LENGTH_SHORT).show();
-          InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_WHEEL.code, pressed);
-          return true;
-        }
+            //Toast.makeText(this, "RIGHT " + (pressed?"DOWN":"UP"), Toast.LENGTH_SHORT).show();
+            InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_RIGHT.code, pressed);
+            return true;
+          }
       }
-
-      // Fallback: DOWN/UP + маска
-      if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_UP) {
-        boolean pressed = (action == MotionEvent.ACTION_DOWN);
-        InputNativeInterface.sendCursorPos(event.getX() * renderScale, event.getY() * renderScale);
-
-        if ((mask & MotionEvent.BUTTON_SECONDARY) != 0) {
-          //Toast.makeText(this, "[GEN] Fallback RIGHT " + pressed, Toast.LENGTH_SHORT).show();
-          InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_RIGHT.code, pressed);
-          return true;
-        } else if ((mask & MotionEvent.BUTTON_TERTIARY) != 0) {
-          //Toast.makeText(this, "[GEN] Fallback MIDDLE " + pressed, Toast.LENGTH_SHORT).show();
-          InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_WHEEL.code, pressed);
-          return true;
-        } else if ((mask & MotionEvent.BUTTON_PRIMARY) != 0) {
-          //Toast.makeText(this, "[GEN] Fallback LEFT " + pressed, Toast.LENGTH_SHORT).show();
-          InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, pressed);
-          return true;
-        }
-      }
-
       return super.onGenericMotionEvent(event);
     }
 
 
     @Override
-      public void onKeyboardConnected() {
-          Toast.makeText(this, "onKeyboardConnected()", Toast.LENGTH_SHORT).show();
-          if (binding.inputControlsV != null) {
-              binding.inputControlsV.setVisibility(View.GONE);
-          }
-      }
-
-      @Override
-      public void onKeyboardDisconnected() {
-          Toast.makeText(this, "onKeyboardDisconnected()", Toast.LENGTH_SHORT).show();
-          if (binding.inputControlsV != null) {
-            binding.inputControlsV.setVisibility(View.VISIBLE);
-            binding.inputControlsV.applyInputMode(InputControlsView.InputMode.ALL);
-          }
-      }
-
-      @Override
-      public void onKeyboardKey(int glfwCode, boolean pressed) {
-          InputNativeInterface.sendKeyboard(glfwCode, pressed);
-      }
-
-  // В GameActivity:
-  private void updateInputUiInitial() {
-    boolean hasGamepad  = (gamepadManager  != null && gamepadManager.hasAnyGamepad());
-    boolean hasKeyboard = (keyboardManager != null && keyboardManager.hasAnyKeyboard());
-
-    if (binding.inputControlsV == null) return;
-
-    if (hasKeyboard) {
-      binding.inputControlsV.setVisibility(View.GONE);
-      binding.inputControlsV.setGamepadConnected(hasGamepad);
-      binding.inputControlsV.applyInputMode(InputControlsView.InputMode.MNK);
-    } else if (hasGamepad) {
-      binding.inputControlsV.setVisibility(View.VISIBLE);
-      binding.inputControlsV.setGamepadConnected(true);
-      binding.inputControlsV.applyInputMode(InputControlsView.InputMode.ALL);
-    } else {
-      binding.inputControlsV.setVisibility(View.VISIBLE);
-      binding.inputControlsV.setGamepadConnected(false);
-      binding.inputControlsV.applyInputMode(InputControlsView.InputMode.ALL);
-    }
-    binding.gameSv.setFocusable(true);
-    binding.gameSv.setFocusableInTouchMode(true);
-    binding.gameSv.requestFocus();
-  }
-
-  @Override
-  public boolean dispatchKeyEvent(KeyEvent event) {
-    int code = event.getKeyCode();
-    boolean down = (event.getAction() == KeyEvent.ACTION_DOWN);
-
-    // Esc с физической клавы
-    if (code == KeyEvent.KEYCODE_ESCAPE) {
-      InputNativeInterface.sendKeyboard(GLFWBinding.KEY_ESCAPE.code, down);
-      return true; // съели
+    public void onKeyboardConnected() {
+        isKeyboardConnected = true;
+        applyInputOverlay();
+        //Toast.makeText(this, "onKeyboardConnected()", Toast.LENGTH_SHORT).show();
+        //if (binding.inputControlsV != null) {
+        //    binding.inputControlsV.setVisibility(View.GONE);
+        //}
     }
 
-    // Back как Esc (на некоторых клавиатурах или лаунчерах Esc мапится в BACK)
-    if (code == KeyEvent.KEYCODE_BACK) {
-      InputNativeInterface.sendKeyboard(GLFWBinding.KEY_ESCAPE.code, down);
-      return true; // съели
+    @Override
+    public void onKeyboardDisconnected() {
+        isKeyboardConnected = false;
+        applyInputOverlay();
+        //Toast.makeText(this, "onKeyboardDisconnected()", Toast.LENGTH_SHORT).show();
+        //if (binding.inputControlsV != null) {
+        //    binding.inputControlsV.setVisibility(View.VISIBLE);
+        //    binding.inputControlsV.applyInputMode(InputControlsView.InputMode.ALL);
+        //}
     }
 
-    return super.dispatchKeyEvent(event);
-  }
+    @Override
+    public void onKeyboardKey(int glfwCode, boolean pressed) {
+        InputNativeInterface.sendKeyboard(glfwCode, pressed);
+    }
+
+    private void applyInputOverlay() {
+      if (binding.inputControlsV == null) return;
+      binding.inputControlsV.setGamepadConnected(isGamepadConnected);
+
+      if (isKeyboardConnected) {
+        binding.inputControlsV.setVisibility(View.GONE);
+      } else if (isGamepadConnected) {
+        binding.inputControlsV.setVisibility(View.VISIBLE);
+        binding.inputControlsV.applyInputMode(InputControlsView.InputMode.MNK);
+      } else {
+        binding.inputControlsV.setVisibility(View.VISIBLE);
+        binding.inputControlsV.applyInputMode(InputControlsView.InputMode.ALL);
+      }
+    }
 }

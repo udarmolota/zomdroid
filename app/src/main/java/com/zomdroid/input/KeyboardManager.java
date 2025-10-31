@@ -2,13 +2,14 @@ package com.zomdroid.input;
 
 import android.content.Context;
 import android.hardware.input.InputManager;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.SystemClock;
-import android.util.Log;
+
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.widget.Toast;
+
+import java.util.HashSet;
+import java.util.Set;
+import android.util.Log;
 
 /**
  * Manages physical keyboard connection and input mapping for Android.
@@ -18,11 +19,12 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
   private final InputManager inputManager;
   // Keyboard event listener
   private final KeyboardListener listener;
+  // Onscreen controls always shown
+  private static boolean touchOverride = false;
   private final Context context;
-  private final Handler handler = new Handler(Looper.getMainLooper());
-  private boolean lastHasKeyboard = false;
-  private long lastNotifyTs = 0L;
-  private static final long NOTIFY_THROTTLE_MS = 250;
+  private final Set<DevKey> quarantined = new HashSet<>();
+  private final Set<DevKey> goodKeyboards = new HashSet<>();
+  private final java.util.Map<Integer, DevKey> idToKey = new java.util.HashMap<>();
 
   // Listener interface for keyboard events
   public interface KeyboardListener {
@@ -40,8 +42,27 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
 
   // Register for keyboard device events
   public void register() {
-      inputManager.registerInputDeviceListener(this, new Handler(Looper.getMainLooper()));
-      updateKeyboardState();
+      inputManager.registerInputDeviceListener(this, null);
+      // Clear the "memory" of kb devices
+      goodKeyboards.clear();
+      quarantined.clear();
+      idToKey.clear();
+
+      // Check on start if a kb is already connected
+      boolean anyKeyboard = false;
+      for (int id : inputManager.getInputDeviceIds()) {
+        InputDevice dev = inputManager.getInputDevice(id);
+        if (dev != null && isPhysicalKeyboard(dev)) {
+          DevKey dk = new DevKey(dev);
+          goodKeyboards.add(dk);
+          idToKey.put(id, dk);
+          anyKeyboard = true;
+        }
+      }
+      if (anyKeyboard)
+        listener.onKeyboardConnected();
+      else
+        listener.onKeyboardDisconnected();
   }
 
   // Unregister from keyboard device events
@@ -49,53 +70,20 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
     inputManager.unregisterInputDeviceListener(this);
   }
 
-  // True if InputDevice is a physical keyboard
-  private boolean isPhysicalKeyboard(InputDevice device) {
-      if (device == null) return false;
+  public static void setTouchOverride(boolean override) {
+    touchOverride = override;
+  }
 
-      String name = device.getName().toLowerCase();
-      if (name.contains("touchscreen") || name.contains("touchpad") ||
-          name.contains("sensor") || name.contains("remote")){return false;}
-
-      int sources = device.getSources();
-      boolean hasKeyboardSource = (sources & InputDevice.SOURCE_KEYBOARD) != 0;
-      boolean isAlphabetic = device.getKeyboardType() == InputDevice.KEYBOARD_TYPE_ALPHABETIC;
-
-      boolean isKbd = hasKeyboardSource && isAlphabetic;
-      Toast.makeText(context, "[KB] => isKbd=" + isKbd, Toast.LENGTH_SHORT).show();
-
-      return hasKeyboardSource && isAlphabetic;
+  public static boolean isTouchOverrideEnabled() {
+    return touchOverride;
   }
 
   // Handle KeyEvent from physical keyboard
   public boolean handleKeyEvent(KeyEvent event) {
     int androidCode = event.getKeyCode();
     InputDevice device = event.getDevice();
+    if (!device.supportsSource(InputDevice.SOURCE_KEYBOARD)) return false;
     boolean isPressed = event.getAction() == KeyEvent.ACTION_DOWN;
-
-    // Always pass through ESC/BACK regardless of device filtering
-    if (androidCode == KeyEvent.KEYCODE_ESCAPE || androidCode == KeyEvent.KEYCODE_BACK) {
-      listener.onKeyboardKey(GLFWBinding.KEY_ESCAPE.code, isPressed);
-      return true;
-    }
-
-    boolean isKbd = isPhysicalKeyboard(device);
-    if (!isKbd) {
-      int src = (device != null) ? device.getSources() : 0;
-      // fallback: если источник — клавиатурный или у клавиши есть символ, считаем это клавой
-      boolean fallback = ((src & InputDevice.SOURCE_KEYBOARD) != 0) || (event.getUnicodeChar() != 0);
-      //Toast.makeText(context, "[KB] Ignored? src=0x" + Integer.toHexString(src) +
-      //  " uni=" + event.getUnicodeChar() + " fb=" + fallback, Toast.LENGTH_SHORT).show();
-      if (!fallback) return false;
-    }
-
-
-
-
-    Toast.makeText(
-      context,
-      "KEY=" + KeyEvent.keyCodeToString(androidCode) + " (" + androidCode + ") " +
-        (isPressed ? "DOWN" : "UP"), Toast.LENGTH_SHORT).show();
 
     int glfwCode = mapAndroidKeyCodeToGLFW(androidCode);
     //Toast.makeText(context, "glfw=" + glfwCode + ", aCode=" + androidCode, Toast.LENGTH_SHORT).show();
@@ -103,7 +91,7 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
         listener.onKeyboardKey(glfwCode, isPressed);
         return true;
     } else {
-        Toast.makeText(context, "Unmapped key", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(context, "Unmapped key", Toast.LENGTH_SHORT).show();
         return false;
     }
 
@@ -228,11 +216,10 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
         case KeyEvent.KEYCODE_DPAD_LEFT: return GLFWBinding.KEY_LEFT.code;
         case KeyEvent.KEYCODE_DPAD_RIGHT: return GLFWBinding.KEY_RIGHT.code;
 
-        case KeyEvent.KEYCODE_PAGE_UP: return GLFWBinding.KEY_UP.code;
-        case KeyEvent.KEYCODE_PAGE_DOWN: return GLFWBinding.KEY_DOWN.code;
-        case KeyEvent.KEYCODE_MOVE_HOME:
-        case KeyEvent.KEYCODE_HOME: return GLFWBinding.KEY_LEFT.code;
-        case KeyEvent.KEYCODE_MOVE_END: return GLFWBinding.KEY_RIGHT.code;
+        case KeyEvent.KEYCODE_PAGE_UP:    return GLFWBinding.KEY_PAGE_UP.code;
+        case KeyEvent.KEYCODE_PAGE_DOWN:  return GLFWBinding.KEY_PAGE_DOWN.code;
+        case KeyEvent.KEYCODE_MOVE_HOME:  return GLFWBinding.KEY_HOME.code;
+        case KeyEvent.KEYCODE_MOVE_END:   return GLFWBinding.KEY_END.code;
 
         case KeyEvent.KEYCODE_NAVIGATE_NEXT:     return GLFWBinding.KEY_TAB.code;
         case KeyEvent.KEYCODE_NAVIGATE_PREVIOUS: return GLFWBinding.KEY_TAB.code;
@@ -244,53 +231,117 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
 
   @Override
   public void onInputDeviceAdded(int deviceId) {
-      Toast.makeText(context, "onInputDeviceAdded", Toast.LENGTH_SHORT).show();
-      scheduleUpdate();
+      //Toast.makeText(context, "onInputDeviceAdded", Toast.LENGTH_SHORT).show();
+      InputDevice d = inputManager.getInputDevice(deviceId);
+      if (d == null) return;
+
+      if (isPhysicalKeyboard(d)) {
+        //Toast.makeText(context, "DeviceAdded KB true", Toast.LENGTH_SHORT).show();
+        DevKey dk = new DevKey(d);
+        idToKey.put(deviceId, dk);
+        boolean wasEmpty = goodKeyboards.isEmpty();
+        goodKeyboards.add(dk);
+        if (wasEmpty) listener.onKeyboardConnected();
+      }
   }
 
   @Override
   public void onInputDeviceRemoved(int deviceId) {
-      Toast.makeText(context, "onInputDeviceRemoved", Toast.LENGTH_SHORT).show();
-      scheduleUpdate();
-  }
-
-  @Override
-  public void onInputDeviceChanged(int deviceId) {
-      Toast.makeText(context, "onInputDeviceChanged", Toast.LENGTH_SHORT).show();
-      scheduleUpdate();
-  }
-
-  public void updateKeyboardState() {
-      boolean hasKeyboard = false;
-      for (int id : inputManager.getInputDeviceIds()) {
-            if (isPhysicalKeyboard(inputManager.getInputDevice(id))) {
-              hasKeyboard = true; break;
-            }
+      DevKey dk = idToKey.remove(deviceId);
+      if (dk != null) {
+        goodKeyboards.remove(dk);
+        quarantined.remove(dk);
       }
 
-      if (hasKeyboard != lastHasKeyboard) {
-        final long now = SystemClock.uptimeMillis();
-        if (now - lastNotifyTs < NOTIFY_THROTTLE_MS) {
-          scheduleUpdate();
-          return;
-        }
-        lastNotifyTs = now;
-        lastHasKeyboard = hasKeyboard;
-        if (hasKeyboard) listener.onKeyboardConnected();
-        else            listener.onKeyboardDisconnected();
-      }
-  }
+      //Toast.makeText(context, "onInputDeviceRemoved", Toast.LENGTH_SHORT).show();
 
-  private void scheduleUpdate() {
-    handler.removeCallbacks(this::updateKeyboardState);
-    handler.postDelayed(this::updateKeyboardState, 50);
-  }
-
-  public boolean hasAnyKeyboard() {
-    for (int id : inputManager.getInputDeviceIds()) {
-      InputDevice dev = inputManager.getInputDevice(id);
-      if (isPhysicalKeyboard(dev)) return true;
+      // State recalculation
+      if (goodKeyboards.isEmpty())
+        listener.onKeyboardDisconnected();
+      else
+        listener.onKeyboardConnected();
     }
-    return false;
+    @Override
+    public void onInputDeviceChanged(int deviceId) {
+      //.makeText(context, "onInputDeviceChanged", Toast.LENGTH_SHORT).show();
+      InputDevice d = inputManager.getInputDevice(deviceId);
+      if (d == null) {
+        // Device already disappeared — recalculate overall state
+        boolean anyKeyboard = hasAnyKeyboard();
+        if (anyKeyboard) listener.onKeyboardConnected();
+        else listener.onKeyboardDisconnected();
+        return;
+      }
+      DevKey key = new DevKey(d);
+
+      if (isPhysicalKeyboard(d)) {
+        quarantined.remove(key);
+        if (goodKeyboards.add(key)) {
+          // new - wasn't before
+          //Toast.makeText(context, "new device added", Toast.LENGTH_SHORT).show();
+          listener.onKeyboardConnected();
+        }
+      } else {
+        // if it was in goodKeyboards will remove
+        boolean removed = goodKeyboards.remove(key);
+        if (removed && !hasAnyKeyboard()) {
+          //Toast.makeText(context, "device removed and disconnected", Toast.LENGTH_SHORT).show();
+          listener.onKeyboardDisconnected();
+        }
+      }
+    }
+
+    // True if InputDevice is a physical keyboard
+    private boolean isPhysicalKeyboard(InputDevice device) {
+      if (device == null) return false;
+      boolean hasKeyboard = false;
+
+      // The launcher 'Always onscreen buttons' is on/off
+      if (isTouchOverrideEnabled()) { return false; }
+
+      // The source is Keyboard
+      if (!device.supportsSource(InputDevice.SOURCE_KEYBOARD)) { return false; }
+
+      // Checking the device type
+      int type = device.getKeyboardType();
+      if (type != InputDevice.KEYBOARD_TYPE_ALPHABETIC && type != InputDevice.KEYBOARD_TYPE_NON_ALPHABETIC) return false;
+
+      //  Quick name-based filter (exclude mouse, touchpads, gamepads)
+      String name = device.getName().toLowerCase();
+      //Toast.makeText(context, "isPhysicalKeyboard name "+name, Toast.LENGTH_SHORT).show();
+      if (name.contains("mouse") || name.contains("touch") || name.contains("touchpad") ||
+        name.contains("remote") || name.contains("gamepad") || name.contains("controller"))
+        return false;
+
+      // KB keys test
+      try {
+        boolean[] out = device.hasKeys(
+          KeyEvent.KEYCODE_A,
+          KeyEvent.KEYCODE_ENTER,
+          KeyEvent.KEYCODE_SPACE
+        );
+        int hits = 0;
+        for (boolean b : out) if (b) hits++;
+        hasKeyboard = hits >= 2;
+        //return hits >= 2;
+      } catch (Throwable t) {
+          //Toast.makeText(context, "physical keyboard "+hasKeyboard, Toast.LENGTH_SHORT).show();
+          return false;
+      }
+      return hasKeyboard;
+    }
+
+    private boolean hasAnyKeyboard() {
+      // Fast path: if goodKeyboards is not empty — we already have one
+      if (!goodKeyboards.isEmpty()) return true;
+
+      // Fallback: rescan the inventory (in case the set got out of sync)
+      for (int id : inputManager.getInputDeviceIds()) {
+        InputDevice dev = inputManager.getInputDevice(id);
+        if (dev != null && isPhysicalKeyboard(dev)) {
+          return true;
+        }
+      }
+      return false;
+    }
   }
-}

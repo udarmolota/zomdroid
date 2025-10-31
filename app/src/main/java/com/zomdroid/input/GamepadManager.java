@@ -6,10 +6,6 @@ import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.InputDevice;
-import android.view.KeyCharacterMap;
-import android.view.InputDevice.MotionRange;
-import android.view.KeyEvent;
 
 /**
  * Manages gamepad connection and input mapping for Android.
@@ -181,7 +177,6 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         // Final decision: must be gamepad-like, have motion and keys, be physical, and not ghost
         return isGamepadSource && hasMotion;
     }
-
 
     @Override
     public void onInputDeviceAdded(int deviceId) {
@@ -370,18 +365,4 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         return v;
     }
     /* ======================= end of NEW helpers ======================= */
-
-    public boolean hasAnyGamepad() {
-      for (int id : inputManager.getInputDeviceIds()) {
-        InputDevice dev = inputManager.getInputDevice(id);
-        if (dev == null) continue;
-
-        if (GamepadManager.isGamepadDevice(dev)) {
-          // Toast.makeText(context, "Detected gamepad: " + dev.getName(), Toast.LENGTH_SHORT).show();
-          return true;
-        }
-      }
-
-      return false;
-    }
 }
