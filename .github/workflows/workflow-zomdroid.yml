@@ -12,6 +12,7 @@ on:
         - only_onscreen
         - gamepad-support-patch-v2
         - native-libs
+        - kb
         
 jobs:
   build:
