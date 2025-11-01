@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.Set;
 import android.util.Log;
 
+import com.zomdroid.GameActivity;
+
 /**
  * Manages physical keyboard connection and input mapping for Android.
  */
@@ -85,8 +87,12 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
     if (!device.supportsSource(InputDevice.SOURCE_KEYBOARD)) return false;
     boolean isPressed = event.getAction() == KeyEvent.ACTION_DOWN;
 
+
     int glfwCode = mapAndroidKeyCodeToGLFW(androidCode);
-    //Toast.makeText(context, "glfw=" + glfwCode + ", aCode=" + androidCode, Toast.LENGTH_SHORT).show();
+    // 1) пробуем распознать как D-Pad
+    int bit = GameActivity.dpadBitForKey(glfwCode);
+    String aName = KeyEvent.keyCodeToString(androidCode);
+    //Toast.makeText(context, "[KB] " + aName + " → glfw=" + glfwCode + " pressed=" + isPressed, Toast.LENGTH_SHORT).show();
     if (glfwCode >= 0) {
         listener.onKeyboardKey(glfwCode, isPressed);
         return true;
@@ -220,6 +226,11 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
         case KeyEvent.KEYCODE_PAGE_DOWN:  return GLFWBinding.KEY_PAGE_DOWN.code;
         case KeyEvent.KEYCODE_MOVE_HOME:  return GLFWBinding.KEY_HOME.code;
         case KeyEvent.KEYCODE_MOVE_END:   return GLFWBinding.KEY_END.code;
+
+        case KeyEvent.KEYCODE_SYSTEM_NAVIGATION_UP:    return GLFWBinding.KEY_UP.code;
+        case KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN:  return GLFWBinding.KEY_DOWN.code;
+        case KeyEvent.KEYCODE_SYSTEM_NAVIGATION_LEFT:  return GLFWBinding.KEY_LEFT.code;
+        case KeyEvent.KEYCODE_SYSTEM_NAVIGATION_RIGHT: return GLFWBinding.KEY_RIGHT.code;
 
         case KeyEvent.KEYCODE_NAVIGATE_NEXT:     return GLFWBinding.KEY_TAB.code;
         case KeyEvent.KEYCODE_NAVIGATE_PREVIOUS: return GLFWBinding.KEY_TAB.code;

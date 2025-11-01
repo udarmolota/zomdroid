@@ -5,10 +5,12 @@ import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
 import android.hardware.input.InputManager;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.system.ErrnoException;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.InputDevice;
+import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -55,6 +57,13 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     private boolean isGamepadConnected = false;
     private boolean isKeyboardConnected = false;
 
+    private boolean leftMouseDown  = false;
+    private boolean rightMouseDown = false;
+
+    private int kbDpadState = 0;
+    private final android.util.SparseIntArray dpadKeyToBit = new android.util.SparseIntArray();
+    private int pressedDpadMask = 0;
+
     private void t(String msg) {
       runOnUiThread(() -> Toast.makeText(this, msg, Toast.LENGTH_SHORT).show());
     }
@@ -67,6 +76,9 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         binding = ActivityGameBinding.inflate(getLayoutInflater());
         // Give focus to game surface to ensure it receives input events
         setContentView(binding.getRoot());
+        binding.gameSv.setFocusable(true);
+        binding.gameSv.setFocusableInTouchMode(true);
+        binding.gameSv.requestFocus();
 
         // Initialize and register GamepadManager for gamepad hotplug and input events
         try {
@@ -152,8 +164,6 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
                     thread.start();
                     isGameStarted = true;
                 }
-                //binding.inputControlsV.applyInputMode(binding.inputControlsV.getCurrentInputMode());
-                //System.out.println("[mixed b] surfaceChanged → reapply input mode: " + binding.inputControlsV.getCurrentInputMode());
             }
 
             @Override
@@ -166,65 +176,55 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
       binding.gameSv.setOnTouchListener(new View.OnTouchListener() {
         float renderScale = LauncherPreferences.requireSingleton().getRenderScale();
         int activePointerId = -1;
-        boolean leftPressed = false;
+        boolean leftPressedFinger = false;
 
         @Override
         public boolean onTouch(View v, MotionEvent e) {
-          boolean isPointerDevice = e.isFromSource(InputDevice.SOURCE_MOUSE) || e.isFromSource(InputDevice.SOURCE_TOUCHPAD)
+          boolean isMouseSrc = e.isFromSource(InputDevice.SOURCE_MOUSE) || e.isFromSource(InputDevice.SOURCE_TOUCHPAD)
               || e.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE;
-
-          if (isPointerDevice) {
-            //Toast.makeText(v.getContext(), "[onTouch] pointer device -> pass", Toast.LENGTH_SHORT).show();
-            return false;
-          }
 
           int action = e.getActionMasked();
           int idx = e.getActionIndex();
 
+          if (isMouseSrc) {
+            return false;
+          }
+
           switch (action) {
-            case MotionEvent.ACTION_DOWN:
-            case MotionEvent.ACTION_POINTER_DOWN: {
-              activePointerId = e.getPointerId(idx);
-              float x = e.getX(idx), y = e.getY(idx);
-              InputNativeInterface.sendCursorPos(x * renderScale, y * renderScale);
-              //Toast.makeText(v.getContext(), "LEFT DOWN @" + (int)x + "," + (int)y, Toast.LENGTH_SHORT).show();
-              leftPressed = true;
-              InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, true);
-              return true;
-            }
-            case MotionEvent.ACTION_MOVE: {
-              if (activePointerId < 0) return false;
-              int p = e.findPointerIndex(activePointerId);
-              if (p < 0) { activePointerId = -1; return false; }
-              float x = e.getX(p), y = e.getY(p);
-              if (leftPressed) {
-                // just keep pressed — GLFW assume as drag
+              case MotionEvent.ACTION_DOWN:
+              case MotionEvent.ACTION_POINTER_DOWN: {
+                activePointerId = e.getPointerId(idx);
+                float x = e.getX(idx), y = e.getY(idx);
+                InputNativeInterface.sendCursorPos(x * renderScale, y * renderScale);
+
+                leftPressedFinger = true;
+                InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, true);
+                return true;
               }
-              InputNativeInterface.sendCursorPos(x * renderScale, y * renderScale);
-              return true;
-            }
-            case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_POINTER_UP: {
-              if (activePointerId < 0) return false;
-              float x = e.getX(idx), y = e.getY(idx);
-              if (leftPressed) {
-                InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, false);
-                //Toast.makeText(v.getContext(), "LEFT UP @" + (int)x + "," + (int)y, Toast.LENGTH_SHORT).show();
+              case MotionEvent.ACTION_MOVE: {
+                if (activePointerId < 0) return false;
+                int p = e.findPointerIndex(activePointerId);
+                if (p < 0) { activePointerId = -1; return false; }
+                float x = e.getX(p), y = e.getY(p);
+                InputNativeInterface.sendCursorPos(x * renderScale, y * renderScale);
+                return true;
               }
-              leftPressed = false;
-              InputNativeInterface.sendCursorPos(x * renderScale, y * renderScale); // безопасно синхронизируем
-              activePointerId = -1;
-              //Toast.makeText(v.getContext(), "[onTouch] FINGER UP -> LEFT", Toast.LENGTH_SHORT).show();
-              //InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, false);
-              return true;
-            }
+              case MotionEvent.ACTION_UP:
+              case MotionEvent.ACTION_POINTER_UP: {
+                if (activePointerId < 0) return false;
+                float x = e.getX(idx), y = e.getY(idx);
+                if (leftPressedFinger) {
+                  InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, false);
+                  leftPressedFinger = false;
+                }
+                InputNativeInterface.sendCursorPos(x * renderScale, y * renderScale);
+                activePointerId = -1;
+                return true;
+              }
           }
           return false;
         }
       });
-
-      // Initial state: assume no gamepad connected until GamepadManager notifies otherwise
-      //isGamepadConnected = false;
     }
 
     @Override
@@ -248,15 +248,6 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     public void onGamepadConnected() {
         isGamepadConnected = true;
         applyInputOverlay();
-        //if (binding.inputControlsV != null) {
-        //    System.out.println("[mixed b] onGamepadConnected");
-        //    binding.inputControlsV.setVisibility(View.VISIBLE);
-        //    binding.inputControlsV.setGamepadConnected(true);
-        //    binding.inputControlsV.applyInputMode(InputControlsView.InputMode.MNK);
-        //}
-        //if (binding.inputControlsV != null) {
-        //    binding.inputControlsV.setVisibility(View.GONE);
-        //}
     }
 
     // Called when all physical gamepads are disconnected: show the virtual controller UI
@@ -264,12 +255,6 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     public void onGamepadDisconnected() {
         isGamepadConnected = false;
         applyInputOverlay();
-        //if (binding.inputControlsV != null) {
-        //    System.out.println("[mixed b] onGamepadDisconnected");
-        //    binding.inputControlsV.setVisibility(View.VISIBLE);
-        //    binding.inputControlsV.setGamepadConnected(false);
-        //    binding.inputControlsV.applyInputMode(InputControlsView.InputMode.ALL);
-        //}
     }
 
     // Forward every gamepad button event to the native input interface
@@ -328,20 +313,43 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
       int btn = event.getActionButton();
       int mask = event.getButtonState();
 
-      if (action == MotionEvent.ACTION_HOVER_MOVE) {
-          InputNativeInterface.sendCursorPos(event.getX() * renderScale, event.getY() * renderScale);
+      final boolean primaryNow   = (mask & MotionEvent.BUTTON_PRIMARY)   != 0;
+      final boolean secondaryNow = (mask & MotionEvent.BUTTON_SECONDARY) != 0;
 
-          // If 'pressed' it's drag
-          if ((mask & MotionEvent.BUTTON_PRIMARY) != 0 || (mask & MotionEvent.BUTTON_SECONDARY) != 0) {
-            return true; // drag обработан
-          }
-          return true;
+      // Cursor movement: always update position and if LMB/RMB is held — it's a drag of crosshair/objects
+      if (action == MotionEvent.ACTION_HOVER_MOVE || action == MotionEvent.ACTION_MOVE) {
+        float x = event.getX();
+        float y = event.getY();
+        InputNativeInterface.sendCursorPos(x * renderScale, y * renderScale);
+
+        // Дожимаем ЛКМ, если маска уже содержит кнопку, но флаг ещё не установлен
+        if (primaryNow && !leftMouseDown) {
+          leftMouseDown = primaryNow;
+          InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, primaryNow);
+        }
+
+        if (secondaryNow != rightMouseDown) {
+          rightMouseDown = secondaryNow;
+          InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_RIGHT.code, secondaryNow);
+        }
+
+        // Если любая кнопка зажата — считаем drag (aim/перетаскивание)
+        if (leftMouseDown || rightMouseDown) return true;
+
+        // Просто наведение курсора
+        return true;
       }
 
       if (action == MotionEvent.ACTION_SCROLL) {
-        // float v = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
-        // float h = event.getAxisValue(MotionEvent.AXIS_HSCROLL);
-        // Toast.makeText(this, "SCROLL v="+v+" h="+h, Toast.LENGTH_SHORT).show();
+        float v = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
+        if (v == 0) { v = event.getAxisValue(MotionEvent.AXIS_WHEEL); }
+
+        if (v != 0) {
+          int keyCode = v > 0 ? GLFWBinding.KEY_EQUAL.code : GLFWBinding.KEY_MINUS.code;
+          InputNativeInterface.sendKeyboard(keyCode, true);
+          try { Thread.sleep(50); } catch (InterruptedException e) {}
+          InputNativeInterface.sendKeyboard(keyCode, false);
+        }
         return true;
       }
 
@@ -350,27 +358,40 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
           InputNativeInterface.sendCursorPos(event.getX() * renderScale, event.getY() * renderScale);
 
         if (btn == MotionEvent.BUTTON_PRIMARY) {
-            //Toast.makeText(this, "PRIMARY ignored", Toast.LENGTH_SHORT).show();
-            InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, pressed);
-            return true;
+          leftMouseDown = pressed;
+          InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, pressed);
+          return true;
         } else if (btn == MotionEvent.BUTTON_SECONDARY) {
-            //Toast.makeText(this, "RIGHT " + (pressed?"DOWN":"UP"), Toast.LENGTH_SHORT).show();
-            InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_RIGHT.code, pressed);
-            return true;
-          }
+          rightMouseDown = pressed;
+          InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_RIGHT.code, pressed);
+          return true;
+        }
+        boolean currentLeftState = (mask & MotionEvent.BUTTON_PRIMARY) != 0;
+        if (leftMouseDown != currentLeftState) {
+          leftMouseDown = currentLeftState;
+          InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, currentLeftState);
+          return true;
+        }
+        // Подстраховка: если ОС не прислала конкретный btn, но изменилась маска — дожмём ЛКМ
+        if (leftMouseDown != primaryNow) {
+          leftMouseDown = primaryNow;
+          InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, primaryNow);
+          return true;
+        }
+        if (rightMouseDown != secondaryNow) {
+          rightMouseDown = secondaryNow;
+          InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_RIGHT.code, secondaryNow);
+          return true;
+        }
       }
       return super.onGenericMotionEvent(event);
     }
-
 
     @Override
     public void onKeyboardConnected() {
         isKeyboardConnected = true;
         applyInputOverlay();
         //Toast.makeText(this, "onKeyboardConnected()", Toast.LENGTH_SHORT).show();
-        //if (binding.inputControlsV != null) {
-        //    binding.inputControlsV.setVisibility(View.GONE);
-        //}
     }
 
     @Override
@@ -378,15 +399,31 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         isKeyboardConnected = false;
         applyInputOverlay();
         //Toast.makeText(this, "onKeyboardDisconnected()", Toast.LENGTH_SHORT).show();
-        //if (binding.inputControlsV != null) {
-        //    binding.inputControlsV.setVisibility(View.VISIBLE);
-        //    binding.inputControlsV.applyInputMode(InputControlsView.InputMode.ALL);
-        //}
     }
 
     @Override
     public void onKeyboardKey(int glfwCode, boolean pressed) {
-        InputNativeInterface.sendKeyboard(glfwCode, pressed);
+      int bit = dpadBitForKey(glfwCode);
+      if (bit != 0) {
+        //Toast.makeText(this, "onKeyboardKey "+bit, Toast.LENGTH_SHORT).show();
+        if (pressed) kbDpadState |=  bit;
+        else         kbDpadState &= ~bit;
+
+        // Отправляем текущую суммарную маску направлений (держит диагонали, корректно отжимает)
+        InputNativeInterface.sendJoystickDpad(0, (char) kbDpadState);
+
+        // ВРЕМЕННО: дублируем включение/выключение соответствующих клавиш
+        // (Это чисто для диагностики — понять, реагирует ли игра на клавиатурные стрелки.)
+        if      ((bit & 0x1) != 0) InputNativeInterface.sendKeyboard(GLFWBinding.KEY_UP.code,     pressed);
+        else if ((bit & 0x2) != 0) InputNativeInterface.sendKeyboard(GLFWBinding.KEY_RIGHT.code,  pressed);
+        else if ((bit & 0x4) != 0) InputNativeInterface.sendKeyboard(GLFWBinding.KEY_DOWN.code,   pressed);
+        else if ((bit & 0x8) != 0) InputNativeInterface.sendKeyboard(GLFWBinding.KEY_LEFT.code,   pressed);
+
+        return;
+      }
+
+      // Все прочие клавиши – как были
+      InputNativeInterface.sendKeyboard(glfwCode, pressed);
     }
 
     private void applyInputOverlay() {
@@ -402,5 +439,18 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         binding.inputControlsV.setVisibility(View.VISIBLE);
         binding.inputControlsV.applyInputMode(InputControlsView.InputMode.ALL);
       }
+    }
+
+    public static int dpadBitForKey(int glfwCode) {
+      if (glfwCode == GLFWBinding.KEY_UP.code     || glfwCode == GLFWBinding.KEY_PAGE_UP.code)   return 0x1; // UP
+      if (glfwCode == GLFWBinding.KEY_RIGHT.code)                                               return 0x2; // RIGHT
+      if (glfwCode == GLFWBinding.KEY_DOWN.code   || glfwCode == GLFWBinding.KEY_PAGE_DOWN.code) return 0x4; // DOWN
+      if (glfwCode == GLFWBinding.KEY_LEFT.code)                                                return 0x8; // LEFT
+
+      if (glfwCode == GLFWBinding.KEY_W.code) return 0x1;
+      if (glfwCode == GLFWBinding.KEY_D.code) return 0x2;
+      if (glfwCode == GLFWBinding.KEY_S.code) return 0x4;
+      if (glfwCode == GLFWBinding.KEY_A.code) return 0x8;
+      return 0;
     }
 }

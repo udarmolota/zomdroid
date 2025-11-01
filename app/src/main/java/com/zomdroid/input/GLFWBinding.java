@@ -149,6 +149,12 @@ public enum GLFWBinding {
     GAMEPAD_AXIS_LT(4),
     GAMEPAD_AXIS_RT(5),
 
+    // gamepad buttons
+    GAMEPAD_BUTTON_DPAD_UP(11),
+    GAMEPAD_BUTTON_DPAD_RIGHT(12),
+    GAMEPAD_BUTTON_DPAD_DOWN(13),
+    GAMEPAD_BUTTON_DPAD_LEFT(14),
+
     /* special binding for joysticks */
     LEFT_JOYSTICK(-1),
     RIGHT_JOYSTICK(-1);
