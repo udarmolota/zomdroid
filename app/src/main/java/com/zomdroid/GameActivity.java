@@ -60,6 +60,16 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     private boolean leftMouseDown  = false;
     private boolean rightMouseDown = false;
 
+    private static final long LMB_TAP_RELEASE_DELAY_MS = 40;
+    private final Runnable lmbAutoUp = new Runnable() {
+      @Override public void run() {
+        if (leftMouseDown) {
+          leftMouseDown = false;
+          InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, false);
+        }
+      }
+    };
+
     private void dbg(String s) {
       runOnUiThread(() -> Toast.makeText(this, s, Toast.LENGTH_SHORT).show());
     }
@@ -187,6 +197,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
                 InputNativeInterface.sendCursorPos(x * renderScale, y * renderScale);
 
                 leftPressedFinger = true;
+                leftMouseDown = true;
                 InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, true);
                 return true;
               }
@@ -207,6 +218,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
                   InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, false);
                   leftPressedFinger = false;
                 }
+                leftMouseDown = false;
                 InputNativeInterface.sendCursorPos(x * renderScale, y * renderScale);
                 activePointerId = -1;
                 return true;
