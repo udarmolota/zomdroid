@@ -60,12 +60,8 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     private boolean leftMouseDown  = false;
     private boolean rightMouseDown = false;
 
-    private int kbDpadState = 0;
-    private final android.util.SparseIntArray dpadKeyToBit = new android.util.SparseIntArray();
-    private int pressedDpadMask = 0;
-
-    private void t(String msg) {
-      runOnUiThread(() -> Toast.makeText(this, msg, Toast.LENGTH_SHORT).show());
+    private void dbg(String s) {
+      runOnUiThread(() -> Toast.makeText(this, s, Toast.LENGTH_SHORT).show());
     }
 
     @SuppressLint({"UnsafeDynamicallyLoadedCode", "ClickableViewAccessibility"})
@@ -180,15 +176,8 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
 
         @Override
         public boolean onTouch(View v, MotionEvent e) {
-          boolean isMouseSrc = e.isFromSource(InputDevice.SOURCE_MOUSE) || e.isFromSource(InputDevice.SOURCE_TOUCHPAD)
-              || e.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE;
-
           int action = e.getActionMasked();
           int idx = e.getActionIndex();
-
-          if (isMouseSrc) {
-            return false;
-          }
 
           switch (action) {
               case MotionEvent.ACTION_DOWN:
@@ -206,6 +195,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
                 int p = e.findPointerIndex(activePointerId);
                 if (p < 0) { activePointerId = -1; return false; }
                 float x = e.getX(p), y = e.getY(p);
+                //dbg("ACTION_MOVE");
                 InputNativeInterface.sendCursorPos(x * renderScale, y * renderScale);
                 return true;
               }
@@ -313,30 +303,17 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
       int btn = event.getActionButton();
       int mask = event.getButtonState();
 
-      final boolean primaryNow   = (mask & MotionEvent.BUTTON_PRIMARY)   != 0;
-      final boolean secondaryNow = (mask & MotionEvent.BUTTON_SECONDARY) != 0;
-
       // Cursor movement: always update position and if LMB/RMB is held — it's a drag of crosshair/objects
-      if (action == MotionEvent.ACTION_HOVER_MOVE || action == MotionEvent.ACTION_MOVE) {
-        float x = event.getX();
+      //if (action == MotionEvent.ACTION_HOVER_MOVE || action == MotionEvent.ACTION_MOVE) {
+      if (action == MotionEvent.ACTION_HOVER_MOVE) {
+      float x = event.getX();
         float y = event.getY();
         InputNativeInterface.sendCursorPos(x * renderScale, y * renderScale);
 
-        // Дожимаем ЛКМ, если маска уже содержит кнопку, но флаг ещё не установлен
-        if (primaryNow && !leftMouseDown) {
-          leftMouseDown = primaryNow;
-          InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, primaryNow);
+        if (leftMouseDown || rightMouseDown) {
+          //dbg("DRAG move");
+          return true;
         }
-
-        if (secondaryNow != rightMouseDown) {
-          rightMouseDown = secondaryNow;
-          InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_RIGHT.code, secondaryNow);
-        }
-
-        // Если любая кнопка зажата — считаем drag (aim/перетаскивание)
-        if (leftMouseDown || rightMouseDown) return true;
-
-        // Просто наведение курсора
         return true;
       }
 
@@ -358,29 +335,14 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
           InputNativeInterface.sendCursorPos(event.getX() * renderScale, event.getY() * renderScale);
 
         if (btn == MotionEvent.BUTTON_PRIMARY) {
+          //dbg(pressed ? "LMB PRESS" : "LMB RELEASE");
           leftMouseDown = pressed;
           InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, pressed);
           return true;
         } else if (btn == MotionEvent.BUTTON_SECONDARY) {
+          //dbg(pressed ? "RMB PRESS" : "RMB RELEASE");
           rightMouseDown = pressed;
           InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_RIGHT.code, pressed);
-          return true;
-        }
-        boolean currentLeftState = (mask & MotionEvent.BUTTON_PRIMARY) != 0;
-        if (leftMouseDown != currentLeftState) {
-          leftMouseDown = currentLeftState;
-          InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, currentLeftState);
-          return true;
-        }
-        // Подстраховка: если ОС не прислала конкретный btn, но изменилась маска — дожмём ЛКМ
-        if (leftMouseDown != primaryNow) {
-          leftMouseDown = primaryNow;
-          InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, primaryNow);
-          return true;
-        }
-        if (rightMouseDown != secondaryNow) {
-          rightMouseDown = secondaryNow;
-          InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_RIGHT.code, secondaryNow);
           return true;
         }
       }
@@ -403,26 +365,6 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
 
     @Override
     public void onKeyboardKey(int glfwCode, boolean pressed) {
-      int bit = dpadBitForKey(glfwCode);
-      if (bit != 0) {
-        //Toast.makeText(this, "onKeyboardKey "+bit, Toast.LENGTH_SHORT).show();
-        if (pressed) kbDpadState |=  bit;
-        else         kbDpadState &= ~bit;
-
-        // Отправляем текущую суммарную маску направлений (держит диагонали, корректно отжимает)
-        InputNativeInterface.sendJoystickDpad(0, (char) kbDpadState);
-
-        // ВРЕМЕННО: дублируем включение/выключение соответствующих клавиш
-        // (Это чисто для диагностики — понять, реагирует ли игра на клавиатурные стрелки.)
-        if      ((bit & 0x1) != 0) InputNativeInterface.sendKeyboard(GLFWBinding.KEY_UP.code,     pressed);
-        else if ((bit & 0x2) != 0) InputNativeInterface.sendKeyboard(GLFWBinding.KEY_RIGHT.code,  pressed);
-        else if ((bit & 0x4) != 0) InputNativeInterface.sendKeyboard(GLFWBinding.KEY_DOWN.code,   pressed);
-        else if ((bit & 0x8) != 0) InputNativeInterface.sendKeyboard(GLFWBinding.KEY_LEFT.code,   pressed);
-
-        return;
-      }
-
-      // Все прочие клавиши – как были
       InputNativeInterface.sendKeyboard(glfwCode, pressed);
     }
 
@@ -439,18 +381,5 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         binding.inputControlsV.setVisibility(View.VISIBLE);
         binding.inputControlsV.applyInputMode(InputControlsView.InputMode.ALL);
       }
-    }
-
-    public static int dpadBitForKey(int glfwCode) {
-      if (glfwCode == GLFWBinding.KEY_UP.code     || glfwCode == GLFWBinding.KEY_PAGE_UP.code)   return 0x1; // UP
-      if (glfwCode == GLFWBinding.KEY_RIGHT.code)                                               return 0x2; // RIGHT
-      if (glfwCode == GLFWBinding.KEY_DOWN.code   || glfwCode == GLFWBinding.KEY_PAGE_DOWN.code) return 0x4; // DOWN
-      if (glfwCode == GLFWBinding.KEY_LEFT.code)                                                return 0x8; // LEFT
-
-      if (glfwCode == GLFWBinding.KEY_W.code) return 0x1;
-      if (glfwCode == GLFWBinding.KEY_D.code) return 0x2;
-      if (glfwCode == GLFWBinding.KEY_S.code) return 0x4;
-      if (glfwCode == GLFWBinding.KEY_A.code) return 0x8;
-      return 0;
     }
 }

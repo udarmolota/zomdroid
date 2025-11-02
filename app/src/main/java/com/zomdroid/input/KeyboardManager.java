@@ -87,11 +87,7 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
     if (!device.supportsSource(InputDevice.SOURCE_KEYBOARD)) return false;
     boolean isPressed = event.getAction() == KeyEvent.ACTION_DOWN;
 
-
     int glfwCode = mapAndroidKeyCodeToGLFW(androidCode);
-    // 1) пробуем распознать как D-Pad
-    int bit = GameActivity.dpadBitForKey(glfwCode);
-    String aName = KeyEvent.keyCodeToString(androidCode);
     //Toast.makeText(context, "[KB] " + aName + " → glfw=" + glfwCode + " pressed=" + isPressed, Toast.LENGTH_SHORT).show();
     if (glfwCode >= 0) {
         listener.onKeyboardKey(glfwCode, isPressed);
