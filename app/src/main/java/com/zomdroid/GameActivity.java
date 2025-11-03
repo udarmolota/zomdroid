@@ -8,7 +8,7 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.system.ErrnoException;
 import android.util.Log;
-import android.view.GestureDetector;
+
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -48,11 +48,11 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     private ActivityGameBinding binding;
     private Surface gameSurface;
     private static boolean isGameStarted = false;
-    private GestureDetector gestureDetector;
 
     // Handles all gamepad connection/disconnection and input events
     private GamepadManager gamepadManager;
     private KeyboardManager keyboardManager;
+    
     // Tracks whether a physical gamepad/kb is currently connected (for UI logic)
     private boolean isGamepadConnected = false;
     private boolean isKeyboardConnected = false;
@@ -60,6 +60,9 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     private boolean leftMouseDown  = false;
     private boolean rightMouseDown = false;
 
+    // Helps to calculate mouse cursor position
+    private float renderScale = 1f;
+    
     private static final long LMB_TAP_RELEASE_DELAY_MS = 40;
     private final Runnable lmbAutoUp = new Runnable() {
       @Override public void run() {
@@ -70,9 +73,9 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
       }
     };
 
-    private void dbg(String s) {
-      runOnUiThread(() -> Toast.makeText(this, s, Toast.LENGTH_SHORT).show());
-    }
+    //private void dbg(String s) {
+    //  runOnUiThread(() -> Toast.makeText(this, s, Toast.LENGTH_SHORT).show());
+    //}
 
     @SuppressLint({"UnsafeDynamicallyLoadedCode", "ClickableViewAccessibility"})
     @Override
@@ -86,10 +89,13 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         binding.gameSv.setFocusableInTouchMode(true);
         binding.gameSv.requestFocus();
 
+        // Initializing the cursor calsulation pos helper
+        renderScale = LauncherPreferences.requireSingleton().getRenderScale();
+
         // Initialize and register GamepadManager for gamepad hotplug and input events
         try {
             gamepadManager = new GamepadManager(this, this);
-            gamepadManager.register();
+            //gamepadManager.register();
 
             // Apply touch override based on saved preference
             boolean isTouchEnabled = LauncherPreferences.requireSingleton().isTouchControlsEnabled();
@@ -101,7 +107,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         // Initialize KeyboardManager
         try {
             keyboardManager = new KeyboardManager(this, this);
-            keyboardManager.register();
+            //keyboardManager.register();
 
           // Apply touch override based on saved preference
           boolean isTouchEnabled = LauncherPreferences.requireSingleton().isTouchControlsEnabled();
@@ -141,24 +147,30 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
             @Override
             public void surfaceCreated(@NonNull SurfaceHolder holder) {
                 Log.d(LOG_TAG, "Game surface created.");
-                float renderScale = LauncherPreferences.requireSingleton().getRenderScale();
-                int width = (int) (binding.gameSv.getWidth() * renderScale);
+                renderScale = LauncherPreferences.requireSingleton().getRenderScale();
+                int width  = (int) (binding.gameSv.getWidth()  * renderScale);
                 int height = (int) (binding.gameSv.getHeight() * renderScale);
-                binding.gameSv.getHolder().setFixedSize(width, height);
+                holder.setFixedSize(width, height);
             }
 
             @Override
             public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
                 Log.d(LOG_TAG, "Game surface changed.");
-
-                gameSurface = binding.gameSv.getHolder().getSurface();
+                // if sizes change at runtime, keep buffer in sync with cached scale
+                int w = (int) (width  * renderScale);
+                int h = (int) (height * renderScale);
+                holder.setFixedSize(w, h);
+                //gameSurface = binding.gameSv.getHolder().getSurface();
+                gameSurface = holder.getSurface();
                 if (gameSurface == null) throw new RuntimeException();
 
                 if (format != PixelFormat.RGBA_8888) {
                     Log.w(LOG_TAG, "Using unsupported pixel format " + format); // LIAMELUI seems like default is RGB_565
                 }
 
-                GameLauncher.setSurface(gameSurface, width, height);
+                //GameLauncher.setSurface(gameSurface, width, height);
+                GameLauncher.setSurface(gameSurface, w, h);
+                
                 if (!isGameStarted) {
                     Thread thread = new Thread(() -> {
                         try {
@@ -180,7 +192,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         });
 
       binding.gameSv.setOnTouchListener(new View.OnTouchListener() {
-        float renderScale = LauncherPreferences.requireSingleton().getRenderScale();
+        //float renderScale = LauncherPreferences.requireSingleton().getRenderScale();
         int activePointerId = -1;
         boolean leftPressedFinger = false;
 
@@ -223,6 +235,15 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
                 activePointerId = -1;
                 return true;
               }
+              case MotionEvent.ACTION_CANCEL: {
+                if (leftPressedFinger || leftMouseDown) {
+                    InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, false);
+                    leftPressedFinger = false;
+                    leftMouseDown = false;
+                }
+                activePointerId = -1;
+                return true;
+            }
           }
           return false;
         }
@@ -300,11 +321,9 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     // Handle gamepad/keyboard motion events
     @Override
     public boolean onGenericMotionEvent(MotionEvent event) {
-      float renderScale = LauncherPreferences.requireSingleton().getRenderScale();
+      //float renderScale = LauncherPreferences.requireSingleton().getRenderScale();
 
-      boolean isPointerDevice = event.isFromSource(InputDevice.SOURCE_MOUSE) ||
-        event.isFromSource(InputDevice.SOURCE_TOUCHPAD) ||
-        event.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE;
+      boolean isPointerDevice = event.isFromSource(InputDevice.SOURCE_MOUSE) || event.isFromSource(InputDevice.SOURCE_TOUCHPAD) || event.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE;
 
       if (!isPointerDevice) {
           if (gamepadManager != null && gamepadManager.handleMotionEvent(event)) return true;
@@ -313,15 +332,14 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
 
       int action = event.getActionMasked();
       int btn = event.getActionButton();
-      int mask = event.getButtonState();
 
       // Cursor movement: always update position and if LMB/RMB is held — it's a drag of crosshair/objects
       //if (action == MotionEvent.ACTION_HOVER_MOVE || action == MotionEvent.ACTION_MOVE) {
       if (action == MotionEvent.ACTION_HOVER_MOVE) {
-      float x = event.getX();
+        float x = event.getX();
         float y = event.getY();
         InputNativeInterface.sendCursorPos(x * renderScale, y * renderScale);
-
+        
         if (leftMouseDown || rightMouseDown) {
           //dbg("DRAG move");
           return true;
@@ -336,8 +354,11 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         if (v != 0) {
           int keyCode = v > 0 ? GLFWBinding.KEY_EQUAL.code : GLFWBinding.KEY_MINUS.code;
           InputNativeInterface.sendKeyboard(keyCode, true);
-          try { Thread.sleep(50); } catch (InterruptedException e) {}
-          InputNativeInterface.sendKeyboard(keyCode, false);
+          //try { Thread.sleep(50); } catch (InterruptedException e) {}
+          //InputNativeInterface.sendKeyboard(keyCode, false);
+          binding.getRoot().postDelayed(() -> {
+                InputNativeInterface.sendKeyboard(keyCode, false);
+            }, 50);
         }
         return true;
       }
@@ -393,5 +414,19 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         binding.inputControlsV.setVisibility(View.VISIBLE);
         binding.inputControlsV.applyInputMode(InputControlsView.InputMode.ALL);
       }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (gamepadManager != null)  gamepadManager.register();
+        if (keyboardManager != null) keyboardManager.register();
+    }
+    
+    @Override
+    protected void onPause() {
+        if (gamepadManager != null)  gamepadManager.unregister();
+        if (keyboardManager != null) keyboardManager.unregister();
+        super.onPause();
     }
 }
