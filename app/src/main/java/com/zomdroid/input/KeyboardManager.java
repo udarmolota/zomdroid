@@ -37,7 +37,8 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
 
   // Create KeyboardManager
   public KeyboardManager(Context context, KeyboardListener listener) {
-    this.context = context;
+    //this.context = context;
+    this.context = context.getApplicationContext();
     this.inputManager = (InputManager) context.getSystemService(Context.INPUT_SERVICE);
     this.listener = listener;
   }
@@ -155,7 +156,7 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
         // System
         case KeyEvent.KEYCODE_ENTER: return GLFWBinding.KEY_ENTER.code;
         case KeyEvent.KEYCODE_ESCAPE: return GLFWBinding.KEY_ESCAPE.code;
-        case KeyEvent.KEYCODE_BACK: return GLFWBinding.KEY_ESCAPE.code;
+        //case KeyEvent.KEYCODE_BACK: return GLFWBinding.KEY_ESCAPE.code;
         case KeyEvent.KEYCODE_DEL: return GLFWBinding.KEY_BACKSPACE.code;
         case KeyEvent.KEYCODE_FORWARD_DEL: return GLFWBinding.KEY_DELETE.code;
         case KeyEvent.KEYCODE_TAB: return GLFWBinding.KEY_TAB.code;

@@ -52,7 +52,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     // Handles all gamepad connection/disconnection and input events
     private GamepadManager gamepadManager;
     private KeyboardManager keyboardManager;
-    
+
     // Tracks whether a physical gamepad/kb is currently connected (for UI logic)
     private boolean isGamepadConnected = false;
     private boolean isKeyboardConnected = false;
@@ -62,7 +62,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
 
     // Helps to calculate mouse cursor position
     private float renderScale = 1f;
-    
+
     private static final long LMB_TAP_RELEASE_DELAY_MS = 40;
     private final Runnable lmbAutoUp = new Runnable() {
       @Override public void run() {
@@ -148,29 +148,24 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
             public void surfaceCreated(@NonNull SurfaceHolder holder) {
                 Log.d(LOG_TAG, "Game surface created.");
                 renderScale = LauncherPreferences.requireSingleton().getRenderScale();
-                int width  = (int) (binding.gameSv.getWidth()  * renderScale);
+                int width = (int) (binding.gameSv.getWidth() * renderScale);
                 int height = (int) (binding.gameSv.getHeight() * renderScale);
-                holder.setFixedSize(width, height);
+                binding.gameSv.getHolder().setFixedSize(width, height);
             }
 
             @Override
             public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
                 Log.d(LOG_TAG, "Game surface changed.");
-                // if sizes change at runtime, keep buffer in sync with cached scale
-                int w = (int) (width  * renderScale);
-                int h = (int) (height * renderScale);
-                holder.setFixedSize(w, h);
-                //gameSurface = binding.gameSv.getHolder().getSurface();
-                gameSurface = holder.getSurface();
+                gameSurface = binding.gameSv.getHolder().getSurface();
+                //gameSurface = holder.getSurface();
                 if (gameSurface == null) throw new RuntimeException();
 
                 if (format != PixelFormat.RGBA_8888) {
                     Log.w(LOG_TAG, "Using unsupported pixel format " + format); // LIAMELUI seems like default is RGB_565
                 }
 
-                //GameLauncher.setSurface(gameSurface, width, height);
-                GameLauncher.setSurface(gameSurface, w, h);
-                
+                GameLauncher.setSurface(gameSurface, width, height);
+
                 if (!isGameStarted) {
                     Thread thread = new Thread(() -> {
                         try {
@@ -339,7 +334,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         float x = event.getX();
         float y = event.getY();
         InputNativeInterface.sendCursorPos(x * renderScale, y * renderScale);
-        
+
         if (leftMouseDown || rightMouseDown) {
           //dbg("DRAG move");
           return true;
@@ -422,7 +417,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         if (gamepadManager != null)  gamepadManager.register();
         if (keyboardManager != null) keyboardManager.register();
     }
-    
+
     @Override
     protected void onPause() {
         if (gamepadManager != null)  gamepadManager.unregister();
