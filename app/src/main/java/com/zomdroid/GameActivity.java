@@ -206,6 +206,9 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
                 leftPressedFinger = true;
                 leftMouseDown = true;
                 InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, true);
+                if (isMouseEvent(e, idx)) {
+                    syncMouseReleaseFromMask(e.getButtonState()); // тихий релиз, press не генерим
+                }
                 return true;
               }
               case MotionEvent.ACTION_MOVE: {
@@ -340,6 +343,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         float x = event.getX();
         float y = event.getY();
         InputNativeInterface.sendCursorPos(x * renderScale, y * renderScale);
+        syncMouseReleaseFromMask(event.getButtonState());
 
         if (leftMouseDown || rightMouseDown) {
           //dbg("DRAG move");
@@ -372,11 +376,13 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
           //dbg(pressed ? "LMB PRESS" : "LMB RELEASE");
           leftMouseDown = pressed;
           InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, pressed);
+          syncMouseReleaseFromMask(event.getButtonState());
           return true;
         } else if (btn == MotionEvent.BUTTON_SECONDARY) {
           //dbg(pressed ? "RMB PRESS" : "RMB RELEASE");
           rightMouseDown = pressed;
           InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_RIGHT.code, pressed);
+          syncMouseReleaseFromMask(event.getButtonState());
           return true;
         }
       }
