@@ -215,6 +215,9 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
                 float x = e.getX(p), y = e.getY(p);
                 //dbg("ACTION_MOVE");
                 InputNativeInterface.sendCursorPos(x * renderScale, y * renderScale);
+                if (isMouseEvent(e, p)) {
+                    syncMouseReleaseFromMask(e.getButtonState());
+                }
                 return true;
               }
               case MotionEvent.ACTION_UP:
@@ -227,6 +230,9 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
                 }
                 leftMouseDown = false;
                 InputNativeInterface.sendCursorPos(x * renderScale, y * renderScale);
+                if (isMouseEvent(e, idx)) {
+                    syncMouseReleaseFromMask(e.getButtonState());
+                }
                 activePointerId = -1;
                 return true;
               }
@@ -424,4 +430,26 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         if (keyboardManager != null) keyboardManager.unregister();
         super.onPause();
     }
+
+    private boolean isMouseEvent(MotionEvent e, int pointerIndex) {
+        return e.isFromSource(InputDevice.SOURCE_MOUSE)
+            || e.isFromSource(InputDevice.SOURCE_TOUCHPAD)
+            || (pointerIndex >= 0 && pointerIndex < e.getPointerCount()
+                && e.getToolType(pointerIndex) == MotionEvent.TOOL_TYPE_MOUSE);
+    }
+    
+    private void syncMouseReleaseFromMask(int mask) {
+        boolean leftNow  = (mask & MotionEvent.BUTTON_PRIMARY)   != 0;
+        boolean rightNow = (mask & MotionEvent.BUTTON_SECONDARY) != 0;
+    
+        if (!leftNow && leftMouseDown) {
+            leftMouseDown = false;
+            InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, false);
+        }
+        if (!rightNow && rightMouseDown) {
+            rightMouseDown = false;
+            InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_RIGHT.code, false);
+        }
+    }
+
 }
