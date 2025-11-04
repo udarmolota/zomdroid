@@ -1,3 +1,12 @@
+## [1.2.6] - 2025-11-02
+### Added
+**🚀 Detection of physical keyboard and mouse**
+The launcher now detects connected keyboards and automatically enables PC-style layout in-game. For best stability, it's recommended to connect your keyboard and mouse before launching the game. Hotplug support is experimental and may behave inconsistently.
+
+**🚀 Extended functionality for physical gamepads via customizable on-screen buttons**
+If you're playing with a physical gamepad but need more control options, you can open the Controls Editor and create new MNK-type buttons mapped to existing keyboard keys. These MNK buttons will remain visible even when a gamepad is connected. For example, you can add Zoom+ / Zoom− buttons mapped to KEY_EQUAL / KEY_MINUS.
+
+---
 ## [1.2.4.v2] - 2025-10-17
 ### Added
 **🛠 Fixes**
