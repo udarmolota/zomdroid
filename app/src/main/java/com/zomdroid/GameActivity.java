@@ -306,7 +306,8 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         boolean handled = false;
-        if (isKeyboardConnected && (keyboardManager != null)) handled |= keyboardManager.handleKeyEvent(event);
+        //if (isKeyboardConnected && (keyboardManager != null)) handled |= keyboardManager.handleKeyEvent(event);
+        if (keyboardManager != null) handled |= keyboardManager.handleKeyEvent(event);
         if (isGamepadConnected && (gamepadManager  != null)) handled |= gamepadManager.handleKeyEvent(event);
         if (handled) return true;
         return super.onKeyDown(keyCode, event);
@@ -315,7 +316,8 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         boolean handled = false;
-        if (isKeyboardConnected && (keyboardManager != null)) handled |= keyboardManager.handleKeyEvent(event);
+        //if (isKeyboardConnected && (keyboardManager != null)) handled |= keyboardManager.handleKeyEvent(event);
+        if (keyboardManager != null) handled |= keyboardManager.handleKeyEvent(event);
         if (isGamepadConnected && (gamepadManager  != null)) handled |= gamepadManager.handleKeyEvent(event);
         if (handled) return true;
         return super.onKeyUp(keyCode, event);
