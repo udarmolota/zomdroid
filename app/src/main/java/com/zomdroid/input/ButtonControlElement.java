@@ -73,6 +73,14 @@ public class ButtonControlElement extends AbstractControlElement {
                 this.pointerId = -1;
                 this.dispatchEvent(false);
                 return true;
+            case MotionEvent.ACTION_CANCEL: {
+                if (this.pointerId != -1) {
+                    this.pointerId = -1;
+                    this.dispatchEvent(false); 
+                    return true;
+                }
+                return false;
+            }
         }
         return false;
     }
