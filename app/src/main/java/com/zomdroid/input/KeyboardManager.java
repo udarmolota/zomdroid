@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 import android.util.Log;
 
+import com.zomdroid.input.KeyCodes;
 import com.zomdroid.GameActivity;
 
 /**
@@ -85,157 +86,20 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
   public boolean handleKeyEvent(KeyEvent event) {
     int androidCode = event.getKeyCode();
     InputDevice device = event.getDevice();
-    if (!device.supportsSource(InputDevice.SOURCE_KEYBOARD)) return false;
+    if (device == null || !device.supportsSource(InputDevice.SOURCE_KEYBOARD))  return false;
+    
     boolean isPressed = event.getAction() == KeyEvent.ACTION_DOWN;
 
-    int glfwCode = mapAndroidKeyCodeToGLFW(androidCode);
+    //int glfwCode = mapAndroidKeyCodeToGLFW(androidCode);
+    GLFWBinding b = KeyCodes.fromAndroid(androidCode);
+    if (b == null) return false;
     //Toast.makeText(context, "[KB] " + aName + " → glfw=" + glfwCode + " pressed=" + isPressed, Toast.LENGTH_SHORT).show();
-    if (glfwCode >= 0) {
-        listener.onKeyboardKey(glfwCode, isPressed);
-        return true;
-    } else {
-        //Toast.makeText(context, "Unmapped key", Toast.LENGTH_SHORT).show();
-        return false;
-    }
-
+    if (listener != null) {
+        listener.onKeyboardKey(b.code, isPressed);
+        //listener.onKeyboardKey(glfwCode, isPressed);        
+    } 
+    return true;
   }
-
-  // Map Android keycode to GLFWBinding code
-  private int mapAndroidKeyCodeToGLFW(int androidCode) {
-      switch (androidCode) {
-        // A-Z
-        case KeyEvent.KEYCODE_A: return GLFWBinding.KEY_A.code;
-        case KeyEvent.KEYCODE_B: return GLFWBinding.KEY_B.code;
-        case KeyEvent.KEYCODE_C: return GLFWBinding.KEY_C.code;
-        case KeyEvent.KEYCODE_D: return GLFWBinding.KEY_D.code;
-        case KeyEvent.KEYCODE_E: return GLFWBinding.KEY_E.code;
-        case KeyEvent.KEYCODE_F: return GLFWBinding.KEY_F.code;
-        case KeyEvent.KEYCODE_G: return GLFWBinding.KEY_G.code;
-        case KeyEvent.KEYCODE_H: return GLFWBinding.KEY_H.code;
-        case KeyEvent.KEYCODE_I: return GLFWBinding.KEY_I.code;
-        case KeyEvent.KEYCODE_J: return GLFWBinding.KEY_J.code;
-        case KeyEvent.KEYCODE_K: return GLFWBinding.KEY_K.code;
-        case KeyEvent.KEYCODE_L: return GLFWBinding.KEY_L.code;
-        case KeyEvent.KEYCODE_M: return GLFWBinding.KEY_M.code;
-        case KeyEvent.KEYCODE_N: return GLFWBinding.KEY_N.code;
-        case KeyEvent.KEYCODE_O: return GLFWBinding.KEY_O.code;
-        case KeyEvent.KEYCODE_P: return GLFWBinding.KEY_P.code;
-        case KeyEvent.KEYCODE_Q: return GLFWBinding.KEY_Q.code;
-        case KeyEvent.KEYCODE_R: return GLFWBinding.KEY_R.code;
-        case KeyEvent.KEYCODE_S: return GLFWBinding.KEY_S.code;
-        case KeyEvent.KEYCODE_T: return GLFWBinding.KEY_T.code;
-        case KeyEvent.KEYCODE_U: return GLFWBinding.KEY_U.code;
-        case KeyEvent.KEYCODE_V: return GLFWBinding.KEY_V.code;
-        case KeyEvent.KEYCODE_W: return GLFWBinding.KEY_W.code;
-        case KeyEvent.KEYCODE_X: return GLFWBinding.KEY_X.code;
-        case KeyEvent.KEYCODE_Y: return GLFWBinding.KEY_Y.code;
-        case KeyEvent.KEYCODE_Z: return GLFWBinding.KEY_Z.code;
-
-        // Numbers
-        case KeyEvent.KEYCODE_0: return GLFWBinding.KEY_0.code;
-        case KeyEvent.KEYCODE_1: return GLFWBinding.KEY_1.code;
-        case KeyEvent.KEYCODE_2: return GLFWBinding.KEY_2.code;
-        case KeyEvent.KEYCODE_3: return GLFWBinding.KEY_3.code;
-        case KeyEvent.KEYCODE_4: return GLFWBinding.KEY_4.code;
-        case KeyEvent.KEYCODE_5: return GLFWBinding.KEY_5.code;
-        case KeyEvent.KEYCODE_6: return GLFWBinding.KEY_6.code;
-        case KeyEvent.KEYCODE_7: return GLFWBinding.KEY_7.code;
-        case KeyEvent.KEYCODE_8: return GLFWBinding.KEY_8.code;
-        case KeyEvent.KEYCODE_9: return GLFWBinding.KEY_9.code;
-
-        // Modificatros
-        case KeyEvent.KEYCODE_SHIFT_LEFT: return GLFWBinding.KEY_LEFT_SHIFT.code;
-        case KeyEvent.KEYCODE_SHIFT_RIGHT: return GLFWBinding.KEY_RIGHT_SHIFT.code;
-        case KeyEvent.KEYCODE_CTRL_LEFT: return GLFWBinding.KEY_LEFT_CONTROL.code;
-        case KeyEvent.KEYCODE_CTRL_RIGHT: return GLFWBinding.KEY_RIGHT_CONTROL.code;
-        case KeyEvent.KEYCODE_ALT_LEFT: return GLFWBinding.KEY_LEFT_ALT.code;
-        case KeyEvent.KEYCODE_ALT_RIGHT: return GLFWBinding.KEY_RIGHT_ALT.code;
-        case KeyEvent.KEYCODE_META_LEFT: return GLFWBinding.KEY_LEFT_SUPER.code;
-        case KeyEvent.KEYCODE_META_RIGHT: return GLFWBinding.KEY_RIGHT_SUPER.code;
-
-        // System
-        case KeyEvent.KEYCODE_ENTER: return GLFWBinding.KEY_ENTER.code;
-        case KeyEvent.KEYCODE_ESCAPE: return GLFWBinding.KEY_ESCAPE.code;
-        //case KeyEvent.KEYCODE_BACK: return GLFWBinding.KEY_ESCAPE.code;
-        case KeyEvent.KEYCODE_DEL: return GLFWBinding.KEY_BACKSPACE.code;
-        case KeyEvent.KEYCODE_FORWARD_DEL: return GLFWBinding.KEY_DELETE.code;
-        case KeyEvent.KEYCODE_TAB: return GLFWBinding.KEY_TAB.code;
-        case KeyEvent.KEYCODE_INSERT: return GLFWBinding.KEY_INSERT.code;
-        case KeyEvent.KEYCODE_CAPS_LOCK: return GLFWBinding.KEY_CAPS_LOCK.code;
-        case KeyEvent.KEYCODE_NUM_LOCK: return GLFWBinding.KEY_NUM_LOCK.code;
-        case KeyEvent.KEYCODE_SCROLL_LOCK: return GLFWBinding.KEY_SCROLL_LOCK.code;
-        case KeyEvent.KEYCODE_BREAK: return GLFWBinding.KEY_PAUSE.code;
-        case KeyEvent.KEYCODE_SYSRQ: return GLFWBinding.KEY_PRINT_SCREEN.code;
-
-        // Symbols
-        case KeyEvent.KEYCODE_SPACE: return GLFWBinding.KEY_SPACE.code;
-        case KeyEvent.KEYCODE_MINUS: return GLFWBinding.KEY_MINUS.code;
-        case KeyEvent.KEYCODE_EQUALS: return GLFWBinding.KEY_EQUAL.code;
-        case KeyEvent.KEYCODE_LEFT_BRACKET: return GLFWBinding.KEY_LEFT_BRACKET.code;
-        case KeyEvent.KEYCODE_RIGHT_BRACKET: return GLFWBinding.KEY_RIGHT_BRACKET.code;
-        case KeyEvent.KEYCODE_BACKSLASH: return GLFWBinding.KEY_BACKSLASH.code;
-        case KeyEvent.KEYCODE_SEMICOLON: return GLFWBinding.KEY_SEMICOLON.code;
-        case KeyEvent.KEYCODE_APOSTROPHE: return GLFWBinding.KEY_APOSTROPHE.code;
-        case KeyEvent.KEYCODE_COMMA: return GLFWBinding.KEY_COMMA.code;
-        case KeyEvent.KEYCODE_PERIOD: return GLFWBinding.KEY_PERIOD.code;
-        case KeyEvent.KEYCODE_SLASH: return GLFWBinding.KEY_SLASH.code;
-        case KeyEvent.KEYCODE_GRAVE: return GLFWBinding.KEY_GRAVE_ACCENT.code;
-
-        // Numpad
-        case KeyEvent.KEYCODE_NUMPAD_0: return GLFWBinding.KEY_KP_0.code;
-        case KeyEvent.KEYCODE_NUMPAD_1: return GLFWBinding.KEY_KP_1.code;
-        case KeyEvent.KEYCODE_NUMPAD_2: return GLFWBinding.KEY_KP_2.code;
-        case KeyEvent.KEYCODE_NUMPAD_3: return GLFWBinding.KEY_KP_3.code;
-        case KeyEvent.KEYCODE_NUMPAD_4: return GLFWBinding.KEY_KP_4.code;
-        case KeyEvent.KEYCODE_NUMPAD_5: return GLFWBinding.KEY_KP_5.code;
-        case KeyEvent.KEYCODE_NUMPAD_6: return GLFWBinding.KEY_KP_6.code;
-        case KeyEvent.KEYCODE_NUMPAD_7: return GLFWBinding.KEY_KP_7.code;
-        case KeyEvent.KEYCODE_NUMPAD_8: return GLFWBinding.KEY_KP_8.code;
-        case KeyEvent.KEYCODE_NUMPAD_9: return GLFWBinding.KEY_KP_9.code;
-        case KeyEvent.KEYCODE_NUMPAD_ENTER: return GLFWBinding.KEY_KP_ENTER.code;
-        case KeyEvent.KEYCODE_NUMPAD_ADD: return GLFWBinding.KEY_KP_ADD.code;
-        case KeyEvent.KEYCODE_NUMPAD_SUBTRACT: return GLFWBinding.KEY_KP_SUBTRACT.code;
-        case KeyEvent.KEYCODE_NUMPAD_MULTIPLY: return GLFWBinding.KEY_KP_MULTIPLY.code;
-        case KeyEvent.KEYCODE_NUMPAD_DIVIDE: return GLFWBinding.KEY_KP_DIVIDE.code;
-        case KeyEvent.KEYCODE_NUMPAD_DOT: return GLFWBinding.KEY_KP_DECIMAL.code;
-
-        // Functional
-        case KeyEvent.KEYCODE_F1: return GLFWBinding.KEY_F1.code;
-        case KeyEvent.KEYCODE_F2: return GLFWBinding.KEY_F2.code;
-        case KeyEvent.KEYCODE_F3: return GLFWBinding.KEY_F3.code;
-        case KeyEvent.KEYCODE_F4: return GLFWBinding.KEY_F4.code;
-        case KeyEvent.KEYCODE_F5: return GLFWBinding.KEY_F5.code;
-        case KeyEvent.KEYCODE_F6: return GLFWBinding.KEY_F6.code;
-        case KeyEvent.KEYCODE_F7: return GLFWBinding.KEY_F7.code;
-        case KeyEvent.KEYCODE_F8: return GLFWBinding.KEY_F8.code;
-        case KeyEvent.KEYCODE_F9: return GLFWBinding.KEY_F9.code;
-        case KeyEvent.KEYCODE_F10: return GLFWBinding.KEY_F10.code;
-        case KeyEvent.KEYCODE_F11: return GLFWBinding.KEY_F11.code;
-        case KeyEvent.KEYCODE_F12: return GLFWBinding.KEY_F12.code;
-
-        // Arrows
-        case KeyEvent.KEYCODE_DPAD_UP: return GLFWBinding.KEY_UP.code;
-        case KeyEvent.KEYCODE_DPAD_DOWN: return GLFWBinding.KEY_DOWN.code;
-        case KeyEvent.KEYCODE_DPAD_LEFT: return GLFWBinding.KEY_LEFT.code;
-        case KeyEvent.KEYCODE_DPAD_RIGHT: return GLFWBinding.KEY_RIGHT.code;
-
-        case KeyEvent.KEYCODE_PAGE_UP:    return GLFWBinding.KEY_PAGE_UP.code;
-        case KeyEvent.KEYCODE_PAGE_DOWN:  return GLFWBinding.KEY_PAGE_DOWN.code;
-        case KeyEvent.KEYCODE_MOVE_HOME:  return GLFWBinding.KEY_HOME.code;
-        case KeyEvent.KEYCODE_MOVE_END:   return GLFWBinding.KEY_END.code;
-
-        case KeyEvent.KEYCODE_SYSTEM_NAVIGATION_UP:    return GLFWBinding.KEY_UP.code;
-        case KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN:  return GLFWBinding.KEY_DOWN.code;
-        case KeyEvent.KEYCODE_SYSTEM_NAVIGATION_LEFT:  return GLFWBinding.KEY_LEFT.code;
-        case KeyEvent.KEYCODE_SYSTEM_NAVIGATION_RIGHT: return GLFWBinding.KEY_RIGHT.code;
-
-        case KeyEvent.KEYCODE_NAVIGATE_NEXT:     return GLFWBinding.KEY_TAB.code;
-        case KeyEvent.KEYCODE_NAVIGATE_PREVIOUS: return GLFWBinding.KEY_TAB.code;
-
-        default: return -1;
-      }
-  }
-
 
   @Override
   public void onInputDeviceAdded(int deviceId) {
