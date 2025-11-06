@@ -185,9 +185,16 @@ public abstract class AbstractControlElement {
         if (binding.ordinal() >= GLFWBinding.MOUSE_BUTTON_LEFT.ordinal()
                 && binding.ordinal() <= GLFWBinding.MOUSE_BUTTON_8.ordinal()) {
             InputNativeInterface.sendMouseButton(binding.code, isPressed);
-        } else if (binding.ordinal() >= GLFWBinding.KEY_SPACE.ordinal()
-                && binding.ordinal() <= GLFWBinding.KEY_WORLD_2.ordinal()) {
-            InputNativeInterface.sendKeyboard(binding.code, isPressed);
+        }
+        
+        if (binding.ordinal() >= GLFWBinding.KEY_SPACE.ordinal() && binding.ordinal() <= GLFWBinding.KEY_WORLD_2.ordinal()) {
+            int androidCode = c(binding); 
+            if (androidCode != KeyEvent.KEYCODE_UNKNOWN) {
+                Log.v(LOG_TAG, "handleMNKBinding androidCode=" + androidCode);
+                InputDispatch.dispatchKey(androidCode, isPressed);   // <-- НОВОЕ (см. п.2-3)
+            } 
+            
+            InputNativeInterface.sendKeyboard(binding.code, isPressed);            
         }
     }
 
