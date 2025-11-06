@@ -28,6 +28,7 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
   private final Set<DevKey> quarantined = new HashSet<>();
   private final Set<DevKey> goodKeyboards = new HashSet<>();
   private final java.util.Map<Integer, DevKey> idToKey = new java.util.HashMap<>();
+  private static final String LOG_TAG = AbstractControlElement.class.getName();
 
   // Listener interface for keyboard events
   public interface KeyboardListener {
@@ -85,19 +86,22 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
   // Handle KeyEvent from physical keyboard
   public boolean handleKeyEvent(KeyEvent event) {
     int androidCode = event.getKeyCode();
-    InputDevice device = event.getDevice();
-    if (device == null || !device.supportsSource(InputDevice.SOURCE_KEYBOARD))  return false;
-    
+    //InputDevice device = event.getDevice();
+    //if (device == null || !device.supportsSource(InputDevice.SOURCE_KEYBOARD))  return false;
+    final int src = event.getSource();
+    if ((src & InputDevice.SOURCE_KEYBOARD) == 0 && src != 0) { return false; }
+
     boolean isPressed = event.getAction() == KeyEvent.ACTION_DOWN;
 
     //int glfwCode = mapAndroidKeyCodeToGLFW(androidCode);
     GLFWBinding b = KeyCodes.fromAndroid(androidCode);
     if (b == null) return false;
-    //Toast.makeText(context, "[KB] " + aName + " → glfw=" + glfwCode + " pressed=" + isPressed, Toast.LENGTH_SHORT).show();
+    //Toast.makeText(context, "[KB] glfw " + b.code + " , androidCode=" + androidCode, Toast.LENGTH_SHORT).show();
+    Log.d(LOG_TAG, "[KB] glfw " + b.code + " , androidCode=" + androidCode);
     if (listener != null) {
         listener.onKeyboardKey(b.code, isPressed);
-        //listener.onKeyboardKey(glfwCode, isPressed);        
-    } 
+        //listener.onKeyboardKey(glfwCode, isPressed);
+    }
     return true;
   }
 

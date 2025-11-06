@@ -3,7 +3,7 @@ package com.zomdroid.input;
 import android.util.SparseArray;
 import android.view.KeyEvent;
 import java.util.EnumMap;
-import javax.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 /**
  * Single source of truth: Android KeyEvent codes <-> GLFWBinding.

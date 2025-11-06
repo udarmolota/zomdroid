@@ -180,8 +180,8 @@ public abstract class AbstractControlElement {
     }
 
   public static void handleMNKBinding(GLFWBinding binding, boolean isPressed) {
-        //Toast.makeText(context, "MNK → " + binding.name() + " code=" + binding.code, Toast.LENGTH_SHORT).show();
-        //Log.v(LOG_TAG, "handleMNKBinding binding=" + binding + " isPressed=" + isPressed);
+        //Toast.makeText(this.context, "MNK → " + binding.name() + " code=" + binding.code, Toast.LENGTH_SHORT).show();
+        Log.v(LOG_TAG, "handleMNKBinding binding=" + binding.name() + " code=" + binding.code);
         if (binding.ordinal() >= GLFWBinding.MOUSE_BUTTON_LEFT.ordinal()
                 && binding.ordinal() <= GLFWBinding.MOUSE_BUTTON_8.ordinal()) {
             InputNativeInterface.sendMouseButton(binding.code, isPressed);
