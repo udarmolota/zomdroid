@@ -161,7 +161,70 @@ public final class KeyCodes {
 
   @Nullable
   public static Integer toAndroid(GLFWBinding glfw) {
-    return GLFW_TO_ANDROID.get(glfw);
+      switch (glfw) {
+        // ===== Top row digits =====
+        case KEY_0: return KeyEvent.KEYCODE_0;
+        case KEY_1: return KeyEvent.KEYCODE_1;
+        case KEY_2: return KeyEvent.KEYCODE_2;
+        case KEY_3: return KeyEvent.KEYCODE_3;
+        case KEY_4: return KeyEvent.KEYCODE_4;
+        case KEY_5: return KeyEvent.KEYCODE_5;
+        case KEY_6: return KeyEvent.KEYCODE_6;
+        case KEY_7: return KeyEvent.KEYCODE_7;
+        case KEY_8: return KeyEvent.KEYCODE_8;
+        case KEY_9: return KeyEvent.KEYCODE_9;
+  
+        // ===== Letters =====
+        case KEY_A: return KeyEvent.KEYCODE_A;
+        case KEY_B: return KeyEvent.KEYCODE_B;
+        case KEY_C: return KeyEvent.KEYCODE_C;
+        case KEY_D: return KeyEvent.KEYCODE_D;
+        case KEY_E: return KeyEvent.KEYCODE_E;
+        case KEY_F: return KeyEvent.KEYCODE_F;
+        case KEY_G: return KeyEvent.KEYCODE_G;
+        case KEY_H: return KeyEvent.KEYCODE_H;
+        case KEY_I: return KeyEvent.KEYCODE_I;
+        case KEY_J: return KeyEvent.KEYCODE_J;
+        case KEY_K: return KeyEvent.KEYCODE_K;
+        case KEY_L: return KeyEvent.KEYCODE_L;
+        case KEY_M: return KeyEvent.KEYCODE_M;
+        case KEY_N: return KeyEvent.KEYCODE_N;
+        case KEY_O: return KeyEvent.KEYCODE_O;
+        case KEY_P: return KeyEvent.KEYCODE_P;
+        case KEY_Q: return KeyEvent.KEYCODE_Q;
+        case KEY_R: return KeyEvent.KEYCODE_R;
+        case KEY_S: return KeyEvent.KEYCODE_S;
+        case KEY_T: return KeyEvent.KEYCODE_T;
+        case KEY_U: return KeyEvent.KEYCODE_U;
+        case KEY_V: return KeyEvent.KEYCODE_V;
+        case KEY_W: return KeyEvent.KEYCODE_W;
+        case KEY_X: return KeyEvent.KEYCODE_X;
+        case KEY_Y: return KeyEvent.KEYCODE_Y;
+        case KEY_Z: return KeyEvent.KEYCODE_Z;
+  
+        // Numpad 
+        case KEY_KP_0: return KeyEvent.KEYCODE_NUMPAD_0;
+        case KEY_KP_1: return KeyEvent.KEYCODE_NUMPAD_1;
+        case KEY_KP_2: return KeyEvent.KEYCODE_NUMPAD_2;
+        case KEY_KP_3: return KeyEvent.KEYCODE_NUMPAD_3;
+        case KEY_KP_4: return KeyEvent.KEYCODE_NUMPAD_4;
+        case KEY_KP_5: return KeyEvent.KEYCODE_NUMPAD_5;
+        case KEY_KP_6: return KeyEvent.KEYCODE_NUMPAD_6;
+        case KEY_KP_7: return KeyEvent.KEYCODE_NUMPAD_7;
+        case KEY_KP_8: return KeyEvent.KEYCODE_NUMPAD_8;
+        case KEY_KP_9: return KeyEvent.KEYCODE_NUMPAD_9;
+        case KEY_KP_ENTER:     return KeyEvent.KEYCODE_NUMPAD_ENTER;
+        case KEY_KP_ADD:       return KeyEvent.KEYCODE_NUMPAD_ADD;
+        case KEY_KP_SUBTRACT:  return KeyEvent.KEYCODE_NUMPAD_SUBTRACT;
+        case KEY_KP_MULTIPLY:  return KeyEvent.KEYCODE_NUMPAD_MULTIPLY;
+        case KEY_KP_DIVIDE:    return KeyEvent.KEYCODE_NUMPAD_DIVIDE;
+        case KEY_KP_DECIMAL:   return KeyEvent.KEYCODE_NUMPAD_DOT;
+  
+        default:
+          // Fallback: если для glfw уже есть обратная запись — вернём её; иначе UNKNOWN.
+          Integer code = GLFW_TO_ANDROID.get(glfw);
+          return (code != null) ? code : KeyEvent.KEYCODE_UNKNOWN;
+      }
   }
 
   private KeyCodes() {}
