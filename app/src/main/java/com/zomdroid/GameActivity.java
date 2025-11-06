@@ -85,7 +85,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         binding = ActivityGameBinding.inflate(getLayoutInflater());
         // Give focus to game surface to ensure it receives input events
         setContentView(binding.getRoot());
-        InputDispatch.setTarget(binding.gameSv);
+        //InputDispatch.setTarget(binding.gameSv);
         binding.gameSv.setFocusable(true);
         binding.gameSv.setFocusableInTouchMode(true);
         binding.gameSv.requestFocus();
@@ -257,7 +257,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
 
     @Override
     protected void onDestroy() {
-      InputDispatch.setTarget(null);
+      //InputDispatch.setTarget(null);
       super.onDestroy();
       // Unregister GamepadManager to avoid leaks
       if (gamepadManager != null) {
