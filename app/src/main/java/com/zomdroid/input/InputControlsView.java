@@ -132,7 +132,7 @@ public class InputControlsView extends View {
     @Override
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
-        System.out.println("[mixed b] onDraw called");
+        //System.out.println("[mixed b] onDraw called");
 
         for (AbstractControlElement controlElement : controlElements) {
             boolean visible = controlElement.isVisible();

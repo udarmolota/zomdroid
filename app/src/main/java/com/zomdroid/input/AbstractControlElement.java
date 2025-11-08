@@ -27,7 +27,6 @@ public abstract class AbstractControlElement {
     protected final Type type;
     protected InputType inputType;
     protected Context context;
-    public static boolean SEND_ANDROID_KEYEVENT_FOR_MNK_KEYS = true;
 
     AbstractControlElement(InputControlsView parentView, ControlElementDescription description) {
         this.parentView = parentView;
@@ -184,29 +183,14 @@ public abstract class AbstractControlElement {
         }
     }
 
-      if (binding.ordinal() >= GLFWBinding.KEY_SPACE.ordinal()  && binding.ordinal() <= GLFWBinding.KEY_WORLD_2.ordinal()) {
-            Log.v(LOG_TAG, "MNK→KEY   binding=" + binding.name() + " glfwCode=" + binding.code + " pressed=" + isPressed);
-    
-            if (SEND_ANDROID_KEYEVENT_FOR_MNK_KEYS) {
-                Integer androidCode = KeyCodes.toAndroid(binding);
-                if (androidCode != null && androidCode != KeyEvent.KEYCODE_UNKNOWN
-                        && InputDispatch.hasTarget()) {  // hasTarget() — маленький helper в твоём InputDispatch
-                    Log.v(LOG_TAG, "→ dispatchKeyEvent(androidCode=" + androidCode + ")");
-                    InputDispatch.dispatchKey(androidCode, isPressed);
-                    return; // ВАЖНО: не дублируем натив
-                } else {
-                    Log.v(LOG_TAG, "→ fallback to native (androidCode=" + androidCode + ", hasTarget=" + InputDispatch.hasTarget() + ")");
-                }
-            }
-    
-            // Fallback или когда SEND_ANDROID_KEYEVENT_FOR_MNK_KEYS == false
-            InputNativeInterface.sendKeyboard(binding.code, isPressed);
-            return;
-        }
+    void handleMNKBinding(GLFWBinding binding, boolean isPressed) {
+      if (binding.ordinal() >= GLFWBinding.MOUSE_BUTTON_LEFT.ordinal() && binding.ordinal() <= GLFWBinding.MOUSE_BUTTON_8.ordinal()) {
+        InputNativeInterface.sendMouseButton(binding.code, isPressed);
+      } else if (binding.ordinal() >= GLFWBinding.KEY_SPACE.ordinal() && binding.ordinal() <= GLFWBinding.KEY_WORLD_2.ordinal()) {
+         InputNativeInterface.sendKeyboard(binding.code, isPressed);
+      }
+      return;
     }
-
-    // Если сюда попали — binding вне диапазонов (ничего не делаем)
-    Log.v(LOG_TAG, "MNK→IGNORED binding=" + binding.name());
 
     public enum Type {
         STICK,

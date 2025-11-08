@@ -557,7 +557,7 @@ void *dlopen(const char* filename, int flags) {
 
             char android_filename[BUF_SIZE];
             //LOGD("[linker] Base name: %s", base);
-            snprintf(android_filename, BUF_SIZE,"android/arm64-v8a/%s", base);
+            //snprintf(android_filename, BUF_SIZE,"android/arm64-v8a/%s", base);
 
             if (access(android_filename, F_OK) == 0) {
                 LOGD("[linker] Native Android version of %s is found", android_filename);
@@ -654,12 +654,10 @@ void *dlsym(void *handle, const char *sym_name) {
             if (sym == NULL) {
                 LOGE("Failed to create emulation bridge for jni symbol %s", sym_name);
                 free(arg_types);
-                fprintf(stderr, "[linker] ERROR: Emulation bridge failed for symbol %s\n", sym_name);
                 return NULL;
             }
             free(arg_types);
             LOGD("Successfully created emulation bridge for jni symbol %s at %p (target=%ld)", sym_name, sym, box64_sym);
-            fprintf(stderr, "[linker] OK: Emulation bridge created for symbol %s at %p\n", sym_name, sym);
             return sym;
         } else {
             return loader_dlsym(handle, sym_name, __builtin_return_address(0));

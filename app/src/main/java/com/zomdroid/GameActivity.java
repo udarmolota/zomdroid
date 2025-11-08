@@ -32,7 +32,7 @@ import com.zomdroid.game.GameInstance;
 import com.zomdroid.game.GameInstanceManager;
 import com.zomdroid.input.InputControlsView;
 import com.zomdroid.input.KeyboardManager;
-import com.zomdroid.input.AbstractControlElement;
+
 
 import org.fmod.FMOD;
 
@@ -63,16 +63,6 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     // Helps to calculate mouse cursor position
     private float renderScale = 1f;
 
-    private static final long LMB_TAP_RELEASE_DELAY_MS = 40;
-    private final Runnable lmbAutoUp = new Runnable() {
-      @Override public void run() {
-        if (leftMouseDown) {
-          leftMouseDown = false;
-          InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, false);
-        }
-      }
-    };
-
     //private void dbg(String s) {
     //  runOnUiThread(() -> Toast.makeText(this, s, Toast.LENGTH_SHORT).show());
     //}
@@ -85,7 +75,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         binding = ActivityGameBinding.inflate(getLayoutInflater());
         // Give focus to game surface to ensure it receives input events
         setContentView(binding.getRoot());
-        //InputDispatch.setTarget(binding.gameSv);
+
         binding.gameSv.setFocusable(true);
         binding.gameSv.setFocusableInTouchMode(true);
         binding.gameSv.requestFocus();
@@ -257,7 +247,6 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
 
     @Override
     protected void onDestroy() {
-      //InputDispatch.setTarget(null);
       super.onDestroy();
       // Unregister GamepadManager to avoid leaks
       if (gamepadManager != null) {
@@ -447,11 +436,11 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
             || (pointerIndex >= 0 && pointerIndex < e.getPointerCount()
                 && e.getToolType(pointerIndex) == MotionEvent.TOOL_TYPE_MOUSE);
     }
-    
+
     private void syncMouseReleaseFromMask(int mask) {
         boolean leftNow  = (mask & MotionEvent.BUTTON_PRIMARY)   != 0;
         boolean rightNow = (mask & MotionEvent.BUTTON_SECONDARY) != 0;
-    
+
         if (!leftNow && leftMouseDown) {
             leftMouseDown = false;
             InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, false);

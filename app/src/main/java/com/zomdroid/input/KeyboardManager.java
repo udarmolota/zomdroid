@@ -97,7 +97,7 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
     GLFWBinding b = KeyCodes.fromAndroid(androidCode);
     if (b == null) return false;
     //Toast.makeText(context, "[KB] glfw " + b.code + " , androidCode=" + androidCode, Toast.LENGTH_SHORT).show();
-    Log.d(LOG_TAG, "[KB] glfw " + b.code + " , androidCode=" + androidCode);
+    //Log.d(LOG_TAG, "[KB] glfw " + b.code + " , androidCode=" + androidCode);
     if (listener != null) {
         listener.onKeyboardKey(b.code, isPressed);
         //listener.onKeyboardKey(glfwCode, isPressed);
