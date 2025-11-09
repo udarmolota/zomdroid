@@ -23,21 +23,23 @@ public class DpadControlElement extends AbstractControlElement {
     private Mode mode = Mode.COMPOSITE;
     private int splitBit = 0; // 0x1 UP, 0x2 RIGHT, 0x4 DOWN, 0x8 LEFT
     private static int pressedMask = 0;
+    private final AbstractControlElement.Type type;
 
     public DpadControlElement(InputControlsView parentView, ControlElementDescription elementDescription) {
         super(parentView, elementDescription);
         this.drawable = new DpadControlDrawable(parentView, elementDescription);
         this.bindings.addAll(Arrays.asList(elementDescription.bindings));
-        
-        if (this.description.type == Type.DPAD) {
+        this.type = elementDescription.type; // ← сохраняем тип
+    
+        if (this.type == Type.DPAD) {
             mode = Mode.COMPOSITE;
-        } else if (this.description.type == Type.DPAD_UP) {
+        } else if (this.type == Type.DPAD_UP) {
             mode = Mode.SPLIT; splitBit = 0x1;
-        } else if (this.description.type == Type.DPAD_RIGHT) {
+        } else if (this.type == Type.DPAD_RIGHT) {
             mode = Mode.SPLIT; splitBit = 0x2;
-        } else if (this.description.type == Type.DPAD_DOWN) {
+        } else if (this.type == Type.DPAD_DOWN) {
             mode = Mode.SPLIT; splitBit = 0x4;
-        } else if (this.description.type == Type.DPAD_LEFT) {
+        } else if (this.type == Type.DPAD_LEFT) {
             mode = Mode.SPLIT; splitBit = 0x8;
         }
     }
@@ -253,7 +255,7 @@ public class DpadControlElement extends AbstractControlElement {
                 this.drawable.centerY / this.parentView.getHeight(),
                 this.drawable.scale, 
                 //Type.DPAD,
-                this.description.type,
+                this.type,
                 this.bindings.toArray(new GLFWBinding[0]), null, this.drawable.color,
                 this.drawable.alpha,
                 this.inputType, ControlElementDescription.Icon.NO_ICON);
