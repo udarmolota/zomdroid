@@ -183,14 +183,24 @@ public abstract class AbstractControlElement {
         }
     }
 
-    void handleMNKBinding(GLFWBinding binding, boolean isPressed) {
-      if (binding.ordinal() >= GLFWBinding.MOUSE_BUTTON_LEFT.ordinal() && binding.ordinal() <= GLFWBinding.MOUSE_BUTTON_8.ordinal()) {
-        InputNativeInterface.sendMouseButton(binding.code, isPressed);
-      } else if (binding.ordinal() >= GLFWBinding.KEY_SPACE.ordinal() && binding.ordinal() <= GLFWBinding.KEY_WORLD_2.ordinal()) {
-         InputNativeInterface.sendKeyboard(binding.code, isPressed);
-      }
-      return;
+    public static void handleMNKBinding(GLFWBinding binding, boolean isPressed) {
+        // Mouse
+        if (binding.name().startsWith("MOUSE_BUTTON_")) {
+            InputNativeInterface.sendMouseButton(binding.code, isPressed);
+            return;
+        }
+    
+        // Buttons
+        Integer androidCode = KeyCodes.toAndroid(binding);
+        if (androidCode != null && androidCode != KeyEvent.KEYCODE_UNKNOWN) {
+            InputNativeInterface.sendKeyboard(binding.code, isPressed);
+            return;
+        }
+    
+        // Fallback
+        InputNativeInterface.sendKeyboard(binding.code, isPressed);
     }
+
 
     public enum Type {
         STICK,
