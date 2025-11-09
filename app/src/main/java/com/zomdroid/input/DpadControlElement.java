@@ -94,7 +94,7 @@ public class DpadControlElement extends AbstractControlElement {
                 float y = e.getY(actionIndex);
                 if (!this.drawable.isPointOver(x, y)) return false;
     
-                this.parentView.requestDisallowInterceptTouchEvent(true);
+                //this.parentView.requestDisallowInterceptTouchEvent(true);
                 this.pointerId = pid;
     
                 if (mode == Mode.SPLIT) {
@@ -130,7 +130,7 @@ public class DpadControlElement extends AbstractControlElement {
                 } else {
                     this.dispatchEvent(0, 0, false);
                 }
-                this.parentView.requestDisallowInterceptTouchEvent(false);
+                //this.parentView.requestDisallowInterceptTouchEvent(false);
                 return true;
             }
     
@@ -139,7 +139,7 @@ public class DpadControlElement extends AbstractControlElement {
                     this.pointerId = -1;
                     if (mode == Mode.SPLIT) setSplitPressed(false);
                     else this.dispatchEvent(0, 0, false);
-                    this.parentView.requestDisallowInterceptTouchEvent(false);
+                    //this.parentView.requestDisallowInterceptTouchEvent(false);
                     return true;
                 }
                 return false;
