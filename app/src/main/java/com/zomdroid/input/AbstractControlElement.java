@@ -209,6 +209,10 @@ public abstract class AbstractControlElement {
     public enum Type {
         STICK,
         DPAD,
+        DPAD_UP,
+        DPAD_RIGHT,
+        DPAD_DOWN,
+        DPAD_LEFT,
         BUTTON_RECT,
         BUTTON_CIRCLE
     }
