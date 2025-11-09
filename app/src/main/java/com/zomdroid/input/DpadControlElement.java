@@ -83,53 +83,67 @@ public class DpadControlElement extends AbstractControlElement {
     public boolean handleMotionEvent(MotionEvent e) {
         int action = e.getActionMasked();
         int actionIndex = e.getActionIndex();
-        int pointerId = e.getPointerId(actionIndex);
+        int pid = e.getPointerId(actionIndex);
+    
         switch (action) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_POINTER_DOWN: {
                 float x = e.getX(actionIndex);
                 float y = e.getY(actionIndex);
                 if (!this.drawable.isPointOver(x, y)) return false;
+    
                 this.parentView.requestDisallowInterceptTouchEvent(true);
-                this.pointerId = pointerId;
+                this.pointerId = pid;
+    
                 if (mode == Mode.SPLIT) {
                     setSplitPressed(true);
-                    return true;
                 } else { // COMPOSITE
                     this.dispatchEvent(x, y, true);
-                    return true;
                 }
+                return true;
             }
+    
             case MotionEvent.ACTION_MOVE: {
                 if (this.pointerId < 0) return false;
-                int pointerIndex = e.findPointerIndex(this.pointerId);
-                if (pointerIndex < 0) {
-                    this.pointerId = -1;
-                    return false;
-                }
-                
+                int idx = e.findPointerIndex(this.pointerId);
+                if (idx < 0) { this.pointerId = -1; return false; }
+    
                 if (mode == Mode.SPLIT) {
-                        return true;
-                } else { // COMPOSITE
-                    float x = e.getX(pointerIndex);
-                    float y = e.getY(pointerIndex);
+                    return true;
+                } else {
+                    float x = e.getX(idx);
+                    float y = e.getY(idx);
                     this.dispatchEvent(x, y, true);
-                    return true; 
+                    return true;
                 }
             }
+    
             case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_POINTER_UP:
-                if (pointerId != this.pointerId) return false;
+            case MotionEvent.ACTION_POINTER_UP: {
+                if (pid != this.pointerId) return false;
                 this.pointerId = -1;
+    
                 if (mode == Mode.SPLIT) {
                     setSplitPressed(false);
-                    return true;
-                } else { // COMPOSITE
+                } else {
                     this.dispatchEvent(0, 0, false);
+                }
+                this.parentView.requestDisallowInterceptTouchEvent(false);
+                return true;
+            }
+    
+            case MotionEvent.ACTION_CANCEL: {
+                if (this.pointerId != -1) {
+                    this.pointerId = -1;
+                    if (mode == Mode.SPLIT) setSplitPressed(false);
+                    else this.dispatchEvent(0, 0, false);
+                    this.parentView.requestDisallowInterceptTouchEvent(false);
                     return true;
                 }
+                return false;
             }
         }
+    
         return false;
     }
 
