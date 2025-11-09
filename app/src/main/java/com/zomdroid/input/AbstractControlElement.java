@@ -41,6 +41,10 @@ public abstract class AbstractControlElement {
             case BUTTON_RECT:
                 return new ButtonControlElement(parentView, description);
             case DPAD:
+            case DPAD_UP:      
+            case DPAD_RIGHT:    
+            case DPAD_DOWN:    
+            case DPAD_LEFT:    
                 return new DpadControlElement(parentView, description);
             case STICK:
                 return new StickControlElement(parentView, description);
