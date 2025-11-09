@@ -1,4 +1,5 @@
 package com.zomdroid.input;
+import java.util.Arrays;
 
 public enum GLFWBinding {
     /* printable keys */
@@ -85,7 +86,6 @@ public enum GLFWBinding {
     KEY_NUM_LOCK(282),
     KEY_PRINT_SCREEN(283),
     KEY_PAUSE(284),
-    KEYCODE_SHIFT_RIGHT(344),
     KEY_LEFT_SHIFT(340),
     KEY_RIGHT_SHIFT(344),
     KEY_LEFT_CONTROL(341),
@@ -149,6 +149,12 @@ public enum GLFWBinding {
     GAMEPAD_AXIS_LT(4),
     GAMEPAD_AXIS_RT(5),
 
+    /* DPAD as pseudo-buttons (handled via sendJoystickDpad) */
+    GAMEPAD_DPAD_UP(-2),
+    GAMEPAD_DPAD_RIGHT(-3),
+    GAMEPAD_DPAD_DOWN(-4),
+    GAMEPAD_DPAD_LEFT(-5),
+
     /* special binding for joysticks */
     LEFT_JOYSTICK(-1),
     RIGHT_JOYSTICK(-1);
@@ -157,7 +163,7 @@ public enum GLFWBinding {
     static final int MNK_MIN_ORDINAL = KEY_SPACE.ordinal();
     static final int MNK_MAX_ORDINAL = MOUSE_BUTTON_8.ordinal();
     static final int GAMEPAD_MIN_ORDINAL = GAMEPAD_BUTTON_A.ordinal();
-    static final int GAMEPAD_MAX_ORDINAL = GAMEPAD_RTRIGGER.ordinal();
+    static final int GAMEPAD_MAX_ORDINAL = GAMEPAD_DPAD_LEFT.ordinal(); //GAMEPAD_RTRIGGER.ordinal();
 
     GLFWBinding(int code) {
         this.code = code;
@@ -166,22 +172,28 @@ public enum GLFWBinding {
     public static GLFWBinding[] valuesForType(AbstractControlElement.InputType type) {
         GLFWBinding[] result = new GLFWBinding[0];
         GLFWBinding[] values = GLFWBinding.values();
+        GLFWBinding[] all = GLFWBinding.values();
+        
         int bindingCount;
         if (type == AbstractControlElement.InputType.MNK) {
-            bindingCount = MNK_MAX_ORDINAL - MNK_MIN_ORDINAL + 1;
-            result = new GLFWBinding[bindingCount];
-            int i = 0;
-            for (int n = MNK_MIN_ORDINAL; n <= MNK_MAX_ORDINAL; n++) {
-                result[i++] = values[n];
-            }
-        } else if (type == AbstractControlElement.InputType.GAMEPAD) {
-            bindingCount = GAMEPAD_MAX_ORDINAL - GAMEPAD_MIN_ORDINAL + 1;
-            result = new GLFWBinding[bindingCount];
-            int i = 0;
-            for (int n = GAMEPAD_MIN_ORDINAL; n <= GAMEPAD_MAX_ORDINAL; n++) {
-                result[i++] = values[n];
-            }
+           // bindingCount = MNK_MAX_ORDINAL - MNK_MIN_ORDINAL + 1;
+           // result = new GLFWBinding[bindingCount];
+           // int i = 0;
+           // for (int n = MNK_MIN_ORDINAL; n <= MNK_MAX_ORDINAL; n++) {
+           //     result[i++] = values[n];
+           // }
+            return Arrays.stream(all)
+                .filter(b -> b.ordinal() >= KEY_SPACE.ordinal()      // printable
+                          && b.ordinal() <= KEY_KP_EQUAL.ordinal())  // всё, что относится к клавиатуре
+                .toArray(GLFWBinding[]::new);
+        } 
+        
+        if (type == AbstractControlElement.InputType.GAMEPAD) {
+            return Arrays.stream(all)
+                    .filter(b -> b.ordinal() >= GAMEPAD_BUTTON_A.ordinal()
+                              && b.ordinal() <= GAMEPAD_DPAD_LEFT.ordinal())
+                    .toArray(GLFWBinding[]::new);
         }
-        return result;
+        return new GLFWBinding[0];
     }
 }
