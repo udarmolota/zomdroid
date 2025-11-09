@@ -29,15 +29,15 @@ public class DpadControlElement extends AbstractControlElement {
         this.drawable = new DpadControlDrawable(parentView, elementDescription);
         this.bindings.addAll(Arrays.asList(elementDescription.bindings));
         
-        if (description.type == Type.DPAD) {
+        if (this.description.type == Type.DPAD) {
             mode = Mode.COMPOSITE;
-        } else if (description.type == Type.DPAD_UP) {
+        } else if (this.description.type == Type.DPAD_UP) {
             mode = Mode.SPLIT; splitBit = 0x1;
-        } else if (description.type == Type.DPAD_RIGHT) {
+        } else if (this.description.type == Type.DPAD_RIGHT) {
             mode = Mode.SPLIT; splitBit = 0x2;
-        } else if (description.type == Type.DPAD_DOWN) {
+        } else if (this.description.type == Type.DPAD_DOWN) {
             mode = Mode.SPLIT; splitBit = 0x4;
-        } else if (description.type == Type.DPAD_LEFT) {
+        } else if (this.description.type == Type.DPAD_LEFT) {
             mode = Mode.SPLIT; splitBit = 0x8;
         }
     }
