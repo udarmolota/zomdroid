@@ -18,11 +18,28 @@ public class DpadControlElement extends AbstractControlElement {
     private final DpadControlDrawable drawable;
     private int pointerId = -1;
     private static final float DPAD_DEAD_ZONE = 0.3f;
+    private enum Mode { COMPOSITE, SPLIT }
+    // New fields for separation
+    private Mode mode = Mode.COMPOSITE;
+    private int splitBit = 0; // 0x1 UP, 0x2 RIGHT, 0x4 DOWN, 0x8 LEFT
+    private static int pressedMask = 0;
 
     public DpadControlElement(InputControlsView parentView, ControlElementDescription elementDescription) {
         super(parentView, elementDescription);
         this.drawable = new DpadControlDrawable(parentView, elementDescription);
         this.bindings.addAll(Arrays.asList(elementDescription.bindings));
+        
+        if (description.type == Type.DPAD) {
+            mode = Mode.COMPOSITE;
+        } else if (description.type == Type.DPAD_UP) {
+            mode = Mode.SPLIT; splitBit = 0x1;
+        } else if (description.type == Type.DPAD_RIGHT) {
+            mode = Mode.SPLIT; splitBit = 0x2;
+        } else if (description.type == Type.DPAD_DOWN) {
+            mode = Mode.SPLIT; splitBit = 0x4;
+        } else if (description.type == Type.DPAD_LEFT) {
+            mode = Mode.SPLIT; splitBit = 0x8;
+        }
     }
 
     @Override
@@ -44,8 +61,8 @@ public class DpadControlElement extends AbstractControlElement {
             float dx = x - this.drawable.centerX;
             float dy = y - this.drawable.centerY;
             float r = this.drawable.size / 2;
-            float nx = Math.clamp(dx / r, -1.f, 1.f);
-            float ny = Math.clamp(dy / r, -1.f, 1.f);
+            float nx = clamp(dx / r, -1.f, 1.f);
+            float ny = clamp(dy / r, -1.f, 1.f);
             if (ny < -DPAD_DEAD_ZONE) state |= 0x1;
             if (nx > DPAD_DEAD_ZONE) state |= 0x2;
             if (ny > DPAD_DEAD_ZONE) state |= 0x4;
@@ -73,9 +90,15 @@ public class DpadControlElement extends AbstractControlElement {
                 float x = e.getX(actionIndex);
                 float y = e.getY(actionIndex);
                 if (!this.drawable.isPointOver(x, y)) return false;
+                this.parentView.requestDisallowInterceptTouchEvent(true);
                 this.pointerId = pointerId;
-                this.dispatchEvent(x, y, true);
-                return true;
+                if (mode == Mode.SPLIT) {
+                    setSplitPressed(true);
+                    return true;
+                } else { // COMPOSITE
+                    this.dispatchEvent(x, y, true);
+                    return true;
+                }
             }
             case MotionEvent.ACTION_MOVE: {
                 if (this.pointerId < 0) return false;
@@ -84,17 +107,28 @@ public class DpadControlElement extends AbstractControlElement {
                     this.pointerId = -1;
                     return false;
                 }
-                float x = e.getX(pointerIndex);
-                float y = e.getY(pointerIndex);
-                this.dispatchEvent(x, y, true);
-                return false;
+                
+                if (mode == Mode.SPLIT) {
+                        return true;
+                } else { // COMPOSITE
+                    float x = e.getX(pointerIndex);
+                    float y = e.getY(pointerIndex);
+                    this.dispatchEvent(x, y, true);
+                    return true; 
+                }
             }
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_POINTER_UP:
                 if (pointerId != this.pointerId) return false;
                 this.pointerId = -1;
-                this.dispatchEvent(0, 0, false);
-                return true;
+                if (mode == Mode.SPLIT) {
+                    setSplitPressed(false);
+                    return true;
+                } else { // COMPOSITE
+                    this.dispatchEvent(0, 0, false);
+                    return true;
+                }
+            }
         }
         return false;
     }
@@ -127,7 +161,7 @@ public class DpadControlElement extends AbstractControlElement {
 
     @Override
     public void setScale(float scale) {
-        scale = Math.clamp(scale, MIN_SCALE, MAX_SCALE);
+        scale = clamp(scale, MIN_SCALE, MAX_SCALE);
         this.drawable.setScale(scale);
         this.parentView.invalidate();
     }
@@ -203,7 +237,9 @@ public class DpadControlElement extends AbstractControlElement {
         return new ControlElementDescription(
                 this.drawable.centerX / this.parentView.getWidth(),
                 this.drawable.centerY / this.parentView.getHeight(),
-                this.drawable.scale, Type.DPAD,
+                this.drawable.scale, 
+                //Type.DPAD,
+                this.description.type,
                 this.bindings.toArray(new GLFWBinding[0]), null, this.drawable.color,
                 this.drawable.alpha,
                 this.inputType, ControlElementDescription.Icon.NO_ICON);
@@ -319,5 +355,22 @@ public class DpadControlElement extends AbstractControlElement {
         public void moveCenterPosition(float dx, float dy) {
             setCenterPosition(this.centerX + dx, this.centerY + dy);
         }
+    }
+
+    private void setSplitPressed(boolean pressed) {
+        if (pressed) pressedMask |= splitBit; else pressedMask &= ~splitBit;
+    
+        if (this.inputType == InputType.GAMEPAD) {
+            InputNativeInterface.sendJoystickDpad(0, (char) pressedMask);
+        } else { // MNK
+            if (splitBit == 0x1) handleMNKBinding(getBindingUp(), pressed);
+            if (splitBit == 0x2) handleMNKBinding(getBindingRight(), pressed);
+            if (splitBit == 0x4) handleMNKBinding(getBindingDown(), pressed);
+            if (splitBit == 0x8) handleMNKBinding(getBindingLeft(), pressed);
+        }
+    }
+
+    private static float clamp(float v, float lo, float hi) {
+        return (v < lo) ? lo : (v > hi ? hi : v);
     }
 }
