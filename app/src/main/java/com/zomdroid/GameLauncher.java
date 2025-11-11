@@ -49,6 +49,14 @@ public class GameLauncher {
                     Os.setenv("ZOMDROID_VULKAN_DRIVER_NAME", vulkanDriverName, false);
                 }
                 break;
+            case NG_GL4ES: {
+                Os.setenv("ZOMDROID_RENDERER", "NG_GL4ES", false);        
+                Os.setenv("LIBGL_SIMPLE_SHADERCONV", "1", false);
+        
+                Os.setenv("ZOMDROID_GLES_MAJOR", "2", false);
+                Os.setenv("ZOMDROID_GLES_MINOR", "1", false);
+                break;
+            }
         }
 
         Os.setenv("ZOMDROID_AUDIO_API", LauncherPreferences.requireSingleton().getAudioAPI().name(), false);
