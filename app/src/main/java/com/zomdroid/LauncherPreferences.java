@@ -122,6 +122,7 @@ public class LauncherPreferences {
         ZINK_ZFA("libzfa.so"),
         ZINK_OSMESA("libOSMesa.so"),
         GL4ES("libgl4es.so");
+        NG_GL4ES("libng_gl4es.so");
 
         final String libName;
 
