@@ -365,6 +365,8 @@ int zomdroid_init() {
         g_zomdroid_renderer = ZINK_OSMESA;
     } else if (strcmp(renderer_name, "GL4ES") == 0) {
         g_zomdroid_renderer = GL4ES;
+    } else if (strcmp(renderer_name, "NG_GL4ES") == 0) {
+        g_zomdroid_renderer = NG_GL4ES;
     } else {
         LOGE("Unrecognized renderer %s", renderer_name);
         exit(1);
