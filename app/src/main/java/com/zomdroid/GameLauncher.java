@@ -13,23 +13,6 @@ import java.util.ArrayList;
 public class GameLauncher {
     public static void launch(GameInstance gameInstance) throws ErrnoException {
 
-/*        // for debug
-        Os.setenv("MESA_DEBUG", "1", false);
-        Os.setenv("MESA_LOG_LEVEL", "debug", false);
-        Os.setenv("ZINK_DEBUG", "validation", false);
-        Os.setenv("mesa_glthread", "false", false);
-        Os.setenv("GALLIUM_THREAD", "0", false);
-        Os.setenv("VK_LOADER_DEBUG", "all", false);
-        Os.setenv("VK_DEBUG", "all", false);
-        Os.setenv("GALLIUM_DEBUG", "all", false);
-        Os.setenv("VK_LOADER_LAYERS_ENABLE", "VK_LAYER_KHRONOS_validation", false);
-        Os.setenv("BOX64_LOG", "3", false);
-        Os.setenv("BOX64_DYNAREC", "0", false);*/
-
-        //Os.setenv("LIBGL_NOERROR", "1", false);
-/*        Os.setenv("LIBGL_LOGSHADERERROR", "1", false);
-        Os.setenv("ZINK_DEBUG", "spirv", false);*/
-
         Os.setenv("LIBGL_MIPMAP", "1", false);
 
         Os.setenv("BOX64_LOG", "1", false);
@@ -55,6 +38,11 @@ public class GameLauncher {
         
                 Os.setenv("ZOMDROID_GLES_MAJOR", "3", false);
                 Os.setenv("ZOMDROID_GLES_MINOR", "0", false);
+
+                // Диагностика GL4ES
+                Os.setenv("LIBGL_DEBUG", "1", false);
+                Os.setenv("LIBGL_VERBOSE", "1", false);
+                Os.setenv("LIBGL_LOGFILE", "/sdcard/ng_gl4es.log", false);
                 break;
             }
         }
