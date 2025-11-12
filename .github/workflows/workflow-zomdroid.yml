@@ -10,8 +10,7 @@ on:
         type: choice
         options:
         - only_onscreen
-        - gamepad-support-patch-v2
-        - native-libs
+        - ng
         - kb
         
 jobs:
