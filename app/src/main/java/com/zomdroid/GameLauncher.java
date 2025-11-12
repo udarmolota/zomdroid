@@ -37,7 +37,7 @@ public class GameLauncher {
                 Os.setenv("LIBGL_SIMPLE_SHADERCONV", "1", false);
         
                 Os.setenv("ZOMDROID_GLES_MAJOR", "3", false);
-                Os.setenv("ZOMDROID_GLES_MINOR", "0", false);
+                Os.setenv("ZOMDROID_GLES_MINOR", "2", false);
 
                 // Диагностика GL4ES
                 Os.setenv("LIBGL_DEBUG", "1", false);
