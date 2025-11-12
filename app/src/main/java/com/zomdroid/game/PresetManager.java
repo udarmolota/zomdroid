@@ -38,8 +38,8 @@ public class PresetManager {
                 })
                 .setExtraJars(new String[0])
                 .setLibraryPathArray(new String[]{
-                        C.deps.LIBS_ANDROID_ARM64_v8a,
-                        C.deps.LIBS_LWJGL_336
+                        C.deps.LIBS_LWJGL_336,
+                        C.deps.LIBS_ANDROID_ARM64_v8a                        
                 })
                 .setLibraryPathForEmulationArray(new String[]{
                         C.deps.LIBS_LINUX_X86_64
@@ -79,8 +79,8 @@ public class PresetManager {
                         C.deps.JARS_SQLITE_JDBC_34800
                 })
                 .setLibraryPathArray(new String[]{
-                        C.deps.LIBS_ANDROID_ARM64_v8a,
-                        C.deps.LIBS_LWJGL_323
+                        C.deps.LIBS_LWJGL_323,
+                        C.deps.LIBS_ANDROID_ARM64_v8a                        
                 })
                 .setLibraryPathForEmulationArray(new String[]{
                         C.deps.LIBS_LINUX_X86_64
