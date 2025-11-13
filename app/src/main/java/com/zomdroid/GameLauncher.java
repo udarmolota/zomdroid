@@ -17,7 +17,6 @@ public class GameLauncher {
 
         Os.setenv("BOX64_LOG", "1", false);
         Os.setenv("BOX64_SHOWBT", "1", false);
-
         Os.setenv("BOX64_LD_LIBRARY_PATH", gameInstance.getLdLibraryPathForEmulation(), false);
 
         Os.setenv("GALLIUM_DRIVER", "zink", false);
@@ -36,21 +35,23 @@ public class GameLauncher {
                 Os.setenv("ZOMDROID_RENDERER", "NG_GL4ES", false);        
                 Os.setenv("LIBGL_SIMPLE_SHADERCONV", "1", false);
         
-                Os.setenv("ZOMDROID_GLES_MAJOR", "3", false);
-                Os.setenv("ZOMDROID_GLES_MINOR", "2", false);
+                Os.setenv("ZOMDROID_GLES_MAJOR", "2", false);
+                Os.setenv("ZOMDROID_GLES_MINOR", "1", false);
 
                 // Диагностика GL4ES
                 Os.setenv("LIBGL_DEBUG", "1", false);
                 Os.setenv("LIBGL_VERBOSE", "1", false);
-                Os.setenv("LIBGL_LOGFILE", "/sdcard/ng_gl4es.log", false);
+                //Os.setenv("LIBGL_LOGFILE", "/sdcard/ng_gl4es.log", false);
+                break;
+            }
+            default: {
+                Os.setenv("ZOMDROID_GLES_MAJOR", "2", false);
+                Os.setenv("ZOMDROID_GLES_MINOR", "1", false);
                 break;
             }
         }
 
         Os.setenv("ZOMDROID_AUDIO_API", LauncherPreferences.requireSingleton().getAudioAPI().name(), false);
-
-        Os.setenv("ZOMDROID_GLES_MAJOR", "2", false);
-        Os.setenv("ZOMDROID_GLES_MINOR", "1", false);
 
         // for debugging GL calls, only supported on GL ES 3.2+ with GL_KHR_debug extension present
 /*        Os.setenv("ZOMDROID_DEBUG_GL", "1", false);
