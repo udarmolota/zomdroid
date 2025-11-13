@@ -33,7 +33,7 @@ public class GameLauncher {
                 break;
             case NG_GL4ES: {
                 Os.setenv("ZOMDROID_RENDERER", "NG_GL4ES", false);        
-                Os.setenv("LIBGL_SIMPLE_SHADERCONV", "1", false);
+                //Os.setenv("LIBGL_SIMPLE_SHADERCONV", "1", false);
         
                 Os.setenv("ZOMDROID_GLES_MAJOR", "2", false);
                 Os.setenv("ZOMDROID_GLES_MINOR", "1", false);
