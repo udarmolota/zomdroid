@@ -22,9 +22,13 @@ import androidx.annotation.Nullable;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.zomdroid.AppStorage;
 import com.zomdroid.C;
 import com.zomdroid.R;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
@@ -44,6 +48,7 @@ public class InputControlsView extends View {
   private Boolean isGamepadConnected = null;
   private InputMode currentInputMode = InputMode.ALL;
   private final Context context;
+  private String controlsSavePath = null;
 
     private ElementSettingsController elementSettingsController;
 
@@ -233,28 +238,51 @@ public class InputControlsView extends View {
     }
 
     public void loadControlElementsFromDisk() {
-        String json = this.sharedPreferences.getString(C.shprefs.keys.INPUT_CONTROLS, null);
-        if (json == null) {
-            try (InputStream is = getContext().getAssets().open(C.assets.DEFAULT_CONTROLS)) {
-                byte[] bytes = new byte[is.available()];
-                is.read(bytes);
-                json = new String(bytes, Charset.defaultCharset());
-            } catch (IOException e) {
-                Log.d(LOG_TAG, e.toString());
-                return;
-            }
+      String json = null;
+
+      // 1) Пытаемся прочитать controls.json из игровой папки
+      File cfgFile = getControlsConfigFileInGameDir();
+      if (cfgFile != null && cfgFile.isFile()) {
+        try (FileInputStream fis = new FileInputStream(cfgFile)) {
+          byte[] bytes = new byte[(int) cfgFile.length()];
+          int read = fis.read(bytes);
+          if (read > 0) {
+            json = new String(bytes, Charset.defaultCharset());
+          }
+        } catch (IOException e) {
+          Log.d(LOG_TAG, "Failed to read controls config from file: " + e);
         }
-        Type type = new TypeToken<ArrayList<ControlElementDescription>>() {
-        }.getType();
-        ArrayList<ControlElementDescription> savedDescriptions = gson.fromJson(json, type);
-        if (savedDescriptions != null) {
-            for (ControlElementDescription description : savedDescriptions) {
-                this.controlElements.add(AbstractControlElement.fromDescription(this, description));
-            }
+      }
+
+      // 2) Если файла нет — пробуем SharedPreferences
+      if (json == null) {
+        json = this.sharedPreferences.getString(C.shprefs.keys.INPUT_CONTROLS, null);
+      }
+
+      // 3) Если и в SharedPreferences пусто — берём дефолт из assets
+      if (json == null) {
+        try (InputStream is = getContext().getAssets().open(C.assets.DEFAULT_CONTROLS)) {
+          byte[] bytes = new byte[is.available()];
+          is.read(bytes);
+          json = new String(bytes, Charset.defaultCharset());
+        } catch (IOException e) {
+          Log.d(LOG_TAG, e.toString());
+          return;
         }
+      }
+
+      if (json == null) return;
+
+      Type type = new TypeToken<ArrayList<ControlElementDescription>>() {}.getType();
+      ArrayList<ControlElementDescription> savedDescriptions = gson.fromJson(json, type);
+      if (savedDescriptions != null) {
+        for (ControlElementDescription description : savedDescriptions) {
+          this.controlElements.add(AbstractControlElement.fromDescription(this, description));
+        }
+      }
     }
 
-    public void saveControlElementsToDisk() {
+  public void saveControlElementsToDisk() {
         ArrayList<ControlElementDescription> descriptions = new ArrayList<>();
         for (AbstractControlElement element : controlElements) {
             descriptions.add(element.describe());
@@ -266,6 +294,22 @@ public class InputControlsView extends View {
                 .edit()
                 .putString(C.shprefs.keys.INPUT_CONTROLS, json)
                 .apply();
+
+      File cfgFile = getControlsConfigFileInGameDir();
+      if (cfgFile != null) {
+        try {
+          File parent = cfgFile.getParentFile();
+          if (parent != null && !parent.exists()) {
+            // mkdirs() на всякий случай, вдруг Zomboid папки не было
+            parent.mkdirs();
+          }
+          try (FileOutputStream fos = new FileOutputStream(cfgFile, false)) {
+            fos.write(json.getBytes(Charset.defaultCharset()));
+          }
+        } catch (IOException e) {
+          Log.d(LOG_TAG, "Failed to write controls config to file: " + e);
+        }
+      }
     }
 
     public void setElementSettingsController(ElementSettingsController elementSettingsController) {
@@ -368,4 +412,41 @@ public class InputControlsView extends View {
           return true;  // BUTTON_RECT, BUTTON_CIRCLE, DPAD, STICK
       }
     }
+
+    /**
+     * <home>/instances/<instance>/Zomboid/controls/controls.json
+     */
+    @Nullable
+    private File getControlsConfigFileInGameDir() {
+      String homePath = AppStorage.requireSingleton().getHomePath();
+      if (homePath == null || homePath.isEmpty()) {
+        return null;
+      }
+
+      File instancesRoot = new File(homePath, "instances");
+      if (!instancesRoot.isDirectory()) {
+        return null;
+      }
+
+      File[] instanceDirs = instancesRoot.listFiles();
+      if (instanceDirs == null || instanceDirs.length == 0) {
+        return null;
+      }
+
+      // <inst>/Zomboid/controls/controls.json
+      for (File inst : instanceDirs) {
+        if (!inst.isDirectory()) continue;
+
+        File gameDir = new File(inst, "Zomboid");
+        File zomboidDir = new File(gameDir, "controls");
+        File cfgFile = new File(zomboidDir, "controls.json");
+
+        // Просто лог, чтобы ты видела, куда оно целится
+        Log.d(LOG_TAG, "Controls config candidate path: " + cfgFile.getAbsolutePath());
+        return cfgFile;
+      }
+
+      return null;
+    }
+
 }

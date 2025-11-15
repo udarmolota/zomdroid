@@ -58,8 +58,6 @@ public class GamepadManager implements InputManager.InputDeviceListener {
     private static final String PREFS_NAME = "gamepad_prefs";
     private static final String PREFS_KEY_MAPPING = "custom_gamepad_mapping";
 
-    private char dpadKeyState = 0;
-
     // Listener for gamepad events
     public interface GamepadListener {
         void onGamepadConnected();
@@ -230,16 +228,6 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         int keyCode = event.getKeyCode();
         boolean isPressed = event.getAction() == KeyEvent.ACTION_DOWN;
 
-        // --- D-Pad as buttons ---
-        switch (keyCode) {
-          case KeyEvent.KEYCODE_DPAD_UP:
-          case KeyEvent.KEYCODE_DPAD_DOWN:
-          case KeyEvent.KEYCODE_DPAD_LEFT:
-          case KeyEvent.KEYCODE_DPAD_RIGHT:
-            updateDpadFromKey(keyCode, isPressed);
-            return true;
-        }
-
         // --- NEW: trigger-as-button handling based on sentinel mapping ---
         if (isTriggerButton(keyCode, true)) {
             // LT is configured as a button: synthesize axis a4 (1.0 on down, 0.0 on up)
@@ -376,33 +364,5 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         if (v > 1f) return 1f;
         return v;
     }
-
-    private void updateDpadFromKey(int keyCode, boolean isPressed) {
-      char mask = 0;
-      switch (keyCode) {
-        case KeyEvent.KEYCODE_DPAD_UP:
-          mask = 0x01; // up
-          break;
-        case KeyEvent.KEYCODE_DPAD_RIGHT:
-          mask = 0x02; // right
-          break;
-        case KeyEvent.KEYCODE_DPAD_DOWN:
-          mask = 0x04; // down
-          break;
-        case KeyEvent.KEYCODE_DPAD_LEFT:
-          mask = 0x08; // left
-          break;
-        default:
-          return;
-      }
-
-      if (isPressed) {
-        dpadKeyState |= mask;
-      } else {
-        dpadKeyState &= ~mask;
-      }
-      listener.onGamepadDpad(0, dpadKeyState);
-    }
-
-  /* ======================= end of NEW helpers ======================= */
+    /* ======================= end of NEW helpers ======================= */
 }
