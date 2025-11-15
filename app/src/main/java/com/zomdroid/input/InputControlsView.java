@@ -414,7 +414,7 @@ public class InputControlsView extends View {
     }
 
     /**
-     * <home>/instances/<instance>/Zomboid/controls/controls.json
+     * <home>/instances/<instance>/game/controls/controls.json
      */
     @Nullable
     private File getControlsConfigFileInGameDir() {
@@ -433,11 +433,11 @@ public class InputControlsView extends View {
         return null;
       }
 
-      // <inst>/Zomboid/controls/controls.json
+      // <inst>/game/controls/controls.json
       for (File inst : instanceDirs) {
         if (!inst.isDirectory()) continue;
 
-        File gameDir = new File(inst, "Zomboid");
+        File gameDir = new File(inst, "game");
         File zomboidDir = new File(gameDir, "controls");
         File cfgFile = new File(zomboidDir, "controls.json");
 
