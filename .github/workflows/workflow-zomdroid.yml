@@ -9,8 +9,9 @@ on:
         default: 'gamepad-support'
         type: choice
         options:
-        - gamepad-support
-        - keyboard-experimental
+        - only_onscreen
+        - ng
+        - kb
         
 jobs:
   build:
