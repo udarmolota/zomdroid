@@ -27,8 +27,6 @@ public class GamepadManager implements InputManager.InputDeviceListener {
     private static final int STORE_IDX_LT = 15; // must match Fragment
     private static final int STORE_IDX_RT = 16; // must match Fragment
 
-    // --- NEW: sentinel encoding to distinguish axis-vs-button trigger bindings ---
-    // Encoding format: (TYPE << 24) | VALUE
     private static final int TYPE_AXIS   = 0x01; // VALUE = target axis index (we target a4/a5 => 4/5)
     private static final int TYPE_BUTTON = 0x02; // VALUE = Android keyCode (e.g. KEYCODE_BUTTON_L2 / R2)
     private static final int TYPE_MASK   = 0xFF000000;
@@ -59,6 +57,8 @@ public class GamepadManager implements InputManager.InputDeviceListener {
     // SharedPreferences keys
     private static final String PREFS_NAME = "gamepad_prefs";
     private static final String PREFS_KEY_MAPPING = "custom_gamepad_mapping";
+
+    private char dpadKeyState = 0;
 
     // Listener for gamepad events
     public interface GamepadListener {
@@ -169,7 +169,8 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         // Check if the device reports itself as a gamepad or joystick
         int sources = device.getSources();
         boolean isGamepadSource = ((sources & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD)
-                || ((sources & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK);
+                || ((sources & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK)
+                || ((sources & InputDevice.SOURCE_DPAD) == InputDevice.SOURCE_DPAD);
 
         // Check if the device has motion ranges (e.g., analog sticks or triggers)
         boolean hasMotion = device.getMotionRanges() != null && !device.getMotionRanges().isEmpty();
@@ -210,8 +211,9 @@ public class GamepadManager implements InputManager.InputDeviceListener {
     // True if KeyEvent is from a gamepad or joystick
     public boolean isGamepadEvent(KeyEvent event) {
         int source = event.getSource();
-        return ((source & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD)
-                || ((source & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK);
+        return((source & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD)
+                || ((source & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK)
+                || ((source & InputDevice.SOURCE_DPAD) == InputDevice.SOURCE_DPAD);
     }
 
     // True if MotionEvent is from a gamepad or joystick
@@ -227,6 +229,16 @@ public class GamepadManager implements InputManager.InputDeviceListener {
 
         int keyCode = event.getKeyCode();
         boolean isPressed = event.getAction() == KeyEvent.ACTION_DOWN;
+
+        // --- D-Pad as buttons ---
+        switch (keyCode) {
+          case KeyEvent.KEYCODE_DPAD_UP:
+          case KeyEvent.KEYCODE_DPAD_DOWN:
+          case KeyEvent.KEYCODE_DPAD_LEFT:
+          case KeyEvent.KEYCODE_DPAD_RIGHT:
+            updateDpadFromKey(keyCode, isPressed);
+            return true;
+        }
 
         // --- NEW: trigger-as-button handling based on sentinel mapping ---
         if (isTriggerButton(keyCode, true)) {
@@ -364,5 +376,33 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         if (v > 1f) return 1f;
         return v;
     }
-    /* ======================= end of NEW helpers ======================= */
+
+    private void updateDpadFromKey(int keyCode, boolean isPressed) {
+      char mask = 0;
+      switch (keyCode) {
+        case KeyEvent.KEYCODE_DPAD_UP:
+          mask = 0x01; // up
+          break;
+        case KeyEvent.KEYCODE_DPAD_RIGHT:
+          mask = 0x02; // right
+          break;
+        case KeyEvent.KEYCODE_DPAD_DOWN:
+          mask = 0x04; // down
+          break;
+        case KeyEvent.KEYCODE_DPAD_LEFT:
+          mask = 0x08; // left
+          break;
+        default:
+          return;
+      }
+
+      if (isPressed) {
+        dpadKeyState |= mask;
+      } else {
+        dpadKeyState &= ~mask;
+      }
+      listener.onGamepadDpad(0, dpadKeyState);
+    }
+
+  /* ======================= end of NEW helpers ======================= */
 }

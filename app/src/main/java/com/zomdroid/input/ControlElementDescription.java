@@ -86,10 +86,10 @@ public class ControlElementDescription {
                 null, Color.LTGRAY, 255,
                 AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON);
 
-          case STICK:
-                return new ControlElementDescription(0.5f, 0.5f, 1.f, type,
-                        new GLFWBinding[]{GLFWBinding.LEFT_JOYSTICK}, null, Color.LTGRAY, 255,
-                        AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON);
+            case STICK:
+                  return new ControlElementDescription(0.5f, 0.5f, 1.f, type,
+                          new GLFWBinding[]{GLFWBinding.LEFT_JOYSTICK}, null, Color.LTGRAY, 255,
+                          AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON);
             default:
                 throw new IllegalArgumentException("Unrecognized type " + type.name());
         }
@@ -146,22 +146,17 @@ public class ControlElementDescription {
 
         // --- GAMEPAD rules ---
         if (isGAMEPAD) {
-            // STICK в геймпаде — ровно 1 биндинг: LEFT_JOYSTICK или RIGHT_JOYSTICK
+
             if (this.type == AbstractControlElement.Type.STICK) {
                 if (this.bindings.length != 1) {
                     throw new IllegalStateException("STICK with GAMEPAD input must have exactly 1 binding, got " +
                             this.bindings.length);
                 }
-                if (this.bindings[0] != GLFWBinding.LEFT_JOYSTICK
-                        && this.bindings[0] != GLFWBinding.RIGHT_JOYSTICK) {
+                if (this.bindings[0] != GLFWBinding.LEFT_JOYSTICK && this.bindings[0] != GLFWBinding.RIGHT_JOYSTICK) {
                     throw new IllegalStateException("STICK with GAMEPAD input must bind to LEFT_JOYSTICK or RIGHT_JOYSTICK, got " +
                             this.bindings[0]);
                 }
             }
-
-            // Для DPAD (композитного) и split-DPAD в GAMEPAD биндинги не требуются:
-            // используется sendJoystickDpad с маской направлений.
-            // Ничего не проверяем.
         }
     }
 }

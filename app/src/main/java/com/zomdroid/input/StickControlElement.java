@@ -11,6 +11,7 @@ import android.view.MotionEvent;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class StickControlElement extends AbstractControlElement {
@@ -22,11 +23,15 @@ public class StickControlElement extends AbstractControlElement {
     public StickControlElement(InputControlsView parentView, ControlElementDescription elementDescription) {
         super(parentView, elementDescription);
         this.drawable = new StickControlDrawable(parentView, elementDescription);
-        this.bindings.addAll(Arrays.asList(elementDescription.bindings));
+        this.bindings.clear();
+        if (elementDescription.bindings != null) {
+          this.bindings.addAll(Arrays.asList(elementDescription.bindings));
+        }
     }
 
     @Override
     public void setInputType(InputType inputType) {
+        var oldBindings = new ArrayList<>(this.bindings);
         clearBindings();
         this.inputType = inputType;
         if (this.inputType == InputType.MNK) {
@@ -35,7 +40,14 @@ public class StickControlElement extends AbstractControlElement {
             this.bindings.add(GLFWBinding.KEY_D);
             this.bindings.add(GLFWBinding.KEY_S);
         } else if (this.inputType == InputType.GAMEPAD) {
-            this.bindings.add(GLFWBinding.LEFT_JOYSTICK);
+          GLFWBinding stick = GLFWBinding.LEFT_JOYSTICK;
+          if (!oldBindings.isEmpty()) {
+            GLFWBinding b = oldBindings.get(0);
+            if (b == GLFWBinding.LEFT_JOYSTICK || b == GLFWBinding.RIGHT_JOYSTICK) {
+              stick = b;
+            }
+          }
+          this.bindings.add(stick);
         }
     }
 
