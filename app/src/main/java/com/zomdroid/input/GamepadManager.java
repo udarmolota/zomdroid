@@ -160,7 +160,7 @@ public class GamepadManager implements InputManager.InputDeviceListener {
 
     // True if InputDevice is a gamepad or joystick
     public static boolean isGamepadDevice(InputDevice device) {
-        Log.d("[keyboadrd]", "isGamepadDevice: " + device);
+        //Log.d("[keyboadrd]", "isGamepadDevice: " + device);
         if (isTouchOverrideEnabled()) {
             return false;
         }

@@ -18,44 +18,38 @@ public class DpadControlElement extends AbstractControlElement {
     private final DpadControlDrawable drawable;
     private int pointerId = -1;
     private static final float DPAD_DEAD_ZONE = 0.3f;
-    private enum Mode { COMPOSITE, SPLIT }
-    // New fields for separation
-    private Mode mode = Mode.COMPOSITE;
-    private int splitBit = 0; // 0x1 UP, 0x2 RIGHT, 0x4 DOWN, 0x8 LEFT
-    private static int pressedMask = 0;
     private final AbstractControlElement.Type type;
 
     public DpadControlElement(InputControlsView parentView, ControlElementDescription elementDescription) {
         super(parentView, elementDescription);
         this.drawable = new DpadControlDrawable(parentView, elementDescription);
         this.bindings.addAll(Arrays.asList(elementDescription.bindings));
-        this.type = elementDescription.type; // ← сохраняем тип
-    
-        if (this.type == Type.DPAD) {
-            mode = Mode.COMPOSITE;
-        } else if (this.type == Type.DPAD_UP) {
-            mode = Mode.SPLIT; splitBit = 0x1;
-        } else if (this.type == Type.DPAD_RIGHT) {
-            mode = Mode.SPLIT; splitBit = 0x2;
-        } else if (this.type == Type.DPAD_DOWN) {
-            mode = Mode.SPLIT; splitBit = 0x4;
-        } else if (this.type == Type.DPAD_LEFT) {
-            mode = Mode.SPLIT; splitBit = 0x8;
+        this.type = elementDescription.type;
+
+        if (this.type != Type.DPAD) {
+          throw new IllegalArgumentException("DpadControlElement must be created with Type.DPAD");
         }
+
+        setInputType(elementDescription.inputType);
     }
 
     @Override
     public void setInputType(InputType inputType) {
-        clearBindings();
-        this.inputType = inputType;
+      this.inputType = inputType;
 
-        if (this.inputType == InputType.MNK) {
-            this.bindings.add(GLFWBinding.KEY_A);
-            this.bindings.add(GLFWBinding.KEY_W);
-            this.bindings.add(GLFWBinding.KEY_D);
-            this.bindings.add(GLFWBinding.KEY_S);
+      if (this.inputType == InputType.MNK) {
+        // Композитный dpad в MNK должен иметь 4 бинда (LEFT, UP, RIGHT, DOWN)
+        // Если пришло не 4 — выставим дефолт WASD.
+        if (this.bindings.size() != 4) {
+          clearBindings();
+          this.bindings.add(GLFWBinding.KEY_A); // LEFT
+          this.bindings.add(GLFWBinding.KEY_W); // UP
+          this.bindings.add(GLFWBinding.KEY_D); // RIGHT
+          this.bindings.add(GLFWBinding.KEY_S); // DOWN
         }
+      }
     }
+
 
     private void dispatchEvent(float x, float y, boolean isPress) {
         int state = 0;
@@ -83,70 +77,46 @@ public class DpadControlElement extends AbstractControlElement {
 
     @Override
     public boolean handleMotionEvent(MotionEvent e) {
-        int action = e.getActionMasked();
-        int actionIndex = e.getActionIndex();
-        int pid = e.getPointerId(actionIndex);
-    
-        switch (action) {
-            case MotionEvent.ACTION_DOWN:
-            case MotionEvent.ACTION_POINTER_DOWN: {
-                float x = e.getX(actionIndex);
-                float y = e.getY(actionIndex);
-                if (!this.drawable.isPointOver(x, y)) return false;
-    
-                //this.parentView.requestDisallowInterceptTouchEvent(true);
-                this.pointerId = pid;
-    
-                if (mode == Mode.SPLIT) {
-                    setSplitPressed(true);
-                } else { // COMPOSITE
-                    this.dispatchEvent(x, y, true);
-                }
-                return true;
-            }
-    
-            case MotionEvent.ACTION_MOVE: {
-                if (this.pointerId < 0) return false;
-                int idx = e.findPointerIndex(this.pointerId);
-                if (idx < 0) { this.pointerId = -1; return false; }
-    
-                if (mode == Mode.SPLIT) {
-                    return true;
-                } else {
-                    float x = e.getX(idx);
-                    float y = e.getY(idx);
-                    this.dispatchEvent(x, y, true);
-                    return true;
-                }
-            }
-    
-            case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_POINTER_UP: {
-                if (pid != this.pointerId) return false;
-                this.pointerId = -1;
-    
-                if (mode == Mode.SPLIT) {
-                    setSplitPressed(false);
-                } else {
-                    this.dispatchEvent(0, 0, false);
-                }
-                //this.parentView.requestDisallowInterceptTouchEvent(false);
-                return true;
-            }
-    
-            case MotionEvent.ACTION_CANCEL: {
-                if (this.pointerId != -1) {
-                    this.pointerId = -1;
-                    if (mode == Mode.SPLIT) setSplitPressed(false);
-                    else this.dispatchEvent(0, 0, false);
-                    //this.parentView.requestDisallowInterceptTouchEvent(false);
-                    return true;
-                }
-                return false;
-            }
+      int action = e.getActionMasked();
+      int actionIndex = e.getActionIndex();
+      int pid = e.getPointerId(actionIndex);
+
+      switch (action) {
+        case MotionEvent.ACTION_DOWN:
+        case MotionEvent.ACTION_POINTER_DOWN: {
+          float x = e.getX(actionIndex);
+          float y = e.getY(actionIndex);
+          if (!this.drawable.isPointOver(x, y)) return false;
+          this.pointerId = pid;
+          this.dispatchEvent(x, y, true);
+          return true;
         }
-    
-        return false;
+        case MotionEvent.ACTION_MOVE: {
+          if (this.pointerId < 0) return false;
+          int idx = e.findPointerIndex(this.pointerId);
+          if (idx < 0) { this.pointerId = -1; return false; }
+          float x = e.getX(idx);
+          float y = e.getY(idx);
+          this.dispatchEvent(x, y, true);
+          return true;
+        }
+        case MotionEvent.ACTION_UP:
+        case MotionEvent.ACTION_POINTER_UP: {
+          if (pid != this.pointerId) return false;
+          this.pointerId = -1;
+          this.dispatchEvent(0, 0, false);
+          return true;
+        }
+        case MotionEvent.ACTION_CANCEL: {
+          if (this.pointerId != -1) {
+            this.pointerId = -1;
+            this.dispatchEvent(0, 0, false);
+            return true;
+          }
+          return false;
+        }
+      }
+      return false;
     }
 
     @Override
@@ -253,7 +223,7 @@ public class DpadControlElement extends AbstractControlElement {
         return new ControlElementDescription(
                 this.drawable.centerX / this.parentView.getWidth(),
                 this.drawable.centerY / this.parentView.getHeight(),
-                this.drawable.scale, 
+                this.drawable.scale,
                 //Type.DPAD,
                 this.type,
                 this.bindings.toArray(new GLFWBinding[0]), null, this.drawable.color,
@@ -370,19 +340,6 @@ public class DpadControlElement extends AbstractControlElement {
 
         public void moveCenterPosition(float dx, float dy) {
             setCenterPosition(this.centerX + dx, this.centerY + dy);
-        }
-    }
-
-    private void setSplitPressed(boolean pressed) {
-        if (pressed) pressedMask |= splitBit; else pressedMask &= ~splitBit;
-    
-        if (this.inputType == InputType.GAMEPAD) {
-            InputNativeInterface.sendJoystickDpad(0, (char) pressedMask);
-        } else { // MNK
-            if (splitBit == 0x1) handleMNKBinding(getBindingUp(), pressed);
-            if (splitBit == 0x2) handleMNKBinding(getBindingRight(), pressed);
-            if (splitBit == 0x4) handleMNKBinding(getBindingDown(), pressed);
-            if (splitBit == 0x8) handleMNKBinding(getBindingLeft(), pressed);
         }
     }
 

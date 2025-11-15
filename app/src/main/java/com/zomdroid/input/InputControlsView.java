@@ -92,20 +92,27 @@ public class InputControlsView extends View {
     }
 
     private void showAddElementDialog() {
-        ArrayAdapter<AbstractControlElement.Type> adapter = new ArrayAdapter<>(this.getContext(),
-                android.R.layout.simple_spinner_dropdown_item, AbstractControlElement.Type.values());
+      java.util.List<AbstractControlElement.Type> palette = new java.util.ArrayList<>();
+      for (AbstractControlElement.Type t : AbstractControlElement.Type.values()) {
+        if (isCreatable(t)) palette.add(t);
+      }
 
-        new MaterialAlertDialogBuilder(this.getContext())
-                .setTitle(this.getContext().getString(R.string.controls_editor_add_element))
-                .setAdapter(adapter, (dialog, i) -> {
-                    AbstractControlElement.Type type = adapter.getItem(i);
-                    if (type == null) return;
-                    ControlElementDescription description = ControlElementDescription.getDefaultForType(type);
-                    controlElements.add(AbstractControlElement.fromDescription(this, description));
-                    invalidate();
-                })
-                .create()
-                .show();
+      ArrayAdapter<AbstractControlElement.Type> adapter =
+        new ArrayAdapter<>(this.getContext(),
+          android.R.layout.simple_spinner_dropdown_item,
+          palette);
+
+      new MaterialAlertDialogBuilder(this.getContext())
+        .setTitle(this.getContext().getString(R.string.controls_editor_add_element))
+        .setAdapter(adapter, (dialog, i) -> {
+          AbstractControlElement.Type type = adapter.getItem(i);
+          if (type == null) return;
+          ControlElementDescription description = ControlElementDescription.getDefaultForType(type);
+          controlElements.add(AbstractControlElement.fromDescription(this, description));
+          invalidate();
+        })
+        .create()
+        .show();
     }
 
     @Override
@@ -350,4 +357,15 @@ public class InputControlsView extends View {
         return currentInputMode;
     }
 
+    private static boolean isCreatable(AbstractControlElement.Type t) {
+      switch (t) {
+        case DPAD_UP:
+        case DPAD_RIGHT:
+        case DPAD_DOWN:
+        case DPAD_LEFT:
+          return false;
+        default:
+          return true;  // BUTTON_RECT, BUTTON_CIRCLE, DPAD, STICK
+      }
+    }
 }

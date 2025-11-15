@@ -13,10 +13,6 @@ import android.view.KeyEvent;
 
 import java.util.ArrayList;
 
-import com.zomdroid.input.KeyCodes;
-import com.zomdroid.input.GLFWBinding;
-import com.zomdroid.input.InputDispatch;
-
 public abstract class AbstractControlElement {
     private static final String LOG_TAG = AbstractControlElement.class.getName();
     protected static final float MIN_SCALE = 0.5f;
@@ -27,6 +23,7 @@ public abstract class AbstractControlElement {
     protected final Type type;
     protected InputType inputType;
     protected Context context;
+    private static int sDpadMask = 0;
 
     AbstractControlElement(InputControlsView parentView, ControlElementDescription description) {
         this.parentView = parentView;
@@ -41,11 +38,12 @@ public abstract class AbstractControlElement {
             case BUTTON_RECT:
                 return new ButtonControlElement(parentView, description);
             case DPAD:
-            case DPAD_UP:      
-            case DPAD_RIGHT:    
-            case DPAD_DOWN:    
-            case DPAD_LEFT:    
                 return new DpadControlElement(parentView, description);
+            case DPAD_UP:
+            case DPAD_RIGHT:
+            case DPAD_DOWN:
+            case DPAD_LEFT:
+                return new ButtonControlElement(parentView, description);
             case STICK:
                 return new StickControlElement(parentView, description);
             default:
@@ -171,38 +169,33 @@ public abstract class AbstractControlElement {
 
     void handleGamepadBinding(GLFWBinding binding, boolean isPressed) {
         Log.v(LOG_TAG, "handleGamepadBinding binding=" + binding + " isPressed=" + isPressed);
-        if (binding.ordinal() >= GLFWBinding.GAMEPAD_MIN_ORDINAL
-                && binding.ordinal() <= GLFWBinding.GAMEPAD_MAX_ORDINAL) {
-            switch (binding) {
-                case GAMEPAD_LTRIGGER:
-                    InputNativeInterface.sendJoystickAxis(GLFWBinding.GAMEPAD_AXIS_LT.code, isPressed ? 1 : 0);
-                    break;
-                case GAMEPAD_RTRIGGER:
-                    InputNativeInterface.sendJoystickAxis(GLFWBinding.GAMEPAD_AXIS_RT.code, isPressed ? 1 : 0);
-                    break;
-                default:
-                    InputNativeInterface.sendJoystickButton(binding.code, isPressed);
-                    break;
-            }
+        if (isDpadBinding(binding)) {
+          int bit = dpadBit(binding);
+          if (isPressed) sDpadMask |= bit; else sDpadMask &= ~bit;
+          InputNativeInterface.sendJoystickDpad(0, (char) sDpadMask);
+          return;
         }
+
+        if (binding == GLFWBinding.GAMEPAD_LTRIGGER) {
+          InputNativeInterface.sendJoystickAxis(GLFWBinding.GAMEPAD_AXIS_LT.code, isPressed ? 1f : 0f);
+          return;
+        }
+        if (binding == GLFWBinding.GAMEPAD_RTRIGGER) {
+          InputNativeInterface.sendJoystickAxis(GLFWBinding.GAMEPAD_AXIS_RT.code, isPressed ? 1f : 0f);
+          return;
+        }
+
+        InputNativeInterface.sendJoystickButton(binding.code, isPressed);
     }
 
     public static void handleMNKBinding(GLFWBinding binding, boolean isPressed) {
-        // Mouse
-        if (binding.name().startsWith("MOUSE_BUTTON_")) {
-            InputNativeInterface.sendMouseButton(binding.code, isPressed);
-            return;
-        }
-    
-        // Buttons
-        Integer androidCode = KeyCodes.toAndroid(binding);
-        if (androidCode != null && androidCode != KeyEvent.KEYCODE_UNKNOWN) {
-            InputNativeInterface.sendKeyboard(binding.code, isPressed);
-            return;
-        }
-    
-        // Fallback
-        InputNativeInterface.sendKeyboard(binding.code, isPressed);
+      // Mouse
+      if (binding.name().startsWith("MOUSE_BUTTON_")) {
+        InputNativeInterface.sendMouseButton(binding.code, isPressed);
+        return;
+      }
+      // MNK (GLFW-код)
+      InputNativeInterface.sendKeyboard(binding.code, isPressed);
     }
 
 
@@ -241,4 +234,20 @@ public abstract class AbstractControlElement {
       return touchable;
     }
 
+    private static boolean isDpadBinding(GLFWBinding b) {
+      return b == GLFWBinding.GAMEPAD_DPAD_UP
+        || b == GLFWBinding.GAMEPAD_DPAD_RIGHT
+        || b == GLFWBinding.GAMEPAD_DPAD_DOWN
+        || b == GLFWBinding.GAMEPAD_DPAD_LEFT;
+    }
+
+    private static int dpadBit(GLFWBinding b) {
+      switch (b) {
+        case GAMEPAD_DPAD_UP:    return 0x1;
+        case GAMEPAD_DPAD_RIGHT: return 0x2;
+        case GAMEPAD_DPAD_DOWN:  return 0x4;
+        case GAMEPAD_DPAD_LEFT:  return 0x8;
+        default: return 0;
+      }
+    }
 }

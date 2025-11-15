@@ -657,7 +657,7 @@ void *dlsym(void *handle, const char *sym_name) {
                 return NULL;
             }
             free(arg_types);
-            LOGD("Successfully created emulation bridge for jni symbol %s at %p (target=%ld)", sym_name, sym, box64_sym);
+            //LOGD("Successfully created emulation bridge for jni symbol %s at %p (target=%ld)", sym_name, sym, box64_sym);
             return sym;
         } else {
             return loader_dlsym(handle, sym_name, __builtin_return_address(0));

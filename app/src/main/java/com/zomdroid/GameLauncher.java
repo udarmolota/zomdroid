@@ -13,6 +13,23 @@ import java.util.ArrayList;
 public class GameLauncher {
     public static void launch(GameInstance gameInstance) throws ErrnoException {
 
+/*        // for debug
+        Os.setenv("MESA_DEBUG", "1", false);
+        Os.setenv("MESA_LOG_LEVEL", "debug", false);
+        Os.setenv("ZINK_DEBUG", "validation", false);
+        Os.setenv("mesa_glthread", "false", false);
+        Os.setenv("GALLIUM_THREAD", "0", false);
+        Os.setenv("VK_LOADER_DEBUG", "all", false);
+        Os.setenv("VK_DEBUG", "all", false);
+        Os.setenv("GALLIUM_DEBUG", "all", false);
+        Os.setenv("VK_LOADER_LAYERS_ENABLE", "VK_LAYER_KHRONOS_validation", false);
+        Os.setenv("BOX64_LOG", "3", false);
+        Os.setenv("BOX64_DYNAREC", "0", false);*/
+
+        //Os.setenv("LIBGL_NOERROR", "1", false);
+/*        Os.setenv("LIBGL_LOGSHADERERROR", "1", false);
+        Os.setenv("ZINK_DEBUG", "spirv", false);*/
+
         Os.setenv("LIBGL_MIPMAP", "1", false);
 
         Os.setenv("BOX64_LOG", "1", false);
@@ -31,19 +48,27 @@ public class GameLauncher {
                     Os.setenv("ZOMDROID_VULKAN_DRIVER_NAME", vulkanDriverName, false);
                 }
                 break;
-            case NG_GL4ES: {
-                Os.setenv("ZOMDROID_RENDERER", "NG_GL4ES", false);        
-                Os.setenv("LIBGL_SIMPLE_SHADERCONV", "1", false);
-        
-                Os.setenv("ZOMDROID_GLES_MAJOR", "3", false);
-                Os.setenv("ZOMDROID_GLES_MINOR", "2", false);
+            /*case NG_GL4ES: {
+              Os.setenv("ZOMDROID_RENDERER", "NG_GL4ES", false);
 
-                // Диагностика GL4ES
-                Os.setenv("LIBGL_DEBUG", "1", false);
-                Os.setenv("LIBGL_VERBOSE", "1", false);
-                Os.setenv("LIBGL_LOGFILE", "/sdcard/ng_gl4es.log", false);
+              // GLES 3.1 запрос
+              Os.setenv("ZOMDROID_GLES_MAJOR", "3", false);
+              Os.setenv("ZOMDROID_GLES_MINOR", "1", false);
+
+              // Включаем OpenMW-конвертер шейдеров
+              Os.setenv("LIBGL_SIMPLE_SHADERCONV", "1", false);
+
+              // Основной лог в logcat
+              Os.setenv("LIBGL_LOGTOLOGCAT", "1", true);
+
+              // Диагностика шейдеров
+              Os.setenv("LIBGL_DEBUG", "1", false);
+              Os.setenv("LIBGL_VERBOSE", "1", false);
+              Os.setenv("LIBGL_LOGSHADER", "1", false);
+              Os.setenv("LIBGL_DUMPSHADERS", "0", false);  // 1 = писать в файлы — не надо!
+              Os.setenv("LIBGL_DUMP_PROG", "0", false);
                 break;
-            }
+            }*/
             default: {
                 Os.setenv("ZOMDROID_GLES_MAJOR", "2", false);
                 Os.setenv("ZOMDROID_GLES_MINOR", "1", false);
