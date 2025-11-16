@@ -1,3 +1,25 @@
+## [1.2.8] - 2025-11-16
+### Added
+**🚀 On-Screen Layout to File**
+
+- About On-Screen Controls Saving
+
+All layout changes are saved automatically to a file:
+`instances → Project Zomboid → game → controls → controls.json`
+
+Before uninstalling the app:
+
+1. Back up the controls folder with the file to your device
+2. After installing the new version and creating a new game instance, copy the folder back to the same path
+3. Only then open the button editor (if needed)
+
+**🛠 Fixes** 
+
+- Fixed bug where some devices incorrectly detected the right stick as the left one. Improved detection of the D-pad on Switch 2 Pro gamepads.
+
+---
+
+
 ## [1.2.6] - 2025-11-02
 ### Added
 **🚀 Detection of physical keyboard and mouse**
