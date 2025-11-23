@@ -53,20 +53,20 @@ public class GameLauncher {
 
               // GLES 3.1 запрос
               Os.setenv("ZOMDROID_GLES_MAJOR", "3", false);
-              Os.setenv("ZOMDROID_GLES_MINOR", "1", false);
+              Os.setenv("ZOMDROID_GLES_MINOR", "0", false);
 
               // Включаем OpenMW-конвертер шейдеров
-              Os.setenv("LIBGL_SIMPLE_SHADERCONV", "1", false);
+              //Os.setenv("LIBGL_SIMPLE_SHADERCONV", "1", false);
 
               // Основной лог в logcat
               Os.setenv("LIBGL_LOGTOLOGCAT", "1", true);
 
-              // Диагностика шейдеров
-              Os.setenv("LIBGL_DEBUG", "1", false);
-              Os.setenv("LIBGL_VERBOSE", "1", false);
-              Os.setenv("LIBGL_LOGSHADER", "1", false);
-              Os.setenv("LIBGL_DUMPSHADERS", "0", false);  // 1 = писать в файлы — не надо!
-              Os.setenv("LIBGL_DUMP_PROG", "0", false);
+                Os.setenv("LIBGL_SRGB", "0", false);        // не просить sRGB surface
+                Os.setenv("LIBGL_BATCH", "0", false);       // без батчинга
+                Os.setenv("LIBGL_USEVBO", "0", false);      // без VBO (пусть эмулирует)
+                Os.setenv("LIBGL_RECYCLE_EGL", "0", false); // не реюзить EGL surface (если ключ поддерживается)
+                Os.setenv("LIBGL_LOGSHADER", "0", false);   // лог шейдеров пока выключим
+                Os.setenv("LIBGL_SIMPLE_SHADERCONV", "0", false); // конвертер шейдеров OpenMW — временно off
                 break;
             }*/
             default: {

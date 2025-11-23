@@ -5,11 +5,6 @@ import android.view.KeyEvent;
 import java.util.EnumMap;
 import androidx.annotation.Nullable;
 
-/**
- * Single source of truth: Android KeyEvent codes <-> GLFWBinding.
- * Forward map (Android -> GLFW) задаём вручную (по твоему свитчу),
- * обратную (GLFW -> Android) строим автоматически.
- */
 public final class KeyCodes {
 
   public static final SparseArray<GLFWBinding> ANDROID_TO_GLFW = new SparseArray<>();

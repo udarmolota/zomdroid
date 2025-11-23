@@ -176,16 +176,16 @@ public enum GLFWBinding {
         
         int bindingCount;
         if (type == AbstractControlElement.InputType.MNK) {
-           // bindingCount = MNK_MAX_ORDINAL - MNK_MIN_ORDINAL + 1;
-           // result = new GLFWBinding[bindingCount];
-           // int i = 0;
-           // for (int n = MNK_MIN_ORDINAL; n <= MNK_MAX_ORDINAL; n++) {
-           //     result[i++] = values[n];
-           // }
             return Arrays.stream(all)
-                .filter(b -> b.ordinal() >= KEY_SPACE.ordinal()      // printable
-                          && b.ordinal() <= KEY_KP_EQUAL.ordinal())  // всё, что относится к клавиатуре
+                    .filter(b -> {
+                    String name = b.name();
+                    return
+                        (b.ordinal() >= KEY_SPACE.ordinal() && b.ordinal() <= KEY_KP_EQUAL.ordinal()) // keyboard
+                        || (b.ordinal() >= MOUSE_BUTTON_LEFT.ordinal() && b.ordinal() <= MOUSE_BUTTON_8.ordinal()) // mouse
+                        || name.startsWith("MOUSE_WHEEL_"); // mouse wheel
+                })
                 .toArray(GLFWBinding[]::new);
+
         } 
         
         if (type == AbstractControlElement.InputType.GAMEPAD) {
