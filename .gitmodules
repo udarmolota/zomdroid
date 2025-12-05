@@ -1,6 +1,6 @@
 [submodule "app/src/main/cpp/box64"]
 	path = app/src/main/cpp/box64
-	url = https://github.com/Wakort/zomdroid-box64.git
+	url = https://github.com/udarmolota/zomdroid-box64.git
 [submodule "app/src/main/cpp/glfw"]
 	path = app/src/main/cpp/glfw
 	url = https://github.com/udarmolota/zomdroid-glfw.git

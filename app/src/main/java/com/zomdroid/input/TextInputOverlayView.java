@@ -2,14 +2,15 @@ package com.zomdroid.input;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.BaseInputConnection;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
 import java.util.function.Consumer;
 
 public class TextInputOverlayView extends LinearLayout {
+  private static final String TAG = "TextInputOverlay";
   private Consumer<String> onTextInput;
 
   public TextInputOverlayView(Context context) {
@@ -29,32 +30,66 @@ public class TextInputOverlayView extends LinearLayout {
   }
 
   private void addKeyButton(String label, String value) {
-      Button button = new Button(getContext());
-      button.setText(label);
+    Button button = new Button(getContext());
+    button.setText(label);
     System.out.println("[TextInputOverlay] addKeyButton");
-      button.setOnClickListener(v -> {
-        if (onTextInput != null) {
-          onTextInput.accept(value);
-          System.out.println("[TextInputOverlay] Sent: " + value);
+
+    button.setOnClickListener(v -> {
+      if (onTextInput != null) {
+        onTextInput.accept(value);
+      }
+
+      // вместо sendChar гоняем клавиши через sendKeyboard
+      for (int offset = 0; offset < value.length(); ) {
+        int codePoint = value.codePointAt(offset);
+        int keyCode = mapCharToKey(codePoint);
+
+        Log.d(TAG, "sendChar: char='" + (char) codePoint +
+                "' code=" + codePoint + " -> key=" + keyCode);
+
+        if (keyCode != 0) {
+          // это как будто нажали клавишу на клавиатуре
+          InputNativeInterface.sendKeyboard(keyCode, true);
+          InputNativeInterface.sendKeyboard(keyCode, false);
         } else {
-          System.out.println("[TextInputOverlay] Nothing sent");
+          Log.d(TAG, "sendChar: unsupported char, skipping");
         }
-      });
-      addView(button);
+
+        offset += Character.charCount(codePoint);
+      }
+
+      System.out.println("[TextInputOverlay] Sent: " + value);
+    });
+
+    addView(button);
   }
 
-  /**
-   * Устанавливает обработчик ввода текста — например, для передачи в чат.
-   */
+  private int mapCharToKey(int codePoint) {
+    switch (codePoint) {
+      case 'A':
+      case 'a':
+        return GLFWBinding.KEY_A.code;
+      case 'B':
+      case 'b':
+        return GLFWBinding.KEY_B.code;
+      case 'C':
+      case 'c':
+        return GLFWBinding.KEY_C.code;
+      case ' ':
+        return GLFWBinding.KEY_SPACE.code;
+      case '\n':
+      case '\r':
+        return GLFWBinding.KEY_ENTER.code;
+      default:
+        return 0;
+    }
+  }
+
   public void setOnTextInputListener(Consumer<String> listener) {
     this.onTextInput = listener;
   }
 
-  /**
-   * Привязка к целевому View, если нужен системный inputConnection.
-   * Можно использовать вместе с BaseInputConnection, если нужно.
-   */
-    public void attachTo(View targetView) {
-        targetView.requestFocus();
-    }
+  public void attachTo(View targetView) {
+    targetView.requestFocus();
+  }
 }
