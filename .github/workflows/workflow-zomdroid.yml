@@ -9,7 +9,7 @@ on:
         default: 'gamepad-support'
         type: choice
         options:
-        - jav21
+        - java21
         - ng
         - kb
         
