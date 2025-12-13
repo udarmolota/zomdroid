@@ -340,10 +340,23 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         InputDevice d = ev.getDevice();
         if (d == null) return 0f;
 
-        // Preferred axis first, then two common fallbacks
         final int[] axes = left
-                ? new int[]{ MotionEvent.AXIS_LTRIGGER, MotionEvent.AXIS_Z,     MotionEvent.AXIS_BRAKE }
-                : new int[]{ MotionEvent.AXIS_RTRIGGER, MotionEvent.AXIS_RZ,    MotionEvent.AXIS_GAS   };
+                ? new int[]{
+                MotionEvent.AXIS_LTRIGGER,
+                MotionEvent.AXIS_BRAKE,
+                MotionEvent.AXIS_Z,
+                MotionEvent.AXIS_GENERIC_1,
+                MotionEvent.AXIS_GENERIC_3,
+                MotionEvent.AXIS_RX // fallback
+        }
+                : new int[]{
+                MotionEvent.AXIS_RTRIGGER,
+                MotionEvent.AXIS_GAS,
+                MotionEvent.AXIS_RZ,
+                MotionEvent.AXIS_GENERIC_2,
+                MotionEvent.AXIS_GENERIC_4,
+                MotionEvent.AXIS_RY // fallback
+        };
 
         final int src = ev.getSource();
         for (int ax : axes) {

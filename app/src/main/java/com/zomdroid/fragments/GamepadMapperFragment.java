@@ -2,6 +2,7 @@ package com.zomdroid.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent; // <-- added for triggers better support
@@ -266,28 +267,40 @@ public class GamepadMapperFragment extends Fragment {
    * Returns normalized float [0..1] (clamped).
    */
   private float readTriggerAxis(MotionEvent ev, boolean leftTrigger) {
-    float v = Float.NaN;
+    InputDevice d = ev.getDevice();
+    if (d == null) return 0f;
 
-    // Preferred trigger axes available on many modern pads
-    v = ev.getAxisValue(leftTrigger ? MotionEvent.AXIS_LTRIGGER : MotionEvent.AXIS_RTRIGGER);
+    final int src = ev.getSource();
 
-    // Fallback to Z/RZ only if value is NaN (axis not present)
-    if (Float.isNaN(v)) {
-      v = ev.getAxisValue(leftTrigger ? MotionEvent.AXIS_Z : MotionEvent.AXIS_RZ);
+    final int[] axes = leftTrigger
+            ? new int[]{
+            MotionEvent.AXIS_LTRIGGER,
+            MotionEvent.AXIS_BRAKE,
+            MotionEvent.AXIS_Z,
+            MotionEvent.AXIS_GENERIC_1,
+            MotionEvent.AXIS_GENERIC_3
     }
+            : new int[]{
+            MotionEvent.AXIS_RTRIGGER,
+            MotionEvent.AXIS_GAS,
+            MotionEvent.AXIS_RZ,
+            MotionEvent.AXIS_GENERIC_2,
+            MotionEvent.AXIS_GENERIC_4
+    };
 
-    // Fallback to "car" style axes only if still NaN
-    if (Float.isNaN(v)) {
-      v = ev.getAxisValue(leftTrigger ? MotionEvent.AXIS_BRAKE : MotionEvent.AXIS_GAS);
+    for (int ax : axes) {
+      if (d.getMotionRange(ax, src) != null || d.getMotionRange(ax) != null) {
+        float v = ev.getAxisValue(ax);
+
+        // normalize
+        if (v < 0f) v = -v;
+        if (v > 1f) v = 1f;
+        return v;
+      }
     }
-
-    if (Float.isNaN(v)) v = 0f;
-
-    // Some devices report in [-1..1]; normalize to [0..1]
-    if (v < 0f) v = -v;           // assume symmetric, split later in manager if needed
-    if (v > 1f) v = 1f;
-    return v;
+    return 0f;
   }
+
 
   /* ========================= end NEW helpers ========================= */
 
