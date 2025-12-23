@@ -196,6 +196,8 @@ public class ButtonControlElement extends AbstractControlElement {
 
     public class ButtonControlDrawable {
         private static final int PAINT_STROKE_WIDTH = 6;
+        private static final int OUTLINE_ALPHA = 140;          // 0..255
+        private static final float OUTLINE_EXTRA_PX = 2f;
         private static final float BUTTON_CIRCLE_DIAMETER = 160.f;
         private static final float BUTTON_RECT_WIDTH = 240.f;
         private static final float BUTTON_RECT_HEIGHT = 120.f;
@@ -251,23 +253,28 @@ public class ButtonControlElement extends AbstractControlElement {
         }
 
         public void draw(@NonNull Canvas canvas) {
+            // --- Outline pass (black, a bit thicker) ---
+            Paint p = this.shapeDrawable.getPaint();
+        
+            int oldColor = p.getColor();
+            int oldAlpha = p.getAlpha();
+            float oldStroke = p.getStrokeWidth();
+        
+            p.setColor(android.graphics.Color.BLACK);
+            p.setAlpha(OUTLINE_ALPHA);
+            p.setStrokeWidth(oldStroke + OUTLINE_EXTRA_PX * parentView.pixelScale);
+            this.shapeDrawable.draw(canvas);
+        
+            // --- Normal pass (your current style/color/alpha) ---
+            p.setColor(oldColor);
+            p.setAlpha(oldAlpha);
+            p.setStrokeWidth(oldStroke);
             this.shapeDrawable.draw(canvas);
 
             if (this.iconDrawable != null) {
                 this.iconDrawable.draw(canvas);
             } else if (this.text != null) {
                 canvas.drawText(this.text, this.centerX, this.textY, this.textPaint);
-
-/*                Rect bounds = new Rect();
-                this.textPaint.getTextBounds(this.text, 0, this.text.length(), bounds);
-                float x = this.centerX - bounds.width() / 2f;
-                float y = this.centerY + bounds.height() / 2f - bounds.bottom;
-                Paint debugPaint = new Paint();
-                debugPaint.setColor(Color.RED);
-                debugPaint.setStyle(Paint.Style.STROKE);
-                debugPaint.setStrokeWidth(2f);
-                bounds.offset((int)x, (int)y);
-                canvas.drawRect(bounds, debugPaint);*/
             }
         }
 
