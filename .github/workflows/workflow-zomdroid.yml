@@ -11,7 +11,7 @@ on:
         options:
         - java21
         - ng
-        - kb
+        - buttons-outline
         
 jobs:
   build:
