@@ -19,8 +19,8 @@ public class DpadControlElement extends AbstractControlElement {
     private int pointerId = -1;
     private static final float DPAD_DEAD_ZONE = 0.3f;
     private final AbstractControlElement.Type type;
-    private static final int OUTLINE_ALPHA = 140;
-    private static final float OUTLINE_EXTRA_PX = 6f;
+    private static final int OUTLINE_ALPHA = 120;
+    private static final float OUTLINE_EXTRA_PX = 5f;
 
     public DpadControlElement(InputControlsView parentView, ControlElementDescription elementDescription) {
         super(parentView, elementDescription);
