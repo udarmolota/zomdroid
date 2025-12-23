@@ -196,8 +196,8 @@ public class ButtonControlElement extends AbstractControlElement {
 
     public class ButtonControlDrawable {
         private static final int PAINT_STROKE_WIDTH = 6;
-        private static final int OUTLINE_ALPHA = 140;          // 0..255
-        private static final float OUTLINE_EXTRA_PX = 6f;
+        private static final int OUTLINE_ALPHA = 120;          // 0..255
+        private static final float OUTLINE_EXTRA_PX = 5f;
         private static final float TEXT_OUTLINE_PX = 4f;
         private static final float BUTTON_CIRCLE_DIAMETER = 160.f;
         private static final float BUTTON_RECT_WIDTH = 240.f;
