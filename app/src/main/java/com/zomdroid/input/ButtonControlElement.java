@@ -277,6 +277,27 @@ public class ButtonControlElement extends AbstractControlElement {
             if (this.iconDrawable != null) {
                 this.iconDrawable.draw(canvas);
             } else if (this.text != null) {
+                float o = OUTLINE_EXTRA_PX * parentView.pixelScale;
+
+                // сохраняем параметры
+                int oldTextColor = this.textPaint.getColor();
+                int oldTextAlpha = this.textPaint.getAlpha();
+                ColorFilter oldTextFilter = this.textPaint.getColorFilter();
+            
+                // outline pass: чёрный без фильтра
+                this.textPaint.setColor(android.graphics.Color.BLACK);
+                this.textPaint.setAlpha(OUTLINE_ALPHA);
+                this.textPaint.setColorFilter(null);
+            
+                canvas.drawText(this.text, this.centerX - o, this.textY, this.textPaint);
+                canvas.drawText(this.text, this.centerX + o, this.textY, this.textPaint);
+                canvas.drawText(this.text, this.centerX, this.textY - o, this.textPaint);
+                canvas.drawText(this.text, this.centerX, this.textY + o, this.textPaint);
+            
+                // normal pass: вернуть как было
+                this.textPaint.setColor(oldTextColor);
+                this.textPaint.setAlpha(oldTextAlpha);
+                this.textPaint.setColorFilter(oldTextFilter);
                 canvas.drawText(this.text, this.centerX, this.textY, this.textPaint);
             }
         }
