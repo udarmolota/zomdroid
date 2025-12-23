@@ -20,7 +20,7 @@ public class DpadControlElement extends AbstractControlElement {
     private static final float DPAD_DEAD_ZONE = 0.3f;
     private final AbstractControlElement.Type type;
     private static final int OUTLINE_ALPHA = 140;
-    private static final float OUTLINE_EXTRA_PX = 2f;
+    private static final float OUTLINE_EXTRA_PX = 6f;
 
     public DpadControlElement(InputControlsView parentView, ControlElementDescription elementDescription) {
         super(parentView, elementDescription);
