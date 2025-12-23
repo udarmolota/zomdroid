@@ -198,6 +198,7 @@ public class ButtonControlElement extends AbstractControlElement {
         private static final int PAINT_STROKE_WIDTH = 6;
         private static final int OUTLINE_ALPHA = 140;          // 0..255
         private static final float OUTLINE_EXTRA_PX = 6f;
+        private static final float TEXT_OUTLINE_PX = 4f;
         private static final float BUTTON_CIRCLE_DIAMETER = 160.f;
         private static final float BUTTON_RECT_WIDTH = 240.f;
         private static final float BUTTON_RECT_HEIGHT = 120.f;
@@ -277,7 +278,7 @@ public class ButtonControlElement extends AbstractControlElement {
             if (this.iconDrawable != null) {
                 this.iconDrawable.draw(canvas);
             } else if (this.text != null) {
-                float o = OUTLINE_EXTRA_PX * parentView.pixelScale;
+                float o = TEXT_OUTLINE_PX * parentView.pixelScale;
 
                 // сохраняем параметры
                 int oldTextColor = this.textPaint.getColor();
