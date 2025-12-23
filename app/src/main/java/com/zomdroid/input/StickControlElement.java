@@ -284,8 +284,8 @@ public class StickControlElement extends AbstractControlElement {
             float os = op.getStrokeWidth();
         
             op.setColor(android.graphics.Color.BLACK);
-            op.setAlpha(140);
-            op.setStrokeWidth(os + 6f * parentView.pixelScale);
+            op.setAlpha(120);
+            op.setStrokeWidth(os + 5f * parentView.pixelScale);
             outerShapeDrawable.draw(canvas);
         
             op.setColor(oc);
