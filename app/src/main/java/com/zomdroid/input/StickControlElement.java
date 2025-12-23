@@ -277,7 +277,41 @@ public class StickControlElement extends AbstractControlElement {
         }
 
         public void draw(@NonNull Canvas canvas) {
+            // --- Outer outline ---
+            Paint op = outerShapeDrawable.getPaint();
+            int oc = op.getColor();
+            int oa = op.getAlpha();
+            float os = op.getStrokeWidth();
+        
+            op.setColor(android.graphics.Color.BLACK);
+            op.setAlpha(140);
+            op.setStrokeWidth(os + 2f * parentView.pixelScale);
             outerShapeDrawable.draw(canvas);
+        
+            op.setColor(oc);
+            op.setAlpha(oa);
+            op.setStrokeWidth(os);
+            outerShapeDrawable.draw(canvas);
+        
+            // --- Inner: outline + fill ---
+            // 1) inner outline (stroke around fill)
+            Paint ip = innerShapeDrawable.getPaint();
+            int ic = ip.getColor();
+            int ia = ip.getAlpha();
+            Paint.Style istyle = ip.getStyle();
+            float iStroke = ip.getStrokeWidth();
+        
+            ip.setStyle(Paint.Style.STROKE);
+            ip.setColor(android.graphics.Color.BLACK);
+            ip.setAlpha(140);
+            ip.setStrokeWidth(2f * parentView.pixelScale);
+            innerShapeDrawable.draw(canvas);
+        
+            // 2) inner fill (restore)
+            ip.setStyle(istyle); // should be FILL in your ctor
+            ip.setColor(ic);
+            ip.setAlpha(ia);
+            ip.setStrokeWidth(iStroke);
             innerShapeDrawable.draw(canvas);
         }
 
