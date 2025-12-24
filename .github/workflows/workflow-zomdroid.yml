@@ -10,7 +10,7 @@ on:
         type: choice
         options:
         - java21
-        - ng
+        - optm-1
         - buttons-outline
         
 jobs:
