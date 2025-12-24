@@ -3,7 +3,7 @@
 #include <dlfcn.h>
 #include <android/dlext.h>
 #include <malloc.h>
-
+#include <unistd.h>
 #include "logger.h"
 #include "emulation.h"
 #include "zomdroid_globals.h"
@@ -548,24 +548,23 @@ void *dlopen(const char* filename, int flags) {
         if (!strstr(filename, jni_libs[i].name)) continue;
 
         //trying to load native library
-        if (jni_libs[i].name != "fmodintegration64") { //later I should fix that. Java for some reason didn't see classes inside
+        if (strcmp(jni_libs[i].name, "fmodintegration64") != 0) { { //later I should fix that. Java for some reason didn't see classes inside
             const char* base = strrchr(filename, '/');
             if (base)
                 base++;
             else
                 base = filename;
 
-            char android_filename[BUF_SIZE];
-            //LOGD("[linker] Base name: %s", base);
-            //snprintf(android_filename, BUF_SIZE,"android/arm64-v8a/%s", base);
+            char android_filename[BUF_SIZE] = {0};
+            snprintf(android_filename, BUF_SIZE, "android/arm64-v8a/%s", base);
 
             if (access(android_filename, F_OK) == 0) {
-                LOGD("[linker] Native Android version of %s is found", android_filename);
+                //LOGD("[linker] Native Android version of %s is found", android_filename);
                 jni_libs[i].handle = loader_dlopen(android_filename, flags, __builtin_return_address(0));
                 jni_libs[i].is_emulated = false;
                 return jni_libs[i].handle;
             }
-            LOGE("[linker] Native Android version of %s not found, loading through box64...", android_filename);
+            LOGV("[linker] Native Android version of %s not found, loading through box64...", android_filename);
         }
 
         //elsewise loading in box64
@@ -633,7 +632,7 @@ void *dlsym(void *handle, const char *sym_name) {
                 if (art_jni_env == NULL) {
                     LOGE("Failed to attach game FMOD thread to ART VM");
                 } else {
-                    LOGD("Successfully attached game FMOD thread to ART VM");
+                    //LOGD("Successfully attached game FMOD thread to ART VM");
                 }
             }
 
@@ -669,7 +668,7 @@ void *dlsym(void *handle, const char *sym_name) {
 
 __attribute__((visibility("default"), used))
 void *android_dlopen_ext(const char *filename, int flags, const android_dlextinfo *extinfo) {
-    LOGE("android_dlopen_ext(filename=%s)", filename);
+    //LOGE("android_dlopen_ext(filename=%s)", filename);
     if(strstr(filename, "vulkan.") && vulkan_driver_handle) {
         return vulkan_driver_handle;
     }
@@ -678,7 +677,7 @@ void *android_dlopen_ext(const char *filename, int flags, const android_dlextinf
 
 __attribute__((visibility("default"), used))
 void *android_load_sphal_library(const char *filename, int flags) {
-    LOGD("android_load_sphal_library(filename=%s)", filename);
+    //LOGD("android_load_sphal_library(filename=%s)", filename);
     if(strstr(filename, "vulkan.") && vulkan_driver_handle) {
         return vulkan_driver_handle;
     }
