@@ -547,6 +547,12 @@ void *dlopen(const char* filename, int flags) {
     for (int i = 0; i < jni_lib_count; i++) {
         if (!strstr(filename, jni_libs[i].name)) continue;
 
+        // Already loaded once -> return cached handle.
+        // This prevents repeated AddNeededLib/RunDeferredElfInit and reduces instability.
+        if (jni_libs[i].handle != NULL) {
+            return jni_libs[i].handle;
+        }
+
         //trying to load native library
         if (strcmp(jni_libs[i].name, "fmodintegration64") != 0) { //later I should fix that. Java for some reason didn't see classes inside
             const char* base = strrchr(filename, '/');
