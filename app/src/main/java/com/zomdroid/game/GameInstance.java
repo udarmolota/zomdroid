@@ -98,7 +98,7 @@ public class GameInstance {
 
         jvmArgsList.add("-Djava.library.path=" + getJavaLibraryPath() + ":.");
 
-        //jvmArgsList.add("-Dorg.lwjgl.util.Debug=true"); // debug
+        jvmArgsList.add("-Dorg.lwjgl.util.Debug=true"); // debug
 
         StringJoiner jarsJoiner = new StringJoiner(":");
         for (String path : this.extraClassPath) {
