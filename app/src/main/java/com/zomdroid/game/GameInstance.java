@@ -150,7 +150,21 @@ public class GameInstance {
     }
 
     public boolean hasGameFiles() {
-        File mainClassFile = new File(getGamePath() + "/" + getMainClassName() + ".class");
+        //File mainClassFile = new File(getGamePath() + "/" + getMainClassName() + ".class");
+        File gameDir = new File(getGamePath());
+        if (!gameDir.exists() || !gameDir.isDirectory()) {
+            return false;
+        }
+    
+        // Новый формат (42.13+): всё внутри projectzomboid.jar
+        File pzJar = new File(gameDir, "projectzomboid.jar");
+        if (pzJar.exists()) {
+            return true;
+        }
+    
+        // Старый формат (до 42.13): проверка .class на диске
+        String classPath = getMainClassName().replace('.', '/') + ".class";
+        File mainClassFile = new File(gameDir, classPath);
         return mainClassFile.exists();
     }
 
