@@ -92,20 +92,24 @@ public class GameInstance {
     }
 
     public ArrayList<String> getJvmArgsAsList() {
+        String libPath = getJavaLibraryPath();
+        String gamePath = getGamePath();        
+        
         ArrayList<String> jvmArgsList = new ArrayList<>();
         jvmArgsList.add("-Duser.home=" + this.homePath);
         jvmArgsList.add("-Djava.io.tmpdir=" + AppStorage.requireSingleton().getCachePath());
 
-        jvmArgsList.add("-Djava.library.path=" + getJavaLibraryPath() + ":.");
+        //jvmArgsList.add("-Djava.library.path=" + getJavaLibraryPath() + ":.");
+        jvmArgsList.add("-Djava.library.path=" + gamePath + ":" + libPath + ":.");
 
         jvmArgsList.add("-Dorg.lwjgl.util.Debug=true"); // debug
-
+        jvmArgsList.add("-Dorg.lwjgl.util.DebugLoader=true"); // debug
         StringJoiner jarsJoiner = new StringJoiner(":");
         for (String path : this.extraClassPath) {
             jarsJoiner.add(AppStorage.requireSingleton().getHomePath() + "/" + path);
         }
         jvmArgsList.add("-Djava.class.path=" + String.join(":", this.classPath) + ":" + jarsJoiner);
-
+        
         jvmArgsList.addAll(Arrays.asList(this.extraJvmArgs));
 
         if (!this.javaAgentPath.isEmpty()) {
