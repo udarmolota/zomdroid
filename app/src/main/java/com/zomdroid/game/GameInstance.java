@@ -91,16 +91,12 @@ public class GameInstance {
         return libsJoiner.toString();
     }
 
-    public ArrayList<String> getJvmArgsAsList() {
-        String libPath = getJavaLibraryPath();
-        String gamePath = getGamePath();        
-        
+    public ArrayList<String> getJvmArgsAsList() { 
         ArrayList<String> jvmArgsList = new ArrayList<>();
         jvmArgsList.add("-Duser.home=" + this.homePath);
         jvmArgsList.add("-Djava.io.tmpdir=" + AppStorage.requireSingleton().getCachePath());
 
-        //jvmArgsList.add("-Djava.library.path=" + getJavaLibraryPath() + ":.");
-        jvmArgsList.add("-Djava.library.path=" + gamePath + ":" + libPath + ":.");
+        jvmArgsList.add("-Djava.library.path=" + getJavaLibraryPath() + ":.");
 
         jvmArgsList.add("-Dorg.lwjgl.util.Debug=true"); // debug
         jvmArgsList.add("-Dorg.lwjgl.util.DebugLoader=true"); // debug
