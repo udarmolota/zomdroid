@@ -28,9 +28,9 @@
 
 Planned features in order of priority:
 
-[ ] Expand GPU and device compatibility
-[ ] Add window typing in MP
-[ ] Add full multiplayer support
+- [ ] Expand GPU and device compatibility
+- [ ] Add window typing in MP
+- [ ] Add full multiplayer support
 
 ## Prebuilt binaries and JARs
 
