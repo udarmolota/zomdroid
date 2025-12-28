@@ -53,7 +53,11 @@ public class GameLauncher {
               Os.setenv("LIBGL_SILENTSTUB", "0", true);
               Os.setenv("LIBGL_STACKTRACE", "1", true);
               Os.setenv("LIBGL_LOGSHADERERROR", "1", true);
-            break;
+              Os.setenv("LIBGL_GL", "21", true);
+                
+              Os.setenv("ZOMDROID_GLES_MAJOR", "2", true);
+              Os.setenv("ZOMDROID_GLES_MINOR", "1", true);
+              break;
             }
             default: {
                 Os.setenv("ZOMDROID_GLES_MAJOR", "2", false);
