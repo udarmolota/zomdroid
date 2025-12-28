@@ -49,10 +49,10 @@ public class GameLauncher {
                 }
                 break;
             case NG_GL4ES: {
-              Os.setenv("LIBGL_NOBANNER", 1);
-              Os.setenv("LIBGL_SILENTSTUB", 0);
-              Os.setenv("LIBGL_STACKTRACE", 1);        
-              Os.setenv("LIBGL_LOGSHADERERROR", 1);
+              Os.setenv("LIBGL_NOBANNER", "1", true);
+              Os.setenv("LIBGL_SILENTSTUB", "0", true);
+              Os.setenv("LIBGL_STACKTRACE", "1", true);
+              Os.setenv("LIBGL_LOGSHADERERROR", "1", true);
             break;
             }
             default: {
