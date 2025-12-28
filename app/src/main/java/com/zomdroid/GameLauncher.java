@@ -27,8 +27,8 @@ public class GameLauncher {
         Os.setenv("BOX64_DYNAREC", "0", false);*/
 
         //Os.setenv("LIBGL_NOERROR", "1", false);
-/*        Os.setenv("LIBGL_LOGSHADERERROR", "1", false);
-        Os.setenv("ZINK_DEBUG", "spirv", false);*/
+        //Os.setenv("LIBGL_LOGSHADERERROR", "1", false);
+        //Os.setenv("ZINK_DEBUG", "spirv", false);
 
         Os.setenv("LIBGL_MIPMAP", "1", false);
 
@@ -48,27 +48,13 @@ public class GameLauncher {
                     Os.setenv("ZOMDROID_VULKAN_DRIVER_NAME", vulkanDriverName, false);
                 }
                 break;
-            /*case NG_GL4ES: {
-              Os.setenv("ZOMDROID_RENDERER", "NG_GL4ES", false);
-
-              // GLES 3.1 запрос
-              Os.setenv("ZOMDROID_GLES_MAJOR", "3", false);
-              Os.setenv("ZOMDROID_GLES_MINOR", "0", false);
-
-              // Включаем OpenMW-конвертер шейдеров
-              //Os.setenv("LIBGL_SIMPLE_SHADERCONV", "1", false);
-
-              // Основной лог в logcat
-              Os.setenv("LIBGL_LOGTOLOGCAT", "1", true);
-
-                Os.setenv("LIBGL_SRGB", "0", false);        // не просить sRGB surface
-                Os.setenv("LIBGL_BATCH", "0", false);       // без батчинга
-                Os.setenv("LIBGL_USEVBO", "0", false);      // без VBO (пусть эмулирует)
-                Os.setenv("LIBGL_RECYCLE_EGL", "0", false); // не реюзить EGL surface (если ключ поддерживается)
-                Os.setenv("LIBGL_LOGSHADER", "0", false);   // лог шейдеров пока выключим
-                Os.setenv("LIBGL_SIMPLE_SHADERCONV", "0", false); // конвертер шейдеров OpenMW — временно off
-                break;
-            }*/
+            case NG_GL4ES: {
+              Os.setenv("LIBGL_NOBANNER", 1);
+              Os.setenv("LIBGL_SILENTSTUB", 0);
+              Os.setenv("LIBGL_STACKTRACE", 1);        
+              Os.setenv("LIBGL_LOGSHADERERROR", 1);
+            break;
+            }
             default: {
                 Os.setenv("ZOMDROID_GLES_MAJOR", "2", false);
                 Os.setenv("ZOMDROID_GLES_MINOR", "1", false);
