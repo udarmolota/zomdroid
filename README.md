@@ -14,7 +14,7 @@
 - ✔️ Supports **Project Zomboid Build 41**
 - ✔️ Supports **Gamepad support** 
 - ✔️ Supports **Lua mods** 
-- ⭕ Project Zomboid Build **42 (partially)**
+- ⭕ Supports **Project Zomboid Build 42 (partially)**
 - ⭕ Currently **MultiPlayer JOIN only**
 - ⭕ Currently **Keyboard + mouse support (no chat typing in MP)**
 
