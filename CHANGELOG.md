@@ -1,21 +1,24 @@
-## [1.2.8] - 2025-11-16
+
+
+## [1.2.9.v4] - 2025-12-24
 ### Added
-**🚀 On-Screen Layout to File**
+**🚀 On-Screen buttons: added a high-contrast outline.**
 
-- About On-Screen Controls Saving
-
-All layout changes are saved automatically to a file:
-`instances → Project Zomboid → game → controls → controls.json`
-
-Before uninstalling the app:
-
-1. Back up the controls folder with the file to your device
-2. After installing the new version and creating a new game instance, copy the folder back to the same path
-3. Only then open the button editor (if needed)
+- So they don’t blend into very bright in-game scenes.
 
 **🛠 Fixes** 
 
-- Fixed bug where some devices incorrectly detected the right stick as the left one. Improved detection of the D-pad on Switch 2 Pro gamepads.
+- **Multiplayer**: fixed crashes when trying to connect to a server (b41.78).
+
+---
+
+## [1.2.9] - 2025-12-5
+### 🆕 What's New
+**🚀 Newer Java version.**
+
+- New launcher version is out with one single change — we've upgraded from Java 17 to the newer Java 21.
+
+For better performance.
 
 ---
 
