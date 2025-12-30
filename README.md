@@ -1,5 +1,6 @@
-> [!WARNING] 
-> Development is currently on hold while I wait for an official response from The Indie Stone regarding potential sponsorship. Just to clarify — TIS is not blocking or interfering with development in any way. I'm simply waiting to hear back, as I don’t have the resources to continue without financial support.
+> [!NOTE]  
+> While the original development is currently on hold, community-driven updates are being made.  
+> Check the [CHANGELOG](CHANGELOG.md) for the latest improvements. If you like the work that’s been done you can support it via [Buy me a Coffee](https://buymeacoffee.com/udarmolota).
 
 # Zomdroid
 
@@ -10,24 +11,26 @@
 
 ## Features
 
-- Supports **Project Zomboid Build 41** (tested on 41.78.16) and **Build 42** (up to 42.7, versions 42.8 and later are not supported) 
-- Supports **Lua mods**
-- Currently **single-player only**
+- ✔️ Supports **Project Zomboid Build 41**
+- ✔️ Supports **Gamepad support** 
+- ✔️ Supports **Lua mods** 
+- ⭕ Supports **Project Zomboid Build 42 (partially)**
+- ⭕ Currently **MultiPlayer JOIN only**
+- ⭕ Currently **Keyboard + mouse support (no chat typing in MP)**
 
 ## System requirements 
 
 - Android 11
-- 3GB of free RAM (usually achievable on devices with at least 5-6GB of total RAM)
+- 4GB of free RAM (usually achievable on devices with at least 6-8GB of total RAM for b41, 12GB for b42)
 - 10-15 GB of free internal storage for downloading and installing the game
 
 ## Roadmap
 
 Planned features in order of priority:
 
-1. Expand GPU and device compatibility
-2. Optimize and improve performance
-3. Add external input support (mouse and keyboard, physical controller) 
-4. Add multiplayer support
+- [ ] Expand GPU and device compatibility
+- [ ] Add window typing in MP
+- [ ] Add full multiplayer support
 
 ## Prebuilt binaries and JARs
 
