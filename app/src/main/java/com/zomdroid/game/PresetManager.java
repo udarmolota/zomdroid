@@ -55,7 +55,7 @@ public class PresetManager {
                 .build()
         );
         // NEW 42.13
-        presets.add(new InstallationPreset.Builder()
+        /*presets.add(new InstallationPreset.Builder()
                 .setName("Build 42.13")
                 .setBuildVersion("42")
                 .setClassPathArray(new String[]{
@@ -102,7 +102,7 @@ public class PresetManager {
                 //.setJavaAgentArgs("build=42")
                 .build()
         );
-        
+        */
         presets.add(new InstallationPreset.Builder()
                 .setName("Build 41")
                 .setBuildVersion("41")

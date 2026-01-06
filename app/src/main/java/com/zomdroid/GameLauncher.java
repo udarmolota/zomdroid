@@ -36,30 +36,38 @@ public class GameLauncher {
         Os.setenv("BOX64_SHOWBT", "1", false);
         Os.setenv("BOX64_LD_LIBRARY_PATH", gameInstance.getLdLibraryPathForEmulation(), false);
 
-        Os.setenv("GALLIUM_DRIVER", "zink", false);
+        //Os.setenv("GALLIUM_DRIVER", "zink", false);
 
         Os.setenv("ZOMDROID_CACHE_DIR", AppStorage.requireSingleton().getCachePath(), false);
         Os.setenv("ZOMDROID_RENDERER", LauncherPreferences.requireSingleton().getRenderer().name(), false);
         switch (LauncherPreferences.requireSingleton().getRenderer()) {
             case ZINK_ZFA:
             case ZINK_OSMESA:
+                Os.setenv("GALLIUM_DRIVER", "zink", true);
                 String vulkanDriverName = LauncherPreferences.requireSingleton().getVulkanDriver().libName;
                 if (vulkanDriverName != null) {
                     Os.setenv("ZOMDROID_VULKAN_DRIVER_NAME", vulkanDriverName, false);
                 }
                 break;
-            case NG_GL4ES: {
+            /*case NG_GL4ES: {
+              Os.unsetenv("GALLIUM_DRIVER");
+
               Os.setenv("LIBGL_NOBANNER", "1", true);
               Os.setenv("LIBGL_SILENTSTUB", "0", true);
               Os.setenv("LIBGL_STACKTRACE", "1", true);
               Os.setenv("LIBGL_LOGSHADERERROR", "1", true);
-              Os.setenv("LIBGL_GL", "21", true);
+              Os.setenv("LIBGL_ES", "2", true);
+              Os.setenv("LIBGL_NODEPTHTEX", "1", true);
+              Os.setenv("LIBGL_FB", "2", true);
+              Os.setenv("LIBGL_FBONOALPHA", "1", true);
+              //Os.setenv("LIBGL_GL", "21", true);
                 
               Os.setenv("ZOMDROID_GLES_MAJOR", "2", true);
-              Os.setenv("ZOMDROID_GLES_MINOR", "1", true);
+              Os.setenv("ZOMDROID_GLES_MINOR", "0", true);
               break;
-            }
+            }*/
             default: {
+                Os.setenv("GALLIUM_DRIVER", "", true);
                 Os.setenv("ZOMDROID_GLES_MAJOR", "2", false);
                 Os.setenv("ZOMDROID_GLES_MINOR", "1", false);
                 break;

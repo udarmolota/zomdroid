@@ -33,8 +33,23 @@ public class LauncherPreferences {
     }
 
     private static boolean isKgslSupported() {
-        File kgsl = new File("/dev/kgsl-3d0");
-        return kgsl.exists();
+        String[] paths = {
+                "/dev/kgsl-3d0",
+                "/dev/kgsl/kgsl-3d0"
+        };
+
+        for (String p : paths) {
+            try {
+                File f = new File(p);
+                if (f.exists()) {
+                    return true;
+                }
+            } catch (SecurityException ignored) {
+                // If access to /dev is restricted, treat as "unknown" (false) for this probe.
+                // Consider logging in debug builds.
+            }
+        }
+        return false;
     }
 
     public static void init(@NonNull Context context) {
@@ -121,8 +136,8 @@ public class LauncherPreferences {
     public enum Renderer {
         ZINK_ZFA("libzfa.so"),
         ZINK_OSMESA("libOSMesa.so"),
-        GL4ES("libgl4es.so"),
-        NG_GL4ES("libgl4es_114.so");
+        GL4ES("libgl4es.so");
+        //NG_GL4ES("libgl4es_114.so");
 
         final String libName;
         Renderer(String libName) {

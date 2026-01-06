@@ -4,6 +4,7 @@
 #include <android/dlext.h>
 #include <malloc.h>
 #include <unistd.h>
+#include <pthread.h>
 #include "logger.h"
 #include "emulation.h"
 #include "zomdroid_globals.h"
@@ -19,6 +20,55 @@
 #define LOG_TAG "zomdroid-linker"
 
 #define BUF_SIZE 1024
+
+#define JNI_SIG_CACHE_SIZE 64
+
+typedef struct {
+    char* sym;  // key
+    char* sig;  // value (full method signature)
+} JniSigCacheEntry;
+
+static JniSigCacheEntry g_jni_sig_cache[JNI_SIG_CACHE_SIZE];
+static int g_jni_sig_cache_next = 0;
+static pthread_mutex_t g_jni_sig_cache_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+static const char* jni_sig_cache_get(const char* sym) {
+    const char* result = NULL;
+    pthread_mutex_lock(&g_jni_sig_cache_mutex);
+    for (int i = 0; i < JNI_SIG_CACHE_SIZE; i++) {
+        if (g_jni_sig_cache[i].sym && strcmp(g_jni_sig_cache[i].sym, sym) == 0) {
+            result = g_jni_sig_cache[i].sig;
+            break;
+        }
+    }
+    pthread_mutex_unlock(&g_jni_sig_cache_mutex);
+    return result;
+}
+
+static void jni_sig_cache_put(const char* sym, const char* sig) {
+    if (!sym || !sig) return;
+    // store our own copies, because caller frees its return value
+    char* sym_copy = strdup(sym);
+    char* sig_copy = strdup(sig);
+    if (!sym_copy || !sig_copy) {
+        free(sym_copy);
+        free(sig_copy);
+        return;
+    }
+
+    pthread_mutex_lock(&g_jni_sig_cache_mutex);
+
+    int idx = g_jni_sig_cache_next;
+    g_jni_sig_cache_next = (g_jni_sig_cache_next + 1) % JNI_SIG_CACHE_SIZE;
+
+    free(g_jni_sig_cache[idx].sym);
+    free(g_jni_sig_cache[idx].sig);
+
+    g_jni_sig_cache[idx].sym = sym_copy;
+    g_jni_sig_cache[idx].sig = sig_copy;
+
+    pthread_mutex_unlock(&g_jni_sig_cache_mutex);
+}
 
 static void* (*loader_dlopen)(const char* filename, int flags, const void* caller);
 static void* (*loader_dlsym)(void* handle, const char* symbol, const void* caller);
@@ -132,6 +182,11 @@ int zomdroid_linker_init() {
 }*/
 
 static void parse_jni_sym_name(const char* sym_name, char** class_name, char** method_name, char** method_sig_short) {
+    // Always initialize outputs, so caller can safely free() them even on failure.
+    *class_name = NULL;
+    *method_name = NULL;
+    *method_sig_short = NULL;
+
     LOGV("Parsing %s", sym_name);
 
     char buf[BUF_SIZE];
@@ -146,11 +201,13 @@ static void parse_jni_sym_name(const char* sym_name, char** class_name, char** m
     int i = 0;
     int sig = 0;
     int method = 0;
+
     while (*sym_name != '\0') {
         if (i + 1 >= BUF_SIZE) {
             LOGE("Class + method name string is more than %d characters long", BUF_SIZE);
             return;
         }
+
         switch (*sym_name) {
             case '_':
                 sym_name++;
@@ -159,8 +216,7 @@ static void parse_jni_sym_name(const char* sym_name, char** class_name, char** m
                     LOGE("Unexpected _0");
                         return;
                     case '1':
-                        buf[i] = '_';
-                        i++;
+                        buf[i++] = '_';
                         sym_name++;
                         break;
                     case '2':
@@ -168,8 +224,7 @@ static void parse_jni_sym_name(const char* sym_name, char** class_name, char** m
                             LOGE("Unexpected _2 not in signature");
                             return;
                         }
-                        buf[i] = ';';
-                        i++;
+                        buf[i++] = ';';
                         sym_name++;
                         break;
                     case '3':
@@ -177,14 +232,12 @@ static void parse_jni_sym_name(const char* sym_name, char** class_name, char** m
                             LOGE("Unexpected _3 not in signature");
                             return;
                         }
-                        buf[i] = '[';
-                        i++;
+                        buf[i++] = '[';
                         sym_name++;
                         break;
                     case '_':
                         sig = i + 1;
-                        buf[i] = '\0';
-                        i++;
+                        buf[i++] = '\0';
                         sym_name++;
                         break;
                     default:
@@ -199,36 +252,58 @@ static void parse_jni_sym_name(const char* sym_name, char** class_name, char** m
                         break;
                 }
                 break;
+
             default:
-                buf[i] = *sym_name;
-                i++;
+                buf[i++] = *sym_name;
                 sym_name++;
                 break;
         }
     }
+
     buf[i++] = '\0';
+
     if (!method) {
         LOGE("JNI name doesn't contain method name");
         return;
     }
-    *class_name = malloc(method);
+
+    // class_name is everything before "method" index
+    *class_name = (char*)malloc((size_t)method);
+    if (!*class_name) {
+        LOGE("malloc failed for class_name");
+        return;
+    }
     strcpy(*class_name, buf);
 
-    if (sig) {
-        *method_name = malloc(sig - method);
-    } else {
-        *method_name = malloc(i - method);
+    // method_name starts at buf[method], ends at (sig-1) if signature exists, otherwise end of buf
+    int method_name_len = sig ? (sig - method) : (i - method);
+    *method_name = (char*)malloc((size_t)method_name_len);
+    if (!*method_name) {
+        LOGE("malloc failed for method_name");
+        free(*class_name);
+        *class_name = NULL;
+        return;
     }
     strcpy(*method_name, &buf[method]);
 
+    // signature short is optional
     if (sig) {
-        *method_sig_short = calloc(i - sig + 2, sizeof (char));
+        size_t short_len = (size_t)(i - sig + 2); // + "(" + ")" + '\0' already accounted in original logic
+        *method_sig_short = (char*)calloc(short_len, sizeof(char));
+        if (!*method_sig_short) {
+            LOGE("calloc failed for method_sig_short");
+            // class_name and method_name remain valid; caller may still use them.
+            return;
+        }
         strcat(*method_sig_short, "(");
         strcat(*method_sig_short, &buf[sig]);
         strcat(*method_sig_short, ")");
     }
 
-    LOGV("className=%s methodName=%s methodSignatureShort=%s", *class_name, *method_name, (*method_sig_short == NULL) ? "<null>" : *method_sig_short);
+    LOGV("className=%s methodName=%s methodSignatureShort=%s",
+         *class_name,
+         *method_name,
+         (*method_sig_short == NULL) ? "<null>" : *method_sig_short);
 }
 
 static int method_signature_to_types(char* sig, char** arg_types, char* return_type) {
@@ -239,7 +314,8 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
 
     sig++; // skip (
 
-    char array = false;
+    //char array = false;
+    char array = 0;
 
     while(*sig != ')') {
         if (i + 1 >= BUF_SIZE) {
@@ -257,7 +333,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
             case 'B': // jbyte
                 if (array) {
                     buf[i++] = 'p';
-                    array = false;
+                    array = 0;
                     break;
                 }
                 buf[i++] = 'c';
@@ -265,7 +341,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
             case 'C': // jchar
                 if (array) {
                     buf[i++] = 'p';
-                    array = false;
+                    array = 0;
                     break;
                 }
                 buf[i++] = 'W';
@@ -273,7 +349,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
             case 'D': // jdouble
                 if (array) {
                     buf[i++] = 'p';
-                    array = false;
+                    array = 0;
                     break;
                 }
                 buf[i++] = 'd';
@@ -281,7 +357,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
             case 'F': // jfloat
                 if (array) {
                     buf[i++] = 'p';
-                    array = false;
+                    array = 0;
                     break;
                 }
                 buf[i++] = 'f';
@@ -289,7 +365,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
             case 'I': // jint
                 if (array) {
                     buf[i++] = 'p';
-                    array = false;
+                    array = 0;
                     break;
                 }
                 buf[i++] = 'i';
@@ -297,7 +373,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
             case 'J': // jlong
                 if (array) {
                     buf[i++] = 'p';
-                    array = false;
+                    array = 0;
                     break;
                 }
                 buf[i++] = 'I';
@@ -305,7 +381,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
             case 'S': // jshort
                 if (array) {
                     buf[i++] = 'p';
-                    array = false;
+                    array = 0;
                     break;
                 }
                 buf[i++] = 'w';
@@ -313,7 +389,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
             case 'Z': // jboolean
                 if (array) {
                     buf[i++] = 'p';
-                    array = false;
+                    array = 0;
                     break;
                 }
                 buf[i++] = 'C';
@@ -328,7 +404,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
                     sig++;
                 }
                 buf[i++] ='p';
-                array = false;
+                array = 0;
                 break;
             default:
             LOGE("Unexpected character %c", *sig);
@@ -352,7 +428,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
         case 'B': // jbyte
             if (array) {
                 *return_type = 'p';
-                array = false;
+                array = 0;
                 break;
             }
             *return_type = 'c';
@@ -360,7 +436,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
         case 'C': // jchar
             if (array) {
                 *return_type = 'p';
-                array = false;
+                array = 0;
                 break;
             }
             *return_type = 'W';
@@ -368,7 +444,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
         case 'D': // jdouble
             if (array) {
                 *return_type = 'p';
-                array = false;
+                array = 0;
                 break;
             }
             *return_type = 'd';
@@ -376,7 +452,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
         case 'F': // jfloat
             if (array) {
                 *return_type = 'p';
-                array = false;
+                array = 0;
                 break;
             }
             *return_type = 'f';
@@ -384,7 +460,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
         case 'I': // jint
             if (array) {
                 *return_type = 'p';
-                array = false;
+                array = 0;
                 break;
             }
             *return_type = 'i';
@@ -392,7 +468,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
         case 'J': // jlong
             if (array) {
                 *return_type = 'p';
-                array = false;
+                array = 0;
                 break;
             }
             *return_type = 'I';
@@ -400,7 +476,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
         case 'S': // jshort
             if (array) {
                 *return_type = 'p';
-                array = false;
+                array = 0;
                 break;
             }
             *return_type = 'w';
@@ -408,7 +484,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
         case 'Z': // jboolean
             if (array) {
                 *return_type = 'p';
-                array = false;
+                array = 0;
                 break;
             }
             *return_type = 'C';
@@ -423,7 +499,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
                 sig++;
             }
             *return_type = 'p';
-            array = false;
+            array = 0;
             break;
         case 'V': // void - only for return type
             *return_type = 'v';
@@ -447,6 +523,12 @@ static char* method_signature_from_symbol_name(const char* sym) {
     char* method_name = NULL;
     char* method_sig = NULL; // argument types + return type
     char* method_sig_short = NULL; // only argument types
+    const char* cached = jni_sig_cache_get(sym);
+    if (cached) {
+        // return a fresh copy because caller will free() it
+        return strdup(cached);
+    }
+
     jvmtiError jvmti_err = 0;
     jint class_count = 0;
     jclass* classes = NULL;
@@ -456,6 +538,11 @@ static char* method_signature_from_symbol_name(const char* sym) {
     jmethodID target_method = NULL;
 
     parse_jni_sym_name(sym, &class_name, &method_name, &method_sig_short);
+
+    if (class_name == NULL || method_name == NULL) {
+        LOGE("Failed to parse JNI symbol name: %s", sym);
+        goto FAIL;
+    }
 
     class_sig = calloc(strlen(class_name) + 3, sizeof(char));
     strcat(class_sig, "L");
@@ -528,6 +615,7 @@ static char* method_signature_from_symbol_name(const char* sym) {
     free(class_sig);
     free(method_name);
     free(method_sig_short);
+    jni_sig_cache_put(sym, method_sig);
     return method_sig;
     FAIL:
     free(class_name);

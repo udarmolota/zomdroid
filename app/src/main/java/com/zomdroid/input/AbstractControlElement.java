@@ -168,7 +168,7 @@ public abstract class AbstractControlElement {
     public abstract ControlElementDescription describe();
 
     void handleGamepadBinding(GLFWBinding binding, boolean isPressed) {
-        Log.v(LOG_TAG, "handleGamepadBinding binding=" + binding + " isPressed=" + isPressed);
+        //Log.v(LOG_TAG, "handleGamepadBinding binding=" + binding + " isPressed=" + isPressed);
         if (isDpadBinding(binding)) {
           int bit = dpadBit(binding);
           if (isPressed) sDpadMask |= bit; else sDpadMask &= ~bit;

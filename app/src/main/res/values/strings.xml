@@ -70,6 +70,7 @@
     <string name="settings_vulkan_driver">Vulkan driver</string>
     <string name="settings_resolution_scale">Resolution scale</string>
     <string name="settings_audio_api">Audio API</string>
+    <string name="settings_render_hint">Build 41 → GL4ES, Build 42 → ZINK (only Snapdragon)</string>
 
     <string name="nav_menu_controls_editor">Controls editor</string>
     <string name="nav_menu_gamepad_mapper">Gamepad mapper</string>

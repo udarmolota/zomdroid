@@ -10,6 +10,7 @@ import android.widget.SeekBar;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 
 import com.zomdroid.LauncherPreferences;
 import com.zomdroid.R;
@@ -55,6 +56,9 @@ public class SettingsFragment extends Fragment {
             }
         });
 
+        binding.settingsRenderHintHelpIb.setOnClickListener(v -> {
+            Navigation.findNavController(v).navigate(R.id.wiki_fragment);
+        });
 
         ArrayAdapter<LauncherPreferences.VulkanDriver> vulkanDriverAdapter = new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_spinner_dropdown_item, LauncherPreferences.VulkanDriver.values());
