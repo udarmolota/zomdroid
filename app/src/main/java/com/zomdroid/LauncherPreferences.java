@@ -26,10 +26,10 @@ public class LauncherPreferences {
     private static final String KEY_TOUCH_CONTROLS = "touch_controls_enabled";
 
     LauncherPreferences() {
-        if (isKgslSupported()) {
-            this.renderer = Renderer.ZINK_ZFA;
-            this.vulkanDriver = VulkanDriver.FREEDRENO;
-        }
+        //if (isKgslSupported()) {
+        //    this.renderer = Renderer.ZINK_ZFA;
+        //    this.vulkanDriver = VulkanDriver.FREEDRENO;
+        //}
     }
 
     private static boolean isKgslSupported() {
