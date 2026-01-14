@@ -22,6 +22,7 @@ import java.util.Arrays;
 public class ButtonControlElement extends AbstractControlElement {
     private final ButtonControlDrawable drawable;
     private int pointerId = -1;
+    private boolean isToggledOn = false;
 
     public ButtonControlElement(InputControlsView parentView, ControlElementDescription elementDescription) {
         super(parentView, elementDescription);
@@ -64,14 +65,28 @@ public class ButtonControlElement extends AbstractControlElement {
                 float y = e.getY(actionIndex);
                 if (!this.drawable.isPointOver(x, y)) return false;
                 this.pointerId = pointerId;
-                this.dispatchEvent(true);
+                
+                if (getToggle()) {
+                    if (isToggledOn) {
+                        this.dispatchEvent(false);
+                        isToggledOn = false;
+                    } else {
+                        this.dispatchEvent(true);
+                        isToggledOn = true;
+                    }
+                } else {
+                    this.dispatchEvent(true);
+                }
+
                 return true;
             }
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_POINTER_UP:
                 if (pointerId != this.pointerId) return false;
                 this.pointerId = -1;
-                this.dispatchEvent(false);
+                if (!getToggle()) {
+                    this.dispatchEvent(false);
+                }
                 return true;
             case MotionEvent.ACTION_CANCEL: {
                 if (this.pointerId != -1) {
@@ -191,7 +206,8 @@ public class ButtonControlElement extends AbstractControlElement {
                 this.bindings.toArray(new GLFWBinding[0]), this.drawable.text, this.drawable.color,
                 this.drawable.alpha,
                 this.inputType,
-                this.drawable.icon);
+                this.drawable.icon,
+                this.isToggle);
     }
 
     public class ButtonControlDrawable {

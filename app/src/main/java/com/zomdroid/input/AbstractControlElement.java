@@ -24,12 +24,14 @@ public abstract class AbstractControlElement {
     protected InputType inputType;
     protected Context context;
     private static int sDpadMask = 0;
+    protected boolean isToggle = false;
 
     AbstractControlElement(InputControlsView parentView, ControlElementDescription description) {
         this.parentView = parentView;
         this.type = description.type;
         this.inputType = description.inputType;
         this.context = parentView.getContext();
+        this.isToggle = description.isToggle;
     }
 
     public static AbstractControlElement fromDescription(InputControlsView parentView, ControlElementDescription description) {
@@ -163,6 +165,14 @@ public abstract class AbstractControlElement {
 
     public GLFWBinding getBindingStick() {
         throw new UnsupportedOperationException();
+    }
+
+    public void setToggle(boolean isToggle) {
+        this.isToggle = isToggle;
+    }
+
+    public boolean getToggle() {
+        return isToggle;
     }
 
     public abstract ControlElementDescription describe();

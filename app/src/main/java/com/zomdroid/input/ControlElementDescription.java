@@ -28,11 +28,12 @@ public class ControlElementDescription {
     public final int alpha;
     public final AbstractControlElement.InputType inputType;
     public final Icon icon;
+    public final boolean isToggle;
 
     public ControlElementDescription(float centerXRelative, float centerYRelative, float scale,
                                      @NonNull AbstractControlElement.Type type, @NonNull GLFWBinding[] bindings,
                                      String text, int color, int alpha,
-                                     AbstractControlElement.InputType inputType, @NonNull Icon icon) {
+                                     AbstractControlElement.InputType inputType, @NonNull Icon icon, boolean isToggle) {
         this.centerXRelative = centerXRelative;
         this.centerYRelative = centerYRelative;
         this.scale = scale;
@@ -43,6 +44,7 @@ public class ControlElementDescription {
         this.alpha = alpha;
         this.inputType = inputType;
         this.icon = icon;
+        this.isToggle = isToggle;
         validate();
     }
 
@@ -52,7 +54,7 @@ public class ControlElementDescription {
             case BUTTON_RECT:
                 return new ControlElementDescription(0.5f, 0.5f, 1.f, type,
                         new GLFWBinding[]{GLFWBinding.GAMEPAD_BUTTON_A}, "A", Color.LTGRAY, 255,
-                        AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON);
+                        AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON, false);
             case DPAD:
                 return new ControlElementDescription(0.5f, 0.5f, 1.f, type,
                         new GLFWBinding[]{}, null, Color.LTGRAY, 255,
@@ -87,9 +89,11 @@ public class ControlElementDescription {
                 AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON);
 
           case STICK:
+                        AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON, false);
+            case STICK:
                 return new ControlElementDescription(0.5f, 0.5f, 1.f, type,
                         new GLFWBinding[]{GLFWBinding.LEFT_JOYSTICK}, null, Color.LTGRAY, 255,
-                        AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON);
+                        AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON, false);
             default:
                 throw new IllegalArgumentException("Unrecognized type " + type.name());
         }

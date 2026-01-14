@@ -230,7 +230,7 @@ public class DpadControlElement extends AbstractControlElement {
                 this.type,
                 this.bindings.toArray(new GLFWBinding[0]), null, this.drawable.color,
                 this.drawable.alpha,
-                this.inputType, ControlElementDescription.Icon.NO_ICON);
+                this.inputType, ControlElementDescription.Icon.NO_ICON, false);
     }
 
     public class DpadControlDrawable {
