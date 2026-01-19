@@ -424,6 +424,16 @@ public class ControlsEditorActivity extends AppCompatActivity {
                     case BUTTON_RECT: {
                         binding.elementBindingsTv.setVisibility(View.VISIBLE);
                         binding.elementBindingsAddIb.setVisibility(View.VISIBLE);
+
+                        binding.elementTogglingTv.setVisibility(View.VISIBLE);
+                        binding.elementTogglingCb.setVisibility(View.VISIBLE);
+
+                        binding.elementTogglingCb.setOnCheckedChangeListener(null);
+                        binding.elementTogglingCb.setChecked(element.getToggle()); 
+                        binding.elementTogglingCb.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                            element.setToggle(isChecked);
+                        });
+
                         binding.elementBindingsContainerLl.removeAllViews();
                         GLFWBinding[] bindings = element.getBindings();
                         for (int i = 0; i < bindings.length; i++) {
@@ -441,6 +451,9 @@ public class ControlsEditorActivity extends AppCompatActivity {
                         binding.elementBindingsAddIb.setVisibility(View.GONE);
                         binding.elementBindingsContainerLl.removeAllViews();
 
+                        binding.elementTogglingTv.setVisibility(View.GONE);
+                        binding.elementTogglingCb.setVisibility(View.GONE);
+
                         binding.elementDirectionalBindingsCl.setVisibility(View.GONE);
 
                         binding.elementStickBindingTv.setVisibility(View.GONE);
@@ -451,6 +464,9 @@ public class ControlsEditorActivity extends AppCompatActivity {
                         binding.elementBindingsTv.setVisibility(View.GONE);
                         binding.elementBindingsAddIb.setVisibility(View.GONE);
                         binding.elementBindingsContainerLl.removeAllViews();
+                        
+                        binding.elementTogglingTv.setVisibility(View.GONE);
+                        binding.elementTogglingCb.setVisibility(View.GONE);
 
                         binding.elementDirectionalBindingsCl.setVisibility(View.GONE);
 

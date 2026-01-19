@@ -22,6 +22,7 @@ public class LauncherPreferences {
     private VulkanDriver vulkanDriver = VulkanDriver.SYSTEM_DEFAULT;
     private boolean isDebug = false;
     private AudioAPI audioAPI = AudioAPI.AAUDIO;
+    private String jvmArgs = "";
 
     private static final String KEY_TOUCH_CONTROLS = "touch_controls_enabled";
 
@@ -130,6 +131,15 @@ public class LauncherPreferences {
 
     public void setAudioAPI(AudioAPI audioAPI) {
         this.audioAPI = audioAPI;
+        saveToPreferences();
+    }
+
+    public String getJvmArgs() {
+        return jvmArgs;
+    }
+    
+    public void setJvmArgs(String jvmArgs) {
+        this.jvmArgs = jvmArgs != null ? jvmArgs : "";
         saveToPreferences();
     }
 

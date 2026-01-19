@@ -101,13 +101,32 @@
                     app:layout_constraintEnd_toEndOf="parent"/>
 
                 <TextView
+                    android:id="@+id/element_toggling_tv"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="start"
+                    android:text="Toggle"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/element_opacity_sb"
+                    app:layout_constraintEnd_toStartOf="@+id/element_toggling_cb"/>
+                    
+                <CheckBox
+                    android:id="@+id/element_toggling_cb"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    app:layout_constraintStart_toEndOf="@id/element_toggling_tv"
+                    app:layout_constraintTop_toTopOf="@id/element_toggling_tv"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <TextView
                     android:id="@+id/element_text_tv"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:gravity="start"
                     android:text="@string/control_element_text"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/element_opacity_sb"
+                    app:layout_constraintTop_toBottomOf="@+id/element_toggling_cb"
                     app:layout_constraintEnd_toEndOf="parent"/>
 
                 <EditText
