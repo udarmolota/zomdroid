@@ -22,6 +22,7 @@ import java.util.Arrays;
 public class ButtonControlElement extends AbstractControlElement {
     private final ButtonControlDrawable drawable;
     private int pointerId = -1;
+    private boolean isToggledOn = false;
 
     public ButtonControlElement(InputControlsView parentView, ControlElementDescription elementDescription) {
         super(parentView, elementDescription);
@@ -31,6 +32,7 @@ public class ButtonControlElement extends AbstractControlElement {
 
     @Override
     public void setInputType(InputType inputType) {
+        if (inputType == null || inputType == this.inputType) return;
         clearBindings();
         this.inputType = inputType;
     }
@@ -63,15 +65,37 @@ public class ButtonControlElement extends AbstractControlElement {
                 float y = e.getY(actionIndex);
                 if (!this.drawable.isPointOver(x, y)) return false;
                 this.pointerId = pointerId;
-                this.dispatchEvent(true);
+                
+                if (getToggle()) {
+                    if (isToggledOn) {
+                        this.dispatchEvent(false);
+                        isToggledOn = false;
+                    } else {
+                        this.dispatchEvent(true);
+                        isToggledOn = true;
+                    }
+                } else {
+                    this.dispatchEvent(true);
+                }
+
                 return true;
             }
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_POINTER_UP:
                 if (pointerId != this.pointerId) return false;
                 this.pointerId = -1;
-                this.dispatchEvent(false);
+                if (!getToggle()) {
+                    this.dispatchEvent(false);
+                }
                 return true;
+            case MotionEvent.ACTION_CANCEL: {
+                if (this.pointerId != -1) {
+                    this.pointerId = -1;
+                    this.dispatchEvent(false); 
+                    return true;
+                }
+                return false;
+            }
         }
         return false;
     }
@@ -182,11 +206,15 @@ public class ButtonControlElement extends AbstractControlElement {
                 this.bindings.toArray(new GLFWBinding[0]), this.drawable.text, this.drawable.color,
                 this.drawable.alpha,
                 this.inputType,
-                this.drawable.icon);
+                this.drawable.icon,
+                this.isToggle);
     }
 
     public class ButtonControlDrawable {
         private static final int PAINT_STROKE_WIDTH = 6;
+        private static final int OUTLINE_ALPHA = 120;          // 0..255
+        private static final float OUTLINE_EXTRA_PX = 5f;
+        private static final float TEXT_OUTLINE_PX = 4f;
         private static final float BUTTON_CIRCLE_DIAMETER = 160.f;
         private static final float BUTTON_RECT_WIDTH = 240.f;
         private static final float BUTTON_RECT_HEIGHT = 120.f;
@@ -242,23 +270,52 @@ public class ButtonControlElement extends AbstractControlElement {
         }
 
         public void draw(@NonNull Canvas canvas) {
+            // --- Outline pass (black, a bit thicker) ---
+            Paint p = this.shapeDrawable.getPaint();
+        
+            int oldColor = p.getColor();
+            int oldAlpha = p.getAlpha();
+            float oldStroke = p.getStrokeWidth();
+            ColorFilter oldFilter = p.getColorFilter();
+        
+            p.setColor(android.graphics.Color.BLACK);
+            p.setAlpha(OUTLINE_ALPHA);
+            p.setStrokeWidth(oldStroke + OUTLINE_EXTRA_PX * parentView.pixelScale);
+            p.setColorFilter(null);
+            this.shapeDrawable.draw(canvas);
+        
+            // --- Normal pass (your current style/color/alpha) ---
+            p.setColor(oldColor);
+            p.setAlpha(oldAlpha);
+            p.setStrokeWidth(oldStroke);
+            p.setColorFilter(oldFilter);
             this.shapeDrawable.draw(canvas);
 
             if (this.iconDrawable != null) {
                 this.iconDrawable.draw(canvas);
             } else if (this.text != null) {
-                canvas.drawText(this.text, this.centerX, this.textY, this.textPaint);
+                float o = TEXT_OUTLINE_PX * parentView.pixelScale;
 
-/*                Rect bounds = new Rect();
-                this.textPaint.getTextBounds(this.text, 0, this.text.length(), bounds);
-                float x = this.centerX - bounds.width() / 2f;
-                float y = this.centerY + bounds.height() / 2f - bounds.bottom;
-                Paint debugPaint = new Paint();
-                debugPaint.setColor(Color.RED);
-                debugPaint.setStyle(Paint.Style.STROKE);
-                debugPaint.setStrokeWidth(2f);
-                bounds.offset((int)x, (int)y);
-                canvas.drawRect(bounds, debugPaint);*/
+                // сохраняем параметры
+                int oldTextColor = this.textPaint.getColor();
+                int oldTextAlpha = this.textPaint.getAlpha();
+                ColorFilter oldTextFilter = this.textPaint.getColorFilter();
+            
+                // outline pass: чёрный без фильтра
+                this.textPaint.setColor(android.graphics.Color.BLACK);
+                this.textPaint.setAlpha(OUTLINE_ALPHA);
+                this.textPaint.setColorFilter(null);
+            
+                canvas.drawText(this.text, this.centerX - o, this.textY, this.textPaint);
+                canvas.drawText(this.text, this.centerX + o, this.textY, this.textPaint);
+                canvas.drawText(this.text, this.centerX, this.textY - o, this.textPaint);
+                canvas.drawText(this.text, this.centerX, this.textY + o, this.textPaint);
+            
+                // normal pass: вернуть как было
+                this.textPaint.setColor(oldTextColor);
+                this.textPaint.setAlpha(oldTextAlpha);
+                this.textPaint.setColorFilter(oldTextFilter);
+                canvas.drawText(this.text, this.centerX, this.textY, this.textPaint);
             }
         }
 

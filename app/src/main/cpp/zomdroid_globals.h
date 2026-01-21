@@ -20,7 +20,8 @@ typedef enum {
 typedef enum {
     GL4ES,
     ZINK_OSMESA,
-    ZINK_ZFA
+    ZINK_ZFA,
+    NG_GL4ES
 } Renderer;
 
 typedef struct {

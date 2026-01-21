@@ -22,17 +22,35 @@ public class LauncherPreferences {
     private VulkanDriver vulkanDriver = VulkanDriver.SYSTEM_DEFAULT;
     private boolean isDebug = false;
     private AudioAPI audioAPI = AudioAPI.AAUDIO;
+    private String jvmArgs = "";
+
+    private static final String KEY_TOUCH_CONTROLS = "touch_controls_enabled";
 
     LauncherPreferences() {
-        if (isKgslSupported()) {
-            this.renderer = Renderer.ZINK_ZFA;
-            this.vulkanDriver = VulkanDriver.FREEDRENO;
-        }
+        //if (isKgslSupported()) {
+        //    this.renderer = Renderer.ZINK_ZFA;
+        //    this.vulkanDriver = VulkanDriver.FREEDRENO;
+        //}
     }
 
     private static boolean isKgslSupported() {
-        File kgsl = new File("/dev/kgsl-3d0");
-        return kgsl.exists();
+        String[] paths = {
+                "/dev/kgsl-3d0",
+                "/dev/kgsl/kgsl-3d0"
+        };
+
+        for (String p : paths) {
+            try {
+                File f = new File(p);
+                if (f.exists()) {
+                    return true;
+                }
+            } catch (SecurityException ignored) {
+                // If access to /dev is restricted, treat as "unknown" (false) for this probe.
+                // Consider logging in debug builds.
+            }
+        }
+        return false;
     }
 
     public static void init(@NonNull Context context) {
@@ -116,13 +134,22 @@ public class LauncherPreferences {
         saveToPreferences();
     }
 
+    public String getJvmArgs() {
+        return jvmArgs;
+    }
+    
+    public void setJvmArgs(String jvmArgs) {
+        this.jvmArgs = jvmArgs != null ? jvmArgs : "";
+        saveToPreferences();
+    }
+
     public enum Renderer {
         ZINK_ZFA("libzfa.so"),
         ZINK_OSMESA("libOSMesa.so"),
         GL4ES("libgl4es.so");
+        //NG_GL4ES("libgl4es_114.so");
 
         final String libName;
-
         Renderer(String libName) {
             this.libName = libName;
         }
@@ -143,4 +170,15 @@ public class LauncherPreferences {
         AAUDIO,
         OPENSL
     }
+
+    private boolean touchControlsEnabled = false;
+
+    public boolean isTouchControlsEnabled() {
+        return touchControlsEnabled;
+    }
+
+    public void setTouchControlsEnabled(boolean enabled) {
+        touchControlsEnabled = enabled;
+    }
+
 }

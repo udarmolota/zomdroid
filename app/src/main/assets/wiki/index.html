@@ -41,6 +41,12 @@
             <li><a href="#copy-archive-to-device">Copy the .zip archive to your mobile
                 device</a></li>
         </ol>
+    <li>
+        <a href="#native-libraries">Native libraries (Build 41 multiplayer)</a>
+    </li>
+    <li>
+        <a href="#renderers">Renderers and drivers</a>
+    </li>
     </li>
 </ul>
 
@@ -74,6 +80,7 @@
             </div>
         </details>
     </section>
+
     <section id="add-files-to-archive">
         <h3>2. Add files to a .zip archive</h3>
         <p>Zomdroid requires the .zip archive to contain the game files at the top level — not inside a folder.</p>
@@ -95,5 +102,97 @@
         Copy the .zip archive from the previous step to any folder on your mobile device. You can later use that file to create a new game instance. Once the game instance is created, you can delete the .zip archive to free up space.
     </section>
 </section>
+<hr>
+
+<section id="native-libraries">
+    <h2>Native libraries (Build 41 multiplayer)</h2>
+
+    <p>
+        To use multiplayer in <b>Build 41</b>, additional native libraries are required.
+        These libraries are officially distributed by the Project Zomboid developers
+        as part of <b>Build 42.12 (Linux version)</b>.
+    </p>
+
+    <p>
+        Only <b>two native libraries</b> are required:
+    </p>
+
+    <ul>
+        <li><code>libRakNet64.so</code></li>
+        <li><code>libZNetNoSteam64.so</code></li>
+    </ul>
+
+    <p>
+        Download these files from the Linux Build 42.12 distribution,
+        place both files into a single <code>.zip</code> archive,
+        and upload this archive when creating a new game instance.
+    </p>
+
+    <p>
+        The <code>.zip</code> archive should contain the two <code>.so</code> files
+        at the top level (not inside a folder).
+    </p>
+
+    <p>
+        You can upload the native libraries archive together with the main game files
+        in the corresponding fields when creating a new game instance.
+    </p>
+</section>
+<hr>
+
+<section id="renderers">
+    <h2>Renderers and drivers</h2>
+
+    <p>
+        Zomdroid uses renderers to translate the desktop graphics of Project Zomboid
+        into graphics compatible with Android devices.
+    </p>
+
+    <p>
+        The launcher provides two rendering solutions:
+    </p>
+
+    <ul>
+        <li><b>GL4ES</b></li>
+        <li><b>ZINK</b> (<code>ZINK_ZFA</code> / <code>ZINK_OSMESA</code>)</li>
+    </ul>
+
+    <h3>GL4ES</h3>
+    <p>
+        GL4ES is the most stable renderer for <b>Build 41</b>.
+        However, in <b>Build 42</b> it often produces graphical artifacts,
+        as it cannot fully translate the updated rendering pipeline of the game.
+    </p>
+
+    <h3>ZINK</h3>
+    <p>
+        ZINK provides the best results with <b>Build 42</b>
+        and usually eliminates the graphical artifacts seen with GL4ES.
+    </p>
+
+    <p>
+        ZINK offers two Vulkan drivers:
+    </p>
+
+    <ul>
+        <li><b>System Vulkan driver</b></li>
+        <li><b>Freedreno (Turnip / Mesa)</b></li>
+    </ul>
+
+    <p>
+        ZINK primarily works on <b>Snapdragon devices (Adreno GPUs)</b>.
+        On MediaTek (Helio, Dimensity) and other platforms
+        (Exynos, Kirin, etc.), ZINK often does not work or may crash.
+    </p>
+
+    <p>
+        The ideal configuration for both <b>Build 41</b> and <b>Build 42</b>
+        is <b>ZINK + Freedreno</b>.
+        However, Freedreno is supported only on certain Snapdragon devices
+        with Adreno GPUs up to the 7xx series.
+        Newer Snapdragon platforms (Elite / Gen 5) are not yet supported.
+    </p>
+</section>
+
 </body>
 </html>

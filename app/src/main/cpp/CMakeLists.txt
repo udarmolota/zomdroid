@@ -40,4 +40,3 @@ set(NOGIT ON)
 set(ARM_DYNAREC ON)
 add_subdirectory(box64)
 target_compile_definitions(box64 PRIVATE BUILD_DYNAMIC)
-

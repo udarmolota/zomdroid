@@ -8,20 +8,27 @@ import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.zomdroid.AppStorage;
 import com.zomdroid.C;
 import com.zomdroid.R;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
@@ -29,21 +36,26 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 
 public class InputControlsView extends View {
-    private static final String LOG_TAG = InputControlsView.class.getName();
-    private ArrayList<AbstractControlElement> controlElements = new ArrayList<>();
-    boolean isEditMode = false;
-    AbstractControlElement selectedElement;
-    AbstractControlElement pointerOverElement;
-    public float pixelScale = 1.f;
-    GestureDetector gestureDetector;
-    private Gson gson = new Gson();
-    private SharedPreferences sharedPreferences;
+  private static final String LOG_TAG = InputControlsView.class.getName();
+  private ArrayList<AbstractControlElement> controlElements = new ArrayList<>();
+  boolean isEditMode = false;
+  AbstractControlElement selectedElement;
+  AbstractControlElement pointerOverElement;
+  public float pixelScale = 1.f;
+  GestureDetector gestureDetector;
+  private Gson gson = new Gson();
+  private SharedPreferences sharedPreferences;
+  private Boolean isGamepadConnected = null;
+  private InputMode currentInputMode = InputMode.ALL;
+  private final Context context;
+  private String controlsSavePath = null;
 
     private ElementSettingsController elementSettingsController;
 
-
     public InputControlsView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        this.context = context;
+        //this.currentInputMode = InputMode.ALL;
         this.sharedPreferences = context.getSharedPreferences(C.shprefs.NAME, MODE_PRIVATE);
 
         this.gestureDetector = new GestureDetector(context, new GestureDetector.OnGestureListener() {
@@ -85,20 +97,27 @@ public class InputControlsView extends View {
     }
 
     private void showAddElementDialog() {
-        ArrayAdapter<AbstractControlElement.Type> adapter = new ArrayAdapter<>(this.getContext(),
-                android.R.layout.simple_spinner_dropdown_item, AbstractControlElement.Type.values());
+      java.util.List<AbstractControlElement.Type> palette = new java.util.ArrayList<>();
+      for (AbstractControlElement.Type t : AbstractControlElement.Type.values()) {
+        if (isCreatable(t)) palette.add(t);
+      }
 
-        new MaterialAlertDialogBuilder(this.getContext())
-                .setTitle(this.getContext().getString(R.string.controls_editor_add_element))
-                .setAdapter(adapter, (dialog, i) -> {
-                    AbstractControlElement.Type type = adapter.getItem(i);
-                    if (type == null) return;
-                    ControlElementDescription description = ControlElementDescription.getDefaultForType(type);
-                    controlElements.add(AbstractControlElement.fromDescription(this, description));
-                    invalidate();
-                })
-                .create()
-                .show();
+      ArrayAdapter<AbstractControlElement.Type> adapter =
+        new ArrayAdapter<>(this.getContext(),
+          android.R.layout.simple_spinner_dropdown_item,
+          palette);
+
+      new MaterialAlertDialogBuilder(this.getContext())
+        .setTitle(this.getContext().getString(R.string.controls_editor_add_element))
+        .setAdapter(adapter, (dialog, i) -> {
+          AbstractControlElement.Type type = adapter.getItem(i);
+          if (type == null) return;
+          ControlElementDescription description = ControlElementDescription.getDefaultForType(type);
+          controlElements.add(AbstractControlElement.fromDescription(this, description));
+          invalidate();
+        })
+        .create()
+        .show();
     }
 
     @Override
@@ -117,14 +136,26 @@ public class InputControlsView extends View {
                 this.controlElements.set(i, controlElement);
             }
         }
-
+        if (currentInputMode != null) {
+            applyInputMode(currentInputMode);
+        }
     }
 
     @Override
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
+        //System.out.println("[mixed b] onDraw called");
 
         for (AbstractControlElement controlElement : controlElements) {
+            boolean visible = controlElement.isVisible();
+            if (!controlElement.isVisible()) {
+              continue; // skip invisible elements
+            }
+            AbstractControlElement.InputType type = controlElement.getInputType();
+            if (controlElement instanceof ButtonControlElement) {
+                ButtonControlElement button = (ButtonControlElement) controlElement;
+                //System.out.println("[mixed b] drawing button: " + button.getText()+ ", type: " + type+", visible "+visible);
+            }
             controlElement.draw(canvas);
         }
     }
@@ -153,6 +184,7 @@ public class InputControlsView extends View {
             return gestureDetector.onTouchEvent(e);
         } else {
             for (AbstractControlElement controlElement : controlElements) {
+                if (!controlElement.isVisible()) continue;
                 if (controlElement.handleMotionEvent(e)) {
                     return true;
                 }
@@ -206,28 +238,51 @@ public class InputControlsView extends View {
     }
 
     public void loadControlElementsFromDisk() {
-        String json = this.sharedPreferences.getString(C.shprefs.keys.INPUT_CONTROLS, null);
-        if (json == null) {
-            try (InputStream is = getContext().getAssets().open(C.assets.DEFAULT_CONTROLS)) {
-                byte[] bytes = new byte[is.available()];
-                is.read(bytes);
-                json = new String(bytes, Charset.defaultCharset());
-            } catch (IOException e) {
-                Log.d(LOG_TAG, e.toString());
-                return;
-            }
+      String json = null;
+
+      // 1) Пытаемся прочитать controls.json из игровой папки
+      File cfgFile = getControlsConfigFileInGameDir();
+      if (cfgFile != null && cfgFile.isFile()) {
+        try (FileInputStream fis = new FileInputStream(cfgFile)) {
+          byte[] bytes = new byte[(int) cfgFile.length()];
+          int read = fis.read(bytes);
+          if (read > 0) {
+            json = new String(bytes, Charset.defaultCharset());
+          }
+        } catch (IOException e) {
+          Log.d(LOG_TAG, "Failed to read controls config from file: " + e);
         }
-        Type type = new TypeToken<ArrayList<ControlElementDescription>>() {
-        }.getType();
-        ArrayList<ControlElementDescription> savedDescriptions = gson.fromJson(json, type);
-        if (savedDescriptions != null) {
-            for (ControlElementDescription description : savedDescriptions) {
-                this.controlElements.add(AbstractControlElement.fromDescription(this, description));
-            }
+      }
+
+      // 2) Если файла нет — пробуем SharedPreferences
+      if (json == null) {
+        json = this.sharedPreferences.getString(C.shprefs.keys.INPUT_CONTROLS, null);
+      }
+
+      // 3) Если и в SharedPreferences пусто — берём дефолт из assets
+      if (json == null) {
+        try (InputStream is = getContext().getAssets().open(C.assets.DEFAULT_CONTROLS)) {
+          byte[] bytes = new byte[is.available()];
+          is.read(bytes);
+          json = new String(bytes, Charset.defaultCharset());
+        } catch (IOException e) {
+          Log.d(LOG_TAG, e.toString());
+          return;
         }
+      }
+
+      if (json == null) return;
+
+      Type type = new TypeToken<ArrayList<ControlElementDescription>>() {}.getType();
+      ArrayList<ControlElementDescription> savedDescriptions = gson.fromJson(json, type);
+      if (savedDescriptions != null) {
+        for (ControlElementDescription description : savedDescriptions) {
+          this.controlElements.add(AbstractControlElement.fromDescription(this, description));
+        }
+      }
     }
 
-    public void saveControlElementsToDisk() {
+  public void saveControlElementsToDisk() {
         ArrayList<ControlElementDescription> descriptions = new ArrayList<>();
         for (AbstractControlElement element : controlElements) {
             descriptions.add(element.describe());
@@ -239,6 +294,22 @@ public class InputControlsView extends View {
                 .edit()
                 .putString(C.shprefs.keys.INPUT_CONTROLS, json)
                 .apply();
+
+      File cfgFile = getControlsConfigFileInGameDir();
+      if (cfgFile != null) {
+        try {
+          File parent = cfgFile.getParentFile();
+          if (parent != null && !parent.exists()) {
+            // mkdirs() на всякий случай, вдруг Zomboid папки не было
+            parent.mkdirs();
+          }
+          try (FileOutputStream fos = new FileOutputStream(cfgFile, false)) {
+            fos.write(json.getBytes(Charset.defaultCharset()));
+          }
+        } catch (IOException e) {
+          Log.d(LOG_TAG, "Failed to write controls config to file: " + e);
+        }
+      }
     }
 
     public void setElementSettingsController(ElementSettingsController elementSettingsController) {
@@ -250,13 +321,132 @@ public class InputControlsView extends View {
         super.onDetachedFromWindow();
     }
 
-    public abstract static class ElementSettingsController {
-        protected boolean fromLeft;
+  public abstract static class ElementSettingsController {
+    protected boolean fromLeft;
+    protected abstract void open();
+    protected abstract void close();
+    protected abstract void hide();
+  }
 
-        protected abstract void open();
+  public void applyInputMode(InputMode mode) {
+      if (mode == null) {return;}
+      boolean changed = currentInputMode != mode;
+      this.currentInputMode = mode;
+      //System.out.println("[mixed b] mode "+mode+", currentInputMode "+currentInputMode);
+      for (AbstractControlElement element : controlElements) {
+          boolean visible;
+          switch (mode) {
+            case MNK:
+              visible = element.getInputType() == AbstractControlElement.InputType.MNK;
+              break;
+            case GAMEPAD:
+              visible = element.getInputType() == AbstractControlElement.InputType.GAMEPAD;
+              break;
+            case ALL:
+              visible = true;
+              break;
+            default:
+              visible = false;
+          }
+          //System.out.println("[mixed b] applyInputType "+element.getInputType()+", visible "+visible);
+          element.setVisible(visible);
+      }
 
-        protected abstract void close();
+      if (changed) {
+          invalidate();
+      }
+  }
 
-        protected abstract void hide();
+    public void setGamepadConnected(boolean connected) {
+        //if (isGamepadConnected != null && isGamepadConnected View.Visible== connected) return;
+        isGamepadConnected = connected;
+        if (getWindowToken() != null && isShown()) {
+          applyInputMode(connected ? InputMode.MNK : InputMode.ALL);
+        }
     }
+
+    public void showTextInputOverlay() {
+      TextInputOverlayView keyboard = new TextInputOverlayView(getContext());
+
+      keyboard.setOnTextInputListener(text -> {
+        //chatInputField.append(text); // или другой обработчик
+      });
+
+      keyboard.attachTo(this); // если нужно использовать BaseInputConnection
+
+      ViewGroup parent = (ViewGroup) getParent();
+      if (parent == null) {
+        Toast.makeText(context, "InputControlsView, Parent view is null — cannot show keyboard", Toast.LENGTH_SHORT).show();
+        System.out.println("[keyboard] InputControlsView, Parent view is null — cannot show keyboard");
+        return;
+      }
+
+      FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+        FrameLayout.LayoutParams.MATCH_PARENT,
+        FrameLayout.LayoutParams.WRAP_CONTENT
+      );
+      params.gravity = Gravity.BOTTOM;
+
+      parent.addView(keyboard, params);
+    }
+
+
+    public enum InputMode {
+        MNK,
+        GAMEPAD,
+        ALL
+    }
+
+    public InputMode getCurrentInputMode() {
+        return currentInputMode;
+    }
+
+    private static boolean isCreatable(AbstractControlElement.Type t) {
+      switch (t) {
+        case DPAD_UP:
+        case DPAD_RIGHT:
+        case DPAD_DOWN:
+        case DPAD_LEFT:
+          return false;
+        default:
+          return true;  // BUTTON_RECT, BUTTON_CIRCLE, DPAD, STICK
+      }
+    }
+
+    /**
+     * <home>/instances/<instance>/game/controls/controls.json
+     */
+    @Nullable
+    private File getControlsConfigFileInGameDir() {
+      String homePath = AppStorage.requireSingleton().getHomePath();
+      if (homePath == null || homePath.isEmpty()) {
+        return null;
+      }
+
+      File instancesRoot = new File(homePath, "instances");
+      if (!instancesRoot.isDirectory()) {
+        return null;
+      }
+
+      File[] instanceDirs = instancesRoot.listFiles();
+      if (instanceDirs == null || instanceDirs.length == 0) {
+        return null;
+      }
+
+      // <inst>/game/controls/controls.json
+      for (File inst : instanceDirs) {
+        if (!inst.isDirectory()) continue;
+
+        File gameDir = new File(inst, "game");
+        File zomboidDir = new File(gameDir, "controls");
+        File cfgFile = new File(zomboidDir, "controls.json");
+
+        // Просто лог, чтобы ты видела, куда оно целится
+        Log.d(LOG_TAG, "Controls config candidate path: " + cfgFile.getAbsolutePath());
+        return cfgFile;
+      }
+
+      return null;
+    }
+
 }

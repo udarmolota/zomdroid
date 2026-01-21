@@ -3,9 +3,12 @@ package com.zomdroid;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.view.Surface;
+import android.util.Log;
 
 import com.zomdroid.input.InputNativeInterface;
+import com.zomdroid.input.InputControlsView;
 import com.zomdroid.game.GameInstance;
+import com.zomdroid.BuildConfig;
 
 import java.util.ArrayList;
 
@@ -26,14 +29,13 @@ public class GameLauncher {
         Os.setenv("BOX64_DYNAREC", "0", false);*/
 
         //Os.setenv("LIBGL_NOERROR", "1", false);
-/*        Os.setenv("LIBGL_LOGSHADERERROR", "1", false);
-        Os.setenv("ZINK_DEBUG", "spirv", false);*/
+        //Os.setenv("LIBGL_LOGSHADERERROR", "1", false);
+        //Os.setenv("ZINK_DEBUG", "spirv", false);
 
         Os.setenv("LIBGL_MIPMAP", "1", false);
 
         Os.setenv("BOX64_LOG", "1", false);
         Os.setenv("BOX64_SHOWBT", "1", false);
-
         Os.setenv("BOX64_LD_LIBRARY_PATH", gameInstance.getLdLibraryPathForEmulation(), false);
 
         Os.setenv("GALLIUM_DRIVER", "zink", false);
@@ -48,37 +50,79 @@ public class GameLauncher {
                     Os.setenv("ZOMDROID_VULKAN_DRIVER_NAME", vulkanDriverName, false);
                 }
                 break;
+            /*case NG_GL4ES: {
+              Os.unsetenv("GALLIUM_DRIVER");
+
+              Os.setenv("LIBGL_NOBANNER", "1", true);
+              Os.setenv("LIBGL_SILENTSTUB", "0", true);
+              Os.setenv("LIBGL_STACKTRACE", "1", true);
+              Os.setenv("LIBGL_LOGSHADERERROR", "1", true);
+              Os.setenv("LIBGL_ES", "2", true);
+              Os.setenv("LIBGL_NODEPTHTEX", "1", true);
+              Os.setenv("LIBGL_FB", "2", true);
+              Os.setenv("LIBGL_FBONOALPHA", "1", true);
+              //Os.setenv("LIBGL_GL", "21", true);
+                
+              Os.setenv("ZOMDROID_GLES_MAJOR", "2", true);
+              Os.setenv("ZOMDROID_GLES_MINOR", "0", true);
+              break;
+            }*/
+            default: {
+                Os.setenv("ZOMDROID_GLES_MAJOR", "2", false);
+                Os.setenv("ZOMDROID_GLES_MINOR", "1", false);
+                break;
+            }
         }
 
         Os.setenv("ZOMDROID_AUDIO_API", LauncherPreferences.requireSingleton().getAudioAPI().name(), false);
 
-        Os.setenv("ZOMDROID_GLES_MAJOR", "2", false);
-        Os.setenv("ZOMDROID_GLES_MINOR", "1", false);
-
-        // for debugging GL calls, only supported on GL ES 3.2+ with GL_KHR_debug extension present
-/*        Os.setenv("ZOMDROID_DEBUG_GL", "1", false);
-        Os.setenv("LIBGL_GLES", "libGLESv3.so", false);
-        Os.setenv("ZOMDROID_GLES_MAJOR", "3", true);
-        Os.setenv("ZOMDROID_GLES_MINOR", "2", true);*/
-
+        if (BuildConfig.DEBUG) {
+                // for debugging GL calls, only supported on GL ES 3.2+ with GL_KHR_debug extension present
+                /*Os.setenv("ZOMDROID_DEBUG_GL", "1", false);
+                Os.setenv("ZOMDROID_DEBUG_GL", "1", false);
+                Os.setenv("LIBGL_GLES", "libGLESv3.so", false);
+                Os.setenv("ZOMDROID_GLES_MAJOR", "3", true);
+                Os.setenv("ZOMDROID_GLES_MINOR", "2", true);*/
+        }
         initZomdroidWindow();
         InputNativeInterface.sendJoystickConnected();
 
         ArrayList<String> jvmArgs = gameInstance.getJvmArgsAsList();
+        String rawArgs = LauncherPreferences.requireSingleton().getJvmArgs();
+
+        if (rawArgs != null && !rawArgs.trim().isEmpty()) {
+                String[] splitArgs = rawArgs.trim().split("\\s+");
+                for (String arg : splitArgs) {
+                        jvmArgs.add(arg);
+                }
+        }
+
         jvmArgs.add("-Dorg.lwjgl.opengl.libname=" + LauncherPreferences.requireSingleton().getRenderer().libName);
         jvmArgs.add("-Dzomdroid.renderer=" + LauncherPreferences.requireSingleton().getRenderer().name());
-        //jvmArgs.add("-XX:+PrintFlagsFinal"); // for debugging
+
+        if (BuildConfig.DEBUG) {
+            jvmArgs.add("-Dorg.lwjgl.util.Debug=true"); //print LWJGL library errors
+            jvmArgs.add("-Dorg.lwjgl.util.DebugLoader=true");
+            jvmArgs.add("-XX:+PrintFlagsFinal"); // for debugging
+        }
+
         jvmArgs.add("-XX:ErrorFile=/dev/stdout"); // print jvm crash report to stdout for now
 
         ArrayList<String> args = gameInstance.getArgsAsList();
-/*        args.add("-debug");
-        args.add("-debuglog=Shader");*/
+        if (BuildConfig.DEBUG) {
+            args.add("-debug");
+            args.add("-debuglog=Shader");
+            Log.i("Zomdroid", "JVM ARGS: " + jvmArgs);
+            Log.i("Zomdroid", "GAME ARGS: " + args);            
+        }
 
         String javaHomePath = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.JRE;
         String ldLibraryPath = AppStorage.requireSingleton().getLibraryPath() + ":/system/lib64:"
                 + javaHomePath + "/lib:" + javaHomePath + "/lib/server:" + gameInstance.getJavaLibraryPath();
         GameLauncher.startGame(gameInstance.getGamePath(), ldLibraryPath, jvmArgs.toArray(new String[0]),
                 gameInstance.getMainClassName(), args.toArray(new String[0]));
+
+        Log.d("zomdroid-main", ldLibraryPath);
     }
 
 

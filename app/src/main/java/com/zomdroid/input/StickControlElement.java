@@ -11,6 +11,7 @@ import android.view.MotionEvent;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class StickControlElement extends AbstractControlElement {
@@ -22,11 +23,15 @@ public class StickControlElement extends AbstractControlElement {
     public StickControlElement(InputControlsView parentView, ControlElementDescription elementDescription) {
         super(parentView, elementDescription);
         this.drawable = new StickControlDrawable(parentView, elementDescription);
-        this.bindings.addAll(Arrays.asList(elementDescription.bindings));
+        this.bindings.clear();
+        if (elementDescription.bindings != null) {
+          this.bindings.addAll(Arrays.asList(elementDescription.bindings));
+        }
     }
 
     @Override
     public void setInputType(InputType inputType) {
+        var oldBindings = new ArrayList<>(this.bindings);
         clearBindings();
         this.inputType = inputType;
         if (this.inputType == InputType.MNK) {
@@ -35,7 +40,14 @@ public class StickControlElement extends AbstractControlElement {
             this.bindings.add(GLFWBinding.KEY_D);
             this.bindings.add(GLFWBinding.KEY_S);
         } else if (this.inputType == InputType.GAMEPAD) {
-            this.bindings.add(GLFWBinding.LEFT_JOYSTICK);
+          GLFWBinding stick = GLFWBinding.LEFT_JOYSTICK;
+          if (!oldBindings.isEmpty()) {
+            GLFWBinding b = oldBindings.get(0);
+            if (b == GLFWBinding.LEFT_JOYSTICK || b == GLFWBinding.RIGHT_JOYSTICK) {
+              stick = b;
+            }
+          }
+          this.bindings.add(stick);
         }
     }
 
@@ -231,7 +243,8 @@ public class StickControlElement extends AbstractControlElement {
                 this.drawable.scale, Type.STICK,
                 this.bindings.toArray(new GLFWBinding[0]), null, this.drawable.color,
                 this.drawable.alpha,
-                this.inputType, ControlElementDescription.Icon.NO_ICON);
+                this.inputType, ControlElementDescription.Icon.NO_ICON,
+                false);
     }
 
     public class StickControlDrawable {
@@ -265,7 +278,41 @@ public class StickControlElement extends AbstractControlElement {
         }
 
         public void draw(@NonNull Canvas canvas) {
+            // --- Outer outline ---
+            Paint op = outerShapeDrawable.getPaint();
+            int oc = op.getColor();
+            int oa = op.getAlpha();
+            float os = op.getStrokeWidth();
+        
+            op.setColor(android.graphics.Color.BLACK);
+            op.setAlpha(120);
+            op.setStrokeWidth(os + 5f * parentView.pixelScale);
             outerShapeDrawable.draw(canvas);
+        
+            op.setColor(oc);
+            op.setAlpha(oa);
+            op.setStrokeWidth(os);
+            outerShapeDrawable.draw(canvas);
+        
+            // --- Inner: outline + fill ---
+            // 1) inner outline (stroke around fill)
+            Paint ip = innerShapeDrawable.getPaint();
+            int ic = ip.getColor();
+            int ia = ip.getAlpha();
+            Paint.Style istyle = ip.getStyle();
+            float iStroke = ip.getStrokeWidth();
+        
+            ip.setStyle(Paint.Style.STROKE);
+            ip.setColor(android.graphics.Color.BLACK);
+            ip.setAlpha(140);
+            ip.setStrokeWidth(2f * parentView.pixelScale);
+            innerShapeDrawable.draw(canvas);
+        
+            // 2) inner fill (restore)
+            ip.setStyle(istyle); // should be FILL in your ctor
+            ip.setColor(ic);
+            ip.setAlpha(ia);
+            ip.setStrokeWidth(iStroke);
             innerShapeDrawable.draw(canvas);
         }
 

@@ -18,25 +18,40 @@ public class DpadControlElement extends AbstractControlElement {
     private final DpadControlDrawable drawable;
     private int pointerId = -1;
     private static final float DPAD_DEAD_ZONE = 0.3f;
+    private final AbstractControlElement.Type type;
+    private static final int OUTLINE_ALPHA = 120;
+    private static final float OUTLINE_EXTRA_PX = 5f;
 
     public DpadControlElement(InputControlsView parentView, ControlElementDescription elementDescription) {
         super(parentView, elementDescription);
         this.drawable = new DpadControlDrawable(parentView, elementDescription);
         this.bindings.addAll(Arrays.asList(elementDescription.bindings));
+        this.type = elementDescription.type;
+
+        if (this.type != Type.DPAD) {
+          throw new IllegalArgumentException("DpadControlElement must be created with Type.DPAD");
+        }
+
+        setInputType(elementDescription.inputType);
     }
 
     @Override
     public void setInputType(InputType inputType) {
-        clearBindings();
-        this.inputType = inputType;
+      this.inputType = inputType;
 
-        if (this.inputType == InputType.MNK) {
-            this.bindings.add(GLFWBinding.KEY_A);
-            this.bindings.add(GLFWBinding.KEY_W);
-            this.bindings.add(GLFWBinding.KEY_D);
-            this.bindings.add(GLFWBinding.KEY_S);
+      if (this.inputType == InputType.MNK) {
+        // Композитный dpad в MNK должен иметь 4 бинда (LEFT, UP, RIGHT, DOWN)
+        // Если пришло не 4 — выставим дефолт WASD.
+        if (this.bindings.size() != 4) {
+          clearBindings();
+          this.bindings.add(GLFWBinding.KEY_A); // LEFT
+          this.bindings.add(GLFWBinding.KEY_W); // UP
+          this.bindings.add(GLFWBinding.KEY_D); // RIGHT
+          this.bindings.add(GLFWBinding.KEY_S); // DOWN
         }
+      }
     }
+
 
     private void dispatchEvent(float x, float y, boolean isPress) {
         int state = 0;
@@ -44,8 +59,8 @@ public class DpadControlElement extends AbstractControlElement {
             float dx = x - this.drawable.centerX;
             float dy = y - this.drawable.centerY;
             float r = this.drawable.size / 2;
-            float nx = Math.clamp(dx / r, -1.f, 1.f);
-            float ny = Math.clamp(dy / r, -1.f, 1.f);
+            float nx = clamp(dx / r, -1.f, 1.f);
+            float ny = clamp(dy / r, -1.f, 1.f);
             if (ny < -DPAD_DEAD_ZONE) state |= 0x1;
             if (nx > DPAD_DEAD_ZONE) state |= 0x2;
             if (ny > DPAD_DEAD_ZONE) state |= 0x4;
@@ -64,39 +79,46 @@ public class DpadControlElement extends AbstractControlElement {
 
     @Override
     public boolean handleMotionEvent(MotionEvent e) {
-        int action = e.getActionMasked();
-        int actionIndex = e.getActionIndex();
-        int pointerId = e.getPointerId(actionIndex);
-        switch (action) {
-            case MotionEvent.ACTION_DOWN:
-            case MotionEvent.ACTION_POINTER_DOWN: {
-                float x = e.getX(actionIndex);
-                float y = e.getY(actionIndex);
-                if (!this.drawable.isPointOver(x, y)) return false;
-                this.pointerId = pointerId;
-                this.dispatchEvent(x, y, true);
-                return true;
-            }
-            case MotionEvent.ACTION_MOVE: {
-                if (this.pointerId < 0) return false;
-                int pointerIndex = e.findPointerIndex(this.pointerId);
-                if (pointerIndex < 0) {
-                    this.pointerId = -1;
-                    return false;
-                }
-                float x = e.getX(pointerIndex);
-                float y = e.getY(pointerIndex);
-                this.dispatchEvent(x, y, true);
-                return false;
-            }
-            case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_POINTER_UP:
-                if (pointerId != this.pointerId) return false;
-                this.pointerId = -1;
-                this.dispatchEvent(0, 0, false);
-                return true;
+      int action = e.getActionMasked();
+      int actionIndex = e.getActionIndex();
+      int pid = e.getPointerId(actionIndex);
+
+      switch (action) {
+        case MotionEvent.ACTION_DOWN:
+        case MotionEvent.ACTION_POINTER_DOWN: {
+          float x = e.getX(actionIndex);
+          float y = e.getY(actionIndex);
+          if (!this.drawable.isPointOver(x, y)) return false;
+          this.pointerId = pid;
+          this.dispatchEvent(x, y, true);
+          return true;
         }
-        return false;
+        case MotionEvent.ACTION_MOVE: {
+          if (this.pointerId < 0) return false;
+          int idx = e.findPointerIndex(this.pointerId);
+          if (idx < 0) { this.pointerId = -1; return false; }
+          float x = e.getX(idx);
+          float y = e.getY(idx);
+          this.dispatchEvent(x, y, true);
+          return true;
+        }
+        case MotionEvent.ACTION_UP:
+        case MotionEvent.ACTION_POINTER_UP: {
+          if (pid != this.pointerId) return false;
+          this.pointerId = -1;
+          this.dispatchEvent(0, 0, false);
+          return true;
+        }
+        case MotionEvent.ACTION_CANCEL: {
+          if (this.pointerId != -1) {
+            this.pointerId = -1;
+            this.dispatchEvent(0, 0, false);
+            return true;
+          }
+          return false;
+        }
+      }
+      return false;
     }
 
     @Override
@@ -127,7 +149,7 @@ public class DpadControlElement extends AbstractControlElement {
 
     @Override
     public void setScale(float scale) {
-        scale = Math.clamp(scale, MIN_SCALE, MAX_SCALE);
+        scale = clamp(scale, MIN_SCALE, MAX_SCALE);
         this.drawable.setScale(scale);
         this.parentView.invalidate();
     }
@@ -203,10 +225,12 @@ public class DpadControlElement extends AbstractControlElement {
         return new ControlElementDescription(
                 this.drawable.centerX / this.parentView.getWidth(),
                 this.drawable.centerY / this.parentView.getHeight(),
-                this.drawable.scale, Type.DPAD,
+                this.drawable.scale,
+                //Type.DPAD,
+                this.type,
                 this.bindings.toArray(new GLFWBinding[0]), null, this.drawable.color,
                 this.drawable.alpha,
-                this.inputType, ControlElementDescription.Icon.NO_ICON);
+                this.inputType, ControlElementDescription.Icon.NO_ICON, false);
     }
 
     public class DpadControlDrawable {
@@ -271,6 +295,20 @@ public class DpadControlElement extends AbstractControlElement {
         }
 
         public void draw(@NonNull Canvas canvas) {
+            // Outline
+            int oldColor = this.paint.getColor();
+            int oldAlpha = this.paint.getAlpha();
+            float oldStroke = this.paint.getStrokeWidth();
+        
+            this.paint.setColor(android.graphics.Color.BLACK);
+            this.paint.setAlpha(OUTLINE_ALPHA);
+            this.paint.setStrokeWidth(oldStroke + OUTLINE_EXTRA_PX * parentView.pixelScale);
+            canvas.drawPath(this.path, this.paint);
+        
+            // Normal
+            this.paint.setColor(oldColor);
+            this.paint.setAlpha(oldAlpha);
+            this.paint.setStrokeWidth(oldStroke);
             canvas.drawPath(this.path, this.paint);
         }
 
@@ -319,5 +357,9 @@ public class DpadControlElement extends AbstractControlElement {
         public void moveCenterPosition(float dx, float dy) {
             setCenterPosition(this.centerX + dx, this.centerY + dy);
         }
+    }
+
+    private static float clamp(float v, float lo, float hi) {
+        return (v < lo) ? lo : (v > hi ? hi : v);
     }
 }

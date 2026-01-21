@@ -7,11 +7,37 @@
     android:padding="16dp">
 
     <TextView
+        android:id="@+id/settings_render_hint_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/settings_render_hint"
+        android:textSize="12sp"
+        android:textColor="?android:attr/textColorSecondary"
+        android:paddingBottom="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/settings_render_hint_help_ib"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <ImageButton
+        style="@style/AppTheme.ImageButton"
+        android:id="@+id/settings_render_hint_help_ib"
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:layout_marginStart="6dp"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
+        android:src="@drawable/mt_icon_help"
+
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/settings_render_hint_tv"/>
+
+    <TextView
         android:id="@+id/settings_renderer_tv"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/settings_render_hint_tv"
+        android:layout_marginTop="12dp"
         android:text="@string/settings_renderer"/>
 
     <Spinner
@@ -77,5 +103,38 @@
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/settings_audio_api_tv"/>
+
+    <TextView
+        android:id="@+id/settings_jargs_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="JVM arguments"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/settings_audio_api_s" />
+
+    <ImageButton
+        android:id="@+id/settings_jargs_info"
+        android:scaleType="centerInside"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_marginStart="8dp"
+        android:src="@drawable/mt_icon_help"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="About"
+        app:layout_constraintStart_toEndOf="@id/settings_jargs_tv"
+        app:layout_constraintTop_toTopOf="@id/settings_jargs_tv"
+        app:layout_constraintBottom_toBottomOf="@id/settings_jargs_tv" />
+
+    <EditText
+        android:id="@+id/settings_jargs_et"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="-Xmx3G -Xms2G -Xmn1G"
+        android:inputType="textMultiLine|textNoSuggestions"
+        android:lines="2"
+        android:maxLines="3"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/settings_jargs_tv" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

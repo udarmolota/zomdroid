@@ -24,6 +24,8 @@ public class C {
         public static final String BUNDLES_LIBS = BUNDLES + "/libs.tar.xz";
         public static final String BUNDLES_JARS = BUNDLES + "/jars.tar";
         public static final String DEFAULT_CONTROLS = "default_controls.json";
+        public static final String BUNDLES_NATIVE_LIBS_41 = BUNDLES + "/libs41.tar";
+        public static final String BUNDLES_NATIVE_LIBS_42 = BUNDLES + "/libs42.tar";
     }
 
     public static class shprefs {

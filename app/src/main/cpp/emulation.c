@@ -400,12 +400,13 @@ static void box64_load_gnu_libc() {
      * box64 will recognize them and replace with wrapped
      * */
 
-    needed_libs_t* needed_libs = new_neededlib(3);
-    needed_libs->names[0] = strdup("libc.so.6"); // This goes first so its symbols are prioritized during search. Is there a better way?
-    needed_libs->names[1] = strdup("_ld-linux-x86-64.so.2");
-    needed_libs->names[2] = strdup("_libc.so.6");
+    needed_libs_t* needed_libs = new_neededlib(4);
+    needed_libs->names[0] = strdup("libpthread_wrapper.so");
+    needed_libs->names[1] = strdup("libc.so.6"); // This goes first so its symbols are prioritized during search. Is there a better way?
+    needed_libs->names[2] = strdup("_ld-linux-x86-64.so.2");
+    needed_libs->names[3] = strdup("_libc.so.6");
     if (AddNeededLib(my_context->maplib, 0, 0, 0, needed_libs, NULL, my_context, thread_get_emu()) != 0) {
-        LOGE("Failed to load needed libraries in box64");
+        LOGE("[linker] Failed to load needed libraries in box64");
         RemoveNeededLib(my_context->maplib, 0, needed_libs, my_context, thread_get_emu());
         free_neededlib(needed_libs);
         return;

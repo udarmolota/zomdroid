@@ -14,6 +14,7 @@ public class GameInstance {
     public static final String GAME_FILES_DIR_NAME = "game";
 
     private String name;
+    private String buildVersion;
     private String homePath;
     private boolean installationFinished = false;
     private String[] classPath;
@@ -29,6 +30,7 @@ public class GameInstance {
 
     public GameInstance(String name, InstallationPreset preset) throws FileSystemException {
         this.name = name;
+        this.buildVersion = preset.buildVersion;
         makeDirs();
         this.classPath = preset.classPathArray;
         this.extraClassPath = preset.extraJars;
@@ -58,7 +60,10 @@ public class GameInstance {
         return this.name;
     }
 
-    public String getHomePath() {
+  public String getBuildVersion() { return this.buildVersion; }
+
+
+  public String getHomePath() {
         return this.homePath;
     }
 
@@ -86,15 +91,15 @@ public class GameInstance {
         return libsJoiner.toString();
     }
 
-    public ArrayList<String> getJvmArgsAsList() {
+    public ArrayList<String> getJvmArgsAsList() { 
         ArrayList<String> jvmArgsList = new ArrayList<>();
         jvmArgsList.add("-Duser.home=" + this.homePath);
         jvmArgsList.add("-Djava.io.tmpdir=" + AppStorage.requireSingleton().getCachePath());
 
         jvmArgsList.add("-Djava.library.path=" + getJavaLibraryPath() + ":.");
 
-        //jvmArgsList.add("-Dorg.lwjgl.util.Debug=true"); // debug
-
+        jvmArgsList.add("-Dorg.lwjgl.util.Debug=true"); // debug
+        jvmArgsList.add("-Dorg.lwjgl.util.DebugLoader=true"); // debug
         StringJoiner jarsJoiner = new StringJoiner(":");
         for (String path : this.extraClassPath) {
             jarsJoiner.add(AppStorage.requireSingleton().getHomePath() + "/" + path);

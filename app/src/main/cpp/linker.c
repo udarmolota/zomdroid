@@ -3,7 +3,8 @@
 #include <dlfcn.h>
 #include <android/dlext.h>
 #include <malloc.h>
-
+#include <unistd.h>
+#include <pthread.h>
 #include "logger.h"
 #include "emulation.h"
 #include "zomdroid_globals.h"
@@ -20,17 +21,66 @@
 
 #define BUF_SIZE 1024
 
+#define JNI_SIG_CACHE_SIZE 64
+
+typedef struct {
+    char* sym;  // key
+    char* sig;  // value (full method signature)
+} JniSigCacheEntry;
+
+static JniSigCacheEntry g_jni_sig_cache[JNI_SIG_CACHE_SIZE];
+static int g_jni_sig_cache_next = 0;
+static pthread_mutex_t g_jni_sig_cache_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+static const char* jni_sig_cache_get(const char* sym) {
+    const char* result = NULL;
+    pthread_mutex_lock(&g_jni_sig_cache_mutex);
+    for (int i = 0; i < JNI_SIG_CACHE_SIZE; i++) {
+        if (g_jni_sig_cache[i].sym && strcmp(g_jni_sig_cache[i].sym, sym) == 0) {
+            result = g_jni_sig_cache[i].sig;
+            break;
+        }
+    }
+    pthread_mutex_unlock(&g_jni_sig_cache_mutex);
+    return result;
+}
+
+static void jni_sig_cache_put(const char* sym, const char* sig) {
+    if (!sym || !sig) return;
+    // store our own copies, because caller frees its return value
+    char* sym_copy = strdup(sym);
+    char* sig_copy = strdup(sig);
+    if (!sym_copy || !sig_copy) {
+        free(sym_copy);
+        free(sig_copy);
+        return;
+    }
+
+    pthread_mutex_lock(&g_jni_sig_cache_mutex);
+
+    int idx = g_jni_sig_cache_next;
+    g_jni_sig_cache_next = (g_jni_sig_cache_next + 1) % JNI_SIG_CACHE_SIZE;
+
+    free(g_jni_sig_cache[idx].sym);
+    free(g_jni_sig_cache[idx].sig);
+
+    g_jni_sig_cache[idx].sym = sym_copy;
+    g_jni_sig_cache[idx].sig = sig_copy;
+
+    pthread_mutex_unlock(&g_jni_sig_cache_mutex);
+}
+
 static void* (*loader_dlopen)(const char* filename, int flags, const void* caller);
 static void* (*loader_dlsym)(void* handle, const char* symbol, const void* caller);
 
 static void* (*loader_android_dlopen_ext)(const char* filename,
-                                            int flag,
-                                            const android_dlextinfo* extinfo,
-                                            const void* caller_addr);
+                                          int flag,
+                                          const android_dlextinfo* extinfo,
+                                          const void* caller_addr);
 static void* vulkan_driver_handle;
 static void* vulkan_loader_handle;
 
-static EmulatedLib jni_libs[] = {{.name = "PZClipper64"}, {.name = "PZBullet64"}, {.name = "PZBulletNoOpenGL64"}, {.name = "Lighting64"}, {.name = "PZPathFind64"}, {.name = "PZPopMan64"}, {.name = "fmodintegration64"}, { .name = "zomdroidtest"} };
+static EmulatedLib jni_libs[] = {{.name = "PZClipper64"}, {.name = "PZBullet64"}, {.name = "PZBulletNoOpenGL64"}, {.name = "Lighting64"}, {.name = "PZPathFind64"}, {.name = "PZPopMan64"}, {.name = "fmodintegration64"}, { .name = "zomdroidtest"}, { .name = "RakNet64"}, { .name = "ZNetNoSteam"} };
 static int jni_lib_count = sizeof (jni_libs) / sizeof (EmulatedLib);
 
 
@@ -132,6 +182,11 @@ int zomdroid_linker_init() {
 }*/
 
 static void parse_jni_sym_name(const char* sym_name, char** class_name, char** method_name, char** method_sig_short) {
+    // Always initialize outputs, so caller can safely free() them even on failure.
+    *class_name = NULL;
+    *method_name = NULL;
+    *method_sig_short = NULL;
+
     LOGV("Parsing %s", sym_name);
 
     char buf[BUF_SIZE];
@@ -146,21 +201,22 @@ static void parse_jni_sym_name(const char* sym_name, char** class_name, char** m
     int i = 0;
     int sig = 0;
     int method = 0;
+
     while (*sym_name != '\0') {
         if (i + 1 >= BUF_SIZE) {
             LOGE("Class + method name string is more than %d characters long", BUF_SIZE);
             return;
         }
+
         switch (*sym_name) {
             case '_':
                 sym_name++;
                 switch (*sym_name) {
                     case '0':
-                        LOGE("Unexpected _0");
+                    LOGE("Unexpected _0");
                         return;
                     case '1':
-                        buf[i] = '_';
-                        i++;
+                        buf[i++] = '_';
                         sym_name++;
                         break;
                     case '2':
@@ -168,8 +224,7 @@ static void parse_jni_sym_name(const char* sym_name, char** class_name, char** m
                             LOGE("Unexpected _2 not in signature");
                             return;
                         }
-                        buf[i] = ';';
-                        i++;
+                        buf[i++] = ';';
                         sym_name++;
                         break;
                     case '3':
@@ -177,14 +232,12 @@ static void parse_jni_sym_name(const char* sym_name, char** class_name, char** m
                             LOGE("Unexpected _3 not in signature");
                             return;
                         }
-                        buf[i] = '[';
-                        i++;
+                        buf[i++] = '[';
                         sym_name++;
                         break;
                     case '_':
                         sig = i + 1;
-                        buf[i] = '\0';
-                        i++;
+                        buf[i++] = '\0';
                         sym_name++;
                         break;
                     default:
@@ -199,36 +252,58 @@ static void parse_jni_sym_name(const char* sym_name, char** class_name, char** m
                         break;
                 }
                 break;
+
             default:
-                buf[i] = *sym_name;
-                i++;
+                buf[i++] = *sym_name;
                 sym_name++;
                 break;
         }
     }
+
     buf[i++] = '\0';
+
     if (!method) {
         LOGE("JNI name doesn't contain method name");
         return;
     }
-    *class_name = malloc(method);
+
+    // class_name is everything before "method" index
+    *class_name = (char*)malloc((size_t)method);
+    if (!*class_name) {
+        LOGE("malloc failed for class_name");
+        return;
+    }
     strcpy(*class_name, buf);
 
-    if (sig) {
-        *method_name = malloc(sig - method);
-    } else {
-        *method_name = malloc(i - method);
+    // method_name starts at buf[method], ends at (sig-1) if signature exists, otherwise end of buf
+    int method_name_len = sig ? (sig - method) : (i - method);
+    *method_name = (char*)malloc((size_t)method_name_len);
+    if (!*method_name) {
+        LOGE("malloc failed for method_name");
+        free(*class_name);
+        *class_name = NULL;
+        return;
     }
     strcpy(*method_name, &buf[method]);
 
+    // signature short is optional
     if (sig) {
-        *method_sig_short = calloc(i - sig + 2, sizeof (char));
+        size_t short_len = (size_t)(i - sig + 2); // + "(" + ")" + '\0' already accounted in original logic
+        *method_sig_short = (char*)calloc(short_len, sizeof(char));
+        if (!*method_sig_short) {
+            LOGE("calloc failed for method_sig_short");
+            // class_name and method_name remain valid; caller may still use them.
+            return;
+        }
         strcat(*method_sig_short, "(");
         strcat(*method_sig_short, &buf[sig]);
         strcat(*method_sig_short, ")");
     }
 
-    LOGV("className=%s methodName=%s methodSignatureShort=%s", *class_name, *method_name, (*method_sig_short == NULL) ? "<null>" : *method_sig_short);
+    LOGV("className=%s methodName=%s methodSignatureShort=%s",
+         *class_name,
+         *method_name,
+         (*method_sig_short == NULL) ? "<null>" : *method_sig_short);
 }
 
 static int method_signature_to_types(char* sig, char** arg_types, char* return_type) {
@@ -239,7 +314,8 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
 
     sig++; // skip (
 
-    char array = false;
+    //char array = false;
+    char array = 0;
 
     while(*sig != ')') {
         if (i + 1 >= BUF_SIZE) {
@@ -252,12 +328,12 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
         }
         switch (*sig) {
             case '\0':
-                LOGE("Encountered end of string before )");
+            LOGE("Encountered end of string before )");
                 return -1;
             case 'B': // jbyte
                 if (array) {
                     buf[i++] = 'p';
-                    array = false;
+                    array = 0;
                     break;
                 }
                 buf[i++] = 'c';
@@ -265,7 +341,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
             case 'C': // jchar
                 if (array) {
                     buf[i++] = 'p';
-                    array = false;
+                    array = 0;
                     break;
                 }
                 buf[i++] = 'W';
@@ -273,7 +349,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
             case 'D': // jdouble
                 if (array) {
                     buf[i++] = 'p';
-                    array = false;
+                    array = 0;
                     break;
                 }
                 buf[i++] = 'd';
@@ -281,7 +357,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
             case 'F': // jfloat
                 if (array) {
                     buf[i++] = 'p';
-                    array = false;
+                    array = 0;
                     break;
                 }
                 buf[i++] = 'f';
@@ -289,7 +365,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
             case 'I': // jint
                 if (array) {
                     buf[i++] = 'p';
-                    array = false;
+                    array = 0;
                     break;
                 }
                 buf[i++] = 'i';
@@ -297,7 +373,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
             case 'J': // jlong
                 if (array) {
                     buf[i++] = 'p';
-                    array = false;
+                    array = 0;
                     break;
                 }
                 buf[i++] = 'I';
@@ -305,7 +381,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
             case 'S': // jshort
                 if (array) {
                     buf[i++] = 'p';
-                    array = false;
+                    array = 0;
                     break;
                 }
                 buf[i++] = 'w';
@@ -313,7 +389,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
             case 'Z': // jboolean
                 if (array) {
                     buf[i++] = 'p';
-                    array = false;
+                    array = 0;
                     break;
                 }
                 buf[i++] = 'C';
@@ -328,10 +404,10 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
                     sig++;
                 }
                 buf[i++] ='p';
-                array = false;
+                array = 0;
                 break;
             default:
-                LOGE("Unexpected character %c", *sig);
+            LOGE("Unexpected character %c", *sig);
                 return -1;
         }
         sig++;
@@ -352,7 +428,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
         case 'B': // jbyte
             if (array) {
                 *return_type = 'p';
-                array = false;
+                array = 0;
                 break;
             }
             *return_type = 'c';
@@ -360,7 +436,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
         case 'C': // jchar
             if (array) {
                 *return_type = 'p';
-                array = false;
+                array = 0;
                 break;
             }
             *return_type = 'W';
@@ -368,7 +444,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
         case 'D': // jdouble
             if (array) {
                 *return_type = 'p';
-                array = false;
+                array = 0;
                 break;
             }
             *return_type = 'd';
@@ -376,7 +452,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
         case 'F': // jfloat
             if (array) {
                 *return_type = 'p';
-                array = false;
+                array = 0;
                 break;
             }
             *return_type = 'f';
@@ -384,7 +460,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
         case 'I': // jint
             if (array) {
                 *return_type = 'p';
-                array = false;
+                array = 0;
                 break;
             }
             *return_type = 'i';
@@ -392,7 +468,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
         case 'J': // jlong
             if (array) {
                 *return_type = 'p';
-                array = false;
+                array = 0;
                 break;
             }
             *return_type = 'I';
@@ -400,7 +476,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
         case 'S': // jshort
             if (array) {
                 *return_type = 'p';
-                array = false;
+                array = 0;
                 break;
             }
             *return_type = 'w';
@@ -408,7 +484,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
         case 'Z': // jboolean
             if (array) {
                 *return_type = 'p';
-                array = false;
+                array = 0;
                 break;
             }
             *return_type = 'C';
@@ -423,13 +499,13 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
                 sig++;
             }
             *return_type = 'p';
-            array = false;
+            array = 0;
             break;
         case 'V': // void - only for return type
             *return_type = 'v';
             break;
         default:
-            LOGE("Unexpected character %c", *sig);
+        LOGE("Unexpected character %c", *sig);
             return -1;
     }
 
@@ -447,6 +523,12 @@ static char* method_signature_from_symbol_name(const char* sym) {
     char* method_name = NULL;
     char* method_sig = NULL; // argument types + return type
     char* method_sig_short = NULL; // only argument types
+    const char* cached = jni_sig_cache_get(sym);
+    if (cached) {
+        // return a fresh copy because caller will free() it
+        return strdup(cached);
+    }
+
     jvmtiError jvmti_err = 0;
     jint class_count = 0;
     jclass* classes = NULL;
@@ -456,6 +538,11 @@ static char* method_signature_from_symbol_name(const char* sym) {
     jmethodID target_method = NULL;
 
     parse_jni_sym_name(sym, &class_name, &method_name, &method_sig_short);
+
+    if (class_name == NULL || method_name == NULL) {
+        LOGE("Failed to parse JNI symbol name: %s", sym);
+        goto FAIL;
+    }
 
     class_sig = calloc(strlen(class_name) + 3, sizeof(char));
     strcat(class_sig, "L");
@@ -528,8 +615,9 @@ static char* method_signature_from_symbol_name(const char* sym) {
     free(class_sig);
     free(method_name);
     free(method_sig_short);
+    jni_sig_cache_put(sym, method_sig);
     return method_sig;
-FAIL:
+    FAIL:
     free(class_name);
     free(class_sig);
     free(method_name);
@@ -541,26 +629,53 @@ FAIL:
 
 __attribute__((visibility("default"), used))
 void *dlopen(const char* filename, int flags) {
-    LOGD("dlopen(name=%s)", filename);
 
     if (filename == NULL) return loader_dlopen(NULL, flags, __builtin_return_address(0));
 
     for (int i = 0; i < jni_lib_count; i++) {
         if (!strstr(filename, jni_libs[i].name)) continue;
 
-        LOGI("Loading %s in box64...", filename);
+        // Already loaded once -> return cached handle.
+        // This prevents repeated AddNeededLib/RunDeferredElfInit and reduces instability.
+        if (jni_libs[i].handle != NULL) {
+            return jni_libs[i].handle;
+        }
+
+        //trying to load native library
+        if (strcmp(jni_libs[i].name, "fmodintegration64") != 0) { //later I should fix that. Java for some reason didn't see classes inside
+            const char* base = strrchr(filename, '/');
+            if (base)
+                base++;
+            else
+                base = filename;
+
+            char android_filename[BUF_SIZE] = {0};
+            snprintf(android_filename, BUF_SIZE, "android/arm64-v8a/%s", base);
+
+            if (access(android_filename, F_OK) == 0) {
+                //LOGD("[linker] Native Android version of %s is found", android_filename);
+                jni_libs[i].handle = loader_dlopen(android_filename, flags, __builtin_return_address(0));
+                jni_libs[i].is_emulated = false;
+                return jni_libs[i].handle;
+            }
+            LOGW("[linker] Native Android version of %s not found, loading through box64...", android_filename);
+        }
+
+        //elsewise loading in box64
+        //LOGE("[linker] Loading %s in box64...", filename);
         needed_libs_t* needed_lib = new_neededlib(1);
         needed_lib->names[0] = strdup(filename);
         int bindnow = (flags & 0x2) ? 1 : 0;
         int islocal = (flags & 0x100) ? 0 : 1;
         // int deepbind = (flags & 0x8) ? 1 : 0;
         if (AddNeededLib(NULL, islocal, bindnow, 1, needed_lib, NULL, my_context, thread_get_emu()) != 0) {
-            LOGE("Failed to load %s in box64", jni_libs[i].name);
+            LOGE("[linker] Failed to load %s in box64", jni_libs[i].name);
             RemoveNeededLib(NULL, islocal, needed_lib, my_context, thread_get_emu());
             free_neededlib(needed_lib);
             return NULL;
         }
         jni_libs[i].handle = needed_lib->libs[0];
+        jni_libs[i].is_emulated = true;
         free_neededlib(needed_lib);
 
         int old_deferredInit = my_context->deferredInit;
@@ -575,7 +690,6 @@ void *dlopen(const char* filename, int flags) {
         my_context->deferredInitList = old_deferredInitList;
         my_context->deferredInitSz = old_deferredInitSz;
         my_context->deferredInitCap = old_deferredInitCap;
-
         return jni_libs[i].handle;
     }
 
@@ -588,55 +702,59 @@ void *dlopen(const char* filename, int flags) {
 
 __attribute__((visibility("default"), used))
 void *dlsym(void *handle, const char *sym_name) {
-    LOGD("dlsym(handle=%p name=%s)", handle, sym_name);
 
     for (int i = 0; i < jni_lib_count; i++) {
         struct library_s* lib = jni_libs[i].handle;
+        EmulatedLib* elib = &jni_libs[i];
         if (sym_name == NULL || handle == NULL || lib != handle) continue;
 
-        struct lib_s* maplib = GetMaplib(lib);
-        uintptr_t box64_sym = FindGlobalSymbol(maplib, sym_name, -1, NULL, 0);
-        if (box64_sym == 0) {
-            return NULL;
-        }
-
-        // On Android FMOD relies on Java for initialization, so we need to attach the game audio thread to ART VM
-        if (strcmp(sym_name, "Java_fmod_javafmodJNI_FMOD_1System_1Create") == 0) {
-            JNIEnv* art_jni_env = NULL;
-            (*g_zomdroid_art_vm)->GetEnv(g_zomdroid_art_vm, (void **) &art_jni_env, JNI_VERSION_1_6) ;
-            if (art_jni_env == NULL){
-                (*g_zomdroid_art_vm)->AttachCurrentThread(g_zomdroid_art_vm,
-                                                          (void **) &art_jni_env, NULL);
+        if (elib->is_emulated) {
+            struct lib_s* maplib = GetMaplib(lib);
+            uintptr_t box64_sym = FindGlobalSymbol(maplib, sym_name, -1, NULL, 0);
+            if (box64_sym == 0) {
+                return NULL;
             }
-            if (art_jni_env == NULL) {
-                LOGE("Failed to attach game FMOD thread to ART VM");
-            } else {
-                LOGD("Successfully attached game FMOD thread to ART VM");
+
+            // On Android FMOD relies on Java for initialization, so we need to attach the game audio thread to ART VM
+            if (strcmp(sym_name, "Java_fmod_javafmodJNI_FMOD_1System_1Create") == 0) {
+                JNIEnv* art_jni_env = NULL;
+                (*g_zomdroid_art_vm)->GetEnv(g_zomdroid_art_vm, (void **) &art_jni_env, JNI_VERSION_1_6) ;
+                if (art_jni_env == NULL){
+                    (*g_zomdroid_art_vm)->AttachCurrentThread(g_zomdroid_art_vm,
+                                                              (void **) &art_jni_env, NULL);
+                }
+                if (art_jni_env == NULL) {
+                    LOGE("Failed to attach game FMOD thread to ART VM");
+                } else {
+                    //LOGD("Successfully attached game FMOD thread to ART VM");
+                }
             }
-        }
 
-        char* method_sig = method_signature_from_symbol_name(sym_name);
+            char* method_sig = method_signature_from_symbol_name(sym_name);
 
-        if (method_sig == NULL) return NULL;
+            if (method_sig == NULL) return NULL;
 
-        char* arg_types = NULL;
-        char ret_type = 0;
-        if (method_signature_to_types(method_sig, &arg_types, &ret_type) != 0) {
+            char* arg_types = NULL;
+            char ret_type = 0;
+            if (method_signature_to_types(method_sig, &arg_types, &ret_type) != 0) {
+                free(method_sig);
+                return NULL;
+            }
             free(method_sig);
-            return NULL;
-        }
-        free(method_sig);
 
-        void* sym = zomdroid_emulation_bridge_jni_symbol(&jni_libs[i], box64_sym,
-                                                         arg_types, ret_type);
-        if (sym == NULL) {
-            LOGE("Failed to create emulation bridge for jni symbol %s", sym_name);
+            void* sym = zomdroid_emulation_bridge_jni_symbol(&jni_libs[i], box64_sym,
+                                                             arg_types, ret_type);
+            if (sym == NULL) {
+                LOGE("Failed to create emulation bridge for jni symbol %s", sym_name);
+                free(arg_types);
+                return NULL;
+            }
             free(arg_types);
-            return NULL;
+            //LOGD("Successfully created emulation bridge for jni symbol %s at %p (target=%ld)", sym_name, sym, box64_sym);
+            return sym;
+        } else {
+            return loader_dlsym(handle, sym_name, __builtin_return_address(0));
         }
-        free(arg_types);
-        LOGD("Successfully created emulation bridge for jni symbol %s at %p (target=%ld)", sym_name, sym, box64_sym);
-        return sym;
     }
 
     return loader_dlsym(handle, sym_name, __builtin_return_address(0));
@@ -644,7 +762,7 @@ void *dlsym(void *handle, const char *sym_name) {
 
 __attribute__((visibility("default"), used))
 void *android_dlopen_ext(const char *filename, int flags, const android_dlextinfo *extinfo) {
-    LOGD("android_dlopen_ext(filename=%s)", filename);
+    //LOGE("android_dlopen_ext(filename=%s)", filename);
     if(strstr(filename, "vulkan.") && vulkan_driver_handle) {
         return vulkan_driver_handle;
     }
@@ -653,7 +771,7 @@ void *android_dlopen_ext(const char *filename, int flags, const android_dlextinf
 
 __attribute__((visibility("default"), used))
 void *android_load_sphal_library(const char *filename, int flags) {
-    LOGD("android_load_sphal_library(filename=%s)", filename);
+    //LOGD("android_load_sphal_library(filename=%s)", filename);
     if(strstr(filename, "vulkan.") && vulkan_driver_handle) {
         return vulkan_driver_handle;
     }

@@ -32,6 +32,7 @@ import com.zomdroid.databinding.ActivityLauncherBinding;
 import com.zomdroid.game.GameInstanceManager;
 import com.zomdroid.input.AbstractControlElement;
 import com.zomdroid.input.ControlElementDescription;
+import com.zomdroid.input.GamepadManager;
 
 public class LauncherActivity extends AppCompatActivity {
     private static final String LOG_TAG = LauncherActivity.class.getName();
@@ -48,6 +49,9 @@ public class LauncherActivity extends AppCompatActivity {
 
         binding = ActivityLauncherBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // >>> ensure custom mapping is loaded at app start <<<
+        GamepadManager.loadCustomMapping(this);
 
         binding.appbarLayout.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
             @NonNull
@@ -93,6 +97,11 @@ public class LauncherActivity extends AppCompatActivity {
                 Intent intent = new Intent(this, ControlsEditorActivity.class);
                 startActivity(intent);
                 return true;
+            } else if (item.getItemId() == R.id.action_open_gamepad_mapper) {
+                // Navigate to gamepad mapper using NavController
+                binding.drawerLayout.close();
+                navController.navigate(R.id.action_open_gamepad_mapper);
+                return true;
             } else if (item.getItemId() == R.id.action_donate) {
                 final SpannableString s = new SpannableString(getString(R.string.donate_message));
                 Linkify.addLinks(s, Linkify.WEB_URLS);
@@ -107,7 +116,12 @@ public class LauncherActivity extends AppCompatActivity {
                     messageView.setMovementMethod(LinkMovementMethod.getInstance());
                 }
                 return true;
-            }
+            } else if (item.getItemId() == R.id.action_open_touch_controls) {
+                // Navigate to TouchControlsFragment
+                binding.drawerLayout.close();
+                navController.navigate(R.id.action_open_touch_controls);
+                return true;
+            } 
 
             binding.drawerLayout.close();
 

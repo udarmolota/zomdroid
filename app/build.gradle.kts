@@ -38,8 +38,8 @@ android {
         applicationId = "com.zomdroid"
         minSdk = 30
         targetSdk = 35
-        versionCode = 3
-        versionName = "1.2.0"
+        versionCode = 6
+        versionName = "1.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -77,6 +77,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
     externalNativeBuild {
         cmake {
@@ -89,7 +90,7 @@ android {
             useLegacyPackaging = true
         }
     }
-    ndkVersion = "28.0.13004108"
+  ndkVersion = "27.3.13750724"
 }
 
 dependencies {

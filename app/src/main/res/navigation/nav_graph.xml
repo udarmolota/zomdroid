@@ -17,6 +17,9 @@
             android:id="@id/action_open_settings_fragment"
             app:destination="@id/settings_fragment"/>
         <action
+            android:id="@id/action_open_gamepad_mapper"
+            app:destination="@id/gamepad_mapper_fragment"/>
+        <action
             android:id="@id/action_open_wiki_fragment"
             app:destination="@id/wiki_fragment"/>
     </fragment>
@@ -36,9 +39,23 @@
     </fragment>
 
     <fragment
+        android:id="@+id/gamepad_mapper_fragment"
+        android:name="com.zomdroid.fragments.GamepadMapperFragment"
+        android:label="@string/nav_menu_gamepad_mapper"
+        tools:layout="@layout/fragment_gamepad_mapper">
+    </fragment>
+
+    <fragment
         android:id="@+id/wiki_fragment"
         android:name="com.zomdroid.fragments.WikiFragment"
         android:label="@string/fragment_label_wiki">
+    </fragment>
+
+    <fragment
+        android:id="@+id/action_open_touch_controls"
+        android:name="com.zomdroid.fragments.TouchControlsFragment"
+        android:label="@string/fragment_label_touch_controls"
+        tools:layout="@layout/fragment_touch_controls">
     </fragment>
 
 </navigation>

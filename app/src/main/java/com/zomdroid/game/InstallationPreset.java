@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 public class InstallationPreset {
     public final String name;
+    public final String buildVersion;
     public final String[] classPathArray;
     public final String[] extraJars;
     public final String[] libraryPathArray;
@@ -17,6 +18,7 @@ public class InstallationPreset {
 
     private InstallationPreset(Builder builder) {
         this.name = builder.name;
+        this.buildVersion = builder.buildVersion;
         this.classPathArray = builder.classPathArray;
         this.extraJars = builder.extraJars;
         this.libraryPathArray = builder.libraryPathArray;
@@ -37,6 +39,7 @@ public class InstallationPreset {
 
     public static class Builder {
         private String name = "";
+        private String buildVersion = "";
         private String[] classPathArray = new String[0];
         private String[] extraJars = new String[0];
         private String[] libraryPathArray = new String[0];
@@ -51,6 +54,11 @@ public class InstallationPreset {
         public Builder setName(String name) {
             this.name = name;
             return this;
+        }
+
+        public Builder setBuildVersion(String buildVersion) {
+          this.buildVersion = buildVersion;
+          return this;
         }
 
         public Builder setClassPathArray(String[] classPathArray) {

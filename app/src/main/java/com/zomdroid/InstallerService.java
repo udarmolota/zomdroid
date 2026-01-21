@@ -45,6 +45,8 @@ public class InstallerService extends Service implements TaskProgressListener {
     public static final String EXTRA_COMMAND = "com.zomdroid.InstallerService.EXTRA_COMMAND";
     public static final String EXTRA_GAME_INSTANCE_NAME = "com.zomdroid.InstallerService.EXTRA_GAME_INSTANCE_NAME";
     public static final String EXTRA_ARCHIVE_URI = "com.zomdroid.InstallerService.EXTRA_ARCHIVE_URI";
+    public static final String EXTRA_NATIVE_LIBS_URI = "com.zomdroid.InstallerService.EXTRA_NATIVE_LIBS_URI";
+
     private final IBinder binder = new LocalBinder();
     private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private NotificationManagerCompat notificationManager;
@@ -95,6 +97,7 @@ public class InstallerService extends Service implements TaskProgressListener {
             return;
         }
         GameInstance gameInstance = GameInstanceManager.requireSingleton().getInstanceByName(gameInstanceName);
+        String buildVersion = gameInstance.getBuildVersion();
         if (gameInstance == null) {
             finishWithError(getString(R.string.dialog_title_failed_to_create_instance),
                     "Game instance with name " + gameInstanceName + " not found");
@@ -107,9 +110,30 @@ public class InstallerService extends Service implements TaskProgressListener {
                     "Game files archive URI intent extra is missing");
             return;
         }
-        executorService.submit(() -> {
+
+      executorService.submit(() -> {
             try {
                 installGameFromZip(gameInstance, gameFilesArchiveUri);
+
+                String nativeLibsPath = gameInstance.getGamePath() + "/android/arm64-v8a";
+                File nativeLibsDir = new File(nativeLibsPath);
+                if (nativeLibsDir.exists())
+                  FileUtils.deleteDirectory(nativeLibsDir);
+                nativeLibsDir.mkdirs();
+
+                Uri nativeLibsArchiveUri = intent.getParcelableExtra(EXTRA_NATIVE_LIBS_URI);
+                if (nativeLibsArchiveUri != null) {
+                    try (InputStream nativeLibsStream = getContentResolver().openInputStream(nativeLibsArchiveUri)) {
+                        FileUtils.extractZipToDisk(nativeLibsStream, nativeLibsPath, this,
+                        FileUtils.queryFileSize(getContentResolver(), nativeLibsArchiveUri));
+                    } catch (IOException e) {
+                        System.out.println("Native libraries not installed: " + e.getMessage());
+                        // Still can work without MP
+                    }
+                } else {
+                    System.out.println("No native libraries provided — skipping multiplayer setup");
+                }
+
             } catch (Exception e) {
                 finishWithError(getString(R.string.dialog_title_failed_to_create_instance), e.toString());
                 return;

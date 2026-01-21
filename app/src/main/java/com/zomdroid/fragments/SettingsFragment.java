@@ -1,6 +1,8 @@
 package com.zomdroid.fragments;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +12,7 @@ import android.widget.SeekBar;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 
 import com.zomdroid.LauncherPreferences;
 import com.zomdroid.R;
@@ -27,6 +30,7 @@ public class SettingsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        
         ArrayAdapter<LauncherPreferences.Renderer> rendererArrayAdapter = new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_spinner_dropdown_item, LauncherPreferences.Renderer.values());
         binding.settingsRendererS.setAdapter(rendererArrayAdapter);
@@ -55,7 +59,11 @@ public class SettingsFragment extends Fragment {
             }
         });
 
+        binding.settingsRenderHintHelpIb.setOnClickListener(v -> {
+            Navigation.findNavController(v).navigate(R.id.wiki_fragment);
+        });
 
+       
         ArrayAdapter<LauncherPreferences.VulkanDriver> vulkanDriverAdapter = new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_spinner_dropdown_item, LauncherPreferences.VulkanDriver.values());
         binding.settingsVulkanDriverS.setAdapter(vulkanDriverAdapter);
@@ -108,6 +116,34 @@ public class SettingsFragment extends Fragment {
             public void onNothingSelected(AdapterView<?> parent) {
 
             }
+        });
+
+        binding.settingsJargsEt.setText(LauncherPreferences.requireSingleton().getJvmArgs());
+        
+        binding.settingsJargsEt.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                LauncherPreferences.requireSingleton().setJvmArgs(s.toString().trim());
+            }
+        });
+        
+        binding.settingsJargsInfo.setOnClickListener(v -> {
+            new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle("JVM arguments")
+                .setMessage("Additional JVM arguments, e.g.:\n\n" +
+                           "• -Xmx2G - allocate 2Gb of memory\n" +
+                           "• -Xms1G - process starts with 1Gb RAM\n" +
+                           "• -XX:+UseG1GC - enable G1 garbage collector\n\n" +
+                           "Right now, we're not sure how much of an impact allocating more memory will have, but in theory, it should help when there's not enough.\n" +
+                           "Some arguments are already set by settings.")
+                .setPositiveButton("OK", null)
+                .show();
         });
     }
 

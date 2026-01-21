@@ -41,30 +41,34 @@ import java.util.Objects;
 public class NewGameInstanceFragment extends Fragment {
     private FragmentNewGameInstanceBinding binding;
     private final String ZIP_MIME = "application/zip";
+
+    // URIs for selected ZIP files
     private Uri gameFilesZipUri = null;
-    private final ActivityResultLauncher<String> actionOpenDocumentLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(),
-            uri -> {
+    private Uri nativeLibsZipUri = null;
+
+    // Launcher for selecting game ZIP
+    private final ActivityResultLauncher<String> actionOpenDocumentLauncher =
+            registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
                 if (uri == null) return;
                 ContentResolver contentResolver = requireContext().getContentResolver();
                 if (Objects.equals(contentResolver.getType(uri), ZIP_MIME)) {
                     gameFilesZipUri = uri;
-                    String fileName = null;
-                    Cursor cursor = requireContext().getContentResolver().query(
-                            uri,
-                            new String[]{MediaStore.MediaColumns.DISPLAY_NAME},
-                            null,
-                            null,
-                            null
-                    );
-
-                    if (cursor != null && cursor.moveToFirst()) {
-                        int nameIndex = cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME);
-                        if (nameIndex != -1) {
-                            fileName = cursor.getString(nameIndex);
-                        }
-                        cursor.close();
-                    }
+                    String fileName = extractFileName(uri);
                     binding.newGameInstanceFilesPathEt.setText(fileName);
+                } else {
+                    Toast.makeText(requireContext(), getString(R.string.game_instance_unsupported_extension), Toast.LENGTH_SHORT).show();
+                }
+            });
+
+    // Launcher for selecting native libs ZIP
+    private final ActivityResultLauncher<String> actionOpenNativeLibsLauncher =
+            registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+                if (uri == null) return;
+                ContentResolver contentResolver = requireContext().getContentResolver();
+                if (Objects.equals(contentResolver.getType(uri), ZIP_MIME)) {
+                    nativeLibsZipUri = uri;
+                    String fileName = extractFileName(uri);
+                    binding.newGameInstanceNativeLibsPathEt.setText(fileName);
                 } else {
                     Toast.makeText(requireContext(), getString(R.string.game_instance_unsupported_extension), Toast.LENGTH_SHORT).show();
                 }
@@ -74,12 +78,13 @@ public class NewGameInstanceFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentNewGameInstanceBinding.inflate(inflater, container, false);
         return binding.getRoot();
-
     }
 
+    @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // Menu setup
         MenuHost menuHost = requireActivity();
         menuHost.addMenuProvider(new MenuProvider() {
             @Override
@@ -111,14 +116,18 @@ public class NewGameInstanceFragment extends Fragment {
                         throw new RuntimeException(e);
                     }
 
-                    GameInstanceManager.requireSingleton().registerInstance(gameInstance);
+                    // Start InstallerService with both ZIPs
+                  GameInstanceManager.requireSingleton().registerInstance(gameInstance);
 
-                    Intent installerIntent = new Intent(requireContext(), InstallerService.class);
-                    installerIntent.putExtra(InstallerService.EXTRA_COMMAND, InstallerService.Task.CREATE_GAME_INSTANCE.ordinal());
-                    installerIntent.putExtra(InstallerService.EXTRA_GAME_INSTANCE_NAME, gameInstance.getName());
-                    installerIntent.putExtra(InstallerService.EXTRA_ARCHIVE_URI, gameFilesZipUri);
-                    Navigation.findNavController(binding.getRoot()).navigateUp();
-                    requireContext().startForegroundService(installerIntent);
+                  Intent installerIntent = new Intent(requireContext(), InstallerService.class);
+                  installerIntent.putExtra(InstallerService.EXTRA_COMMAND, InstallerService.Task.CREATE_GAME_INSTANCE.ordinal());
+                  installerIntent.putExtra(InstallerService.EXTRA_GAME_INSTANCE_NAME, gameInstance.getName());
+                  installerIntent.putExtra(InstallerService.EXTRA_ARCHIVE_URI, gameFilesZipUri);
+                  if (nativeLibsZipUri != null) {
+                    installerIntent.putExtra(InstallerService.EXTRA_NATIVE_LIBS_URI, nativeLibsZipUri);
+                  }
+                  Navigation.findNavController(binding.getRoot()).navigateUp();
+                  requireContext().startForegroundService(installerIntent);
 
                     return true;
                 }
@@ -126,51 +135,82 @@ public class NewGameInstanceFragment extends Fragment {
             }
         }, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
 
+        // Hide keyboard when user presses "Done"
         binding.newGameInstanceNameEt.setOnEditorActionListener((v, actionId, event) -> {
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                v.clearFocus();
-            }
-            return false;
+          if (actionId == EditorInfo.IME_ACTION_DONE) {
+            v.clearFocus();
+          }
+          return false;
         });
 
+        // Validate game instance name as user types
         binding.newGameInstanceNameEt.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
+          @Override
+          public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (!GameInstance.isValidName(s.toString())) {
-                    binding.newGameInstanceNameEt.setError(getString(R.string.game_instance_name_invalid));
-                } else if (!GameInstance.isUniqueName(s.toString())) {
-                    binding.newGameInstanceNameEt.setError(getString(R.string.game_instance_name_already_exists));
-                } else {
-                    binding.newGameInstanceNameEt.setError(null);
-                }
+          @Override
+          public void onTextChanged(CharSequence s, int start, int before, int count) {
+            if (!GameInstance.isValidName(s.toString())) {
+              binding.newGameInstanceNameEt.setError(getString(R.string.game_instance_name_invalid));
+            } else if (!GameInstance.isUniqueName(s.toString())) {
+              binding.newGameInstanceNameEt.setError(getString(R.string.game_instance_name_already_exists));
+            } else {
+              binding.newGameInstanceNameEt.setError(null);
             }
+          }
 
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
+          @Override
+          public void afterTextChanged(Editable s) {}
         });
 
-        binding.newGameInstancePresetS.setAdapter(new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_spinner_dropdown_item, PresetManager.getPresets()));
+      // Populate version selection spinner
+      binding.newGameInstancePresetS.setAdapter(new ArrayAdapter<>(
+        requireContext(),
+        android.R.layout.simple_spinner_dropdown_item,
+        PresetManager.getPresets()
+      ));
 
-        binding.newGameInstanceFilesHelpIb.setOnClickListener(v -> {
-            Navigation.findNavController(v).navigate(R.id.wiki_fragment);
-        });
+      // Help button opens wiki fragment
+      binding.newGameInstanceFilesHelpIb.setOnClickListener(v -> {
+        Navigation.findNavController(v).navigate(R.id.wiki_fragment);
+      });
 
-        binding.newGameInstanceFilesBrowseIb.setOnClickListener(v -> {
-            actionOpenDocumentLauncher.launch(ZIP_MIME);
-        });
+      // Browse button for game ZIP
+      binding.newGameInstanceFilesBrowseIb.setOnClickListener(v -> {
+        actionOpenDocumentLauncher.launch(ZIP_MIME);
+      });
+
+      // Browse button for native libs ZIP
+      binding.newGameInstanceNativeLibsBrowseIb.setOnClickListener(v -> {
+        actionOpenNativeLibsLauncher.launch(ZIP_MIME);
+      });
+
+
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
+  @Override
+  public void onDestroyView() {
+    super.onDestroyView();
+    binding = null;
+  }
+
+    // Helper to extract file name from URI
+    private String extractFileName(Uri uri) {
+        String fileName = null;
+        Cursor cursor = requireContext().getContentResolver().query(
+                uri,
+                new String[]{MediaStore.MediaColumns.DISPLAY_NAME},
+                null,
+                null,
+                null
+        );
+        if (cursor != null && cursor.moveToFirst()) {
+            int nameIndex = cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME);
+            if (nameIndex != -1) {
+                fileName = cursor.getString(nameIndex);
+            }
+            cursor.close();
+        }
+        return fileName;
     }
-
-
 }
