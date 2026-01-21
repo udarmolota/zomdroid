@@ -9,9 +9,8 @@ on:
         default: 'gamepad-support'
         type: choice
         options:
-        - java21
         - optm-1
-        - buttons-outline
+        - wakort_jvm_toggle
         
 jobs:
   build:
