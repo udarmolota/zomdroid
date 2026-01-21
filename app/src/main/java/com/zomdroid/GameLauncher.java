@@ -76,15 +76,13 @@ public class GameLauncher {
 
         Os.setenv("ZOMDROID_AUDIO_API", LauncherPreferences.requireSingleton().getAudioAPI().name(), false);
 
-        Os.setenv("ZOMDROID_GLES_MAJOR", "2", false);
-        Os.setenv("ZOMDROID_GLES_MINOR", "1", false);
-
         if (BuildConfig.DEBUG) {
                 // for debugging GL calls, only supported on GL ES 3.2+ with GL_KHR_debug extension present
+                /*Os.setenv("ZOMDROID_DEBUG_GL", "1", false);
                 Os.setenv("ZOMDROID_DEBUG_GL", "1", false);
                 Os.setenv("LIBGL_GLES", "libGLESv3.so", false);
                 Os.setenv("ZOMDROID_GLES_MAJOR", "3", true);
-                Os.setenv("ZOMDROID_GLES_MINOR", "2", true);
+                Os.setenv("ZOMDROID_GLES_MINOR", "2", true);*/
         }
         initZomdroidWindow();
         InputNativeInterface.sendJoystickConnected();
