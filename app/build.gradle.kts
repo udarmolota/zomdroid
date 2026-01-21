@@ -38,13 +38,8 @@ android {
         applicationId = "com.zomdroid"
         minSdk = 30
         targetSdk = 35
-<<<<<<< HEAD
-        versionCode = 4
-        versionName = "1.2.9.v5"
-=======
         versionCode = 6
-        versionName = "1.2.2-alpha.2"
->>>>>>> 7287fbf (Added JVM arguments to settings. Now arguments for debugging in GameLauncher.java have a check for debug builds.)
+        versionName = "1.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
