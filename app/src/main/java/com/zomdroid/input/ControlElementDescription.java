@@ -53,43 +53,41 @@ public class ControlElementDescription {
             case BUTTON_CIRCLE:
             case BUTTON_RECT:
                 return new ControlElementDescription(0.5f, 0.5f, 1.f, type,
-                        new GLFWBinding[]{GLFWBinding.GAMEPAD_BUTTON_A}, "A", Color.LTGRAY, 255,
+                        new GLFWBinding[]{GLFWBinding.GAMEPAD_BUTTON_A}, "A", Color.LTGRAY, 150,
                         AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON, false);
             case DPAD:
                 return new ControlElementDescription(0.5f, 0.5f, 1.f, type,
-                        new GLFWBinding[]{}, null, Color.LTGRAY, 255,
-                        AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON);
+                        new GLFWBinding[]{}, null, Color.LTGRAY, 150,
+                        AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON, false);
 
             case DPAD_UP:
               return new ControlElementDescription(
                 0.5f, 0.5f, 1.f, type,
                 new GLFWBinding[]{ GLFWBinding.GAMEPAD_DPAD_UP },
-                null, Color.LTGRAY, 255,
-                AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON);
+                null, Color.LTGRAY, 150,
+                AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON, false);
 
             case DPAD_RIGHT:
               return new ControlElementDescription(
                 0.5f, 0.5f, 1.f, type,
                 new GLFWBinding[]{ GLFWBinding.GAMEPAD_DPAD_RIGHT },
-                null, Color.LTGRAY, 255,
-                AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON);
+                null, Color.LTGRAY, 150,
+                AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON, false);
 
             case DPAD_DOWN:
               return new ControlElementDescription(
                 0.5f, 0.5f, 1.f, type,
                 new GLFWBinding[]{ GLFWBinding.GAMEPAD_DPAD_DOWN },
-                null, Color.LTGRAY, 255,
-                AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON);
+                null, Color.LTGRAY, 150,
+                AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON, false);
 
             case DPAD_LEFT:
               return new ControlElementDescription(
                 0.5f, 0.5f, 1.f, type,
                 new GLFWBinding[]{ GLFWBinding.GAMEPAD_DPAD_LEFT },
-                null, Color.LTGRAY, 255,
-                AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON);
-
-          case STICK:
-                        AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON, false);
+                null, Color.LTGRAY, 150,
+                AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON, false);
+                
             case STICK:
                 return new ControlElementDescription(0.5f, 0.5f, 1.f, type,
                         new GLFWBinding[]{GLFWBinding.LEFT_JOYSTICK}, null, Color.LTGRAY, 255,
