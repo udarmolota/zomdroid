@@ -101,16 +101,19 @@ public class GameLauncher {
         jvmArgs.add("-Dzomdroid.renderer=" + LauncherPreferences.requireSingleton().getRenderer().name());
 
         if (BuildConfig.DEBUG) {
-                jvmArgs.add("-Dorg.lwjgl.util.Debug=true"); //print LWJGL library errors
-                jvmArgs.add("-XX:+PrintFlagsFinal"); // for debugging
+            jvmArgs.add("-Dorg.lwjgl.util.Debug=true"); //print LWJGL library errors
+            jvmArgs.add("-Dorg.lwjgl.util.DebugLoader=true");
+            jvmArgs.add("-XX:+PrintFlagsFinal"); // for debugging
         }
 
         jvmArgs.add("-XX:ErrorFile=/dev/stdout"); // print jvm crash report to stdout for now
 
         ArrayList<String> args = gameInstance.getArgsAsList();
         if (BuildConfig.DEBUG) {
-                args.add("-debug");
-                args.add("-debuglog=Shader");
+            args.add("-debug");
+            args.add("-debuglog=Shader");
+            Log.i("Zomdroid", "JVM ARGS: " + jvmArgs);
+            Log.i("Zomdroid", "GAME ARGS: " + args);            
         }
 
         String javaHomePath = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.JRE;
