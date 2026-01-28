@@ -120,6 +120,10 @@ public class GameInstance {
         return jvmArgsList;
     }
 
+    public String getClassPathArray() {
+        return this.classPath;
+    }
+
     public ArrayList<String> getArgsAsList() {
         return new ArrayList<>(Arrays.asList(this.args));
     }
@@ -150,6 +154,15 @@ public class GameInstance {
     }
 
     public boolean hasGameFiles() {
+        // New fat-jar structure (42.12+)
+        for (String cp : getClassPathArray()) {
+            if ("projectzomboid.jar".equals(cp)) {
+                File jar = new File(getGamePath(), "projectzomboid.jar");
+                return jar.exists();
+            }
+        }
+
+        // Old structure (41 / 42.6 - 42.11)
         File mainClassFile = new File(getGamePath() + "/" + getMainClassName() + ".class");
         return mainClassFile.exists();
     }
