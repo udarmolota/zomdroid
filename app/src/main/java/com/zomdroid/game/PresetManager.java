@@ -55,6 +55,33 @@ public class PresetManager {
                 .build()
         );
 
+        // NEW 42.13+ structure
+        presets.add(new InstallationPreset.Builder()
+                .setName("Build 42.13")
+                .setBuildVersion("42")
+                .setClassPathArray(new String[]{
+                        ".",
+                        "projectzomboid.jar"
+                })
+                .setExtraJars(new String[0])
+                .setLibraryPathArray(new String[]{
+                        C.deps.LIBS_LWJGL_336,
+                        C.deps.LIBS_ANDROID_ARM64_v8a
+                })
+                .setLibraryPathForEmulationArray(new String[]{
+                        C.deps.LIBS_LINUX_X86_64
+                })
+                .setFmodLibraryPath(C.deps.LIBS_FMOD_20224)
+                .setExtraJvmArgs(new String[0])
+                .setArgs(new String[]{
+                        "-novoip"
+                })
+                .setMainClassName("zombie/gameStates/MainScreenState")
+                .setJavaAgentPath(C.deps.JARS_ZOMDROID_AGENT)
+                //.setJavaAgentArgs("build=42")
+                .build()
+        );
+
         presets.add(new InstallationPreset.Builder()
                 .setName("Build 41")
                 .setBuildVersion("41")
