@@ -199,9 +199,42 @@ static void create_jvm_and_launch_main(int jvm_argc, const char** jvm_argv, cons
 
     jclass main_class = (*env)->FindClass(env, main_class_name);
     if (main_class == NULL) {
-        LOGE("Failed to load main class");
-        goto FINISH;
+        // ВАЖНО: FindClass мог кинуть исключение ClassNotFoundException
+        if ((*env)->ExceptionCheck(env)) {
+            (*env)->ExceptionClear(env);
+        }
+    
+        // fallback: ClassLoader.getSystemClassLoader().loadClass("zombie.gameStates.MainScreenState")
+        jclass clsClassLoader = (*env)->FindClass(env, "java/lang/ClassLoader");
+        jmethodID midGetSys = (*env)->GetStaticMethodID(
+                env, clsClassLoader, "getSystemClassLoader", "()Ljava/lang/ClassLoader;");
+        jobject sysCl = (*env)->CallStaticObjectMethod(env, clsClassLoader, midGetSys);
+    
+        jmethodID midLoadClass = (*env)->GetMethodID(
+                env, clsClassLoader, "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
+    
+        // main_class_name у тебя в формате "zombie/gameStates/MainScreenState"
+        // loadClass требует "zombie.gameStates.MainScreenState"
+        char dotted[512];
+        strncpy(dotted, main_class_name, sizeof(dotted) - 1);
+        dotted[sizeof(dotted) - 1] = 0;
+        for (char *p = dotted; *p; ++p) if (*p == '/') *p = '.';
+    
+        jstring jName = (*env)->NewStringUTF(env, dotted);
+        jobject clsObj = (*env)->CallObjectMethod(env, sysCl, midLoadClass, jName);
+    
+        if ((*env)->ExceptionCheck(env)) {
+            (*env)->ExceptionDescribe(env);
+            (*env)->ExceptionClear(env);
+        }
+    
+        main_class = (jclass)clsObj;
+        if (main_class == NULL) {
+            LOGE("Failed to load main class (FindClass + loadClass fallback both failed)");
+            goto FINISH;
+        }
     }
+
 
     jobject classLoader = NULL;
     if ((err = (*jvmtiEnv)->GetClassLoader(jvmtiEnv, main_class, &classLoader)) != JVMTI_ERROR_NONE) {
