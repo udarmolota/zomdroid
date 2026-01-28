@@ -120,7 +120,7 @@ public class GameInstance {
         return jvmArgsList;
     }
 
-    public String getClassPathArray() {
+    public String[] getClassPathArray() {
         return this.classPath;
     }
 
