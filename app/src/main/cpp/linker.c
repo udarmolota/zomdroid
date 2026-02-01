@@ -45,6 +45,14 @@ static const char* jni_sig_cache_get(const char* sym) {
     return result;
 }
 
+static jobjectArray JNICALL stub_getAudioDevices(JNIEnv* env, jclass clazz, jint deviceType) {
+    LOGD("[stub] getAudioDevices(%d) -> NULL", deviceType);
+    (void)env;
+    (void)clazz;
+    (void)deviceType;
+    return NULL;  // пусть FMOD использует дефолтное устройство
+}
+
 static void jni_sig_cache_put(const char* sym, const char* sig) {
     if (!sym || !sig) return;
     // store our own copies, because caller frees its return value
@@ -713,6 +721,20 @@ void *dlsym(void *handle, const char *sym_name) {
         if (sym_name == NULL || handle == NULL || lib != handle) continue;
 
         if (elib->is_emulated) {
+            // 1) Stub for getAudioDevices
+            if (strcmp(jni_libs[i].name, "fmodintegration64") == 0 &&
+                strstr(sym_name, "getAudioDevices")) {
+
+                void* sym = zomdroid_emulation_bridge_jni_symbol(
+                        &jni_libs[i],
+                        (uintptr_t)stub_getAudioDevices,
+                        "ppi",  // JNIEnv*, jclass, jint
+                        'p'     // возвращаем jobjectArray
+                );
+                return sym;
+            }
+
+            // 2) The regular x86 way
             struct lib_s* maplib = GetMaplib(lib);
             uintptr_t box64_sym = FindGlobalSymbol(maplib, sym_name, -1, NULL, 0);
             if (box64_sym == 0) {
