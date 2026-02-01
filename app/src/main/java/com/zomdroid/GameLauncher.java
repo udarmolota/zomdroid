@@ -102,7 +102,7 @@ public class GameLauncher {
 
         if (BuildConfig.DEBUG) {
             jvmArgs.add("-Dorg.lwjgl.util.Debug=true"); //print LWJGL library errors
-            jvmArgs.add("-Dorg.lwjgl.util.DebugLoader=true");
+            //jvmArgs.add("-Dorg.lwjgl.util.DebugLoader=true");
             jvmArgs.add("-XX:+PrintFlagsFinal"); // for debugging
         }
 
@@ -119,10 +119,9 @@ public class GameLauncher {
         String javaHomePath = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.JRE;
         String ldLibraryPath = AppStorage.requireSingleton().getLibraryPath() + ":/system/lib64:"
                 + javaHomePath + "/lib:" + javaHomePath + "/lib/server:" + gameInstance.getJavaLibraryPath();
+        Log.d("zomdroid-main", ldLibraryPath);
         GameLauncher.startGame(gameInstance.getGamePath(), ldLibraryPath, jvmArgs.toArray(new String[0]),
                 gameInstance.getMainClassName(), args.toArray(new String[0]));
-
-        Log.d("zomdroid-main", ldLibraryPath);
     }
 
 
