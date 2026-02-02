@@ -199,10 +199,6 @@ static void create_jvm_and_launch_main(int jvm_argc, const char** jvm_argv, cons
 
     jclass main_class = (*env)->FindClass(env, main_class_name);
     if (main_class == NULL) {
-        if ((*env)->ExceptionCheck(env)) {
-            (*env)->ExceptionDescribe(env); // покажет UnsupportedClassVersionError или ClassNotFoundException
-            (*env)->ExceptionClear(env);
-        }
         LOGE("Failed to load main class");
         goto FINISH;
     }
@@ -238,8 +234,7 @@ static void create_jvm_and_launch_main(int jvm_argc, const char** jvm_argv, cons
         abort();
     }
 
-    LOGW("JNI: leaving create_jvm_and_launch_main() WITHOUT DestroyJavaVM");
-
+    (*jvm)->DestroyJavaVM(jvm);
 }
 
 static int init_zomdroid_namespace(const char* ld_library_path) {

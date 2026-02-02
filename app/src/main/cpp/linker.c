@@ -45,14 +45,6 @@ static const char* jni_sig_cache_get(const char* sym) {
     return result;
 }
 
-static jobjectArray JNICALL stub_getAudioDevices(JNIEnv* env, jclass clazz, jint deviceType) {
-    LOGD("[stub] getAudioDevices(%d) -> NULL", deviceType);
-    (void)env;
-    (void)clazz;
-    (void)deviceType;
-    return NULL;  // пусть FMOD использует дефолтное устройство
-}
-
 static void jni_sig_cache_put(const char* sym, const char* sig) {
     if (!sym || !sig) return;
     // store our own copies, because caller frees its return value
@@ -637,7 +629,6 @@ static char* method_signature_from_symbol_name(const char* sym) {
 
 __attribute__((visibility("default"), used))
 void *dlopen(const char* filename, int flags) {
-    //LOGE("[linker] dlopen called with filename=%s flags=%d", filename, flags);
 
     if (filename == NULL) return loader_dlopen(NULL, flags, __builtin_return_address(0));
 
@@ -651,7 +642,7 @@ void *dlopen(const char* filename, int flags) {
         }
 
         //trying to load native library
-        //if (strcmp(jni_libs[i].name, "fmodintegration64") != 0) { //later I should fix that. Java for some reason didn't see classes inside
+        if (strcmp(jni_libs[i].name, "fmodintegration64") != 0) { //later I should fix that. Java for some reason didn't see classes inside
             const char* base = strrchr(filename, '/');
             if (base)
                 base++;
@@ -668,10 +659,10 @@ void *dlopen(const char* filename, int flags) {
                 return jni_libs[i].handle;
             }
             LOGW("[linker] Native Android version of %s not found, loading through box64...", android_filename);
-        //}
+        }
 
         //elsewise loading in box64
-        LOGE("[linker] Loading %s in box64...", filename);
+        //LOGE("[linker] Loading %s in box64...", filename);
         needed_libs_t* needed_lib = new_neededlib(1);
         needed_lib->names[0] = strdup(filename);
         int bindnow = (flags & 0x2) ? 1 : 0;
@@ -682,12 +673,9 @@ void *dlopen(const char* filename, int flags) {
             RemoveNeededLib(NULL, islocal, needed_lib, my_context, thread_get_emu());
             free_neededlib(needed_lib);
             return NULL;
-        } else {
-            //LOGE("[linker] box64 AddNeededLib: trying to load %s", filename);
         }
         jni_libs[i].handle = needed_lib->libs[0];
         jni_libs[i].is_emulated = true;
-
         free_neededlib(needed_lib);
 
         int old_deferredInit = my_context->deferredInit;
@@ -714,27 +702,13 @@ void *dlopen(const char* filename, int flags) {
 
 __attribute__((visibility("default"), used))
 void *dlsym(void *handle, const char *sym_name) {
-    //LOGE("[linker] dlsym called with filename=%s", sym_name);
+
     for (int i = 0; i < jni_lib_count; i++) {
         struct library_s* lib = jni_libs[i].handle;
         EmulatedLib* elib = &jni_libs[i];
         if (sym_name == NULL || handle == NULL || lib != handle) continue;
 
         if (elib->is_emulated) {
-            // 1) Stub for getAudioDevices
-            if (strcmp(jni_libs[i].name, "fmodintegration64") == 0 &&
-                strstr(sym_name, "getAudioDevices")) {
-
-                void* sym = zomdroid_emulation_bridge_jni_symbol(
-                        &jni_libs[i],
-                        (uintptr_t)stub_getAudioDevices,
-                        "ppi",  // JNIEnv*, jclass, jint
-                        'p'     // возвращаем jobjectArray
-                );
-                return sym;
-            }
-
-            // 2) The regular x86 way
             struct lib_s* maplib = GetMaplib(lib);
             uintptr_t box64_sym = FindGlobalSymbol(maplib, sym_name, -1, NULL, 0);
             if (box64_sym == 0) {
@@ -755,8 +729,6 @@ void *dlsym(void *handle, const char *sym_name) {
                     //LOGD("Successfully attached game FMOD thread to ART VM");
                 }
             }
-
-
 
             char* method_sig = method_signature_from_symbol_name(sym_name);
 
