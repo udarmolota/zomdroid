@@ -47,9 +47,9 @@ public class InputControlsView extends View {
   private SharedPreferences sharedPreferences;
   private Boolean isGamepadConnected = null;
   private InputMode currentInputMode = InputMode.ALL;
-  private boolean overlayHidden = false;
   private final Context context;
   private String controlsSavePath = null;
+  private boolean overlayHidden = false;
 
     private ElementSettingsController elementSettingsController;
 
@@ -331,7 +331,7 @@ public class InputControlsView extends View {
 
   public void applyInputMode(InputMode mode) {
       if (mode == null) {return;}
-      boolean changed = currentInputMode != mode;
+      //boolean changed = currentInputMode != mode;
       this.currentInputMode = mode;
       //System.out.println("[mixed b] mode "+mode+", currentInputMode "+currentInputMode);
       for (AbstractControlElement element : controlElements) {
@@ -361,9 +361,9 @@ public class InputControlsView extends View {
           element.setVisible(visible);
       }
 
-      if (changed) {
+      //if (changed) {
           invalidate();
-      }
+      //}
   }
 
     public void setGamepadConnected(boolean connected) {
@@ -372,20 +372,6 @@ public class InputControlsView extends View {
         if (getWindowToken() != null && isShown()) {
           applyInputMode(connected ? InputMode.MNK : InputMode.ALL);
         }
-    }
-
-    public void toggleOverlayVisibility() {
-        overlayHidden = !overlayHidden;
-        applyInputMode(currentInputMode);
-    }
-
-    private boolean isOverlayToggleElement(AbstractControlElement element) {
-        for (GLFWBinding binding : element.getBindings()) {
-            if (binding == GLFWBinding.UI_TOGGLE_OVERLAY) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public void showTextInputOverlay() {
@@ -470,6 +456,19 @@ public class InputControlsView extends View {
       }
 
       return null;
+    }
+
+    public void toggleOverlayVisibility() {
+        overlayHidden = !overlayHidden;
+        applyInputMode(currentInputMode);
+        invalidate();
+    }
+
+    private boolean isOverlayToggleElement(AbstractControlElement element) {
+        for (GLFWBinding binding : element.getBindings()) {
+            if (binding == GLFWBinding.UI_TOGGLE_OVERLAY) return true;
+        }
+        return false;
     }
 
 }

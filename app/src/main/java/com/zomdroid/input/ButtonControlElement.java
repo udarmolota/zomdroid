@@ -11,7 +11,7 @@ import android.graphics.drawable.shapes.OvalShape;
 import android.graphics.drawable.shapes.RectShape;
 import android.text.TextPaint;
 import android.view.MotionEvent;
-
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
@@ -38,19 +38,15 @@ public class ButtonControlElement extends AbstractControlElement {
     }
 
     private void dispatchEvent(boolean isPressed) {
-        boolean hasOverlayToggle = false;
         for (GLFWBinding binding : bindings) {
             if (binding == GLFWBinding.UI_TOGGLE_OVERLAY) {
-                hasOverlayToggle = true;
-                break;
+                if (isPressed) {
+                    parentView.toggleOverlayVisibility();
+                }
+                return; // важно: не отправлять дальше ни MNK, ни GAMEPAD
             }
         }
-        if (hasOverlayToggle) {
-            if (isPressed) {
-                this.parentView.toggleOverlayVisibility();
-            }
-            return;
-        }
+
         switch (this.inputType) {
             case MNK:
                 for (GLFWBinding binding : bindings) {
