@@ -38,6 +38,19 @@ public class ButtonControlElement extends AbstractControlElement {
     }
 
     private void dispatchEvent(boolean isPressed) {
+        boolean hasOverlayToggle = false;
+        for (GLFWBinding binding : bindings) {
+            if (binding == GLFWBinding.UI_TOGGLE_OVERLAY) {
+                hasOverlayToggle = true;
+                break;
+            }
+        }
+        if (hasOverlayToggle) {
+            if (isPressed) {
+                this.parentView.toggleOverlayVisibility();
+            }
+            return;
+        }
         switch (this.inputType) {
             case MNK:
                 for (GLFWBinding binding : bindings) {

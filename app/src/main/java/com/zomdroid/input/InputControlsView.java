@@ -47,6 +47,7 @@ public class InputControlsView extends View {
   private SharedPreferences sharedPreferences;
   private Boolean isGamepadConnected = null;
   private InputMode currentInputMode = InputMode.ALL;
+  private boolean overlayHidden = false;
   private final Context context;
   private String controlsSavePath = null;
 
@@ -335,18 +336,26 @@ public class InputControlsView extends View {
       //System.out.println("[mixed b] mode "+mode+", currentInputMode "+currentInputMode);
       for (AbstractControlElement element : controlElements) {
           boolean visible;
-          switch (mode) {
-            case MNK:
-              visible = element.getInputType() == AbstractControlElement.InputType.MNK;
-              break;
-            case GAMEPAD:
-              visible = element.getInputType() == AbstractControlElement.InputType.GAMEPAD;
-              break;
-            case ALL:
-              visible = true;
-              break;
-            default:
-              visible = false;
+          if (overlayHidden) {
+              visible = isOverlayToggleElement(element);
+          } else {
+              if (isOverlayToggleElement(element)) {
+                  visible = true;
+              } else {
+                  switch (mode) {
+                      case MNK:
+                          visible = element.getInputType() == AbstractControlElement.InputType.MNK;
+                          break;
+                      case GAMEPAD:
+                          visible = element.getInputType() == AbstractControlElement.InputType.GAMEPAD;
+                          break;
+                      case ALL:
+                          visible = true;
+                          break;
+                      default:
+                          visible = false;
+                  }
+              }
           }
           //System.out.println("[mixed b] applyInputType "+element.getInputType()+", visible "+visible);
           element.setVisible(visible);
@@ -363,6 +372,20 @@ public class InputControlsView extends View {
         if (getWindowToken() != null && isShown()) {
           applyInputMode(connected ? InputMode.MNK : InputMode.ALL);
         }
+    }
+
+    public void toggleOverlayVisibility() {
+        overlayHidden = !overlayHidden;
+        applyInputMode(currentInputMode);
+    }
+
+    private boolean isOverlayToggleElement(AbstractControlElement element) {
+        for (GLFWBinding binding : element.getBindings()) {
+            if (binding == GLFWBinding.UI_TOGGLE_OVERLAY) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void showTextInputOverlay() {

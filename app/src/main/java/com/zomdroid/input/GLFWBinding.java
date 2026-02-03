@@ -123,6 +123,7 @@ public enum GLFWBinding {
     MOUSE_BUTTON_6(5),
     MOUSE_BUTTON_7(6),
     MOUSE_BUTTON_8(7),
+    UI_TOGGLE_OVERLAY(-100),
 
     /* gamepad buttons*/
     GAMEPAD_BUTTON_A(0),
@@ -182,7 +183,8 @@ public enum GLFWBinding {
                     return
                         (b.ordinal() >= KEY_SPACE.ordinal() && b.ordinal() <= KEY_KP_EQUAL.ordinal()) // keyboard
                         || (b.ordinal() >= MOUSE_BUTTON_LEFT.ordinal() && b.ordinal() <= MOUSE_BUTTON_8.ordinal()) // mouse
-                        || name.startsWith("MOUSE_WHEEL_"); // mouse wheel
+                        || name.startsWith("MOUSE_WHEEL_") // mouse wheel
+                        || b == UI_TOGGLE_OVERLAY;
                 })
                 .toArray(GLFWBinding[]::new);
 
