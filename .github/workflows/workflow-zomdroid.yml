@@ -10,7 +10,7 @@ on:
         type: choice
         options:
         - run_4213
-        - wakort_jvm_toggle
+        - jre25_freedreno
         
 jobs:
   build:
