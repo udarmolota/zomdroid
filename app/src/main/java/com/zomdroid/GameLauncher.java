@@ -10,6 +10,7 @@ import com.zomdroid.input.InputControlsView;
 import com.zomdroid.game.GameInstance;
 import com.zomdroid.BuildConfig;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class GameLauncher {
@@ -111,12 +112,40 @@ public class GameLauncher {
         ArrayList<String> args = gameInstance.getArgsAsList();
         if (BuildConfig.DEBUG) {
             args.add("-debug");
-            args.add("-debuglog=Shader");
+            //args.add("-debuglog=Shader");
             Log.i("Zomdroid", "JVM ARGS: " + jvmArgs);
             Log.i("Zomdroid", "GAME ARGS: " + args);            
         }
 
-        String javaHomePath = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.JRE;
+        //String javaHomePath = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.JRE;
+        // =========================
+        // ✅ New 1.3.1 JRE selection logic
+        // =========================
+
+        String home = AppStorage.requireSingleton().getHomePath();
+
+        // ✅ Added: prefer JRE21 when using GL4ES-style renderers (Build 41 tends to rely on that path).
+        // This isolates "old GL4ES pipeline" from "new Java 25 runtime" regressions.
+        boolean preferJre21ForRenderer = isLegacyRendererNeedingJre21(LauncherPreferences.requireSingleton().getRenderer()); // ✅ Added
+
+        // ✅ Added: try to use dedicated folders if present (jre21 / jre25). If not present, fall back to C.deps.JRE.
+        String jreFolder = preferJre21ForRenderer ? C.deps.JRE_21 : C.deps.JRE_25; // ✅ Added
+        String candidateJavaHomePath = home + "/" + jreFolder; // ✅ Added
+        String javaHomePath;
+        Log.i("zomdroid-main", "candidateJavaHomePath: "+candidateJavaHomePath);
+        if (new File(candidateJavaHomePath).exists()) {
+            javaHomePath = candidateJavaHomePath; // ✅ Added
+        } else {
+            // ✅ Added: fallback for setups that still package only one JRE folder (legacy behavior)
+            javaHomePath = home + "/" + C.deps.JRE_ROOT;
+        }
+
+        // ✅ Added: log which JRE path is actually used (critical for debugging reports discovers)
+        if (BuildConfig.DEBUG) {
+            Log.i("zomdroid-main", "jreFolder: "+jreFolder);
+            Log.i("zomdroid-main", "Using Java home: " + javaHomePath + " (renderer=" + LauncherPreferences.requireSingleton().getRenderer().name() + ")");
+        }
+
         String ldLibraryPath = AppStorage.requireSingleton().getLibraryPath() + ":/system/lib64:"
                 + javaHomePath + "/lib:" + javaHomePath + "/lib/server:" + gameInstance.getJavaLibraryPath();
         Log.d("zomdroid-main", ldLibraryPath);
@@ -124,6 +153,22 @@ public class GameLauncher {
                 gameInstance.getMainClassName(), args.toArray(new String[0]));
     }
 
+    // ✅ Added: central place to decide which renderers should stick to JRE21
+    private static boolean isLegacyRendererNeedingJre21(LauncherPreferences.Renderer r) {
+        // NOTE: adjust these cases to match your actual enum values.
+        // Idea: GL4ES path is the one that breaks visually under JRE25 for Build 41.
+        boolean result;
+        Log.d("zomdroid-main", "Renderer: "+r.name());
+        switch (r) {
+            case GL4ES:        // ✅ Add/keep if your enum has GL4ES
+            //case NG_GL4ES:   // ✅ Uncomment if you actually use this enum
+                result = true;
+            default:
+                result = false;
+        }
+        Log.d("zomdroid-main", "result: "+result);
+        return result;
+    }
 
     public static native int initZomdroidWindow();
 

@@ -5,7 +5,11 @@ public class C {
 
     public static class deps {
         public static final String ROOT = "dependencies";
-        public static final String JRE = ROOT + "/jre";
+        // We keep multiple JRE/LIBS versions side-by-side to support different game builds.
+        // NOTE: This avoids breaking PZ Build 41 when the launcher ships Java 25 for Build 42+.
+        public static final String JRE_ROOT = ROOT + "/jre";
+        public static final String JRE_21 = JRE_ROOT + "21"; // <-- NEW
+        public static final String JRE_25 = JRE_ROOT + "25"; // <-- NEW
         public static final String LIBS = ROOT + "/libs";
         public static final String JARS = ROOT + "/jars";
         public static final String LIBS_LINUX_X86_64 = LIBS + "/linux-x86_64";
@@ -20,7 +24,8 @@ public class C {
 
     public static class assets {
         public static final String BUNDLES = "bundles";
-        public static final String BUNDLES_JRE = BUNDLES + "/jre.tar.xz";
+        public static final String BUNDLES_JRE21 = BUNDLES + "/jre21.tar.xz";
+        public static final String BUNDLES_JRE25 = BUNDLES + "/jre25.tar.xz";
         public static final String BUNDLES_LIBS = BUNDLES + "/libs.tar.xz";
         public static final String BUNDLES_JARS = BUNDLES + "/jars.tar";
         public static final String DEFAULT_CONTROLS = "default_controls.json";
