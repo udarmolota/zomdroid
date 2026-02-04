@@ -198,17 +198,44 @@ public class InstallerService extends Service implements TaskProgressListener {
 
             HashMap<String, Long> newBundlesHashesMap = new HashMap<>();
 
-            Long jreHashOld = oldBundlesHashesMap.get(C.assets.BUNDLES_JRE);
+            // --- JRE 21 ---
+            Long jre21HashOld = oldBundlesHashesMap.get(C.assets.BUNDLES_JRE21);
             try {
-                Long jreHashNew = FileUtils.generateCRC32ForAsset(this, C.assets.BUNDLES_JRE);
-                newBundlesHashesMap.put(C.assets.BUNDLES_JRE, jreHashNew);
-                if (jreHashOld == null || !jreHashOld.equals(jreHashNew)) {
-                    String jrePath = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.JRE;
-                    File jreDir = new File(jrePath);
-                    if (jreDir.exists())
-                        FileUtils.deleteDirectory(jreDir);
-                    InputStream libsBundleInStream = getAssets().open(C.assets.BUNDLES_JRE);
-                    FileUtils.extractTarXzToDisk(libsBundleInStream, jrePath, this, 0);
+                Long jre21HashNew = FileUtils.generateCRC32ForAsset(this, C.assets.BUNDLES_JRE21);
+                newBundlesHashesMap.put(C.assets.BUNDLES_JRE21, jre21HashNew);
+            
+                // Reinstall only if the bundle changed (CRC mismatch) or not installed yet.
+                if (jre21HashOld == null || !jre21HashOld.equals(jre21HashNew)) {
+                    String jre21Path = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.JRE_21;
+                    File jre21Dir = new File(jre21Path);
+                    if (jre21Dir.exists()) {
+                        FileUtils.deleteDirectory(jre21Dir);
+                    }
+                    InputStream jreBundleInStream = getAssets().open(C.assets.BUNDLES_JRE21);
+                    FileUtils.extractTarXzToDisk(jreBundleInStream, jre21Path, this, 0);
+                    jreBundleInStream.close();
+                }
+            } catch (IOException e) {
+                finishWithError(getString(R.string.dialog_title_failed_to_install_dependencies), e.toString());
+                return;
+            }
+            
+            // --- JRE 25 ---
+            Long jre25HashOld = oldBundlesHashesMap.get(C.assets.BUNDLES_JRE25);
+            try {
+                Long jre25HashNew = FileUtils.generateCRC32ForAsset(this, C.assets.BUNDLES_JRE25);
+                newBundlesHashesMap.put(C.assets.BUNDLES_JRE25, jre25HashNew);
+            
+                // Reinstall only if the bundle changed (CRC mismatch) or not installed yet.
+                if (jre25HashOld == null || !jre25HashOld.equals(jre25HashNew)) {
+                    String jre25Path = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.JRE_25;
+                    File jre25Dir = new File(jre25Path);
+                    if (jre25Dir.exists()) {
+                        FileUtils.deleteDirectory(jre25Dir);
+                    }
+                    InputStream jreBundleInStream = getAssets().open(C.assets.BUNDLES_JRE25);
+                    FileUtils.extractTarXzToDisk(jreBundleInStream, jre25Path, this, 0);
+                    jreBundleInStream.close();
                 }
             } catch (IOException e) {
                 finishWithError(getString(R.string.dialog_title_failed_to_install_dependencies), e.toString());
