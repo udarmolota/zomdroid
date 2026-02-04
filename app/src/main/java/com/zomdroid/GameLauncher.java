@@ -132,7 +132,7 @@ public class GameLauncher {
         String jreFolder = preferJre21ForRenderer ? C.deps.JRE_21 : C.deps.JRE_25; // ✅ Added
         String candidateJavaHomePath = home + "/" + jreFolder; // ✅ Added
         String javaHomePath;
-        Log.i("zomdroid-main", "candidateJavaHomePath: "+candidateJavaHomePath);
+
         if (new File(candidateJavaHomePath).exists()) {
             javaHomePath = candidateJavaHomePath; // ✅ Added
         } else {
@@ -140,15 +140,9 @@ public class GameLauncher {
             javaHomePath = home + "/" + C.deps.JRE_ROOT;
         }
 
-        // ✅ Added: log which JRE path is actually used (critical for debugging reports discovers)
-        if (BuildConfig.DEBUG) {
-            Log.i("zomdroid-main", "jreFolder: "+jreFolder);
-            Log.i("zomdroid-main", "Using Java home: " + javaHomePath + " (renderer=" + LauncherPreferences.requireSingleton().getRenderer().name() + ")");
-        }
-
         String ldLibraryPath = AppStorage.requireSingleton().getLibraryPath() + ":/system/lib64:"
                 + javaHomePath + "/lib:" + javaHomePath + "/lib/server:" + gameInstance.getJavaLibraryPath();
-        Log.d("zomdroid-main", ldLibraryPath);
+        //Log.d("zomdroid-main", ldLibraryPath);
         GameLauncher.startGame(gameInstance.getGamePath(), ldLibraryPath, jvmArgs.toArray(new String[0]),
                 gameInstance.getMainClassName(), args.toArray(new String[0]));
     }
@@ -158,7 +152,7 @@ public class GameLauncher {
         // NOTE: adjust these cases to match your actual enum values.
         // Idea: GL4ES path is the one that breaks visually under JRE25 for Build 41.
         boolean result;
-        Log.d("zomdroid-main", "Renderer: "+r.name());
+
         switch (r) {
             case GL4ES:        // ✅ Add/keep if your enum has GL4ES
             //case NG_GL4ES:   // ✅ Uncomment if you actually use this enum
@@ -166,7 +160,7 @@ public class GameLauncher {
             default:
                 result = false;
         }
-        Log.d("zomdroid-main", "result: "+result);
+
         return result;
     }
 
