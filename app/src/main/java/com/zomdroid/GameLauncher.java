@@ -129,17 +129,19 @@ public class GameLauncher {
         boolean preferJre21ForRenderer = isLegacyRendererNeedingJre21(LauncherPreferences.requireSingleton().getRenderer()); // ✅ Added
 
         // ✅ Added: try to use dedicated folders if present (jre21 / jre25). If not present, fall back to C.deps.JRE.
-        String jreFolder = preferJre21ForRenderer ? C.deps.JRE_21 : C.deps.JRE_25; // ✅ Added
-        String candidateJavaHomePath = home + "/" + jreFolder; // ✅ Added
+        String jreFolder = preferJre21ForRenderer ? C.deps.JRE_21 : C.deps.JRE_25;
+        String candidateJavaHomePath = home + "/" + jreFolder;
         String javaHomePath;
 
         if (new File(candidateJavaHomePath).exists()) {
-            javaHomePath = candidateJavaHomePath; // ✅ Added
+            javaHomePath = candidateJavaHomePath;
         } else {
             // ✅ Added: fallback for setups that still package only one JRE folder (legacy behavior)
             javaHomePath = home + "/" + C.deps.JRE_ROOT;
         }
-
+        if (BuildConfig.DEBUG) {
+            Log.i("Zomdroid", "jreFolder: " + jreFolder+", candidateJavaHomePath: "+candidateJavaHomePath+", javaHomePath: "+javaHomePath);
+        }
         String ldLibraryPath = AppStorage.requireSingleton().getLibraryPath() + ":/system/lib64:"
                 + javaHomePath + "/lib:" + javaHomePath + "/lib/server:" + gameInstance.getJavaLibraryPath();
         //Log.d("zomdroid-main", ldLibraryPath);
@@ -147,20 +149,12 @@ public class GameLauncher {
                 gameInstance.getMainClassName(), args.toArray(new String[0]));
     }
 
-    // ✅ Added: central place to decide which renderers should stick to JRE21
     private static boolean isLegacyRendererNeedingJre21(LauncherPreferences.Renderer r) {
-        // NOTE: adjust these cases to match your actual enum values.
-        // Idea: GL4ES path is the one that breaks visually under JRE25 for Build 41.
-        boolean result;
+        boolean result = (r == LauncherPreferences.Renderer.GL4ES);
 
-        switch (r) {
-            case GL4ES:        // ✅ Add/keep if your enum has GL4ES
-            //case NG_GL4ES:   // ✅ Uncomment if you actually use this enum
-                result = true;
-            default:
-                result = false;
+        if (BuildConfig.DEBUG) {
+            Log.i("Zomdroid", "isLegacyRendererNeedingJre21: " + result + ", Renderer: " + r.name());
         }
-
         return result;
     }
 
