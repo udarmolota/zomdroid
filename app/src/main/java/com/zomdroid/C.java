@@ -14,6 +14,7 @@ public class C {
         public static final String LIBS_LWJGL_336 = LIBS_ANDROID_ARM64_v8a + "/lwjgl-3.3.6";
         public static final String LIBS_FMOD_20206 = LIBS_ANDROID_ARM64_v8a + "/fmod-2.02.06";
         public static final String LIBS_FMOD_20224 = LIBS_ANDROID_ARM64_v8a + "/fmod-2.02.24";
+        public static final String LIBS_FMOD_200309 = LIBS_ANDROID_ARM64_v8a + "/fmod-2.03.09";
         public static final String JARS_SQLITE_JDBC_34800 = JARS + "/sqlite-jdbc-3.48.0.0.jar";
         public static final String JARS_ZOMDROID_AGENT = JARS + "/zomdroid-agent.jar";
     }
