@@ -651,7 +651,7 @@ void *dlopen(const char* filename, int flags) {
         }
 
         //trying to load native library
-        //if (strcmp(jni_libs[i].name, "fmodintegration64") != 0) { //later I should fix that. Java for some reason didn't see classes inside
+        if (strcmp(jni_libs[i].name, "fmodintegration64") != 0) { //later I should fix that. Java for some reason didn't see classes inside
             const char* base = strrchr(filename, '/');
             if (base)
                 base++;
@@ -668,7 +668,7 @@ void *dlopen(const char* filename, int flags) {
                 return jni_libs[i].handle;
             }
             LOGW("[linker] Native Android version of %s not found, loading through box64...", android_filename);
-        //}
+        }
 
         //elsewise loading in box64
         LOGE("[linker] Loading %s in box64...", filename);

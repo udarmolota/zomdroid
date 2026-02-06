@@ -11,7 +11,7 @@ import android.graphics.drawable.shapes.OvalShape;
 import android.graphics.drawable.shapes.RectShape;
 import android.text.TextPaint;
 import android.view.MotionEvent;
-
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
@@ -38,6 +38,15 @@ public class ButtonControlElement extends AbstractControlElement {
     }
 
     private void dispatchEvent(boolean isPressed) {
+        for (GLFWBinding binding : bindings) {
+            if (binding == GLFWBinding.UI_TOGGLE_OVERLAY) {
+                if (isPressed) {
+                    parentView.toggleOverlayVisibility();
+                }
+                return; // важно: не отправлять дальше ни MNK, ни GAMEPAD
+            }
+        }
+
         switch (this.inputType) {
             case MNK:
                 for (GLFWBinding binding : bindings) {
@@ -65,7 +74,7 @@ public class ButtonControlElement extends AbstractControlElement {
                 float y = e.getY(actionIndex);
                 if (!this.drawable.isPointOver(x, y)) return false;
                 this.pointerId = pointerId;
-                
+
                 if (getToggle()) {
                     if (isToggledOn) {
                         this.dispatchEvent(false);
@@ -91,7 +100,7 @@ public class ButtonControlElement extends AbstractControlElement {
             case MotionEvent.ACTION_CANCEL: {
                 if (this.pointerId != -1) {
                     this.pointerId = -1;
-                    this.dispatchEvent(false); 
+                    this.dispatchEvent(false);
                     return true;
                 }
                 return false;
@@ -272,18 +281,18 @@ public class ButtonControlElement extends AbstractControlElement {
         public void draw(@NonNull Canvas canvas) {
             // --- Outline pass (black, a bit thicker) ---
             Paint p = this.shapeDrawable.getPaint();
-        
+
             int oldColor = p.getColor();
             int oldAlpha = p.getAlpha();
             float oldStroke = p.getStrokeWidth();
             ColorFilter oldFilter = p.getColorFilter();
-        
+
             p.setColor(android.graphics.Color.BLACK);
             p.setAlpha(OUTLINE_ALPHA);
             p.setStrokeWidth(oldStroke + OUTLINE_EXTRA_PX * parentView.pixelScale);
             p.setColorFilter(null);
             this.shapeDrawable.draw(canvas);
-        
+
             // --- Normal pass (your current style/color/alpha) ---
             p.setColor(oldColor);
             p.setAlpha(oldAlpha);
@@ -300,17 +309,17 @@ public class ButtonControlElement extends AbstractControlElement {
                 int oldTextColor = this.textPaint.getColor();
                 int oldTextAlpha = this.textPaint.getAlpha();
                 ColorFilter oldTextFilter = this.textPaint.getColorFilter();
-            
+
                 // outline pass: чёрный без фильтра
                 this.textPaint.setColor(android.graphics.Color.BLACK);
                 this.textPaint.setAlpha(OUTLINE_ALPHA);
                 this.textPaint.setColorFilter(null);
-            
+
                 canvas.drawText(this.text, this.centerX - o, this.textY, this.textPaint);
                 canvas.drawText(this.text, this.centerX + o, this.textY, this.textPaint);
                 canvas.drawText(this.text, this.centerX, this.textY - o, this.textPaint);
                 canvas.drawText(this.text, this.centerX, this.textY + o, this.textPaint);
-            
+
                 // normal pass: вернуть как было
                 this.textPaint.setColor(oldTextColor);
                 this.textPaint.setAlpha(oldTextAlpha);

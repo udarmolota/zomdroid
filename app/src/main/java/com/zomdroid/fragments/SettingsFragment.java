@@ -30,7 +30,7 @@ public class SettingsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        
+
         ArrayAdapter<LauncherPreferences.Renderer> rendererArrayAdapter = new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_spinner_dropdown_item, LauncherPreferences.Renderer.values());
         binding.settingsRendererS.setAdapter(rendererArrayAdapter);
@@ -63,22 +63,46 @@ public class SettingsFragment extends Fragment {
             Navigation.findNavController(v).navigate(R.id.wiki_fragment);
         });
 
-       
-        ArrayAdapter<LauncherPreferences.VulkanDriver> vulkanDriverAdapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_spinner_dropdown_item, LauncherPreferences.VulkanDriver.values());
+        ArrayAdapter<LauncherPreferences.VulkanDriver> vulkanDriverAdapter =
+                new ArrayAdapter<>(requireContext(),
+                        android.R.layout.simple_spinner_dropdown_item,
+                        LauncherPreferences.VulkanDriver.values());
+
         binding.settingsVulkanDriverS.setAdapter(vulkanDriverAdapter);
-        binding.settingsVulkanDriverS.setSelection(vulkanDriverAdapter.getPosition(LauncherPreferences.requireSingleton().getVulkanDriver()));
+        binding.settingsVulkanDriverS.setSelection(
+                vulkanDriverAdapter.getPosition(LauncherPreferences.requireSingleton().getVulkanDriver())
+        );
+
+        final boolean[] isInitialSelection = { true };
+
         binding.settingsVulkanDriverS.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                LauncherPreferences.VulkanDriver vulkanDriver = (LauncherPreferences.VulkanDriver) parent.getSelectedItem();
+                LauncherPreferences.VulkanDriver vulkanDriver =
+                        (LauncherPreferences.VulkanDriver) parent.getSelectedItem();
+
                 LauncherPreferences.requireSingleton().setVulkanDriver(vulkanDriver);
+
+                if (isInitialSelection[0]) {
+                    isInitialSelection[0] = false;
+                    return;
+                }
+
+                if (vulkanDriver == LauncherPreferences.VulkanDriver.FREEDRENO_8XX_Expr) {
+                    new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                            .setTitle("Freedreno 8xx")
+                            .setMessage(
+                                    "Freedreno 8xx is experimental.\n\n" +
+                                            "If you get crashes or rendering issues, switch back to System driver.\n" +
+                                            "Recommended mainly for Adreno 840/830/825/810/829. Snapdragon 8 Gen 3/4/5/Elite and 7 Gen 3 devices."
+                            )
+                            .setPositiveButton("OK", null)
+                            .show();
+                }
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
+            public void onNothingSelected(AdapterView<?> parent) {}
         });
 
         binding.settingsResolutionScaleSb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -119,7 +143,7 @@ public class SettingsFragment extends Fragment {
         });
 
         binding.settingsJargsEt.setText(LauncherPreferences.requireSingleton().getJvmArgs());
-        
+
         binding.settingsJargsEt.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -132,18 +156,18 @@ public class SettingsFragment extends Fragment {
                 LauncherPreferences.requireSingleton().setJvmArgs(s.toString().trim());
             }
         });
-        
+
         binding.settingsJargsInfo.setOnClickListener(v -> {
             new androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                .setTitle("JVM arguments")
-                .setMessage("Additional JVM arguments, e.g.:\n\n" +
-                           "• -Xmx2G - allocate 2Gb of memory\n" +
-                           "• -Xms1G - process starts with 1Gb RAM\n" +
-                           "• -XX:+UseG1GC - enable G1 garbage collector\n\n" +
-                           "Right now, we're not sure how much of an impact allocating more memory will have, but in theory, it should help when there's not enough.\n" +
-                           "Some arguments are already set by settings.")
-                .setPositiveButton("OK", null)
-                .show();
+                    .setTitle("JVM arguments")
+                    .setMessage("Additional JVM arguments, e.g.:\n\n" +
+                            "• -Xmx2G - allocate 2Gb of memory\n" +
+                            "• -Xms1G - process starts with 1Gb RAM\n" +
+                            "• -XX:+UseG1GC - enable G1 garbage collector\n\n" +
+                            "Right now, we're not sure how much of an impact allocating more memory will have, but in theory, it should help when there's not enough.\n" +
+                            "Some arguments are already set by settings.")
+                    .setPositiveButton("OK", null)
+                    .show();
         });
     }
 

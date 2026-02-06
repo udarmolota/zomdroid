@@ -10,6 +10,7 @@ import com.zomdroid.input.InputControlsView;
 import com.zomdroid.game.GameInstance;
 import com.zomdroid.BuildConfig;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class GameLauncher {
@@ -62,7 +63,7 @@ public class GameLauncher {
               Os.setenv("LIBGL_FB", "2", true);
               Os.setenv("LIBGL_FBONOALPHA", "1", true);
               //Os.setenv("LIBGL_GL", "21", true);
-                
+
               Os.setenv("ZOMDROID_GLES_MAJOR", "2", true);
               Os.setenv("ZOMDROID_GLES_MINOR", "0", true);
               break;
@@ -77,7 +78,7 @@ public class GameLauncher {
         Os.setenv("ZOMDROID_AUDIO_API", LauncherPreferences.requireSingleton().getAudioAPI().name(), false);
 
         if (BuildConfig.DEBUG) {
-                // for debugging GL calls, only supported on GL ES 3.2+ with GL_KHR_debug extension present
+            // for debugging GL calls, only supported on GL ES 3.2+ with GL_KHR_debug extension present
                 /*Os.setenv("ZOMDROID_DEBUG_GL", "1", false);
                 Os.setenv("ZOMDROID_DEBUG_GL", "1", false);
                 Os.setenv("LIBGL_GLES", "libGLESv3.so", false);
@@ -91,10 +92,10 @@ public class GameLauncher {
         String rawArgs = LauncherPreferences.requireSingleton().getJvmArgs();
 
         if (rawArgs != null && !rawArgs.trim().isEmpty()) {
-                String[] splitArgs = rawArgs.trim().split("\\s+");
-                for (String arg : splitArgs) {
-                        jvmArgs.add(arg);
-                }
+            String[] splitArgs = rawArgs.trim().split("\\s+");
+            for (String arg : splitArgs) {
+                jvmArgs.add(arg);
+            }
         }
 
         jvmArgs.add("-Dorg.lwjgl.opengl.libname=" + LauncherPreferences.requireSingleton().getRenderer().libName);
@@ -111,27 +112,51 @@ public class GameLauncher {
         ArrayList<String> args = gameInstance.getArgsAsList();
         if (BuildConfig.DEBUG) {
             args.add("-debug");
-            args.add("-debuglog=Shader");
+            //args.add("-debuglog=Shader");
             Log.i("Zomdroid", "JVM ARGS: " + jvmArgs);
-            Log.i("Zomdroid", "GAME ARGS: " + args);            
+            Log.i("Zomdroid", "GAME ARGS: " + args);
         }
 
-        String javaHomePath = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.JRE;
+        //String javaHomePath = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.JRE;
+        String home = AppStorage.requireSingleton().getHomePath();
+
+        // Prefer JRE21 when using GL4ES-style renderers (Build 41 tends to rely on that path).
+        // This isolates "old GL4ES pipeline" from "new Java 25 runtime" regressions.
+        boolean preferJre21ForRenderer = isLegacyRendererNeedingJre21(LauncherPreferences.requireSingleton().getRenderer()); // ✅ Added
+
+        // Try to use dedicated folders if present (jre21 / jre25). If not present, fall back to C.deps.JRE.
+        String jreFolder = preferJre21ForRenderer ? C.deps.JRE_21 : C.deps.JRE_25;
+        String candidateJavaHomePath = home + "/" + jreFolder;
+        String javaHomePath;
+
+        if (new File(candidateJavaHomePath).exists()) {
+            javaHomePath = candidateJavaHomePath;
+        } else {
+            // fallback for setups that still package only one JRE folder (legacy behavior)
+            javaHomePath = home + "/" + C.deps.JRE_ROOT;
+        }
+        if (BuildConfig.DEBUG) {
+            Log.i("Zomdroid", "jreFolder: " + jreFolder+", candidateJavaHomePath: "+candidateJavaHomePath+", javaHomePath: "+javaHomePath);
+        }
         String ldLibraryPath = AppStorage.requireSingleton().getLibraryPath() + ":/system/lib64:"
                 + javaHomePath + "/lib:" + javaHomePath + "/lib/server:" + gameInstance.getJavaLibraryPath();
-        Log.d("zomdroid-main", ldLibraryPath);
+        //Log.d("zomdroid-main", ldLibraryPath);
         GameLauncher.startGame(gameInstance.getGamePath(), ldLibraryPath, jvmArgs.toArray(new String[0]),
                 gameInstance.getMainClassName(), args.toArray(new String[0]));
     }
 
+    private static boolean isLegacyRendererNeedingJre21(LauncherPreferences.Renderer r) {
+        boolean result = (r == LauncherPreferences.Renderer.GL4ES);
+
+        if (BuildConfig.DEBUG) {
+            Log.i("Zomdroid", "isLegacyRendererNeedingJre21: " + result + ", Renderer: " + r.name());
+        }
+        return result;
+    }
 
     public static native int initZomdroidWindow();
-
     public static native void destroyZomdroidWindow();
-
     public static native int setSurface(Surface surface, int width, int height);
-
     public static native void destroySurface();
-
     static native void startGame(String gameDirPath, String libraryDirPath, String[] jvmArgs, String mainClassName, String[] args);
 }

@@ -59,7 +59,7 @@
     <string name="dialog_title_installing_dependencies">Installing dependencies…</string>
     <string name="dialog_title_dependencies_installed">Dependencies successfully installed</string>
     <string name="dialog_title_failed_to_install_dependencies">Failed to install dependencies</string>
-    <string name="dialog_title_donate">Donate</string>
+    <string name="dialog_title_donate">Support development</string>
     <string name="dialog_title_game_files_missing">Game files are missing</string>
     <string name="dialog_title_game_files_not_for_linux">Installed files are not supported</string>
 
@@ -75,7 +75,7 @@
     <string name="nav_menu_controls_editor">Controls editor</string>
     <string name="nav_menu_gamepad_mapper">Gamepad mapper</string>
     <string name="nav_menu_manage_storage">Manage storage</string>
-    <string name="nav_menu_donate">Donate</string>
+    <string name="nav_menu_donate">Support</string>
     <string name="control_element_delete">Delete element</string>
     <string name="control_element_input_type">Input type</string>
     <string name="control_element_stick_binding">Stick Binding</string>
@@ -84,7 +84,7 @@
     <string name="game_instance_manage_storage">Manage storage</string>
     <string name="game_instance_delete">Delete</string>
 
-    <string name="donate_message">Enjoying the app and want to help it grow? It was originally created by ko-fi.com/liamelui, and is now maintained and developed by ko-fi.com/udarmolota.</string>
+    <string name="donate_message">Enjoying the app and want to support us? \n\nCreated by ko-fi.com/liamelui, and is now maintained and developed by ko-fi.com/udarmolota. \n\nOther contributors: \nshimux0, Wakort, LeHiepDuy.</string>
 
     <string name="app_aborted">The app ran into an unexpected issue and had to close</string>
     <string name="share_logs">Share log file</string>

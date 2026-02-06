@@ -123,6 +123,7 @@ public enum GLFWBinding {
     MOUSE_BUTTON_6(5),
     MOUSE_BUTTON_7(6),
     MOUSE_BUTTON_8(7),
+    UI_TOGGLE_OVERLAY(-100),
 
     /* gamepad buttons*/
     GAMEPAD_BUTTON_A(0),
