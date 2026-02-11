@@ -52,22 +52,19 @@ public class GameLauncher {
                 }
                 break;
             /*case NG_GL4ES: {
-              Os.unsetenv("GALLIUM_DRIVER");
-
-              Os.setenv("LIBGL_NOBANNER", "1", true);
-              Os.setenv("LIBGL_SILENTSTUB", "0", true);
-              Os.setenv("LIBGL_STACKTRACE", "1", true);
-              Os.setenv("LIBGL_LOGSHADERERROR", "1", true);
-              Os.setenv("LIBGL_ES", "2", true);
-              Os.setenv("LIBGL_NODEPTHTEX", "1", true);
-              Os.setenv("LIBGL_FB", "2", true);
-              Os.setenv("LIBGL_FBONOALPHA", "1", true);
-              //Os.setenv("LIBGL_GL", "21", true);
-
-              Os.setenv("ZOMDROID_GLES_MAJOR", "2", true);
-              Os.setenv("ZOMDROID_GLES_MINOR", "0", true);
+                Os.setenv("LIBGL_ES", "3", true);
+                //Os.setenv("LIBGL_GL", "21", true); // если нужен OpenGL 2.1 для движка
+                //Os.setenv("LIBGL_NOBANNER", "0", true);
+                //Os.setenv("LIBGL_SILENTSTUB", "0", true); // если хотите убрать шум
+                //Os.setenv("LIBGL_FB", "2", true);
+                //Os.setenv("LIBGL_FBONOALPHA", "1", true);
+                Os.setenv("ZOMDROID_GLES_MAJOR", "3", true);
+                Os.setenv("ZOMDROID_GLES_MINOR", "1", true);
+                //Os.setenv("LIBGL_SIMPLE_SHADERCONV", "1", true);
+                //Os.setenv("LIBGL_VGPU_FORCE", "1", true);
+                //Os.setenv("LIBGL_DBGSHADERCONV", "15", true);
               break;
-            }*/
+            } */
             default: {
                 Os.setenv("ZOMDROID_GLES_MAJOR", "2", false);
                 Os.setenv("ZOMDROID_GLES_MINOR", "1", false);
@@ -78,7 +75,9 @@ public class GameLauncher {
         Os.setenv("ZOMDROID_AUDIO_API", LauncherPreferences.requireSingleton().getAudioAPI().name(), false);
 
         if (BuildConfig.DEBUG) {
-            // for debugging GL calls, only supported on GL ES 3.2+ with GL_KHR_debug extension present
+            //for debugging GL calls, only supported on GL ES 3.2+ with GL_KHR_debug extension present
+                Os.setenv("LIBGL_STACKTRACE","1", false);
+                Os.setenv("LIBGL_LOGSHADERERROR","1", false);
                 /*Os.setenv("ZOMDROID_DEBUG_GL", "1", false);
                 Os.setenv("ZOMDROID_DEBUG_GL", "1", false);
                 Os.setenv("LIBGL_GLES", "libGLESv3.so", false);

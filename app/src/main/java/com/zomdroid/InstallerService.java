@@ -30,12 +30,20 @@ import com.zomdroid.game.GameInstance;
 import com.zomdroid.game.GameInstanceManager;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.util.Enumeration;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 public class InstallerService extends Service implements TaskProgressListener {
     private static final String LOG_TAG = InstallerService.class.getName();
@@ -97,7 +105,7 @@ public class InstallerService extends Service implements TaskProgressListener {
             return;
         }
         GameInstance gameInstance = GameInstanceManager.requireSingleton().getInstanceByName(gameInstanceName);
-        String buildVersion = gameInstance.getBuildVersion();
+        //String buildVersion = gameInstance.getBuildVersion();
         if (gameInstance == null) {
             finishWithError(getString(R.string.dialog_title_failed_to_create_instance),
                     "Game instance with name " + gameInstanceName + " not found");
@@ -114,6 +122,8 @@ public class InstallerService extends Service implements TaskProgressListener {
         executorService.submit(() -> {
             try {
                 installGameFromZip(gameInstance, gameFilesArchiveUri);
+                // 42.13 extra jar unpack
+                extractProjectZomboidJarSimple(gameInstance);
 
                 // Added in 1.3.2 for native game libs
                 File androidDirFromGame = new File(gameInstance.getGamePath() + "/android");
@@ -142,6 +152,8 @@ public class InstallerService extends Service implements TaskProgressListener {
                     System.out.println("No native libraries provided — skipping multiplayer setup");
                 }
 
+                // 42.13 problematic lib renaming
+                maybeDisableLightingLibFor4213(gameInstance);
             } catch (Exception e) {
                 finishWithError(getString(R.string.dialog_title_failed_to_create_instance), e.toString());
                 return;
@@ -378,6 +390,42 @@ public class InstallerService extends Service implements TaskProgressListener {
         });
     }
 
+    private void maybeDisableLightingLibFor4213(GameInstance gameInstance) {
+        File gameDir = new File(gameInstance.getGamePath());
+        File pzJar = new File(gameDir, "projectzomboid.jar");
+        if (!pzJar.exists()) return; // не 42.13-структура
+
+        File soDir = new File(gameDir, "android/arm64-v8a");
+        File so = new File(soDir, "libLighting64.so");
+        if (!so.exists()) return;
+
+        File disabled = new File(soDir, "libLighting64.so.disabled");
+        if (disabled.exists()) {
+            // уже отключали раньше; если вдруг снова появился оригинал — прибьём
+            //noinspection ResultOfMethodCallIgnored
+            so.delete();
+            return;
+        }
+
+        // Переименовываем. Если не получилось — кидаем exception, чтобы установка считалась неуспешной.
+        if (!so.renameTo(disabled)) {
+            throw new RuntimeException("Failed to rename libLighting64.so for 42.13: " + so.getAbsolutePath());
+        }
+
+        Log.i(LOG_TAG, "42.13 patch: disabled libLighting64.so -> " + disabled.getName());
+    }
+
+    private void extractProjectZomboidJarSimple(GameInstance gameInstance) throws IOException {
+        File gameDir = new File(gameInstance.getGamePath());
+        File jar = new File(gameDir, "projectzomboid.jar");
+        if (!jar.exists()) return;
+
+        Log.i(LOG_TAG, "42.13 test: extracting projectzomboid.jar using FileUtils");
+
+        try (InputStream is = new FileInputStream(jar)) {
+            FileUtils.extractZipToDisk(is, gameDir.getAbsolutePath(), this, jar.length());
+        }
+    }
 
     public LiveData<TaskState> getTaskState() {
         return taskState;
