@@ -56,7 +56,7 @@ public class PresetManager {
         );
         // NEW 42.12 structure
         presets.add(new InstallationPreset.Builder()
-                .setName("Build 42.12")
+                .setName("Build 42.12+")
                 .setBuildVersion("42")
                 .setClassPathArray(new String[]{
                         ".",
