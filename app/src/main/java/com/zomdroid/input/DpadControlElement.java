@@ -302,7 +302,7 @@ public class DpadControlElement extends AbstractControlElement {
             float oldStroke = this.paint.getStrokeWidth();
         
             //this.paint.setColor(android.graphics.Color.BLACK);
-            android.graphics.Color.rgb(40, 40, 40);
+            this.paint.setColor(android.graphics.Color.rgb(40, 40, 40));
             //this.paint.setAlpha(OUTLINE_ALPHA);
             this.paint.setAlpha(Math.min(oldAlpha, OUTLINE_ALPHA));
             this.paint.setStrokeWidth(oldStroke + OUTLINE_EXTRA_PX * parentView.pixelScale);
