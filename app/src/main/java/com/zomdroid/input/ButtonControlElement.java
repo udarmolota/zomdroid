@@ -220,10 +220,11 @@ public class ButtonControlElement extends AbstractControlElement {
     }
 
     public class ButtonControlDrawable {
-        private static final int PAINT_STROKE_WIDTH = 6;
-        private static final int OUTLINE_ALPHA = 120;          // 0..255
-        private static final float OUTLINE_EXTRA_PX = 5f;
-        private static final float TEXT_OUTLINE_PX = 4f;
+        private static final int PAINT_STROKE_WIDTH = 4;
+        private static final int OUTLINE_ALPHA = 70;          // 0..255
+        //private static final float OUTLINE_EXTRA_PX = 5f;
+        private static final float OUTLINE_EXTRA_PX = 1.25f; // или 1.5f
+        private static final float TEXT_OUTLINE_PX = 2.5f; //4f;
         private static final float BUTTON_CIRCLE_DIAMETER = 160.f;
         private static final float BUTTON_RECT_WIDTH = 240.f;
         private static final float BUTTON_RECT_HEIGHT = 120.f;
@@ -287,8 +288,9 @@ public class ButtonControlElement extends AbstractControlElement {
             float oldStroke = p.getStrokeWidth();
             ColorFilter oldFilter = p.getColorFilter();
 
-            p.setColor(android.graphics.Color.BLACK);
-            p.setAlpha(OUTLINE_ALPHA);
+            p.setColor(android.graphics.Color.rgb(40, 40, 40));
+            //p.setAlpha(OUTLINE_ALPHA);
+            p.setAlpha(Math.min(oldAlpha, OUTLINE_ALPHA));
             p.setStrokeWidth(oldStroke + OUTLINE_EXTRA_PX * parentView.pixelScale);
             p.setColorFilter(null);
             this.shapeDrawable.draw(canvas);
@@ -311,8 +313,10 @@ public class ButtonControlElement extends AbstractControlElement {
                 ColorFilter oldTextFilter = this.textPaint.getColorFilter();
 
                 // outline pass: чёрный без фильтра
-                this.textPaint.setColor(android.graphics.Color.BLACK);
-                this.textPaint.setAlpha(OUTLINE_ALPHA);
+                //this.textPaint.setColor(android.graphics.Color.BLACK);
+                this.textPaint.setColor(android.graphics.Color.rgb(40, 40, 40));
+                //this.textPaint.setAlpha(OUTLINE_ALPHA);
+                this.textPaint.setAlpha(Math.min(oldAlpha, OUTLINE_ALPHA));
                 this.textPaint.setColorFilter(null);
 
                 canvas.drawText(this.text, this.centerX - o, this.textY, this.textPaint);

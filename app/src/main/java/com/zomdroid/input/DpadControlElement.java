@@ -19,8 +19,9 @@ public class DpadControlElement extends AbstractControlElement {
     private int pointerId = -1;
     private static final float DPAD_DEAD_ZONE = 0.3f;
     private final AbstractControlElement.Type type;
-    private static final int OUTLINE_ALPHA = 120;
-    private static final float OUTLINE_EXTRA_PX = 5f;
+    private static final int OUTLINE_ALPHA = 70; // 120;
+    //private static final float OUTLINE_EXTRA_PX = 5f;
+    private static final float OUTLINE_EXTRA_PX = 1.25f; // или 1.5f
 
     public DpadControlElement(InputControlsView parentView, ControlElementDescription elementDescription) {
         super(parentView, elementDescription);
@@ -234,7 +235,7 @@ public class DpadControlElement extends AbstractControlElement {
     }
 
     public class DpadControlDrawable {
-        private static final int PAINT_STROKE_WIDTH = 6;
+        private static final int PAINT_STROKE_WIDTH = 4;
         private static final float DPAD_SIZE = 340.f;
 
         private int color;
@@ -300,8 +301,10 @@ public class DpadControlElement extends AbstractControlElement {
             int oldAlpha = this.paint.getAlpha();
             float oldStroke = this.paint.getStrokeWidth();
         
-            this.paint.setColor(android.graphics.Color.BLACK);
-            this.paint.setAlpha(OUTLINE_ALPHA);
+            //this.paint.setColor(android.graphics.Color.BLACK);
+            android.graphics.Color.rgb(40, 40, 40);
+            //this.paint.setAlpha(OUTLINE_ALPHA);
+            this.paint.setAlpha(Math.min(oldAlpha, OUTLINE_ALPHA));
             this.paint.setStrokeWidth(oldStroke + OUTLINE_EXTRA_PX * parentView.pixelScale);
             canvas.drawPath(this.path, this.paint);
         
