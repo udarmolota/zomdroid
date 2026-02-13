@@ -10,7 +10,7 @@ on:
         type: choice
         options:
         - run_4213
-        - jre25_freedreno
+        - separation
         
 jobs:
   build:
