@@ -158,7 +158,8 @@ public class LauncherPreferences {
     public enum VulkanDriver {
         SYSTEM_DEFAULT(null),
         FREEDRENO("libvulkan_freedreno.so"),
-        FREEDRENO_8XX_Expr("libvulkan_freedreno_8xx.so");
+        FREEDRENO_8XX_Expr("libvulkan_freedreno_8xx.so"),
+        TURNIP_bb61a78("vulkan.ad07XX.so");
 
         final String libName;
         VulkanDriver(String libName) {
