@@ -45,6 +45,8 @@ public class NewGameInstanceFragment extends Fragment {
     // URIs for selected ZIP files
     private Uri gameFilesZipUri = null;
     private Uri nativeLibsZipUri = null;
+    private Uri savesZipUri = null;
+    private Uri modsZipUri = null;
 
     // Launcher for selecting game ZIP
     private final ActivityResultLauncher<String> actionOpenDocumentLauncher =
@@ -73,6 +75,35 @@ public class NewGameInstanceFragment extends Fragment {
                     Toast.makeText(requireContext(), getString(R.string.game_instance_unsupported_extension), Toast.LENGTH_SHORT).show();
                 }
             });
+
+    // Launcher for selecting saves ZIP
+    private final ActivityResultLauncher<String> actionOpenSavesLauncher =
+            registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+                if (uri == null) return;
+                ContentResolver contentResolver = requireContext().getContentResolver();
+                if (Objects.equals(contentResolver.getType(uri), ZIP_MIME)) {
+                    savesZipUri = uri;
+                    String fileName = extractFileName(uri);
+                    binding.newGameInstanceSavesPathEt.setText(fileName);
+                } else {
+                    Toast.makeText(requireContext(), getString(R.string.game_instance_unsupported_extension), Toast.LENGTH_SHORT).show();
+                }
+            });
+
+    private final ActivityResultLauncher<String> actionOpenModsLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts.GetContent(),
+                    uri -> {
+                        if (uri == null) return;
+                        ContentResolver cr =
+                                requireContext().getContentResolver();
+                        if (Objects.equals(cr.getType(uri), ZIP_MIME)) {
+                            modsZipUri = uri;
+                            binding.newGameInstanceModsPathEt.setText(extractFileName(uri));
+                        } else {
+                            Toast.makeText(requireContext(), getString(R.string.game_instance_unsupported_extension), Toast.LENGTH_SHORT).show();
+                        }
+                    });
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -116,7 +147,7 @@ public class NewGameInstanceFragment extends Fragment {
                         throw new RuntimeException(e);
                     }
 
-                    // Start InstallerService with both ZIPs
+                  // Start InstallerService with ZIPs
                   GameInstanceManager.requireSingleton().registerInstance(gameInstance);
 
                   Intent installerIntent = new Intent(requireContext(), InstallerService.class);
@@ -126,10 +157,16 @@ public class NewGameInstanceFragment extends Fragment {
                   if (nativeLibsZipUri != null) {
                     installerIntent.putExtra(InstallerService.EXTRA_NATIVE_LIBS_URI, nativeLibsZipUri);
                   }
-                  Navigation.findNavController(binding.getRoot()).navigateUp();
+                  if (savesZipUri != null) {
+                    installerIntent.putExtra(InstallerService.EXTRA_SAVES_URI, savesZipUri);
+                  }
+                    if (modsZipUri != null) {
+                        installerIntent.putExtra(InstallerService.EXTRA_MODS_URI, modsZipUri);
+                    }
+                    Navigation.findNavController(binding.getRoot()).navigateUp();
                   requireContext().startForegroundService(installerIntent);
 
-                    return true;
+                  return true;
                 }
                 return false;
             }
@@ -185,6 +222,15 @@ public class NewGameInstanceFragment extends Fragment {
         actionOpenNativeLibsLauncher.launch(ZIP_MIME);
       });
 
+      // Browse button for Saves ZIP
+      binding.newGameInstanceSavesBrowseIb.setOnClickListener(v -> {
+        actionOpenSavesLauncher.launch(ZIP_MIME);
+      });
+
+      // Browse button for Modes ZIP
+      binding.newGameInstanceModsBrowseIb.setOnClickListener(v -> {
+        actionOpenModsLauncher.launch(ZIP_MIME);
+      });
 
     }
 

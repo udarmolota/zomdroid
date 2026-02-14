@@ -121,9 +121,18 @@ public class LauncherActivity extends AppCompatActivity {
                 binding.drawerLayout.close();
                 navController.navigate(R.id.action_open_touch_controls);
                 return true;
-            } 
-
+            } else if (item.getItemId() == R.id.action_open_install_mod) {
+                // Navigate to Mod installation
+                binding.drawerLayout.close();
+                navController.navigate(R.id.action_open_install_mod);
+                return true;
+            } else if (item.getItemId() == R.id.action_install_controls) {
             binding.drawerLayout.close();
+            navController.navigate(R.id.action_install_controls);
+            return true;
+        }
+
+        binding.drawerLayout.close();
 
             return NavigationUI.onNavDestinationSelected(item, navController)
                     || super.onOptionsItemSelected(item);

@@ -38,12 +38,10 @@ import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.util.Enumeration;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 public class InstallerService extends Service implements TaskProgressListener {
     private static final String LOG_TAG = InstallerService.class.getName();
@@ -54,6 +52,9 @@ public class InstallerService extends Service implements TaskProgressListener {
     public static final String EXTRA_GAME_INSTANCE_NAME = "com.zomdroid.InstallerService.EXTRA_GAME_INSTANCE_NAME";
     public static final String EXTRA_ARCHIVE_URI = "com.zomdroid.InstallerService.EXTRA_ARCHIVE_URI";
     public static final String EXTRA_NATIVE_LIBS_URI = "com.zomdroid.InstallerService.EXTRA_NATIVE_LIBS_URI";
+    public static final String EXTRA_SAVES_URI = "com.zomdroid.InstallerService.EXTRA_SAVES_URI";
+    public static final String EXTRA_MODS_URI = "com.zomdroid.InstallerService.EXTRA_MODS_URI";
+    public static final String EXTRA_CONTROLS_URI = "com.zomdroid.InstallerService.EXTRA_CONTROLS_URI";
 
     private final IBinder binder = new LocalBinder();
     private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -85,7 +86,17 @@ public class InstallerService extends Service implements TaskProgressListener {
             }
             case INSTALL_DEPENDENCIES: {
                 doInstallDependencies(intent);
+                break;
             }
+            case INSTALL_MOD_TO_INSTANCE: {
+                doInstallModToInstance(intent);
+                break;
+            }
+            case INSTALL_CONTROLS_TO_INSTANCE: {
+                doInstallControlsToInstance(intent);
+                break;
+            }
+
         }
 
         return START_NOT_STICKY;
@@ -95,7 +106,6 @@ public class InstallerService extends Service implements TaskProgressListener {
         String taskTitle = getString(R.string.dialog_title_creating_instance);
 
         startForeground(NOTIFICATION_ID, buildNotification(taskTitle));
-
         this.taskState.postValue(new TaskState(taskTitle, null, -1, 0, false, false));
 
         String gameInstanceName = intent.getStringExtra(EXTRA_GAME_INSTANCE_NAME);
@@ -105,7 +115,6 @@ public class InstallerService extends Service implements TaskProgressListener {
             return;
         }
         GameInstance gameInstance = GameInstanceManager.requireSingleton().getInstanceByName(gameInstanceName);
-        //String buildVersion = gameInstance.getBuildVersion();
         if (gameInstance == null) {
             finishWithError(getString(R.string.dialog_title_failed_to_create_instance),
                     "Game instance with name " + gameInstanceName + " not found");
@@ -154,13 +163,53 @@ public class InstallerService extends Service implements TaskProgressListener {
 
                 // 42.13 problematic lib renaming
                 maybeDisableLightingLibFor4213(gameInstance);
+
+                // Extracting Saves
+                Uri savesArchiveUri = intent.getParcelableExtra(EXTRA_SAVES_URI);
+                if (savesArchiveUri != null) {
+                    try {
+                        String savesRootPath = gameInstance.getHomePath() + "/Zomboid/Saves";
+                        File savesRootDir = new File(savesRootPath);
+                        if (!savesRootDir.exists()) savesRootDir.mkdirs();
+
+                        try (InputStream savesStream = getContentResolver().openInputStream(savesArchiveUri)) {
+                            FileUtils.extractZipToDisk(
+                                    savesStream,
+                                    savesRootPath,
+                                    this,
+                                    FileUtils.queryFileSize(getContentResolver(), savesArchiveUri)
+                            );
+                        }
+                    } catch (IOException e) {
+                        System.out.println("Saves not installed: " + e.getMessage());
+                    }
+                }
+
+                // Extracting Mods (при создании инстанса)
+                Uri modsArchiveUri = intent.getParcelableExtra(EXTRA_MODS_URI);
+                if (modsArchiveUri != null) {
+                    try (InputStream modsStream = getContentResolver().openInputStream(modsArchiveUri)) {
+                        String modsRootPath = gameInstance.getHomePath() + "/Zomboid/mods";
+                        File modsRootDir = new File(modsRootPath);
+                        if (!modsRootDir.exists()) modsRootDir.mkdirs();
+
+                        FileUtils.extractZipToDisk(
+                                modsStream,
+                                modsRootPath,
+                                this,
+                                FileUtils.queryFileSize(getContentResolver(), modsArchiveUri)
+                        );
+                    } catch (IOException e) {
+                        System.out.println("Mods not installed: " + e.getMessage());
+                    }
+                }
+
             } catch (Exception e) {
                 finishWithError(getString(R.string.dialog_title_failed_to_create_instance), e.toString());
                 return;
             }
 
             GameInstanceManager.requireSingleton().markInstallationFinished(gameInstance);
-
             finish(getString(R.string.dialog_title_instance_created), null);
         });
     }
@@ -169,7 +218,6 @@ public class InstallerService extends Service implements TaskProgressListener {
         String taskTitle = getString(R.string.dialog_title_deleting_game_instance);
 
         startForeground(NOTIFICATION_ID, buildNotification(taskTitle));
-
         this.taskState.postValue(new TaskState(taskTitle, null, -1, 0, false, false));
 
         String gameInstanceName = intent.getStringExtra(EXTRA_GAME_INSTANCE_NAME);
@@ -178,6 +226,7 @@ public class InstallerService extends Service implements TaskProgressListener {
                     "Game instance name intent extra is missing");
             return;
         }
+
         GameInstance gameInstance = GameInstanceManager.requireSingleton().getInstanceByName(gameInstanceName);
         if (gameInstance == null) {
             finishWithError(getString(R.string.dialog_title_failed_to_delete_instance),
@@ -194,7 +243,6 @@ public class InstallerService extends Service implements TaskProgressListener {
             }
 
             GameInstanceManager.requireSingleton().unregisterInstance(gameInstance);
-
             finish(getString(R.string.dialog_title_instance_deleted), null);
         });
     }
@@ -203,7 +251,6 @@ public class InstallerService extends Service implements TaskProgressListener {
         String taskTitle = getString(R.string.dialog_title_installing_dependencies);
 
         startForeground(NOTIFICATION_ID, buildNotification(taskTitle));
-
         this.taskState.postValue(new TaskState(taskTitle, null, -1, 0, false, false));
 
         executorService.submit(() -> {
@@ -212,8 +259,7 @@ public class InstallerService extends Service implements TaskProgressListener {
 
             String bundlesJson = prefs.getString(C.shprefs.keys.INSTALLED_BUNDLES, "[]");
 
-            Type mapType = new TypeToken<HashMap<String, Long>>() {
-            }.getType();
+            Type mapType = new TypeToken<HashMap<String, Long>>() {}.getType();
             HashMap<String, Long> oldBundlesHashesMap = gson.fromJson(bundlesJson, mapType);
 
             HashMap<String, Long> newBundlesHashesMap = new HashMap<>();
@@ -228,9 +274,8 @@ public class InstallerService extends Service implements TaskProgressListener {
                 if (jre21HashOld == null || !jre21HashOld.equals(jre21HashNew)) {
                     String jre21Path = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.JRE_21;
                     File jre21Dir = new File(jre21Path);
-                    if (jre21Dir.exists()) {
-                        FileUtils.deleteDirectory(jre21Dir);
-                    }
+                    if (jre21Dir.exists()) FileUtils.deleteDirectory(jre21Dir);
+
                     InputStream jreBundleInStream = getAssets().open(C.assets.BUNDLES_JRE21);
                     FileUtils.extractTarXzToDisk(jreBundleInStream, jre21Path, this, 0);
                     jreBundleInStream.close();
@@ -250,9 +295,8 @@ public class InstallerService extends Service implements TaskProgressListener {
                 if (jre25HashOld == null || !jre25HashOld.equals(jre25HashNew)) {
                     String jre25Path = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.JRE_25;
                     File jre25Dir = new File(jre25Path);
-                    if (jre25Dir.exists()) {
-                        FileUtils.deleteDirectory(jre25Dir);
-                    }
+                    if (jre25Dir.exists()) FileUtils.deleteDirectory(jre25Dir);
+
                     InputStream jreBundleInStream = getAssets().open(C.assets.BUNDLES_JRE25);
                     FileUtils.extractTarXzToDisk(jreBundleInStream, jre25Path, this, 0);
                     jreBundleInStream.close();
@@ -262,15 +306,17 @@ public class InstallerService extends Service implements TaskProgressListener {
                 return;
             }
 
+            // --- LIBS ---
             Long libsHashOld = oldBundlesHashesMap.get(C.assets.BUNDLES_LIBS);
             try {
                 Long libsHashNew = FileUtils.generateCRC32ForAsset(this, C.assets.BUNDLES_LIBS);
                 newBundlesHashesMap.put(C.assets.BUNDLES_LIBS, libsHashNew);
+
                 if (libsHashOld == null || !libsHashOld.equals(libsHashNew)) {
                     String libsPath = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.LIBS;
                     File libsDir = new File(libsPath);
-                    if (libsDir.exists())
-                        FileUtils.deleteDirectory(libsDir);
+                    if (libsDir.exists()) FileUtils.deleteDirectory(libsDir);
+
                     InputStream libsBundleInStream = getAssets().open(C.assets.BUNDLES_LIBS);
                     FileUtils.extractTarXzToDisk(libsBundleInStream, libsPath, this, 0);
                 }
@@ -279,15 +325,17 @@ public class InstallerService extends Service implements TaskProgressListener {
                 return;
             }
 
+            // --- JARS ---
             Long jarsHashOld = oldBundlesHashesMap.get(C.assets.BUNDLES_JARS);
             try {
                 Long jarsHashNew = FileUtils.generateCRC32ForAsset(this, C.assets.BUNDLES_JARS);
                 newBundlesHashesMap.put(C.assets.BUNDLES_JARS, jarsHashNew);
+
                 if (jarsHashOld == null || !jarsHashOld.equals(jarsHashNew)) {
                     String jarsPath = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.JARS;
                     File jarsDir = new File(jarsPath);
-                    if (jarsDir.exists())
-                        FileUtils.deleteDirectory(jarsDir);
+                    if (jarsDir.exists()) FileUtils.deleteDirectory(jarsDir);
+
                     InputStream jarsBundleInStream = getAssets().open(C.assets.BUNDLES_JARS);
                     FileUtils.extractTarToDisk(jarsBundleInStream, jarsPath, this, 0);
                 }
@@ -306,6 +354,145 @@ public class InstallerService extends Service implements TaskProgressListener {
         });
     }
 
+    // -------------------- INSTALL MOD TO INSTANCE --------------------
+
+    private void doInstallModToInstance(Intent intent) {
+        String taskTitle = getString(R.string.dialog_title_installing_mods);
+
+        startForeground(NOTIFICATION_ID, buildNotification(taskTitle));
+        this.taskState.postValue(new TaskState(taskTitle, null, -1, 0, false, false));
+
+        String instanceName = intent.getStringExtra(EXTRA_GAME_INSTANCE_NAME);
+        if (instanceName == null) {
+            finishWithError(taskTitle, "Game instance name is missing");
+            return;
+        }
+
+        GameInstance gameInstance = GameInstanceManager.requireSingleton().getInstanceByName(instanceName);
+        if (gameInstance == null) {
+            finishWithError(taskTitle, "Game instance not found: " + instanceName);
+            return;
+        }
+
+        Uri modsArchiveUri = intent.getParcelableExtra(EXTRA_MODS_URI);
+        if (modsArchiveUri == null) {
+            finishWithError(taskTitle, "Mods archive URI is missing");
+            return;
+        }
+
+        executorService.submit(() -> {
+            try {
+                String modsRootPath = gameInstance.getHomePath() + "/Zomboid/mods";
+                File modsRootDir = new File(modsRootPath);
+                if (!modsRootDir.exists()) modsRootDir.mkdirs();
+
+                try (InputStream modsStream = getContentResolver().openInputStream(modsArchiveUri)) {
+                    FileUtils.extractZipToDisk(
+                            modsStream,
+                            modsRootPath,
+                            this,
+                            FileUtils.queryFileSize(getContentResolver(), modsArchiveUri)
+                    );
+                }
+
+                finish(getString(R.string.dialog_title_mods_installed), null);
+            } catch (Exception e) {
+                finishWithError(getString(R.string.dialog_title_failed_to_install_mods), e.toString());
+            }
+        });
+    }
+
+    private void doInstallControlsToInstance(Intent intent) {
+        String taskTitle = getString(R.string.dialog_title_installing_controls);
+
+        startForeground(NOTIFICATION_ID, buildNotification(taskTitle));
+        this.taskState.postValue(new TaskState(taskTitle, null, -1, 0, false, false));
+
+        String instanceName = intent.getStringExtra(EXTRA_GAME_INSTANCE_NAME);
+        if (instanceName == null) {
+            finishWithError(taskTitle, "Game instance name is missing");
+            return;
+        }
+
+        GameInstance gameInstance = GameInstanceManager.requireSingleton().getInstanceByName(instanceName);
+        if (gameInstance == null) {
+            finishWithError(taskTitle, "Game instance not found: " + instanceName);
+            return;
+        }
+
+        Uri controlsArchiveUri = intent.getParcelableExtra(EXTRA_CONTROLS_URI);
+        if (controlsArchiveUri == null) {
+            finishWithError(taskTitle, "Controls archive URI is missing");
+            return;
+        }
+
+        executorService.submit(() -> {
+            try {
+                // "home -> game -> controls"
+                // Предположим, что "game" = gameInstance.getGamePath()
+                String controlsDirPath = gameInstance.getGamePath() + "/controls";
+                File controlsDir = new File(controlsDirPath);
+                if (!controlsDir.exists()) controlsDir.mkdirs();
+
+                File outFile = new File(controlsDir, "controls.json");
+
+                boolean found = false;
+
+                try (InputStream is = getContentResolver().openInputStream(controlsArchiveUri);
+                     ZipInputStream zis = new ZipInputStream(is)) {
+
+                    ZipEntry e;
+                    byte[] buf = new byte[64 * 1024];
+
+                    while ((e = zis.getNextEntry()) != null) {
+                        if (e.isDirectory()) continue;
+
+                        String name = e.getName();
+                        // ловим и "controls.json", и "something/controls.json"
+                        if (name != null && name.toLowerCase().endsWith("controls.json")) {
+                            //byte[] buf = new byte[64 * 1024];
+                            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+
+                            int r;
+                            while ((r = zis.read(buf)) != -1) {
+                                baos.write(buf, 0, r);
+                            }
+
+                            byte[] jsonBytes = baos.toByteArray();
+
+                            // 1) пишем файл
+                            try (OutputStream os = new FileOutputStream(outFile, false)) {
+                                os.write(jsonBytes);
+                                os.flush();
+                            }
+
+                            // 2) пишем SharedPreferences (перезапишет текущий layout в памяти)
+                            String json = new String(jsonBytes, java.nio.charset.Charset.defaultCharset());
+                            getSharedPreferences(C.shprefs.NAME, MODE_PRIVATE)
+                                    .edit()
+                                    .putString(C.shprefs.keys.INPUT_CONTROLS, json)
+                                    .apply();
+
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!found) {
+                    finishWithError(getString(R.string.dialog_title_failed_to_install_controls),
+                            "controls.json not found in the ZIP");
+                    return;
+                }
+
+                finish(getString(R.string.dialog_title_controls_installed), null);
+
+            } catch (Exception e) {
+                finishWithError(getString(R.string.dialog_title_failed_to_install_controls), e.toString());
+            }
+        });
+    }
+
     private void finish(String title, String message) {
         this.taskState.postValue(new TaskState(title, message, -1, 0, true, false));
     }
@@ -317,7 +504,6 @@ public class InstallerService extends Service implements TaskProgressListener {
 
     private void installGameFromZip(GameInstance gameInstance, Uri zipUri) throws IOException {
         ContentResolver contentResolver = getApplicationContext().getContentResolver();
-
         try (InputStream inputStream = contentResolver.openInputStream(zipUri)) {
             long fileSize = FileUtils.queryFileSize(contentResolver, zipUri);
             FileUtils.extractZipToDisk(inputStream, gameInstance.getGamePath(), this, fileSize);
@@ -401,13 +587,11 @@ public class InstallerService extends Service implements TaskProgressListener {
 
         File disabled = new File(soDir, "libLighting64.so.disabled");
         if (disabled.exists()) {
-            // уже отключали раньше; если вдруг снова появился оригинал — прибьём
             //noinspection ResultOfMethodCallIgnored
             so.delete();
             return;
         }
 
-        // Переименовываем. Если не получилось — кидаем exception, чтобы установка считалась неуспешной.
         if (!so.renameTo(disabled)) {
             throw new RuntimeException("Failed to rename libLighting64.so for 42.13: " + so.getAbsolutePath());
         }
@@ -421,7 +605,6 @@ public class InstallerService extends Service implements TaskProgressListener {
         if (!jar.exists()) return;
 
         Log.i(LOG_TAG, "42.13 test: extracting projectzomboid.jar using FileUtils");
-
         try (InputStream is = new FileInputStream(jar)) {
             FileUtils.extractZipToDisk(is, gameDir.getAbsolutePath(), this, jar.length());
         }
@@ -440,7 +623,9 @@ public class InstallerService extends Service implements TaskProgressListener {
     public enum Task {
         CREATE_GAME_INSTANCE,
         DELETE_GAME_INSTANCE,
-        INSTALL_DEPENDENCIES
+        INSTALL_DEPENDENCIES,
+        INSTALL_MOD_TO_INSTANCE,
+        INSTALL_CONTROLS_TO_INSTANCE
     }
 
     public static class TaskState {
@@ -451,7 +636,8 @@ public class InstallerService extends Service implements TaskProgressListener {
         public final boolean isFinished;
         public final boolean isFinishedWithError;
 
-        public TaskState(String title, String message, int progress, int progressMax, boolean isFinished, boolean isFinishedWithError) {
+        public TaskState(String title, String message, int progress, int progressMax,
+                         boolean isFinished, boolean isFinishedWithError) {
             this.title = title;
             this.message = message;
             this.progress = progress;
