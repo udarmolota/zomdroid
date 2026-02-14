@@ -450,13 +450,29 @@ public class InstallerService extends Service implements TaskProgressListener {
                         String name = e.getName();
                         // ловим и "controls.json", и "something/controls.json"
                         if (name != null && name.toLowerCase().endsWith("controls.json")) {
+                            //byte[] buf = new byte[64 * 1024];
+                            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+
+                            int r;
+                            while ((r = zis.read(buf)) != -1) {
+                                baos.write(buf, 0, r);
+                            }
+
+                            byte[] jsonBytes = baos.toByteArray();
+
+                            // 1) пишем файл
                             try (OutputStream os = new FileOutputStream(outFile, false)) {
-                                int r;
-                                while ((r = zis.read(buf)) != -1) {
-                                    os.write(buf, 0, r);
-                                }
+                                os.write(jsonBytes);
                                 os.flush();
                             }
+
+                            // 2) пишем SharedPreferences (перезапишет текущий layout в памяти)
+                            String json = new String(jsonBytes, java.nio.charset.Charset.defaultCharset());
+                            getSharedPreferences(C.shprefs.NAME, MODE_PRIVATE)
+                                    .edit()
+                                    .putString(C.shprefs.keys.INPUT_CONTROLS, json)
+                                    .apply();
+
                             found = true;
                             break;
                         }
