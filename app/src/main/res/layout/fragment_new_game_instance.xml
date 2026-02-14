@@ -119,4 +119,67 @@
       app:layout_constraintBottom_toBottomOf="@id/new_game_instance_native_libs_path_et"
       android:src="@drawable/mt_icon_folder_open" />
 
+    <!-- Saves ZIP Label -->
+    <TextView
+        android:id="@+id/new_game_instance_saves_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/new_game_instance_native_libs_path_et"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="@string/game_instance_saves_label" />
+
+    <EditText
+        android:id="@+id/new_game_instance_saves_path_et"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/new_game_instance_saves_tv"
+        app:layout_constraintEnd_toStartOf="@id/new_game_instance_saves_browse_ib"
+        android:hint="@string/game_instance_no_file_selected"
+        android:enabled="false"
+        android:focusable="false"
+        android:inputType="none" />
+
+    <ImageButton
+        style="@style/AppTheme.ImageButton"
+        android:id="@+id/new_game_instance_saves_browse_ib"
+        app:layout_constraintTop_toTopOf="@id/new_game_instance_saves_path_et"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/new_game_instance_saves_path_et"
+        android:src="@drawable/mt_icon_folder_open" />
+
+    <!-- Mods ZIP Label -->
+    <TextView
+        android:id="@+id/new_game_instance_mods_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/new_game_instance_saves_path_et"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="@string/game_instance_mods_label" />
+
+    <EditText
+        android:id="@+id/new_game_instance_mods_path_et"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/new_game_instance_mods_tv"
+        app:layout_constraintEnd_toStartOf="@id/new_game_instance_mods_browse_ib"
+        android:hint="@string/game_instance_no_file_selected"
+        android:enabled="false"
+        android:focusable="false"
+        android:clickable="false"
+        android:cursorVisible="false"
+        android:inputType="none" />
+
+    <ImageButton
+        style="@style/AppTheme.ImageButton"
+        android:id="@+id/new_game_instance_mods_browse_ib"
+        app:layout_constraintTop_toTopOf="@id/new_game_instance_mods_path_et"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/new_game_instance_mods_path_et"
+        android:src="@drawable/mt_icon_folder_open" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

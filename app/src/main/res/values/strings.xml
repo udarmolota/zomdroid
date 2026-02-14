@@ -12,6 +12,7 @@
     <string name="fragment_label_controls_editor">Controls editor</string>
     <string name="fragment_label_wiki">Wiki</string>
     <string name="fragment_label_onscreen">Onscreen buttons only</string>
+    <string name="nav_menu_install_mod">Install Mod</string>
 
     <string name="controls_editor_instructions">Long press on empty space to open context menu. Changes are saved automatically once you are finished</string>
     <string name="controls_editor_add_element">Add control element</string>
@@ -70,7 +71,7 @@
     <string name="settings_vulkan_driver">Vulkan driver</string>
     <string name="settings_resolution_scale">Resolution scale</string>
     <string name="settings_audio_api">Audio API</string>
-    <string name="settings_render_hint">Build 41 → GL4ES, Build 42 → ZINK (only Snapdragon)</string>
+    <string name="settings_render_hint">Build 41 → GL4ES, Build 42 → ZINK (Dimensity: turn on ANGLE)</string>
 
     <string name="nav_menu_controls_editor">Controls editor</string>
     <string name="nav_menu_gamepad_mapper">Gamepad mapper</string>
@@ -125,11 +126,66 @@
     <string name="game_instance_no_native_libs_selected">Please select native libraries ZIP (opt. for MP)</string>
     <string name="game_instance_browse_native_libs">Browse native libraries ZIP</string>
 
+    <!-- Saves -->
+    <string name="game_instance_saves_label">Save file (.zip)</string>
+    <string name="game_instance_no_saves_selected">Please select Save ZIP</string>
+    <string name="game_instance_browse_saves">Browse Save ZIP</string>
+
+    <!-- Mods -->
+    <string name="game_instance_mods_label">Mods ZIP (optional)</string>
+
     <!-- Onscreen controls -->
     <string name="touch_controls_description">Touch control mode disables gamepad support and enables on-screen buttons only.</string>
     <string name="touch_controls_switch_label">Enable on-screen touch controls</string>
     <string name="touch_controls_enabled_toast">Touch controls enabled</string>
     <string name="touch_controls_disabled_toast">Touch controls disabled</string>
     <string name="fragment_label_touch_controls">Touch Controls</string>
+
+    <!-- Install Mod -->
+    <string name="install_mod_title">Install Mod</string>
+    <string name="install_mod_instance_label">Game instance</string>
+    <string name="install_mod_zip_label">Mod ZIP</string>
+    <string name="install_mod_browse">Browse…</string>
+    <string name="install_mod_install">Install</string>
+
+    <string name="install_mod_no_instances">No game instances found</string>
+    <string name="install_mod_select_instance">Select a game instance</string>
+    <string name="install_mod_select_zip">Select a ZIP file</string>
+
+    <string name="dialog_title_installing_mods">Installing mods</string>
+    <string name="dialog_title_failed_to_install_mods">Failed to install mods</string>
+    <string name="dialog_title_mods_installed">Mods installed</string>
+
+    <string name="install_mod_zip_warning">ZIP must contain mod.info at the top level.</string>
+
+    <string name="install_mod_zip_help_title">Mod archive structure</string>
+
+    <string name="install_mod_zip_help_message">
+    \u2705 Correct:\n\n
+    ModName/\n
+    \u00A0\u00A0mod.info\n
+    \u00A0\u00A0media/\n
+    \u00A0\u00A0scripts/\n\n
+    \u274C Incorrect:\n\n
+    Downloads/\n
+    \u00A0\u00A0ModName/\n
+    \u00A0\u00A0\u00A0\u00A0mod.info
+    </string>
+
+    <!-- Controls layout -->
+    <string name="menu_install_controls">Install Controls Layout</string>
+
+    <string name="install_controls_instance_label">Game instance</string>
+    <string name="install_controls_zip_label">Controls ZIP</string>
+    <string name="install_controls_install">Install</string>
+
+    <string name="dialog_title_installing_controls">Installing controls…</string>
+    <string name="dialog_title_controls_installed">Controls installed</string>
+    <string name="dialog_title_failed_to_install_controls">Failed to install controls</string>
+
+    <string name="install_controls_zip_warning">ZIP must contain controls.json (at top level). If not, it may be installed incorrectly.</string>
+
+    <string name="install_controls_zip_help_title">Controls ZIP format</string>
+    <string name="install_controls_zip_help_message">✅ Correct:\n\ncontrols.json\n\n❌ Incorrect:\n\nSomeFolder/\n\u00A0\u00A0controls.json</string>
 
 </resources>

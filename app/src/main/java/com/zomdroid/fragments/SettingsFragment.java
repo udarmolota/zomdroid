@@ -93,8 +93,27 @@ public class SettingsFragment extends Fragment {
                             .setTitle("Freedreno 8xx")
                             .setMessage(
                                     "Freedreno 8xx is experimental.\n\n" +
-                                            "If you get crashes or rendering issues, switch back to System driver.\n" +
-                                            "Recommended mainly for Adreno 840/830/825/810/829. Snapdragon 8 Gen 3/4/5/Elite and 7 Gen 3 devices."
+                                    "If you get crashes or rendering issues, switch back to System driver.\n" +
+                                    "Recommended for Adreno 840/830/825/810/829. Snapdragon 8 Gen 3/4/5/Elite and 7 Gen 3 devices."
+                            )
+                            .setPositiveButton("OK", null)
+                            .show();
+                } else if (vulkanDriver == LauncherPreferences.VulkanDriver.TURNIP_bbdd688_8gen2) {
+                    new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                            .setTitle("TURNIP bbdd688 8g2")
+                            .setMessage(
+                                    "This is for Snapdragon 8 Gen 2 only.\n\n" +
+                                    "Fixes flickering that may occur after updating to HyperOS 3."
+                            )
+                            .setPositiveButton("OK", null)
+                            .show();
+                } else if (vulkanDriver == LauncherPreferences.VulkanDriver.TURNIP_bbdd688) {
+                    new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                            .setTitle("TURNIP bbdd688")
+                            .setMessage(
+                                    "This driver is intended for Adreno 7xx GPUs.\n\n" +
+                                    "Snapdragon 4-series, 5-series, and Elite (Adreno 8xx) devices are not supported.\n\n" +
+                                    "For Snapdragon 4 / 5 / Elite select Freedreno 8xx."
                             )
                             .setPositiveButton("OK", null)
                             .show();
