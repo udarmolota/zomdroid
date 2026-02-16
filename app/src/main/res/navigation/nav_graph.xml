@@ -28,6 +28,9 @@
         <action
             android:id="@+id/action_install_controls"
             app:destination="@id/installControlsFragment" />
+        <action
+            android:id="@+id/action_install_saves"
+            app:destination="@id/install_saves_fragment" />
 
     </fragment>
 
@@ -75,5 +78,10 @@
         android:name="com.zomdroid.fragments.InstallControlsFragment"
         android:label="@string/menu_install_controls"
         tools:layout="@layout/fragment_install_controls" />
+
+    <fragment
+        android:id="@+id/install_saves_fragment"
+        android:name="com.zomdroid.fragments.InstallSavesFragment"
+        android:label="@string/install_saves_menu" />
 
 </navigation>

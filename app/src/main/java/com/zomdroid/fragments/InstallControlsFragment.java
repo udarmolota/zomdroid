@@ -27,9 +27,13 @@ import com.zomdroid.databinding.FragmentInstallControlsBinding;
 import com.zomdroid.game.GameInstance;
 import com.zomdroid.game.GameInstanceManager;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
+import java.io.File;
 
 public class InstallControlsFragment extends Fragment {
 
@@ -53,6 +57,39 @@ public class InstallControlsFragment extends Fragment {
                             getString(R.string.game_instance_unsupported_extension),
                             Toast.LENGTH_SHORT).show();
                 }
+            });
+
+    private final ActivityResultLauncher<String> actionCreateControlsZipLauncher =
+            registerForActivityResult(new ActivityResultContracts.CreateDocument(ZIP_MIME), outUri -> {
+                if (outUri == null) return;
+
+                int position = binding.installControlsInstanceSpinner.getSelectedItemPosition();
+                if (position < 0 || position >= instances.size()) {
+                    Toast.makeText(requireContext(), "Invalid instance selected", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                GameInstance selectedInstance = instances.get(position);
+
+                Intent installerIntent = new Intent(requireContext(), InstallerService.class);
+                installerIntent.putExtra(
+                        InstallerService.EXTRA_COMMAND,
+                        InstallerService.Task.EXPORT_CONTROLS_FROM_INSTANCE.ordinal()
+                );
+                installerIntent.putExtra(
+                        InstallerService.EXTRA_GAME_INSTANCE_NAME,
+                        selectedInstance.getName()
+                );
+                installerIntent.putExtra(
+                        InstallerService.EXTRA_OUTPUT_URI,
+                        outUri
+                );
+
+                requireContext().startForegroundService(installerIntent);
+
+                Toast.makeText(requireContext(),
+                        "Controls export started",
+                        Toast.LENGTH_SHORT).show();
             });
 
     @Override
@@ -125,6 +162,30 @@ public class InstallControlsFragment extends Fragment {
             TextView messageView = dialog.findViewById(android.R.id.message);
             if (messageView != null) messageView.setTypeface(Typeface.MONOSPACE);
         });
+
+        binding.installControlsExportBtn.setOnClickListener(v -> {
+            int position = binding.installControlsInstanceSpinner.getSelectedItemPosition();
+            if (position < 0 || position >= instances.size()) {
+                Toast.makeText(requireContext(), "Invalid instance selected", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            GameInstance gi = instances.get(position);
+
+            // ВАЖНО: проверяем ДО CreateDocument
+            java.io.File controlsDir = new java.io.File(gi.getGamePath(), "controls");
+
+            if (!controlsDir.exists()) {
+                Toast.makeText(requireContext(),
+                        getString(R.string.dialog_title_controls_export_skipped_default),
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            String ts = new java.text.SimpleDateFormat("yyyyMMdd_HHmm", java.util.Locale.US).format(new java.util.Date());
+            String suggested = "zomdroid_controls_" + ts + ".zip";
+            actionCreateControlsZipLauncher.launch(suggested);
+        });
     }
 
     private void clearSelectedZip() {
@@ -153,5 +214,12 @@ public class InstallControlsFragment extends Fragment {
             cursor.close();
         }
         return fileName;
+    }
+
+    private boolean hasControlsToExport(GameInstance gi) {
+        if (gi == null) return false;
+        File controlsDir = new File(gi.getGamePath(), "controls");
+        File controlsJson = new File(controlsDir, "controls.json");
+        return controlsDir.isDirectory() && controlsJson.isFile() && controlsJson.length() > 0;
     }
 }

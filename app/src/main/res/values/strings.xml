@@ -12,7 +12,7 @@
     <string name="fragment_label_controls_editor">Controls editor</string>
     <string name="fragment_label_wiki">Wiki</string>
     <string name="fragment_label_onscreen">Onscreen buttons only</string>
-    <string name="nav_menu_install_mod">Install Mod</string>
+    <string name="nav_menu_install_mod">Install Mods</string>
 
     <string name="controls_editor_instructions">Long press on empty space to open context menu. Changes are saved automatically once you are finished</string>
     <string name="controls_editor_add_element">Add control element</string>
@@ -142,50 +142,103 @@
     <string name="fragment_label_touch_controls">Touch Controls</string>
 
     <!-- Install Mod -->
-    <string name="install_mod_title">Install Mod</string>
+    <string name="install_mod_title">Import Mods</string>
     <string name="install_mod_instance_label">Game instance</string>
     <string name="install_mod_zip_label">Mod ZIP</string>
     <string name="install_mod_browse">Browse…</string>
-    <string name="install_mod_install">Install</string>
+    <string name="install_mod_install">Import</string>
 
     <string name="install_mod_no_instances">No game instances found</string>
     <string name="install_mod_select_instance">Select a game instance</string>
     <string name="install_mod_select_zip">Select a ZIP file</string>
 
-    <string name="dialog_title_installing_mods">Installing mods</string>
-    <string name="dialog_title_failed_to_install_mods">Failed to install mods</string>
+    <string name="dialog_title_installing_mods">Importing mods</string>
+    <string name="dialog_title_failed_to_install_mods">Failed to import mods</string>
     <string name="dialog_title_mods_installed">Mods installed</string>
+
+    <string name="dialog_title_installing_saves">Importing saves</string>
+    <string name="dialog_title_failed_to_install_saves">Failed to import saves</string>
+    <string name="dialog_title_saves_installed">Saves imported</string>
 
     <string name="install_mod_zip_warning">ZIP must contain mod.info at the top level.</string>
 
     <string name="install_mod_zip_help_title">Mod archive structure</string>
 
     <string name="install_mod_zip_help_message">
-    \u2705 Correct:\n\n
+    \u2705 Correct examples:\n\n
+
+    Single mod:\n
     ModName/\n
     \u00A0\u00A0mod.info\n
     \u00A0\u00A0media/\n
     \u00A0\u00A0scripts/\n\n
-    \u274C Incorrect:\n\n
+
+    Multiple mods in one ZIP:\n
+    ModA/\n
+    \u00A0\u00A0mod.info\n
+    ModB/\n
+    \u00A0\u00A0mod.info\n\n
+
+    \u274C Incorrect examples:\n\n
+
+    Extra wrapper folder:\n
     Downloads/\n
     \u00A0\u00A0ModName/\n
-    \u00A0\u00A0\u00A0\u00A0mod.info
-    </string>
+    \u00A0\u00A0\u00A0\u00A0mod.info\n\n
+
+    Missing mod root:\n
+    media/\n
+    scripts/\n
+    (no mod.info in root)
+</string>
+
 
     <!-- Controls layout -->
-    <string name="menu_install_controls">Install Controls Layout</string>
+    <string name="menu_install_controls">Import/Export Controls</string>
 
     <string name="install_controls_instance_label">Game instance</string>
     <string name="install_controls_zip_label">Controls ZIP</string>
-    <string name="install_controls_install">Install</string>
+    <string name="install_controls_install">Import</string>
 
-    <string name="dialog_title_installing_controls">Installing controls…</string>
-    <string name="dialog_title_controls_installed">Controls installed</string>
-    <string name="dialog_title_failed_to_install_controls">Failed to install controls</string>
+    <string name="dialog_title_installing_controls">Importing controls…</string>
+    <string name="dialog_title_controls_installed">Controls imported</string>
+    <string name="dialog_title_failed_to_install_controls">Failed to import controls</string>
 
     <string name="install_controls_zip_warning">ZIP must contain controls.json (at top level). If not, it may be installed incorrectly.</string>
 
     <string name="install_controls_zip_help_title">Controls ZIP format</string>
     <string name="install_controls_zip_help_message">✅ Correct:\n\ncontrols.json\n\n❌ Incorrect:\n\nSomeFolder/\n\u00A0\u00A0controls.json</string>
+
+    <string name="install_saves_instance_label">Select game instance</string>
+    <string name="install_saves_zip_label">Saves ZIP archive</string>
+    <string name="install_saves_zip_warning">ZIP must contain save folders directly (Sandbox, Survival, etc.).</string>
+    <string name="install_saves_install">Import</string>
+    <string name="install_saves_menu">Import/Export Saves</string>
+    <string name="install_saves_zip_help_title">How saves ZIP should look</string>
+    <string name="install_saves_zip_help_message">
+    \u2705 Example structure:
+    \u00A0\u00A0Sandbox/\n
+    \u00A0Survival/\n
+    \u00A0Builder/\n
+    \u00A0Apocalypse/\n\n
+
+    Do not pack the parent folder.
+    </string>
+
+    <string name="install_saves_export">Export</string>
+    <string name="dialog_title_exporting_saves">Exporting saves</string>
+    <string name="dialog_title_saves_exported">Saves exported</string>
+    <string name="dialog_title_failed_to_export_saves">Failed to export saves</string>
+
+    <string name="install_controls_export">Export</string>
+
+    <string name="dialog_title_exporting_controls">Exporting controls…</string>
+    <string name="dialog_title_controls_exported">Controls exported</string>
+    <string name="dialog_title_failed_to_export_controls">Failed to export controls</string>
+    <string name="dialog_title_controls_export_skipped_default">Default controls in use — nothing to export</string>
+    <string name="install_controls_global_hint">
+       Controls layout is global. Export saves controls.json only if you changed the layout.
+    </string>
+    <string name="controls_export_nothing_to_export">Nothing to export: default controls layout is used.</string>
 
 </resources>

@@ -24,11 +24,24 @@
         app:layout_constraintEnd_toEndOf="parent"/>
 
     <TextView
+        android:id="@+id/install_controls_global_hint_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/install_controls_global_hint"
+        android:textSize="12sp"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/install_controls_instance_spinner"/>
+
+    <TextView
         android:id="@+id/install_controls_zip_tv"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:text="@string/install_controls_zip_label"
-        app:layout_constraintTop_toBottomOf="@id/install_controls_instance_spinner"
+        app:layout_constraintTop_toBottomOf="@id/install_controls_global_hint_tv"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/install_controls_zip_help_ib"/>
 
@@ -90,5 +103,16 @@
         app:layout_constraintTop_toBottomOf="@id/install_controls_zip_path_et"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Button
+        android:id="@+id/install_controls_export_btn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/install_controls_export"
+        app:layout_constraintTop_toBottomOf="@id/install_controls_install_btn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -44,6 +44,12 @@
         android:icon="@drawable/mt_icon_folder" />
 
     <item
+        android:id="@+id/action_install_saves"
+        android:title="@string/install_saves_menu"
+        android:icon="@drawable/mt_icon_folder"
+        app:showAsAction="never"/>
+
+    <item
         android:id="@+id/action_donate"
         android:title="@string/nav_menu_donate"
         android:icon="@drawable/mt_icon_heart"

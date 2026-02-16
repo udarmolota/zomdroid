@@ -76,35 +76,6 @@ public class NewGameInstanceFragment extends Fragment {
                 }
             });
 
-    // Launcher for selecting saves ZIP
-    private final ActivityResultLauncher<String> actionOpenSavesLauncher =
-            registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
-                if (uri == null) return;
-                ContentResolver contentResolver = requireContext().getContentResolver();
-                if (Objects.equals(contentResolver.getType(uri), ZIP_MIME)) {
-                    savesZipUri = uri;
-                    String fileName = extractFileName(uri);
-                    binding.newGameInstanceSavesPathEt.setText(fileName);
-                } else {
-                    Toast.makeText(requireContext(), getString(R.string.game_instance_unsupported_extension), Toast.LENGTH_SHORT).show();
-                }
-            });
-
-    private final ActivityResultLauncher<String> actionOpenModsLauncher =
-            registerForActivityResult(
-                    new ActivityResultContracts.GetContent(),
-                    uri -> {
-                        if (uri == null) return;
-                        ContentResolver cr =
-                                requireContext().getContentResolver();
-                        if (Objects.equals(cr.getType(uri), ZIP_MIME)) {
-                            modsZipUri = uri;
-                            binding.newGameInstanceModsPathEt.setText(extractFileName(uri));
-                        } else {
-                            Toast.makeText(requireContext(), getString(R.string.game_instance_unsupported_extension), Toast.LENGTH_SHORT).show();
-                        }
-                    });
-
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentNewGameInstanceBinding.inflate(inflater, container, false);
@@ -221,17 +192,6 @@ public class NewGameInstanceFragment extends Fragment {
       binding.newGameInstanceNativeLibsBrowseIb.setOnClickListener(v -> {
         actionOpenNativeLibsLauncher.launch(ZIP_MIME);
       });
-
-      // Browse button for Saves ZIP
-      binding.newGameInstanceSavesBrowseIb.setOnClickListener(v -> {
-        actionOpenSavesLauncher.launch(ZIP_MIME);
-      });
-
-      // Browse button for Modes ZIP
-      binding.newGameInstanceModsBrowseIb.setOnClickListener(v -> {
-        actionOpenModsLauncher.launch(ZIP_MIME);
-      });
-
     }
 
   @Override

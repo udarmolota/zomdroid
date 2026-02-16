@@ -42,6 +42,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.nio.charset.StandardCharsets;
 
 public class InstallerService extends Service implements TaskProgressListener {
     private static final String LOG_TAG = InstallerService.class.getName();
@@ -55,6 +56,7 @@ public class InstallerService extends Service implements TaskProgressListener {
     public static final String EXTRA_SAVES_URI = "com.zomdroid.InstallerService.EXTRA_SAVES_URI";
     public static final String EXTRA_MODS_URI = "com.zomdroid.InstallerService.EXTRA_MODS_URI";
     public static final String EXTRA_CONTROLS_URI = "com.zomdroid.InstallerService.EXTRA_CONTROLS_URI";
+    public static final String EXTRA_OUTPUT_URI = "com.zomdroid.InstallerService.EXTRA_OUTPUT_URI";
 
     private final IBinder binder = new LocalBinder();
     private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -96,7 +98,18 @@ public class InstallerService extends Service implements TaskProgressListener {
                 doInstallControlsToInstance(intent);
                 break;
             }
-
+            case INSTALL_SAVES_TO_INSTANCE: {
+                doInstallSavesToInstance(intent);
+                break;
+            }
+            case EXPORT_SAVES_FROM_INSTANCE: {
+                doExportSavesFromInstance(intent);
+                break;
+            }
+            case EXPORT_CONTROLS_FROM_INSTANCE: {
+                doExportControlsFromInstance(intent);
+                break;
+            }
         }
 
         return START_NOT_STICKY;
@@ -163,46 +176,6 @@ public class InstallerService extends Service implements TaskProgressListener {
 
                 // 42.13 problematic lib renaming
                 maybeDisableLightingLibFor4213(gameInstance);
-
-                // Extracting Saves
-                Uri savesArchiveUri = intent.getParcelableExtra(EXTRA_SAVES_URI);
-                if (savesArchiveUri != null) {
-                    try {
-                        String savesRootPath = gameInstance.getHomePath() + "/Zomboid/Saves";
-                        File savesRootDir = new File(savesRootPath);
-                        if (!savesRootDir.exists()) savesRootDir.mkdirs();
-
-                        try (InputStream savesStream = getContentResolver().openInputStream(savesArchiveUri)) {
-                            FileUtils.extractZipToDisk(
-                                    savesStream,
-                                    savesRootPath,
-                                    this,
-                                    FileUtils.queryFileSize(getContentResolver(), savesArchiveUri)
-                            );
-                        }
-                    } catch (IOException e) {
-                        System.out.println("Saves not installed: " + e.getMessage());
-                    }
-                }
-
-                // Extracting Mods (при создании инстанса)
-                Uri modsArchiveUri = intent.getParcelableExtra(EXTRA_MODS_URI);
-                if (modsArchiveUri != null) {
-                    try (InputStream modsStream = getContentResolver().openInputStream(modsArchiveUri)) {
-                        String modsRootPath = gameInstance.getHomePath() + "/Zomboid/mods";
-                        File modsRootDir = new File(modsRootPath);
-                        if (!modsRootDir.exists()) modsRootDir.mkdirs();
-
-                        FileUtils.extractZipToDisk(
-                                modsStream,
-                                modsRootPath,
-                                this,
-                                FileUtils.queryFileSize(getContentResolver(), modsArchiveUri)
-                        );
-                    } catch (IOException e) {
-                        System.out.println("Mods not installed: " + e.getMessage());
-                    }
-                }
 
             } catch (Exception e) {
                 finishWithError(getString(R.string.dialog_title_failed_to_create_instance), e.toString());
@@ -386,18 +359,107 @@ public class InstallerService extends Service implements TaskProgressListener {
                 File modsRootDir = new File(modsRootPath);
                 if (!modsRootDir.exists()) modsRootDir.mkdirs();
 
-                try (InputStream modsStream = getContentResolver().openInputStream(modsArchiveUri)) {
-                    FileUtils.extractZipToDisk(
-                            modsStream,
-                            modsRootPath,
-                            this,
-                            FileUtils.queryFileSize(getContentResolver(), modsArchiveUri)
-                    );
+                // temp dir рядом (внутри homePath, чтобы move сработал чаще)
+                File tempDir = new File(gameInstance.getHomePath(), "tmp_mods_import_" + System.currentTimeMillis());
+                if (!tempDir.mkdirs()) {
+                    throw new RuntimeException("Failed to create temp dir: " + tempDir.getAbsolutePath());
+                }
+
+                try {
+                    // 1) extract zip -> temp
+                    try (InputStream modsStream = getContentResolver().openInputStream(modsArchiveUri)) {
+                        FileUtils.extractZipToDisk(
+                                modsStream,
+                                tempDir.getAbsolutePath(),
+                                this,
+                                FileUtils.queryFileSize(getContentResolver(), modsArchiveUri)
+                        );
+                    }
+
+                    // 2) detect mod folders
+                    File[] top = listDirs(tempDir);
+
+                    java.util.List<File> mods = new java.util.ArrayList<>();
+
+                    // mods directly at top-level
+                    for (File d : top) {
+                        if (isModFolder(d)) mods.add(d);
+                    }
+
+                    // if none found and there's exactly one wrapper dir -> scan one level deeper
+                    if (mods.isEmpty() && top.length == 1) {
+                        File[] inner = listDirs(top[0]);
+                        for (File d : inner) {
+                            if (isModFolder(d)) mods.add(d);
+                        }
+                    }
+
+                    if (mods.isEmpty()) {
+                        throw new IllegalArgumentException("No valid mods found in ZIP (mod.info missing).");
+                    }
+
+                    // 3) install each mod folder
+                    for (File modDir : mods) {
+                        File target = new File(modsRootDir, modDir.getName());
+                        moveOrReplace(modDir, target);
+                    }
+
+                } finally {
+                    // cleanup whatever remains (e.g., wrapper dir)
+                    FileUtils.deleteDirectory(tempDir);
                 }
 
                 finish(getString(R.string.dialog_title_mods_installed), null);
             } catch (Exception e) {
                 finishWithError(getString(R.string.dialog_title_failed_to_install_mods), e.toString());
+            }
+        });
+    }
+
+    // -------------------- INSTALL SAVES TO INSTANCE --------------------
+
+    private void doInstallSavesToInstance(Intent intent) {
+        String taskTitle = getString(R.string.dialog_title_installing_saves);
+
+        startForeground(NOTIFICATION_ID, buildNotification(taskTitle));
+        this.taskState.postValue(new TaskState(taskTitle, null, -1, 0, false, false));
+
+        String instanceName = intent.getStringExtra(EXTRA_GAME_INSTANCE_NAME);
+        if (instanceName == null) {
+            finishWithError(taskTitle, "Game instance name is missing");
+            return;
+        }
+
+        GameInstance gameInstance = GameInstanceManager.requireSingleton().getInstanceByName(instanceName);
+        if (gameInstance == null) {
+            finishWithError(taskTitle, "Game instance not found: " + instanceName);
+            return;
+        }
+
+        Uri savesArchiveUri = intent.getParcelableExtra(EXTRA_SAVES_URI);
+        if (savesArchiveUri == null) {
+            finishWithError(taskTitle, "Saves archive URI is missing");
+            return;
+        }
+
+        executorService.submit(() -> {
+            try {
+                String savesRootPath = gameInstance.getHomePath() + "/Zomboid/Saves";
+                File savesRootDir = new File(savesRootPath);
+                if (!savesRootDir.exists()) savesRootDir.mkdirs();
+
+                try (InputStream savesStream = getContentResolver().openInputStream(savesArchiveUri)) {
+                    FileUtils.extractZipToDisk(
+                            savesStream,
+                            savesRootPath,
+                            this,
+                            FileUtils.queryFileSize(getContentResolver(), savesArchiveUri)
+                    );
+                }
+
+                finish(getString(R.string.dialog_title_saves_installed), null);
+            } catch (Exception e) {
+                finishWithError(getString(R.string.dialog_title_failed_to_install_saves), e.toString());
             }
         });
     }
@@ -429,7 +491,6 @@ public class InstallerService extends Service implements TaskProgressListener {
         executorService.submit(() -> {
             try {
                 // "home -> game -> controls"
-                // Предположим, что "game" = gameInstance.getGamePath()
                 String controlsDirPath = gameInstance.getGamePath() + "/controls";
                 File controlsDir = new File(controlsDirPath);
                 if (!controlsDir.exists()) controlsDir.mkdirs();
@@ -438,43 +499,46 @@ public class InstallerService extends Service implements TaskProgressListener {
 
                 boolean found = false;
 
-                try (InputStream is = getContentResolver().openInputStream(controlsArchiveUri);
-                     ZipInputStream zis = new ZipInputStream(is)) {
+                try (InputStream is = getContentResolver().openInputStream(controlsArchiveUri)) {
+                    if (is == null)
+                        throw new IllegalStateException("openInputStream returned null");
+                    try (ZipInputStream zis = new ZipInputStream(is)) {
 
-                    ZipEntry e;
-                    byte[] buf = new byte[64 * 1024];
+                        ZipEntry e;
+                        byte[] buf = new byte[64 * 1024];
 
-                    while ((e = zis.getNextEntry()) != null) {
-                        if (e.isDirectory()) continue;
+                        while ((e = zis.getNextEntry()) != null) {
+                            if (e.isDirectory()) continue;
 
-                        String name = e.getName();
-                        // ловим и "controls.json", и "something/controls.json"
-                        if (name != null && name.toLowerCase().endsWith("controls.json")) {
-                            //byte[] buf = new byte[64 * 1024];
-                            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+                            String name = e.getName();
+                            // ловим и "controls.json", и "something/controls.json"
+                            if (name != null && name.toLowerCase().endsWith("controls.json")) {
+                                //byte[] buf = new byte[64 * 1024];
+                                java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
 
-                            int r;
-                            while ((r = zis.read(buf)) != -1) {
-                                baos.write(buf, 0, r);
+                                int r;
+                                while ((r = zis.read(buf)) != -1) {
+                                    baos.write(buf, 0, r);
+                                }
+
+                                byte[] jsonBytes = baos.toByteArray();
+
+                                // 1) пишем файл
+                                try (OutputStream os = new FileOutputStream(outFile, false)) {
+                                    os.write(jsonBytes);
+                                    os.flush();
+                                }
+
+                                // 2) пишем SharedPreferences (перезапишет текущий layout в памяти)
+                                String json = new String(jsonBytes, java.nio.charset.StandardCharsets.UTF_8);
+                                getSharedPreferences(C.shprefs.NAME, MODE_PRIVATE)
+                                        .edit()
+                                        .putString(C.shprefs.keys.INPUT_CONTROLS, json)
+                                        .apply();
+
+                                found = true;
+                                break;
                             }
-
-                            byte[] jsonBytes = baos.toByteArray();
-
-                            // 1) пишем файл
-                            try (OutputStream os = new FileOutputStream(outFile, false)) {
-                                os.write(jsonBytes);
-                                os.flush();
-                            }
-
-                            // 2) пишем SharedPreferences (перезапишет текущий layout в памяти)
-                            String json = new String(jsonBytes, java.nio.charset.Charset.defaultCharset());
-                            getSharedPreferences(C.shprefs.NAME, MODE_PRIVATE)
-                                    .edit()
-                                    .putString(C.shprefs.keys.INPUT_CONTROLS, json)
-                                    .apply();
-
-                            found = true;
-                            break;
                         }
                     }
                 }
@@ -489,6 +553,43 @@ public class InstallerService extends Service implements TaskProgressListener {
 
             } catch (Exception e) {
                 finishWithError(getString(R.string.dialog_title_failed_to_install_controls), e.toString());
+            }
+        });
+    }
+
+    private void doExportControlsFromInstance(Intent intent) {
+        String taskTitle = getString(R.string.dialog_title_exporting_controls);
+
+        startForeground(NOTIFICATION_ID, buildNotification(taskTitle));
+        this.taskState.postValue(new TaskState(taskTitle, null, -1, 0, false, false));
+
+        String instanceName = intent.getStringExtra(EXTRA_GAME_INSTANCE_NAME);
+        Uri outUri = intent.getParcelableExtra(EXTRA_OUTPUT_URI);
+
+        if (instanceName == null) { finishWithError(taskTitle, "Game instance name is missing"); return; }
+        if (outUri == null) { finishWithError(taskTitle, "Output URI is missing"); return; }
+
+        GameInstance gameInstance = GameInstanceManager.requireSingleton().getInstanceByName(instanceName);
+        if (gameInstance == null) { finishWithError(taskTitle, "Game instance not found: " + instanceName); return; }
+
+        executorService.submit(() -> {
+            try {
+                File controlsDir = new File(gameInstance.getGamePath(), "controls");
+
+                if (!controlsDir.exists()) {
+                    // нечего экспортировать (дефолтный layout, controls/ не создавался)
+                    finish(getString(R.string.dialog_title_controls_export_skipped_default), null);
+                    return;
+                }
+
+                try (OutputStream os = getContentResolver().openOutputStream(outUri)) {
+                    if (os == null) throw new IllegalStateException("openOutputStream returned null");
+                    ZipUtils.zipDirectoryToStream(controlsDir, os);
+                }
+
+                finish(getString(R.string.dialog_title_controls_exported), null);
+            } catch (Exception e) {
+                finishWithError(getString(R.string.dialog_title_failed_to_export_controls), e.toString());
             }
         });
     }
@@ -610,6 +711,62 @@ public class InstallerService extends Service implements TaskProgressListener {
         }
     }
 
+    private void doExportSavesFromInstance(Intent intent) {
+        String taskTitle = getString(R.string.dialog_title_exporting_saves);
+
+        startForeground(NOTIFICATION_ID, buildNotification(taskTitle));
+        this.taskState.postValue(new TaskState(taskTitle, null, -1, 0, false, false));
+
+        String instanceName = intent.getStringExtra(EXTRA_GAME_INSTANCE_NAME);
+        Uri outUri = intent.getParcelableExtra(EXTRA_OUTPUT_URI);
+
+        if (instanceName == null) { finishWithError(taskTitle, "Game instance name is missing"); return; }
+        if (outUri == null) { finishWithError(taskTitle, "Output URI is missing"); return; }
+
+        GameInstance gi = GameInstanceManager.requireSingleton().getInstanceByName(instanceName);
+        if (gi == null) { finishWithError(taskTitle, "Game instance not found: " + instanceName); return; }
+
+        executorService.submit(() -> {
+            try {
+                File savesDir = new File(gi.getHomePath() + "/Zomboid/Saves");
+                if (!savesDir.exists() || !savesDir.isDirectory()) {
+                    throw new IllegalArgumentException("Saves folder not found: " + savesDir);
+                }
+
+                try (OutputStream os = getContentResolver().openOutputStream(outUri)) {
+                    if (os == null) throw new IllegalStateException("openOutputStream returned null");
+                    ZipUtils.zipDirectoryToStream(savesDir, os);
+                }
+
+                finish(getString(R.string.dialog_title_saves_exported), null);
+            } catch (Exception e) {
+                finishWithError(getString(R.string.dialog_title_failed_to_export_saves), e.toString());
+            }
+        });
+    }
+
+
+    private static boolean isModFolder(File dir) {
+        return dir != null && dir.isDirectory() && new File(dir, "mod.info").isFile();
+    }
+
+    private static File[] listDirs(File root) {
+        File[] dirs = root.listFiles(File::isDirectory);
+        return (dirs == null) ? new File[0] : dirs;
+    }
+
+    private static void moveOrReplace(File srcDir, File dstDir) throws Exception {
+        if (dstDir.exists()) {
+            FileUtils.deleteDirectory(dstDir); // у тебя уже есть
+        }
+        // Быстро и без копирования (если на том же storage)
+        java.nio.file.Files.move(
+                srcDir.toPath(),
+                dstDir.toPath(),
+                java.nio.file.StandardCopyOption.REPLACE_EXISTING
+        );
+    }
+
     public LiveData<TaskState> getTaskState() {
         return taskState;
     }
@@ -625,7 +782,10 @@ public class InstallerService extends Service implements TaskProgressListener {
         DELETE_GAME_INSTANCE,
         INSTALL_DEPENDENCIES,
         INSTALL_MOD_TO_INSTANCE,
-        INSTALL_CONTROLS_TO_INSTANCE
+        INSTALL_CONTROLS_TO_INSTANCE,
+        INSTALL_SAVES_TO_INSTANCE,
+        EXPORT_SAVES_FROM_INSTANCE,
+        EXPORT_CONTROLS_FROM_INSTANCE
     }
 
     public static class TaskState {
