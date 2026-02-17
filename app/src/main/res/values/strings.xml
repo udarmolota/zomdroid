@@ -12,7 +12,7 @@
     <string name="fragment_label_controls_editor">Controls editor</string>
     <string name="fragment_label_wiki">Wiki</string>
     <string name="fragment_label_onscreen">Onscreen buttons only</string>
-    <string name="nav_menu_install_mod">Install Mods</string>
+    <string name="nav_menu_install_mod">Import Mods</string>
 
     <string name="controls_editor_instructions">Long press on empty space to open context menu. Changes are saved automatically once you are finished</string>
     <string name="controls_editor_add_element">Add control element</string>
@@ -141,7 +141,7 @@
     <string name="touch_controls_disabled_toast">Touch controls disabled</string>
     <string name="fragment_label_touch_controls">Touch Controls</string>
 
-    <!-- Install Mod -->
+    <!-- Import Mod -->
     <string name="install_mod_title">Import Mods</string>
     <string name="install_mod_instance_label">Game instance</string>
     <string name="install_mod_zip_label">Mod ZIP</string>
