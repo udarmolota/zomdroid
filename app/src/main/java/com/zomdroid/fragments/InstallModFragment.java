@@ -139,7 +139,7 @@ public class InstallModFragment extends Fragment {
             clearSelectedModZip();
 
             Toast.makeText(requireContext(),
-                    "Mod installation successfull",
+                    "Mod import successfull",
                     Toast.LENGTH_SHORT).show();
 
         });

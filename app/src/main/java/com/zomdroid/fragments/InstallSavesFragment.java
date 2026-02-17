@@ -159,7 +159,7 @@ public class InstallSavesFragment extends Fragment {
             clearSelectedSavesZip();
 
             Toast.makeText(requireContext(),
-                    "Saves import started",
+                    "Saves import successfull",
                     Toast.LENGTH_SHORT).show();
         });
 

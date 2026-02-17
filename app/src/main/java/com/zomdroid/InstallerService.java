@@ -747,7 +747,8 @@ public class InstallerService extends Service implements TaskProgressListener {
 
 
     private static boolean isModFolder(File dir) {
-        return dir != null && dir.isDirectory() && new File(dir, "mod.info").isFile();
+        //return dir != null && dir.isDirectory() && new File(dir, "mod.info").isFile();
+        return dir != null && dir.isDirectory();
     }
 
     private static File[] listDirs(File root) {
