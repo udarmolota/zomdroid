@@ -110,24 +110,20 @@ static void assemble_box64_jni_trampoline(uint32_t** code, int* code_size, const
     // Rewritten to avoid realloc() per instruction:
     // - Uses a growable buffer (capacity doubles when needed)
     // - Reduces heap fragmentation and makes generation O(N) instead of O(N^2)
-    int insn_index = 0;    
+    int insn_index = 0;
     size_t cap_bytes = 0;
-    if (code && *code && code_size && *code_size > 0) {
-        // We don't know the real capacity from outside; treat current size as baseline.
-        cap_bytes = (size_t)(*code_size);
-    }
 
     // 256 bytes = 64 AArch64 instructions (reasonable starting point)
     const size_t kInitialCap = 256;
 
     // Ensure buffer can hold `needed_bytes` bytes; grows exponentially.
-    #define ENSURE_CAPACITY(needed_bytes) do { \
+#define ENSURE_CAPACITY(needed_bytes) do { \
         size_t _need = (size_t)(needed_bytes); \
         if (_need > cap_bytes) { \
             size_t _new_cap = cap_bytes ? cap_bytes : kInitialCap; \
             while (_new_cap < _need) { \
                 size_t _next = _new_cap * 2; \
-                if (_next < _new_cap) { /* overflow guard */ \
+                if (_next < _new_cap) { \
                     _new_cap = _need; \
                     break; \
                 } \
@@ -135,7 +131,7 @@ static void assemble_box64_jni_trampoline(uint32_t** code, int* code_size, const
             } \
             void* _p = realloc(*code, _new_cap); \
             if (!_p) { \
-                LOGE(LOG_TAG, "assemble_box64_jni_trampoline: realloc failed (need=%zu bytes)", _new_cap); \
+                LOGE("assemble_box64_jni_trampoline: realloc failed (need=%zu bytes)", _new_cap); \
                 return; \
             } \
             *code = (uint32_t*)_p; \
@@ -144,15 +140,14 @@ static void assemble_box64_jni_trampoline(uint32_t** code, int* code_size, const
     } while (0)
 
     // Append one 32-bit instruction; keeps *code_size in BYTES (same as original).
-    #define ADD_INSN(I) do { \
-        int _old_size = *code_size; \
-        int _new_size = _old_size + (int)sizeof(uint32_t); \
-        if (_new_size < _old_size) { \
-            LOGE(LOG_TAG, "assemble_box64_jni_trampoline: code_size overflow"); \
+#define ADD_INSN(I) do { \
+        int _new_size = *code_size + (int)sizeof(uint32_t); \
+        if (_new_size < *code_size) { \
+            LOGE("assemble_box64_jni_trampoline: code_size overflow"); \
             return; \
         } \
-        ENSURE_CAPACITY(_new_size); \
         *code_size = _new_size; \
+        ENSURE_CAPACITY((size_t)*code_size); \
         insn_index = (*code_size / (int)sizeof(uint32_t)) - 1; \
         (*code)[insn_index] = (I); \
     } while (0)
@@ -200,19 +195,19 @@ static void assemble_box64_jni_trampoline(uint32_t** code, int* code_size, const
     int stack_size = fp_offset + 16 + argc + 1;
     stack_size = (stack_size + 15) & ~15;
     if (fp_offset > 0) {
-        ADD_INSN(base_sub_imm(A64_SF_64, 0, stack_size, A64_REG_SP, A64_REG_SP))
-        ADD_INSN(base_stp(A64_SF_64, (fp_offset) / 8, A64_REG_30, A64_REG_SP, A64_REG_29))
-        ADD_INSN(base_add_imm(A64_SF_64, 0, fp_offset, A64_REG_SP, A64_REG_29))
+        ADD_INSN(base_sub_imm(A64_SF_64, 0, stack_size, A64_REG_SP, A64_REG_SP));
+        ADD_INSN(base_stp(A64_SF_64, (fp_offset) / 8, A64_REG_30, A64_REG_SP, A64_REG_29));
+        ADD_INSN(base_add_imm(A64_SF_64, 0, fp_offset, A64_REG_SP, A64_REG_29));
     } else {
-        ADD_INSN(base_stp_prei(A64_SF_64, -stack_size / 8, A64_REG_30, A64_REG_SP, A64_REG_29))
-        ADD_INSN(base_mov_sp(A64_SF_64, A64_REG_SP, A64_REG_29))
+        ADD_INSN(base_stp_prei(A64_SF_64, -stack_size / 8, A64_REG_30, A64_REG_SP, A64_REG_29));
+        ADD_INSN(base_mov_sp(A64_SF_64, A64_REG_SP, A64_REG_29));
     }
 
     // overwrite first arg (JNIEnv*) with our wrapper
-    ADD_INSN(base_movz(A64_SF_64, 0, g_wrapped_jni_env & 0xFFFF, A64_REG_0))
-    ADD_INSN(base_movk(A64_SF_64, 1, (g_wrapped_jni_env >> 16) & 0xFFFF, A64_REG_0))
-    ADD_INSN(base_movk(A64_SF_64, 2, (g_wrapped_jni_env >> 32) & 0xFFFF, A64_REG_0))
-    ADD_INSN(base_movk(A64_SF_64, 3, (g_wrapped_jni_env >> 48) & 0xFFFF, A64_REG_0))
+    ADD_INSN(base_movz(A64_SF_64, 0, g_wrapped_jni_env & 0xFFFF, A64_REG_0));
+    ADD_INSN(base_movk(A64_SF_64, 1, (g_wrapped_jni_env >> 16) & 0xFFFF, A64_REG_0));
+    ADD_INSN(base_movk(A64_SF_64, 2, (g_wrapped_jni_env >> 32) & 0xFFFF, A64_REG_0));
+    ADD_INSN(base_movk(A64_SF_64, 3, (g_wrapped_jni_env >> 48) & 0xFFFF, A64_REG_0));
 
     // shift arguments to make space for reserved
     for (int i = argc - 1; i >= 0; i--) {
@@ -222,18 +217,18 @@ static void assemble_box64_jni_trampoline(uint32_t** code, int* code_size, const
                     int src_offset = (i64_argc_stack + df64_argc_stack) * 8 - 8;
                     int i64_off = i64_argc + i64_reserved >= 8 ? (i64_argc + i64_reserved - 8) * 8 : 0;
                     int target_offset = (df64_argc + df64_reserved - 8) * 8 + i64_off + src_offset;
-                    ADD_INSN(simd_ldr_imm(0b10, 0b01, (src_offset + stack_size) / 4, A64_REG_SP, A64_REG_18))
-                    ADD_INSN(simd_fcvt(0b00, 0b01, A64_REG_18, A64_REG_18))
-                    ADD_INSN(simd_str_imm(0b11, 0b00, target_offset / 8, A64_REG_SP, A64_REG_18))
+                    ADD_INSN(simd_ldr_imm(0b10, 0b01, (src_offset + stack_size) / 4, A64_REG_SP, A64_REG_18));
+                    ADD_INSN(simd_fcvt(0b00, 0b01, A64_REG_18, A64_REG_18));
+                    ADD_INSN(simd_str_imm(0b11, 0b00, target_offset / 8, A64_REG_SP, A64_REG_18));
                     df64_argc_stack--;
                 } else {
                     if (df64_argc + df64_reserved <= 8) {
-                        ADD_INSN(simd_fcvt(0b00, 0b01, df64_argc - 1, df64_argc - 1 + df64_reserved))
+                        ADD_INSN(simd_fcvt(0b00, 0b01, df64_argc - 1, df64_argc - 1 + df64_reserved));
                     } else {
                         int i64_off = i64_argc + i64_reserved >= 8 ? (i64_argc + i64_reserved - 8) * 8 : 0;
                         int target_offset = (df64_argc + df64_reserved - 8) * 8 + i64_off - 8;
-                        ADD_INSN(simd_fcvt(0b00, 0b01, df64_argc - 1, A64_REG_18))
-                        ADD_INSN(simd_str_imm(0b11, 0b00, target_offset / 8, A64_REG_SP, A64_REG_18))
+                        ADD_INSN(simd_fcvt(0b00, 0b01, df64_argc - 1, A64_REG_18));
+                        ADD_INSN(simd_str_imm(0b11, 0b00, target_offset / 8, A64_REG_SP, A64_REG_18));
                     }
                     df64_argc--;
                 }
@@ -243,8 +238,8 @@ static void assemble_box64_jni_trampoline(uint32_t** code, int* code_size, const
                     int src_offset = (i64_argc_stack + df64_argc_stack) * 8 - 8;
                     int i64_off = i64_argc + i64_reserved >= 8 ? (i64_argc + i64_reserved - 8) * 8 : 0;
                     int target_offset = (df64_argc + df64_reserved - 8) * 8 + i64_off + src_offset;
-                    ADD_INSN(simd_ldr_imm(0b11, 0b01, (src_offset + stack_size) / 8, A64_REG_SP, A64_REG_18))
-                    ADD_INSN(simd_str_imm(0b11, 0b00, target_offset / 8, A64_REG_SP, A64_REG_18))
+                    ADD_INSN(simd_ldr_imm(0b11, 0b01, (src_offset + stack_size) / 8, A64_REG_SP, A64_REG_18));
+                    ADD_INSN(simd_str_imm(0b11, 0b00, target_offset / 8, A64_REG_SP, A64_REG_18));
                     df64_argc_stack--;
                 } else {
                     if (df64_reserved == 0) {
@@ -253,11 +248,11 @@ static void assemble_box64_jni_trampoline(uint32_t** code, int* code_size, const
                     }
 
                     if (df64_argc + df64_reserved <= 8) {
-                        ADD_INSN(simd_mov_vec(0, df64_argc - 1, df64_argc - 1, df64_argc - 1 + df64_reserved))
+                        ADD_INSN(simd_mov_vec(0, df64_argc - 1, df64_argc - 1, df64_argc - 1 + df64_reserved));
                     } else {
                         int i64_off = i64_argc + i64_reserved >= 8 ? (i64_argc + i64_reserved - 8) * 8 : 0;
                         int target_offset = (df64_argc + df64_reserved - 8) * 8 + i64_off - 8;
-                        ADD_INSN(simd_str_imm(0b11, 0b00, target_offset / 8, A64_REG_SP, df64_argc - 1))
+                        ADD_INSN(simd_str_imm(0b11, 0b00, target_offset / 8, A64_REG_SP, df64_argc - 1));
                     }
                     df64_argc--;
                 }
@@ -272,8 +267,8 @@ static void assemble_box64_jni_trampoline(uint32_t** code, int* code_size, const
                     int src_offset = (i64_argc_stack + df64_argc_stack) * 8 - 8;
                     int d64_off = df64_argc + df64_reserved >= 8 ? (df64_argc + df64_reserved - 8) * 8 : 0;
                     int dst_offset = (i64_argc + i64_reserved - 8) * 8 + d64_off + src_offset;
-                    ADD_INSN(base_ldr_imm(A64_SF_32, (src_offset + stack_size) / 4, A64_REG_SP, A64_REG_18))
-                    ADD_INSN(base_str_imm(A64_SF_32, dst_offset / 4, A64_REG_SP, A64_REG_18))
+                    ADD_INSN(base_ldr_imm(A64_SF_32, (src_offset + stack_size) / 4, A64_REG_SP, A64_REG_18));
+                    ADD_INSN(base_str_imm(A64_SF_32, dst_offset / 4, A64_REG_SP, A64_REG_18));
                     i64_argc_stack--;
                 } else {
                     if (i64_reserved == 0) {
@@ -282,11 +277,11 @@ static void assemble_box64_jni_trampoline(uint32_t** code, int* code_size, const
                     }
 
                     if (i64_argc + i64_reserved <= 8) {
-                        ADD_INSN(base_mov_reg(A64_SF_32, i64_argc - 1, i64_argc - 1 + i64_reserved))
+                        ADD_INSN(base_mov_reg(A64_SF_32, i64_argc - 1, i64_argc - 1 + i64_reserved));
                     } else {
                         int d64_off = df64_argc + df64_reserved >= 8 ? (df64_argc + df64_reserved - 8) * 8 : 0;
                         int offset = (i64_argc + i64_reserved - 8) * 8 + d64_off - 8;
-                        ADD_INSN(base_str_imm(A64_SF_32, offset / 4, A64_REG_SP, i64_argc - 1))
+                        ADD_INSN(base_str_imm(A64_SF_32, offset / 4, A64_REG_SP, i64_argc - 1));
                     }
                     i64_argc--;
                 }
@@ -300,8 +295,8 @@ static void assemble_box64_jni_trampoline(uint32_t** code, int* code_size, const
                     int src_offset = (i64_argc_stack + df64_argc_stack) * 8 - 8;
                     int d64_off = df64_argc + df64_reserved >= 8 ? (df64_argc + df64_reserved - 8) * 8 : 0;
                     int dst_offset = (i64_argc + i64_reserved - 8) * 8 + d64_off + src_offset;
-                    ADD_INSN(base_ldr_imm(A64_SF_64, (src_offset + stack_size) / 8, A64_REG_SP, A64_REG_18))
-                    ADD_INSN(base_str_imm(A64_SF_64, dst_offset / 8, A64_REG_SP, A64_REG_18))
+                    ADD_INSN(base_ldr_imm(A64_SF_64, (src_offset + stack_size) / 8, A64_REG_SP, A64_REG_18));
+                    ADD_INSN(base_str_imm(A64_SF_64, dst_offset / 8, A64_REG_SP, A64_REG_18));
                     i64_argc_stack--;
                 } else {
                     if (i64_reserved == 0) {
@@ -310,11 +305,11 @@ static void assemble_box64_jni_trampoline(uint32_t** code, int* code_size, const
                     }
 
                     if (i64_argc + i64_reserved <= 8) {
-                        ADD_INSN(base_mov_reg(A64_SF_64, i64_argc - 1, i64_argc - 1 + i64_reserved))
+                        ADD_INSN(base_mov_reg(A64_SF_64, i64_argc - 1, i64_argc - 1 + i64_reserved));
                     } else {
                         int d64_off = df64_argc + df64_reserved >= 8 ? (df64_argc + df64_reserved - 8) * 8 : 0;
                         int offset = (i64_argc + i64_reserved - 8) * 8 + d64_off - 8;
-                        ADD_INSN(base_str_imm(A64_SF_64, offset / 8, A64_REG_SP, i64_argc - 1))
+                        ADD_INSN(base_str_imm(A64_SF_64, offset / 8, A64_REG_SP, i64_argc - 1));
                     }
                     i64_argc--;
                 }
@@ -323,61 +318,61 @@ static void assemble_box64_jni_trampoline(uint32_t** code, int* code_size, const
     }
 
     // put first reserved arg - emulated function ptr
-    ADD_INSN(base_movz(A64_SF_64, 0, emulated_fn & 0xFFFF, A64_REG_0))
-    ADD_INSN(base_movk(A64_SF_64, 1, (emulated_fn >> 16) & 0xFFFF, A64_REG_0))
-    ADD_INSN(base_movk(A64_SF_64, 2, (emulated_fn >> 32) & 0xFFFF, A64_REG_0))
-    ADD_INSN(base_movk(A64_SF_64, 3, (emulated_fn >> 48) & 0xFFFF, A64_REG_0))
+    ADD_INSN(base_movz(A64_SF_64, 0, emulated_fn & 0xFFFF, A64_REG_0));
+    ADD_INSN(base_movk(A64_SF_64, 1, (emulated_fn >> 16) & 0xFFFF, A64_REG_0));
+    ADD_INSN(base_movk(A64_SF_64, 2, (emulated_fn >> 32) & 0xFFFF, A64_REG_0));
+    ADD_INSN(base_movk(A64_SF_64, 3, (emulated_fn >> 48) & 0xFFFF, A64_REG_0));
 
     // put second reserved arg - emulated function signature
     int signature_offset = fp_offset + 16;
     for (int i = 0; signature[i] != 0;) {
         if (i + 8 <= strlen(signature)) {
             uint64_t chunk = *(uint64_t *)(signature + i);
-            ADD_INSN(base_movz(A64_SF_64, 0, chunk & 0xFFFF, A64_REG_18))
-            ADD_INSN(base_movk(A64_SF_64, 1, (chunk >> 16) & 0xFFFF, A64_REG_18))
-            ADD_INSN(base_movk(A64_SF_64, 2, (chunk >> 32) & 0xFFFF, A64_REG_18))
-            ADD_INSN(base_movk(A64_SF_64, 3, (chunk >> 48) & 0xFFFF, A64_REG_18))
-            ADD_INSN(base_str_imm(A64_SF_64, (signature_offset + i) / 8, A64_REG_SP, A64_REG_18))
+            ADD_INSN(base_movz(A64_SF_64, 0, chunk & 0xFFFF, A64_REG_18));
+            ADD_INSN(base_movk(A64_SF_64, 1, (chunk >> 16) & 0xFFFF, A64_REG_18));
+            ADD_INSN(base_movk(A64_SF_64, 2, (chunk >> 32) & 0xFFFF, A64_REG_18));
+            ADD_INSN(base_movk(A64_SF_64, 3, (chunk >> 48) & 0xFFFF, A64_REG_18));
+            ADD_INSN(base_str_imm(A64_SF_64, (signature_offset + i) / 8, A64_REG_SP, A64_REG_18));
             i += 8;
         } else if (i + 4 <= strlen(signature)) {
             uint32_t chunk = *(uint32_t*)(signature + i);
-            ADD_INSN(base_movz(A64_SF_32, 0, chunk & 0xFFFF, A64_REG_18))
-            ADD_INSN(base_movk(A64_SF_32, 1, (chunk >> 16) & 0xFFFF, A64_REG_18))
-            ADD_INSN(base_str_imm(A64_SF_32, (signature_offset + i) / 4, A64_REG_SP, A64_REG_18))
+            ADD_INSN(base_movz(A64_SF_32, 0, chunk & 0xFFFF, A64_REG_18));
+            ADD_INSN(base_movk(A64_SF_32, 1, (chunk >> 16) & 0xFFFF, A64_REG_18));
+            ADD_INSN(base_str_imm(A64_SF_32, (signature_offset + i) / 4, A64_REG_SP, A64_REG_18));
             i += 4;
         } else {
-            ADD_INSN(base_movz(A64_SF_32, 0, signature[i], A64_REG_18))
-            ADD_INSN(base_strb_imm(signature_offset + i, A64_REG_SP, A64_REG_18))
+            ADD_INSN(base_movz(A64_SF_32, 0, signature[i], A64_REG_18));
+            ADD_INSN(base_strb_imm(signature_offset + i, A64_REG_SP, A64_REG_18));
             i++;
         }
     }
-    ADD_INSN(base_movz(A64_SF_32, 0, 0, A64_REG_18))
-    ADD_INSN(base_strb_imm(signature_offset + strlen(signature), A64_REG_SP, A64_REG_18))
-    ADD_INSN(base_add_imm(A64_SF_64, 0, signature_offset, A64_REG_SP, A64_REG_1))
+    ADD_INSN(base_movz(A64_SF_32, 0, 0, A64_REG_18));
+    ADD_INSN(base_strb_imm(signature_offset + strlen(signature), A64_REG_SP, A64_REG_18));
+    ADD_INSN(base_add_imm(A64_SF_64, 0, signature_offset, A64_REG_SP, A64_REG_1));
 
 /*    // put third reserved arg - emulated function return type
     ADD_INSN(base_movz(A64_SF_32, 0, returnType, A64_REG_2))*/
 
     // prepare and call RunFunctionFmt
-    ADD_INSN(base_movz(A64_SF_64, 0, (uint64_t) &RunFunctionFmt & 0xFFFF, A64_REG_18))
-    ADD_INSN(base_movk(A64_SF_64, 1, ((uint64_t) &RunFunctionFmt >> 16) & 0xFFFF, A64_REG_18))
-    ADD_INSN(base_movk(A64_SF_64, 2, ((uint64_t) &RunFunctionFmt >> 32) & 0xFFFF, A64_REG_18))
-    ADD_INSN(base_movk(A64_SF_64, 3, ((uint64_t) &RunFunctionFmt >> 48) & 0xFFFF, A64_REG_18))
-    ADD_INSN(base_blr(A64_REG_18))
+    ADD_INSN(base_movz(A64_SF_64, 0, (uint64_t) &RunFunctionFmt & 0xFFFF, A64_REG_18));
+    ADD_INSN(base_movk(A64_SF_64, 1, ((uint64_t) &RunFunctionFmt >> 16) & 0xFFFF, A64_REG_18));
+    ADD_INSN(base_movk(A64_SF_64, 2, ((uint64_t) &RunFunctionFmt >> 32) & 0xFFFF, A64_REG_18));
+    ADD_INSN(base_movk(A64_SF_64, 3, ((uint64_t) &RunFunctionFmt >> 48) & 0xFFFF, A64_REG_18));
+    ADD_INSN(base_blr(A64_REG_18));
 
     // free stack
     if (fp_offset > 0) {
-        ADD_INSN(base_ldp(A64_SF_64, fp_offset / 8, A64_REG_30, A64_REG_SP, A64_REG_29))
-        ADD_INSN(base_add_imm(A64_SF_64, 0, stack_size, A64_REG_SP, A64_REG_SP))
+        ADD_INSN(base_ldp(A64_SF_64, fp_offset / 8, A64_REG_30, A64_REG_SP, A64_REG_29));
+        ADD_INSN(base_add_imm(A64_SF_64, 0, stack_size, A64_REG_SP, A64_REG_SP));
     } else {
-        ADD_INSN(base_ldp_posti(A64_SF_64, stack_size / 8, A64_REG_30, A64_REG_SP, A64_REG_29))
+        ADD_INSN(base_ldp_posti(A64_SF_64, stack_size / 8, A64_REG_30, A64_REG_SP, A64_REG_29));
     }
 
     // return
-    ADD_INSN(base_ret(A64_REG_30))
+    ADD_INSN(base_ret(A64_REG_30));
 
-    #undef ADD_INSN
-    #undef ENSURE_CAPACITY
+#undef ADD_INSN
+#undef ENSURE_CAPACITY
 }
 
 void* zomdroid_emulation_bridge_jni_symbol(EmulatedLib *lib, uint64_t fn, const char* arg_types, char ret_type) {
@@ -534,154 +529,3 @@ int zomdroid_emulation_init() {
 
     return 0;
 }
-
-// this will fail for double values, smth wrong with vararg
-//void test_print_vararg() {
-//    uintptr_t print_vararg_fn = FindGlobalSymbol(my_context->maplib, "print_vararg", 0,0,0);
-//    RunFunctionFmt(print_vararg_fn, "pidididid","idididid", 1, 1.1, 2, 2.2, 3, 3.3, 4, 4.4);
-//    RunFunctionFmt(print_vararg_fn, "pidididid","idididid", 5, 5.5, 6, 6.6, 7, 7.7, 8, 8.8);
-//
-//    long page_size = sysconf(_SC_PAGESIZE);
-//    uint32_t* code = NULL;
-//    int code_size = 0;
-//    assemble_box64_jni_trampoline(&code, &code_size, "pidididid", print_vararg_fn);
-//    void* mem = mmap(NULL, page_size, PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-//    if (mem == MAP_FAILED) {
-//        LOGE("mmap failed with error: %s", strerror(errno));
-//        return;
-//    }
-//    memcpy(mem, code, code_size);
-//
-//    free(code);
-//
-//    __builtin___clear_cache(mem, mem + code_size);
-//
-//    void (*mapped_code)(char*, int, double, int, double, int, double, int, double) = (void(*)())mem;
-//    mapped_code("idididid", 5, 5.5, 6, 6.6, 7, 7.7, 8, 8.8);
-//
-//    if (munmap(mem, page_size) != 0) {
-//        LOGE("munmap failed with error: %s", strerror(errno));
-//    }
-//}
-//
-//void test_print_16int_16double() {
-//    uintptr_t print_16int_16double_fn = FindGlobalSymbol(my_context->maplib, "print_16int_16double", 0,0,0);
-//    RunFunctionFmt(print_16int_16double_fn, "iiiiiiiiiiiiiiiidddddddddddddddd",
-//                   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
-//                   1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 1.10, 1.11, 1.12, 1.13, 1.14, 1.15, 1.16);
-//
-//    long page_size = sysconf(_SC_PAGESIZE);
-//    uint32_t* code = NULL;
-//    int code_size = 0;
-//    assemble_box64_jni_trampoline(&code, &code_size, "iiiiiiiiiiiiiiiidddddddddddddddd",
-//                                  print_16int_16double_fn);
-//    void* mem = mmap(NULL, page_size, PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-//    if (mem == MAP_FAILED) {
-//        LOGE("mmap failed with error: %s", strerror(errno));
-//        return;
-//    }
-//    memcpy(mem, code, code_size);
-//
-//    free(code);
-//
-//    __builtin___clear_cache(mem, mem + code_size);
-//
-//    asm volatile("isb");
-//
-//    void (*mapped_code)(int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int,
-//            double, double , double , double , double, double, double, double, double, double, double, double, double, double, double, double
-//            ) = (void(*)())mem;
-//    mapped_code(17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
-//                2.17, 2.18, 2.19, 2.20, 2.21, 2.22, 2.23, 2.24, 2.25, 2.26, 2.27, 2.28, 2.29, 2.30, 2.31, 2.32);
-//
-//    if (munmap(mem, page_size) != 0) {
-//        LOGE("munmap failed with error: %s", strerror(errno));
-//    }
-//}
-//
-//void test_add_two_numbers() {
-//    uintptr_t add_two_numbers_fn = FindGlobalSymbol(my_context->maplib, "add_two_numbers", 0, 0, 0);
-//    if (add_two_numbers_fn == 0) {
-//        LOGE("FindGlobalSymbol failed");
-//        return;
-//    }
-//    int result = (int) RunFunction(add_two_numbers_fn, 2, 4,5);
-//    LOGD("add_two_numbers result: %d", result);
-//
-//    long page_size = sysconf(_SC_PAGESIZE);
-//
-//    uint32_t* code = NULL;
-//    int code_size = 0;
-//    assemble_box64_jni_trampoline(&code, &code_size, "ii", add_two_numbers_fn);
-//    void* mem = mmap(NULL, page_size, PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-//    if (mem == MAP_FAILED) {
-//        LOGE("mmap failed with error: %s", strerror(errno));
-//        return;
-//    }
-//    memcpy(mem, code, code_size);
-//
-//    free(code);
-//
-//    __builtin___clear_cache(mem, mem + code_size);
-//
-//    int (*mapped_code)(int, int) = (int(*)(int, int))mem;
-//    result = (int) mapped_code(2, 3);
-//
-//    LOGD("add_two_numbers trampoline result: %d", result);
-//
-//    if (munmap(mem, page_size) != 0) {
-//        LOGE("munmap failed with error: %s", strerror(errno));
-//    }
-//}
-//
-//void test_print_message() {
-//    uintptr_t print_message_fn = FindGlobalSymbol(my_context->maplib, "print_message", 0,0,0);
-//    char msg[] = "Hello, World!";
-//    RunFunction(print_message_fn, 1, msg);
-//}
-//
-//void test_vaarg() {
-//    long page_size = sysconf(_SC_PAGESIZE);
-//
-//    uint32_t* code = NULL;
-//    int code_size = 0;
-//    assemble_box64_jni_trampoline(&code, &code_size, "iiiiiiwiwiwi", 0);
-//    void* mem = mmap(NULL, page_size, PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-//    if (mem == MAP_FAILED) {
-//        LOGE("mmap failed with error: %s", strerror(errno));
-//        return;
-//    }
-//    memcpy(mem, code, code_size);
-//
-//    free(code);
-//
-//    __builtin___clear_cache(mem, mem + code_size);
-//
-//    void (*mapped_code)(int, int, int, int, int, int, short, int, short, int, short, int) = mem;
-//    mapped_code(INT_MAX, INT_MAX - 1, INT_MAX - 2, INT_MAX - 3, INT_MAX - 4, INT_MAX - 5,
-//                               SHRT_MAX, INT_MAX - 6, SHRT_MAX - 1, INT_MAX - 7, SHRT_MAX - 2, INT_MAX - 8);
-//
-//    if (munmap(mem, page_size) != 0) {
-//        LOGE("munmap failed with error: %s", strerror(errno));
-//    }
-//}
-//
-//void test_box64() {
-//    test_vaarg();
-////    needed_libs_t* needed_lib = new_neededlib(1);
-////    needed_lib->names[0] = strdup("/data/data/com.zomdroid/files/libbox64test.so");
-////    if (AddNeededLib(my_context->maplib, 0, 0, 0, needed_lib, NULL, my_context, thread_get_emu()) != 0) {
-////        LOGE("Failed to load test library in box64");
-////        RemoveNeededLib(my_context->maplib, 0, needed_lib, my_context, thread_get_emu());
-////        free_neededlib(needed_lib);
-////        return;
-////    }
-////    free_neededlib(needed_lib);
-////
-////
-////    test_add_two_numbers();
-////    test_print_message();
-////    test_print_vararg();
-////    test_print_16int_16double();
-//}
-//

@@ -21,7 +21,7 @@
 
 #define BUF_SIZE 1024
 
-#define JNI_SIG_CACHE_SIZE 64
+#define JNI_SIG_CACHE_SIZE 32 //64
 
 typedef struct {
     char* sym;  // key
@@ -90,7 +90,20 @@ static void* vulkan_loader_handle;
 
 static EmulatedLib jni_libs[] = {{.name = "PZClipper64"}, {.name = "PZBullet64"}, {.name = "PZBulletNoOpenGL64"}, {.name = "Lighting64"}, {.name = "PZPathFind64"}, {.name = "PZPopMan64"}, {.name = "fmodintegration64"}, { .name = "zomdroidtest"}, { .name = "RakNet64"}, { .name = "ZNetNoSteam"} };
 static int jni_lib_count = sizeof (jni_libs) / sizeof (EmulatedLib);
+static void init_jni_libs() {
+    static int initialized = 0;
+    if (initialized) return;
 
+    for (int i = 0; i < jni_lib_count; i++) {
+        jni_libs[i].handle = NULL;
+        jni_libs[i].mapped_pages = NULL;
+        jni_libs[i].page_count = 0;
+        jni_libs[i].page_code_size = NULL;
+        jni_libs[i].is_emulated = false;
+    }
+
+    initialized = 1;
+}
 
 __attribute__((visibility("default"), used))
 void zomdroid_linker_set_vulkan_driver_handle(void* handle) {
@@ -114,6 +127,7 @@ void zomdroid_linker_set_proc_addrs(void* _loader_dlopen_fn, void* _loader_dlsym
 
 __attribute__((visibility("default"), used))
 int zomdroid_linker_init() {
+    init_jni_libs();
     if (zomdroid_emulation_init() != 0) {
         LOGE("Failed to initialize emulation");
         return -1;
