@@ -107,12 +107,55 @@ uint32_t simd_fcvt(uint8_t ftype, uint8_t opc, uint8_t Rn, uint8_t Rd) {
 }
 
 static void assemble_box64_jni_trampoline(uint32_t** code, int* code_size, const char* signature, char returnType, uint64_t emulated_fn) {
-#define ADD_INSN(I) *code_size = *code_size + (int) sizeof (uint32_t); \
-                *code = realloc(*code, *code_size);\
-                insn_index = *code_size / (int) sizeof(uint32_t) - 1;\
-                (*code)[insn_index] = I;
+    // Rewritten to avoid realloc() per instruction:
+    // - Uses a growable buffer (capacity doubles when needed)
+    // - Reduces heap fragmentation and makes generation O(N) instead of O(N^2)
+    int insn_index = 0;    
+    size_t cap_bytes = 0;
+    if (code && *code && code_size && *code_size > 0) {
+        // We don't know the real capacity from outside; treat current size as baseline.
+        cap_bytes = (size_t)(*code_size);
+    }
 
-    int insn_index = 0;
+    // 256 bytes = 64 AArch64 instructions (reasonable starting point)
+    const size_t kInitialCap = 256;
+
+    // Ensure buffer can hold `needed_bytes` bytes; grows exponentially.
+    #define ENSURE_CAPACITY(needed_bytes) do { \
+        size_t _need = (size_t)(needed_bytes); \
+        if (_need > cap_bytes) { \
+            size_t _new_cap = cap_bytes ? cap_bytes : kInitialCap; \
+            while (_new_cap < _need) { \
+                size_t _next = _new_cap * 2; \
+                if (_next < _new_cap) { /* overflow guard */ \
+                    _new_cap = _need; \
+                    break; \
+                } \
+                _new_cap = _next; \
+            } \
+            void* _p = realloc(*code, _new_cap); \
+            if (!_p) { \
+                LOGE(LOG_TAG, "assemble_box64_jni_trampoline: realloc failed (need=%zu bytes)", _new_cap); \
+                return; \
+            } \
+            *code = (uint32_t*)_p; \
+            cap_bytes = _new_cap; \
+        } \
+    } while (0)
+
+    // Append one 32-bit instruction; keeps *code_size in BYTES (same as original).
+    #define ADD_INSN(I) do { \
+        int _old_size = *code_size; \
+        int _new_size = _old_size + (int)sizeof(uint32_t); \
+        if (_new_size < _old_size) { \
+            LOGE(LOG_TAG, "assemble_box64_jni_trampoline: code_size overflow"); \
+            return; \
+        } \
+        ENSURE_CAPACITY(_new_size); \
+        *code_size = _new_size; \
+        insn_index = (*code_size / (int)sizeof(uint32_t)) - 1; \
+        (*code)[insn_index] = (I); \
+    } while (0)
 
     const int argc = (int)strlen(signature);
 
@@ -332,6 +375,9 @@ static void assemble_box64_jni_trampoline(uint32_t** code, int* code_size, const
 
     // return
     ADD_INSN(base_ret(A64_REG_30))
+
+    #undef ADD_INSN
+    #undef ENSURE_CAPACITY
 }
 
 void* zomdroid_emulation_bridge_jni_symbol(EmulatedLib *lib, uint64_t fn, const char* arg_types, char ret_type) {
