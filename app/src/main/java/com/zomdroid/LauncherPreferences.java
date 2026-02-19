@@ -161,7 +161,7 @@ public class LauncherPreferences {
         FREEDRENO_8XX_Expr("libvulkan_freedreno_8xx.so"),
         TURNIP_bbdd688("libvulkan.ad07XX_regular.so"),
         TURNIP_bbdd688_8gen2("libvulkan.ad07XX.so"),
-        Turnip_25.1.3_GMEM("vulkan.turnip.710.so");
+        Turnip_25_1_3_GMEM("vulkan.turnip.710.so");
 
         final String libName;
         VulkanDriver(String libName) {
