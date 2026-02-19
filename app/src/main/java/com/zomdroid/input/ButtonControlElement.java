@@ -12,6 +12,8 @@ import android.graphics.drawable.shapes.RectShape;
 import android.text.TextPaint;
 import android.view.MotionEvent;
 import android.util.Log;
+import android.view.ViewGroup;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
@@ -44,6 +46,15 @@ public class ButtonControlElement extends AbstractControlElement {
                     parentView.toggleOverlayVisibility();
                 }
                 return; // важно: не отправлять дальше ни MNK, ни GAMEPAD
+            }
+            if (binding == GLFWBinding.UI_TOGGLE_KEYBOARD) {
+                if (isPressed) {
+                    TextInputOverlayView.toggle(
+                            parentView.getContext(),
+                            (ViewGroup) parentView.getParent()
+                    );
+                }
+                return;
             }
         }
 

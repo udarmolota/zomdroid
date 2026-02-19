@@ -337,9 +337,9 @@ public class InputControlsView extends View {
         for (AbstractControlElement element : controlElements) {
             boolean visible;
             if (overlayHidden) {
-                visible = isOverlayToggleElement(element);
+                visible = isOverlayToggleElement(element) || isKeyboardToggleElement(element);
             } else {
-                if (isOverlayToggleElement(element)) {
+                if (isOverlayToggleElement(element)|| isKeyboardToggleElement(element)) {
                     visible = true;
                 } else {
                     switch (mode) {
@@ -375,28 +375,12 @@ public class InputControlsView extends View {
     }
 
     public void showTextInputOverlay() {
-        TextInputOverlayView keyboard = new TextInputOverlayView(getContext());
-
-        keyboard.setOnTextInputListener(text -> {
-            //chatInputField.append(text); // или другой обработчик
-        });
-
-        keyboard.attachTo(this); // если нужно использовать BaseInputConnection
-
         ViewGroup parent = (ViewGroup) getParent();
         if (parent == null) {
-            Toast.makeText(context, "InputControlsView, Parent view is null — cannot show keyboard", Toast.LENGTH_SHORT).show();
-            System.out.println("[keyboard] InputControlsView, Parent view is null — cannot show keyboard");
+            Toast.makeText(context, "Parent view is null", Toast.LENGTH_SHORT).show();
             return;
         }
-
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT
-        );
-        params.gravity = Gravity.BOTTOM;
-
-        parent.addView(keyboard, params);
+        TextInputOverlayView.toggle(getContext(), parent);
     }
 
 
@@ -471,4 +455,10 @@ public class InputControlsView extends View {
         return false;
     }
 
+    private boolean isKeyboardToggleElement(AbstractControlElement element) {
+        for (GLFWBinding binding : element.getBindings()) {
+            if (binding == GLFWBinding.UI_TOGGLE_KEYBOARD) return true;
+        }
+        return false;
+    }
 }

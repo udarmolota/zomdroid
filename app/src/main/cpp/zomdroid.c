@@ -475,10 +475,12 @@ void zomdroid_event_keyboard(int key, bool isPressed) {
 }
 
 void zomdroid_event_char(unsigned int codepoint) {
+    LOGI("zomdroid_event_char: codepoint=%u", codepoint);
     ENQUEUE_EVENT({
-        e->type = CHAR_INPUT;
-        e->charInput.codepoint = codepoint;
-    });
+                      e->type = CHAR_INPUT;
+                      e->charInput.codepoint = codepoint;
+                      LOGI("zomdroid_event_char: enqueued at head=%d", next);
+                  });
 }
 
 void zomdroid_event_cursor_pos(double x, double y) {
