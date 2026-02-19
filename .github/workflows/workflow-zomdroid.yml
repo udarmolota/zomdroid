@@ -10,7 +10,7 @@ on:
         type: choice
         options:
         - opt-2
-        - separation
+        - kb_2_mp
         
 jobs:
   build:
