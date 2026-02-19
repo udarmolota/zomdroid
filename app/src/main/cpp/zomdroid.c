@@ -78,10 +78,11 @@ static void monitor_stdio_and_memory() {
         if (i > 0) {
             buffer[i] = '\0';
             // splitting output into individual lines makes it easier for logcat to process and avoids truncation
-            char* line = strtok(buffer, "\n");
+            char* saveptr;
+            char* line = strtok_r(buffer, "\n", &saveptr);
             while (line) {
                 LOGI("%s", line);
-                line = strtok(NULL, "\n");
+                line = strtok_r(NULL, "\n", &saveptr);
             }
         }
 
@@ -441,17 +442,27 @@ void zomdroid_surface_init(ANativeWindow* wnd, int width, int height) {
     pthread_mutex_unlock(&g_zomdroid_surface.mutex);
 }
 
-#define ENQUEUE_EVENT(setup_code)                                     \
-    do {                                                              \
-        u_char head = atomic_load_explicit(&g_zomdroid_event_queue.head, memory_order_relaxed);  \
-        u_char tail = atomic_load_explicit(&g_zomdroid_event_queue.tail, memory_order_acquire);  \
-        u_char next = (head + 1) & EVENT_QUEUE_MAX;                   \
-        if (next == tail) {                                           \
-            break;                                                    \
-        }                                                             \
-        ZomdroidEvent* e = &g_zomdroid_event_queue.buffer[next];      \
-        setup_code                                                    \
-        atomic_store_explicit(&g_zomdroid_event_queue.head, next, memory_order_release); \
+// Thread-safe lock-free enqueue using compare-exchange to prevent two threads
+// from simultaneously claiming the same slot in the ring buffer.
+#define ENQUEUE_EVENT(setup_code)                                                           \
+    do {                                                                                    \
+        u_char head, next;                                                                  \
+        do {                                                                                \
+            head = atomic_load_explicit(&g_zomdroid_event_queue.head,                      \
+                                        memory_order_relaxed);                              \
+            u_char tail = atomic_load_explicit(&g_zomdroid_event_queue.tail,               \
+                                               memory_order_acquire);                       \
+            next = (head + 1) & EVENT_QUEUE_MAX;                                           \
+            if (next == tail) goto enqueue_full;                                            \
+        } while (!atomic_compare_exchange_weak_explicit(                                    \
+                    &g_zomdroid_event_queue.head,                                           \
+                    &head, next,                                                            \
+                    memory_order_acquire,                                                   \
+                    memory_order_relaxed));                                                 \
+        ZomdroidEvent* e = &g_zomdroid_event_queue.buffer[next];                           \
+        setup_code                                                                          \
+        atomic_thread_fence(memory_order_release);                                         \
+        enqueue_full:;                                                                      \
     } while (0)
 
 
