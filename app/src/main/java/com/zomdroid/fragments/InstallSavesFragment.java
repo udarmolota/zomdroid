@@ -1,11 +1,16 @@
 package com.zomdroid.fragments;
 
+import android.content.ComponentName;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,14 +20,19 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.zomdroid.InstallerService;
 import com.zomdroid.R;
 import com.zomdroid.databinding.FragmentInstallSavesBinding;
+import com.zomdroid.databinding.TaskProgressDialogBinding;
 import com.zomdroid.game.GameInstance;
 import com.zomdroid.game.GameInstanceManager;
+
+import android.graphics.Typeface;
+import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -31,18 +41,54 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-import androidx.appcompat.app.AlertDialog;
-import android.graphics.Typeface;
-import android.widget.TextView;
-
 public class InstallSavesFragment extends Fragment {
 
+    private static final String LOG_TAG = InstallSavesFragment.class.getName();
+
     private FragmentInstallSavesBinding binding;
+    private TaskProgressDialogBinding taskProgressDialogBinding;
+    private AlertDialog taskProgressDialog;
+    private boolean isInstallerServiceBound = false;
 
     private static final String ZIP_MIME = "application/zip";
 
     private Uri savesZipUri = null;
     private List<GameInstance> instances;
+
+    private final ServiceConnection installerServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            InstallerService.LocalBinder binder = (InstallerService.LocalBinder) service;
+            InstallerService installerService = binder.getService();
+            isInstallerServiceBound = true;
+
+            handleTaskState(installerService.getTaskState().getValue());
+            installerService.getTaskState().observe(InstallSavesFragment.this, InstallSavesFragment.this::handleTaskState);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            Log.e(LOG_TAG, "Connection to installer service has been lost");
+            isInstallerServiceBound = false;
+            if (taskProgressDialog != null) taskProgressDialog.dismiss();
+        }
+    };
+
+    private void handleTaskState(InstallerService.TaskState state) {
+        if (state == null) return;
+        if (state.isFinished) {
+            taskProgressDialog.dismiss();
+            unbindInstallerService();
+            requireContext().stopService(new Intent(requireContext(), InstallerService.class));
+            Toast.makeText(requireContext(), state.title, Toast.LENGTH_SHORT).show();
+        } else if (state.isFinishedWithError) {
+            showTaskFinishedWithErrorDialog(state.title, state.message);
+            unbindInstallerService();
+            requireContext().stopService(new Intent(requireContext(), InstallerService.class));
+        } else {
+            showTaskProgressDialog(state.title, state.message, state.progress, state.progressMax);
+        }
+    }
 
     // Import: ZIP picker
     private final ActivityResultLauncher<String> actionOpenSavesLauncher =
@@ -83,17 +129,13 @@ public class InstallSavesFragment extends Fragment {
                 );
 
                 requireContext().startForegroundService(installerIntent);
-
-                Toast.makeText(requireContext(),
-                        "Saves export started",
-                        Toast.LENGTH_SHORT).show();
+                bindInstallerService();
             });
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
-
         binding = FragmentInstallSavesBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -101,6 +143,16 @@ public class InstallSavesFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // Setup progress dialog
+        taskProgressDialogBinding = TaskProgressDialogBinding.inflate(getLayoutInflater());
+        taskProgressDialog = new MaterialAlertDialogBuilder(requireContext())
+                .setView(taskProgressDialogBinding.getRoot())
+                .setCancelable(false)
+                .create();
+        taskProgressDialogBinding.progressDialogOkMb.setOnClickListener(v ->
+                taskProgressDialog.dismiss()
+        );
 
         instances = GameInstanceManager.requireSingleton().getInstances();
         if (instances == null || instances.isEmpty()) {
@@ -154,18 +206,14 @@ public class InstallSavesFragment extends Fragment {
                     savesZipUri
             );
 
-            requireContext().startForegroundService(installerIntent);
-
             clearSelectedSavesZip();
 
-            Toast.makeText(requireContext(),
-                    "Saves import successfull",
-                    Toast.LENGTH_SHORT).show();
+            requireContext().startForegroundService(installerIntent);
+            bindInstallerService();
         });
 
-        // Export: button (добавь эту кнопку в layout)
+        // Export button
         binding.installSavesExportBtn.setOnClickListener(v -> {
-            // имя по умолчанию — чтобы юзеру было удобно
             String ts = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.US).format(new Date());
             String defaultName = "zomdroid_saves_" + ts + ".zip";
             actionCreateSavesZipLauncher.launch(defaultName);
@@ -187,6 +235,75 @@ public class InstallSavesFragment extends Fragment {
         });
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbindInstallerService();
+        binding = null;
+    }
+
+    private void bindInstallerService() {
+        Intent intent = new Intent(requireContext(), InstallerService.class);
+        requireContext().bindService(intent, installerServiceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    private void unbindInstallerService() {
+        if (isInstallerServiceBound) {
+            requireContext().unbindService(installerServiceConnection);
+            isInstallerServiceBound = false;
+        }
+    }
+
+    private void showTaskProgressDialog(String title, String message, int progress, int progressMax) {
+        if (title != null) {
+            taskProgressDialogBinding.progressDialogTitleTv.setText(title);
+            taskProgressDialogBinding.progressDialogTitleTv.setVisibility(View.VISIBLE);
+        } else {
+            taskProgressDialogBinding.progressDialogTitleTv.setVisibility(View.GONE);
+        }
+
+        if (message != null) {
+            taskProgressDialogBinding.progressDialogMessageTv.setText(message);
+            taskProgressDialogBinding.progressDialogMessageTv.setVisibility(View.VISIBLE);
+        } else {
+            taskProgressDialogBinding.progressDialogMessageTv.setVisibility(View.GONE);
+        }
+
+        taskProgressDialogBinding.progressDialogProgressLpi.setVisibility(View.VISIBLE);
+        if (progress < 0)
+            taskProgressDialogBinding.progressDialogProgressLpi.setIndeterminate(true);
+        else {
+            taskProgressDialogBinding.progressDialogProgressLpi.setIndeterminate(false);
+            taskProgressDialogBinding.progressDialogProgressLpi.setMax(progressMax);
+            taskProgressDialogBinding.progressDialogProgressLpi.setProgress(progress);
+        }
+
+        taskProgressDialogBinding.progressDialogOkMb.setVisibility(View.GONE);
+
+        taskProgressDialog.show();
+    }
+
+    private void showTaskFinishedWithErrorDialog(String title, String message) {
+        if (title != null) {
+            taskProgressDialogBinding.progressDialogTitleTv.setText(title);
+            taskProgressDialogBinding.progressDialogTitleTv.setVisibility(View.VISIBLE);
+        } else {
+            taskProgressDialogBinding.progressDialogTitleTv.setVisibility(View.GONE);
+        }
+
+        if (message != null) {
+            taskProgressDialogBinding.progressDialogMessageTv.setText(message);
+            taskProgressDialogBinding.progressDialogMessageTv.setVisibility(View.VISIBLE);
+        } else {
+            taskProgressDialogBinding.progressDialogMessageTv.setVisibility(View.GONE);
+        }
+
+        taskProgressDialogBinding.progressDialogProgressLpi.setVisibility(View.GONE);
+        taskProgressDialogBinding.progressDialogOkMb.setVisibility(View.VISIBLE);
+
+        taskProgressDialog.show();
+    }
+
     private GameInstance getSelectedInstanceOrNull() {
         int position = binding.installSavesInstanceSpinner.getSelectedItemPosition();
         if (position < 0 || position >= instances.size()) {
@@ -196,12 +313,6 @@ public class InstallSavesFragment extends Fragment {
             return null;
         }
         return instances.get(position);
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
     }
 
     private void clearSelectedSavesZip() {
