@@ -128,7 +128,7 @@ public class SettingsFragment extends Fragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 binding.settingsResolutionScalePercentTv.setText(getResources().getString(R.string.percentage_format, progress));
-                LauncherPreferences.requireSingleton().setRenderScale((float) progress / 70);
+                LauncherPreferences.requireSingleton().setRenderScale((float) progress / 100);
             }
 
             @Override
