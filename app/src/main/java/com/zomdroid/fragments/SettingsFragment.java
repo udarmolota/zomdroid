@@ -128,7 +128,7 @@ public class SettingsFragment extends Fragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 binding.settingsResolutionScalePercentTv.setText(getResources().getString(R.string.percentage_format, progress));
-                LauncherPreferences.requireSingleton().setRenderScale((float) progress / 100);
+                LauncherPreferences.requireSingleton().setRenderScale((float) progress / 70);
             }
 
             @Override
@@ -175,6 +175,10 @@ public class SettingsFragment extends Fragment {
                 LauncherPreferences.requireSingleton().setJvmArgs(s.toString().trim());
             }
         });
+
+        binding.settingsDebugSwitch.setChecked(LauncherPreferences.requireSingleton().isDebug());
+        binding.settingsDebugSwitch.setOnCheckedChangeListener((v, isChecked) ->
+            LauncherPreferences.requireSingleton().setDebug(isChecked));
 
         binding.settingsJargsInfo.setOnClickListener(v -> {
             new androidx.appcompat.app.AlertDialog.Builder(requireContext())
