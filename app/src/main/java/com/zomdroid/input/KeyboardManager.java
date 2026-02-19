@@ -100,7 +100,12 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
     //Log.d(LOG_TAG, "[KB] glfw " + b.code + " , androidCode=" + androidCode);
     if (listener != null) {
         listener.onKeyboardKey(b.code, isPressed);
-        //listener.onKeyboardKey(glfwCode, isPressed);
+        if (isPressed) {
+          int unicode = event.getUnicodeChar(event.getMetaState());
+          if (unicode > 0) {
+              InputNativeInterface.sendChar(unicode);
+          }
+      }
     }
     return true;
   }
