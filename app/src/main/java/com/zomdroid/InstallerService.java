@@ -175,7 +175,7 @@ public class InstallerService extends Service implements TaskProgressListener {
                 }
 
                 // 42.13 problematic lib renaming
-                maybeDisableLightingLibFor4213(gameInstance);
+                maybeDisableLibFor42(gameInstance);
 
             } catch (Exception e) {
                 finishWithError(getString(R.string.dialog_title_failed_to_create_instance), e.toString());
@@ -677,27 +677,33 @@ public class InstallerService extends Service implements TaskProgressListener {
         });
     }
 
-    private void maybeDisableLightingLibFor4213(GameInstance gameInstance) {
+    private void maybeDisableLibFor42(GameInstance gameInstance) {
         File gameDir = new File(gameInstance.getGamePath());
         File pzJar = new File(gameDir, "projectzomboid.jar");
         if (!pzJar.exists()) return; // не 42.13-структура
-
+    
         File soDir = new File(gameDir, "android/arm64-v8a");
-        File so = new File(soDir, "libLighting64.so");
+    
+        maybeDisableLib(soDir, "libLighting64.so");
+        maybeDisableLib(soDir, "libPZBullet64.so");
+    }
+    
+    private void maybeDisableLib(File soDir, String libName) {
+        File so = new File(soDir, libName);
         if (!so.exists()) return;
-
-        File disabled = new File(soDir, "libLighting64.so.disabled");
+    
+        File disabled = new File(soDir, libName + ".disabled");
         if (disabled.exists()) {
             //noinspection ResultOfMethodCallIgnored
             so.delete();
             return;
         }
-
+    
         if (!so.renameTo(disabled)) {
-            throw new RuntimeException("Failed to rename libLighting64.so for 42.13: " + so.getAbsolutePath());
+            throw new RuntimeException("Failed to rename " + libName + " for 42.13: " + so.getAbsolutePath());
         }
-
-        Log.i(LOG_TAG, "42.13 patch: disabled libLighting64.so -> " + disabled.getName());
+    
+        Log.i(LOG_TAG, "42.13 patch: disabled " + libName + " -> " + disabled.getName());
     }
 
     private void extractProjectZomboidJarSimple(GameInstance gameInstance) throws IOException {
