@@ -165,32 +165,32 @@
     <string name="install_mod_zip_help_title">Mod archive structure</string>
 
     <string name="install_mod_zip_help_message">
-    \u2705 Correct examples:\n\n
-
-    Single mod:\n
-    ModName/\n
-    \u00A0\u00A0mod.info\n
-    \u00A0\u00A0media/\n
-    \u00A0\u00A0scripts/\n\n
-
-    Multiple mods in one ZIP:\n
-    ModA/\n
-    \u00A0\u00A0mod.info\n
-    ModB/\n
-    \u00A0\u00A0mod.info\n\n
-
-    \u274C Incorrect examples:\n\n
-
-    Extra wrapper folder:\n
-    Downloads/\n
-    \u00A0\u00A0ModName/\n
-    \u00A0\u00A0\u00A0\u00A0mod.info\n\n
-
-    Missing mod root:\n
-    media/\n
-    scripts/\n
-    (no mod.info in root)
-</string>
+        \u2705 Correct examples:\n\n
+    
+        Single mod:\n
+        ModName/\n
+        \u00A0\u00A0mod.info\n
+        \u00A0\u00A0media/\n
+        \u00A0\u00A0scripts/\n\n
+    
+        Multiple mods in one ZIP:\n
+        ModA/\n
+        \u00A0\u00A0mod.info\n
+        ModB/\n
+        \u00A0\u00A0mod.info\n\n
+    
+        \u274C Incorrect examples:\n\n
+    
+        Extra wrapper folder:\n
+        Downloads/\n
+        \u00A0\u00A0ModName/\n
+        \u00A0\u00A0\u00A0\u00A0mod.info\n\n
+    
+        Missing mod root:\n
+        media/\n
+        scripts/\n
+        (no mod.info in root)
+    </string>
 
 
     <!-- Controls layout -->
@@ -240,5 +240,5 @@
        Controls layout is global. Export saves controls.json only if you changed the layout.
     </string>
     <string name="controls_export_nothing_to_export">Nothing to export: default controls layout is used.</string>
-
+    <string name="settings_debug_mode">Debug mode (-debug)</string>
 </resources>
