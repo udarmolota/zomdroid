@@ -113,10 +113,13 @@ public class GameLauncher {
 
         ArrayList<String> args = gameInstance.getArgsAsList();
         if (BuildConfig.DEBUG) {
-            args.add("-debug");
+            //args.add("-debug");
             //args.add("-debuglog=Shader");
             Log.i("Zomdroid", "JVM ARGS: " + jvmArgs);
             Log.i("Zomdroid", "GAME ARGS: " + args);
+        }
+        if (BuildConfig.DEBUG || LauncherPreferences.requireSingleton().isDebug()) {
+            args.add("-debug");
         }
 
         //String javaHomePath = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.JRE;
@@ -124,7 +127,7 @@ public class GameLauncher {
 
         // Prefer JRE21 when using GL4ES-style renderers (Build 41 tends to rely on that path).
         // This isolates "old GL4ES pipeline" from "new Java 25 runtime" regressions.
-        boolean preferJre21ForRenderer = isLegacyRendererNeedingJre21(LauncherPreferences.requireSingleton().getRenderer()); // ✅ Added
+        boolean preferJre21ForRenderer = isLegacyRendererNeedingJre21(LauncherPreferences.requireSingleton().getRenderer()); 
 
         // Try to use dedicated folders if present (jre21 / jre25). If not present, fall back to C.deps.JRE.
         String jreFolder = preferJre21ForRenderer ? C.deps.JRE_21 : C.deps.JRE_25;
