@@ -474,6 +474,13 @@ void zomdroid_event_keyboard(int key, bool isPressed) {
     });
 }
 
+void zomdroid_event_char(unsigned int codepoint) {
+    ENQUEUE_EVENT({
+        e->type = CHAR_INPUT;
+        e->charInput.codepoint = codepoint;
+    });
+}
+
 void zomdroid_event_cursor_pos(double x, double y) {
     ENQUEUE_EVENT({
         e->type = CURSOR_POS;
