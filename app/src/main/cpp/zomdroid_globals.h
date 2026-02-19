@@ -14,7 +14,8 @@ typedef enum {
     JOYSTICK_DISCONNECTED,
     JOYSTICK_AXIS,
     JOYSTICK_DPAD,
-    JOYSTICK_BUTTON
+    JOYSTICK_BUTTON,
+    CHAR_INPUT
 } EventType;
 
 typedef enum {
@@ -73,6 +74,11 @@ typedef struct {
     bool is_pressed;
 } JoystickButtonEvent;
 
+typedef struct {
+    EventType type;
+    unsigned int codepoint;
+} CharInputEvent;
+
 typedef union {
     EventType type;
     KeyboardEvent keyboard;
@@ -83,6 +89,7 @@ typedef union {
     JoystickAxisEvent joystickAxis;
     JoystickDpadEvent joystickDpad;
     JoystickButtonEvent joystickButton;
+    CharInputEvent charInput;
 } ZomdroidEvent;
 
 #define EVENT_QUEUE_MAX 255
