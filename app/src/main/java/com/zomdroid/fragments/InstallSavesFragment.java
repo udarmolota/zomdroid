@@ -164,6 +164,9 @@ public class InstallSavesFragment extends Fragment {
 
         // Spinner population
         List<String> names = new ArrayList<>();
+        if (instances.size() > 1) {
+            names.add(getString(R.string.select_instance));
+        }
         for (GameInstance gi : instances) {
             names.add(gi.getName());
         }
@@ -174,6 +177,10 @@ public class InstallSavesFragment extends Fragment {
                 names
         );
         binding.installSavesInstanceSpinner.setAdapter(adapter);
+
+        if (instances.size() == 1) {
+            binding.installSavesInstanceSpinner.setSelection(0);
+        }
 
         // Import: Browse ZIP
         binding.installSavesBrowseIb.setOnClickListener(v ->
@@ -306,13 +313,15 @@ public class InstallSavesFragment extends Fragment {
 
     private GameInstance getSelectedInstanceOrNull() {
         int position = binding.installSavesInstanceSpinner.getSelectedItemPosition();
-        if (position < 0 || position >= instances.size()) {
+        int instanceIndex = instances.size() > 1 ? position - 1 : position;
+
+        if (instanceIndex < 0 || instanceIndex >= instances.size()) {
             Toast.makeText(requireContext(),
-                    "Invalid instance selected",
+                    getString(R.string.select_instance),
                     Toast.LENGTH_SHORT).show();
             return null;
         }
-        return instances.get(position);
+        return instances.get(instanceIndex);
     }
 
     private void clearSelectedSavesZip() {

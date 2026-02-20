@@ -110,13 +110,8 @@ public class InstallControlsFragment extends Fragment {
             registerForActivityResult(new ActivityResultContracts.CreateDocument(ZIP_MIME), outUri -> {
                 if (outUri == null) return;
 
-                int position = binding.installControlsInstanceSpinner.getSelectedItemPosition();
-                if (position < 0 || position >= instances.size()) {
-                    Toast.makeText(requireContext(), "Invalid instance selected", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                GameInstance selectedInstance = instances.get(position);
+                GameInstance selectedInstance = getSelectedInstanceOrNull();
+                if (selectedInstance == null) return;
 
                 Intent installerIntent = new Intent(requireContext(), InstallerService.class);
                 installerIntent.putExtra(
@@ -162,7 +157,11 @@ public class InstallControlsFragment extends Fragment {
             return;
         }
 
+        // Spinner population
         List<String> names = new ArrayList<>();
+        if (instances.size() > 1) {
+            names.add(getString(R.string.select_instance));
+        }
         for (GameInstance gi : instances) names.add(gi.getName());
 
         binding.installControlsInstanceSpinner.setAdapter(new ArrayAdapter<>(
@@ -170,6 +169,10 @@ public class InstallControlsFragment extends Fragment {
                 android.R.layout.simple_spinner_dropdown_item,
                 names
         ));
+
+        if (instances.size() == 1) {
+            binding.installControlsInstanceSpinner.setSelection(0);
+        }
 
         binding.installControlsInstallBtn.setEnabled(false);
 
@@ -183,13 +186,8 @@ public class InstallControlsFragment extends Fragment {
                 return;
             }
 
-            int position = binding.installControlsInstanceSpinner.getSelectedItemPosition();
-            if (position < 0 || position >= instances.size()) {
-                Toast.makeText(requireContext(), "Invalid instance selected", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            GameInstance selectedInstance = instances.get(position);
+            GameInstance selectedInstance = getSelectedInstanceOrNull();
+            if (selectedInstance == null) return;
 
             Intent installerIntent = new Intent(requireContext(), InstallerService.class);
             installerIntent.putExtra(InstallerService.EXTRA_COMMAND,
@@ -217,15 +215,9 @@ public class InstallControlsFragment extends Fragment {
         });
 
         binding.installControlsExportBtn.setOnClickListener(v -> {
-            int position = binding.installControlsInstanceSpinner.getSelectedItemPosition();
-            if (position < 0 || position >= instances.size()) {
-                Toast.makeText(requireContext(), "Invalid instance selected", Toast.LENGTH_SHORT).show();
-                return;
-            }
+            GameInstance gi = getSelectedInstanceOrNull();
+            if (gi == null) return;
 
-            GameInstance gi = instances.get(position);
-
-            // Проверяем ДО CreateDocument
             if (!hasControlsToExport(gi)) {
                 Toast.makeText(requireContext(),
                         getString(R.string.dialog_title_controls_export_skipped_default),
@@ -244,6 +236,19 @@ public class InstallControlsFragment extends Fragment {
         super.onDestroyView();
         unbindInstallerService();
         binding = null;
+    }
+
+    private GameInstance getSelectedInstanceOrNull() {
+        int position = binding.installControlsInstanceSpinner.getSelectedItemPosition();
+        int instanceIndex = instances.size() > 1 ? position - 1 : position;
+
+        if (instanceIndex < 0 || instanceIndex >= instances.size()) {
+            Toast.makeText(requireContext(),
+                    getString(R.string.select_instance),
+                    Toast.LENGTH_SHORT).show();
+            return null;
+        }
+        return instances.get(instanceIndex);
     }
 
     private void bindInstallerService() {

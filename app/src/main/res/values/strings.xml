@@ -241,4 +241,5 @@
     </string>
     <string name="controls_export_nothing_to_export">Nothing to export: default controls layout is used.</string>
     <string name="settings_debug_mode">Debug mode (-debug)</string>
+    <string name="select_instance">— Select game instance —</string>
 </resources>

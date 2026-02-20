@@ -117,7 +117,17 @@ public class SettingsFragment extends Fragment {
                             )
                             .setPositiveButton("OK", null)
                             .show();
-                }
+                } else if (vulkanDriver == LauncherPreferences.VulkanDriver.Turnip_25_1_3_GMEM) {
+                new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                        .setTitle("TURNIP 25.1.3 GMEM")
+                        .setMessage(
+                                "This driver is intended for Adreno 710 GPU only.\n\n" +
+                                "Mostly for Snapdragon 7 Gen 1 and 778G+ devices."
+                        )
+                        .setPositiveButton("OK", null)
+                        .show();
+            }
+
             }
 
             @Override

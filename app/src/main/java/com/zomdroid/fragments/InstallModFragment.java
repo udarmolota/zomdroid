@@ -139,6 +139,9 @@ public class InstallModFragment extends Fragment {
 
         // Spinner population
         List<String> names = new ArrayList<>();
+        if (instances.size() > 1) {
+            names.add(getString(R.string.select_instance)); // holder
+        }
         for (GameInstance gi : instances) {
             names.add(gi.getName());
         }
@@ -148,8 +151,11 @@ public class InstallModFragment extends Fragment {
                 android.R.layout.simple_spinner_dropdown_item,
                 names
         );
-
         binding.installModInstanceSpinner.setAdapter(adapter);
+
+        if (instances.size() == 1) {
+            binding.installModInstanceSpinner.setSelection(0);
+        }
 
         // Browse button
         binding.installModBrowseIb.setOnClickListener(v ->
@@ -167,14 +173,17 @@ public class InstallModFragment extends Fragment {
             }
 
             int position = binding.installModInstanceSpinner.getSelectedItemPosition();
-            if (position < 0 || position >= instances.size()) {
+            // если инстансов > 1, первый элемент — заглушка, сдвигаем индекс
+            int instanceIndex = instances.size() > 1 ? position - 1 : position;
+
+            if (instanceIndex < 0 || instanceIndex >= instances.size()) {
                 Toast.makeText(requireContext(),
-                        "Invalid instance selected",
+                        getString(R.string.select_instance),
                         Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            GameInstance selectedInstance = instances.get(position);
+            GameInstance selectedInstance = instances.get(instanceIndex);
 
             Intent installerIntent = new Intent(requireContext(), InstallerService.class);
             installerIntent.putExtra(
