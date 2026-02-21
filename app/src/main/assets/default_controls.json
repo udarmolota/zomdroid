@@ -14,5 +14,6 @@
   {"alpha":128,"bindings":["GAMEPAD_BUTTON_RSTICK"],"centerXRelative":0.95,"centerYRelative":0.90,"color":-3355444,"icon":"NO_ICON","inputType":"GAMEPAD","scale":0.75,"text":"R","type":"BUTTON_CIRCLE"},
   {"alpha":128,"bindings":["GAMEPAD_LTRIGGER"],"centerXRelative":0.1,"centerYRelative":0.075,"color":-3355444,"icon":"NO_ICON","inputType":"GAMEPAD","scale":1.0,"text":"LT","type":"BUTTON_RECT"},
   {"alpha":128,"bindings":["GAMEPAD_RTRIGGER"],"centerXRelative":0.9,"centerYRelative":0.075,"color":-3355444,"icon":"NO_ICON","inputType":"GAMEPAD","scale":1.0,"text":"RT","type":"BUTTON_RECT"},
-  {"alpha":128,"bindings":["UI_TOGGLE_OVERLAY"],"centerXRelative":0.5,"centerYRelative":0.08,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","scale":0.9,"text":"V","type":"BUTTON_CIRCLE"}
+  {"alpha":128,"bindings":["UI_TOGGLE_OVERLAY"],"centerXRelative":0.47,"centerYRelative":0.08,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","scale":0.9,"text":"V","type":"BUTTON_CIRCLE"},
+  {"alpha":128,"bindings":["UI_TOGGLE_KEYBOARD"],"centerXRelative":0.53,"centerYRelative":0.08,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","scale":0.9,"text":"KB","type":"BUTTON_CIRCLE"}
 ]
