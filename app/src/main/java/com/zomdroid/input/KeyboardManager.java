@@ -103,10 +103,10 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
         if (isPressed) {
             int unicode = event.getUnicodeChar(event.getMetaState() &
                     (KeyEvent.META_SHIFT_ON | KeyEvent.META_ALT_ON));
-            Log.d("ZomdroidChar", "unicode=" + unicode + " for androidKey=" + androidCode);
+            //Log.d("ZomdroidChar", "unicode=" + unicode + " for androidKey=" + androidCode);
             if (unicode > 0) {
                 InputNativeInterface.sendChar(unicode);
-                Log.d("ZomdroidChar", "sendChar called with " + unicode);
+                //Log.d("ZomdroidChar", "sendChar called with " + unicode);
             }
         }
     }

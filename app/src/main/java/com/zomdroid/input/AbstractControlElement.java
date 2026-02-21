@@ -207,7 +207,7 @@ public abstract class AbstractControlElement {
       // MNK (GLFW-код)
       InputNativeInterface.sendKeyboard(binding.code, isPressed);
 
-    // Char event для текстовых полей
+      // Char event для текстовых полей
       if (isPressed) {
         int unicode = glfwBindingToUnicode(binding);
         if (unicode > 0) {
@@ -217,17 +217,17 @@ public abstract class AbstractControlElement {
     }
 
     private static int glfwBindingToUnicode(GLFWBinding binding) {
-        // Буквы A-Z → a-z (97-122)
+        // Letters A-Z → a-z (97-122)
         if (binding.ordinal() >= GLFWBinding.KEY_A.ordinal()
                 && binding.ordinal() <= GLFWBinding.KEY_Z.ordinal()) {
             return binding.code + 32; // GLFW A=65 → 'a'=97
         }
-        // Цифры 0-9
+        // Numbers 0-9
         if (binding.ordinal() >= GLFWBinding.KEY_0.ordinal()
                 && binding.ordinal() <= GLFWBinding.KEY_9.ordinal()) {
             return binding.code; // совпадают с ASCII
         }
-        // Точка, тире, слэш — нужны для IP
+        // Special signs for IP
         switch (binding) {
             case KEY_PERIOD:    return '.';
             case KEY_MINUS:     return '-';
