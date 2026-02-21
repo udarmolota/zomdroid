@@ -49,10 +49,11 @@ public class ButtonControlElement extends AbstractControlElement {
             }
             if (binding == GLFWBinding.UI_TOGGLE_KEYBOARD) {
                 if (isPressed) {
-                    TextInputOverlayView.toggle(
-                            parentView.getContext(),
-                            (ViewGroup) parentView.getParent()
-                    );
+                    //TextInputOverlayView.toggle(
+                    //        parentView.getContext(),
+                    //        (ViewGroup) parentView.getParent()
+                    //);
+                    parentView.showTextInputOverlay();
                 }
                 return;
             }

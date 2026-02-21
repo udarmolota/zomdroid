@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 import android.content.Context;
 import androidx.annotation.NonNull;
@@ -32,7 +33,6 @@ import com.zomdroid.game.GameInstance;
 import com.zomdroid.game.GameInstanceManager;
 import com.zomdroid.input.InputControlsView;
 import com.zomdroid.input.KeyboardManager;
-
 
 import org.fmod.FMOD;
 
@@ -60,6 +60,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     private boolean leftMouseDown  = false;
     private boolean rightMouseDown = false;
 
+    private boolean systemKeyboardVisible = false;
     // Helps to calculate mouse cursor position
     private float renderScale = 1f;
 
@@ -75,6 +76,12 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         binding = ActivityGameBinding.inflate(getLayoutInflater());
         // Give focus to game surface to ensure it receives input events
         setContentView(binding.getRoot());
+
+        binding.getRoot().setOnApplyWindowInsetsListener((v, insets) -> {
+            boolean imeVisible = insets.isVisible(WindowInsets.Type.ime());
+            systemKeyboardVisible = imeVisible;
+            return v.onApplyWindowInsets(insets);
+        });
 
         binding.gameSv.setFocusable(true);
         binding.gameSv.setFocusableInTouchMode(true);
@@ -109,6 +116,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         }
         // Display on/off buttons overlay
         applyInputOverlay();
+        binding.inputControlsV.setKeyboardToggleListener(() -> toggleSystemKeyboard());
 
         getWindow().setDecorFitsSystemWindows(false);
         final WindowInsetsController controller = getWindow().getInsetsController();
@@ -451,4 +459,26 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         }
     }
 
+    public void showSystemKeyboard() {
+        binding.gameSv.requestFocus();
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.showSoftInput(binding.gameSv, InputMethodManager.SHOW_FORCED);
+        }
+    }
+
+    public void hideSystemKeyboard() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(binding.gameSv.getWindowToken(), 0);
+        }
+    }
+
+    private void toggleSystemKeyboard() {
+        if (systemKeyboardVisible) {
+            hideSystemKeyboard();
+        } else {
+            showSystemKeyboard();
+        }
+    }
 }

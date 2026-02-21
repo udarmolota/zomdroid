@@ -50,6 +50,7 @@ public class InputControlsView extends View {
     private final Context context;
     private String controlsSavePath = null;
     private boolean overlayHidden = false;
+    private KeyboardToggleListener keyboardToggleListener;
 
     private ElementSettingsController elementSettingsController;
 
@@ -375,14 +376,10 @@ public class InputControlsView extends View {
     }
 
     public void showTextInputOverlay() {
-        ViewGroup parent = (ViewGroup) getParent();
-        if (parent == null) {
-            Toast.makeText(context, "Parent view is null", Toast.LENGTH_SHORT).show();
-            return;
+        if (keyboardToggleListener != null) {
+            keyboardToggleListener.onToggleSystemKeyboard();
         }
-        TextInputOverlayView.toggle(getContext(), parent);
     }
-
 
     public enum InputMode {
         MNK,
@@ -460,5 +457,13 @@ public class InputControlsView extends View {
             if (binding == GLFWBinding.UI_TOGGLE_KEYBOARD) return true;
         }
         return false;
+    }
+
+    public interface KeyboardToggleListener {
+        void onToggleSystemKeyboard();
+    }
+
+    public void setKeyboardToggleListener(KeyboardToggleListener listener) {
+        this.keyboardToggleListener = listener;
     }
 }
