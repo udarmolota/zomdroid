@@ -9,7 +9,7 @@ on:
         default: 'master'
         type: choice
         options:
-        - opt-2
+        - vkbd
         - kb_2_mp
         
 jobs:
