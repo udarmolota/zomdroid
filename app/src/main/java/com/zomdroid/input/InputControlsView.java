@@ -50,7 +50,9 @@ public class InputControlsView extends View {
     private final Context context;
     private String controlsSavePath = null;
     private boolean overlayHidden = false;
+    private boolean isKeyboardConnected = false;
     private KeyboardToggleListener keyboardToggleListener;
+    private float renderScale = 1f;
 
     private ElementSettingsController elementSettingsController;
 
@@ -375,6 +377,10 @@ public class InputControlsView extends View {
         }
     }
 
+    public void setKeyboardConnected(boolean connected) {
+        isKeyboardConnected = connected;
+    }
+
     public void showTextInputOverlay() {
         if (keyboardToggleListener != null) {
             keyboardToggleListener.onToggleSystemKeyboard();
@@ -439,6 +445,44 @@ public class InputControlsView extends View {
         return null;
     }
 
+    public void replaceControlsFromJson(@Nullable String json, boolean persist) {
+        if (json == null) return;
+
+        // сброс выбора/окна настроек, чтобы не остались ссылки на старый элемент
+        if (this.elementSettingsController != null) {
+            this.elementSettingsController.hide();
+        }
+        this.selectedElement = null;
+        this.pointerOverElement = null;
+
+        this.controlElements.clear();
+
+        Type type = new TypeToken<ArrayList<ControlElementDescription>>() {}.getType();
+        ArrayList<ControlElementDescription> savedDescriptions = gson.fromJson(json, type);
+        if (savedDescriptions != null) {
+            for (ControlElementDescription d : savedDescriptions) {
+                this.controlElements.add(AbstractControlElement.fromDescription(this, d));
+            }
+        }
+
+        invalidate();
+
+        if (persist) {
+            saveControlElementsToDisk(); // SharedPrefs + файл :contentReference[oaicite:4]{index=4}
+        }
+    }
+
+    public void replaceControlsFromAsset(@NonNull String assetPath, boolean persist) {
+        try (InputStream is = getContext().getAssets().open(assetPath)) {
+            byte[] bytes = new byte[is.available()];
+            is.read(bytes);
+            String json = new String(bytes, Charset.defaultCharset());
+            replaceControlsFromJson(json, persist);
+        } catch (IOException e) {
+            Log.d(LOG_TAG, "replaceControlsFromAsset failed: " + e);
+        }
+    }
+
     public void toggleOverlayVisibility() {
         overlayHidden = !overlayHidden;
         applyInputMode(currentInputMode);
@@ -465,5 +509,18 @@ public class InputControlsView extends View {
 
     public void setKeyboardToggleListener(KeyboardToggleListener listener) {
         this.keyboardToggleListener = listener;
+    }
+
+    public boolean isPhysicalKeyboardConnected() {
+        return isKeyboardConnected;
+    }
+
+    public void setRenderScale(float rs) {
+        if (rs <= 0f) rs = 1f;
+        this.renderScale = rs;
+    }
+
+    public float getRenderScale() {
+        return renderScale;
     }
 }

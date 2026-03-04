@@ -49,11 +49,16 @@ public class ButtonControlElement extends AbstractControlElement {
             }
             if (binding == GLFWBinding.UI_TOGGLE_KEYBOARD) {
                 if (isPressed) {
-                    //TextInputOverlayView.toggle(
-                    //        parentView.getContext(),
-                    //        (ViewGroup) parentView.getParent()
-                    //);
-                    parentView.showTextInputOverlay();
+                    if (parentView.isPhysicalKeyboardConnected()) {
+                        // Физическая клавиатура → маленькая встроенная клавиатурка
+                        TextInputOverlayView.toggle(
+                                parentView.getContext(),
+                                (ViewGroup) parentView.getParent()
+                        );
+                    } else {
+                        // Нет физической клавиатуры → системная Android IME
+                        parentView.showTextInputOverlay();
+                    }
                 }
                 return;
             }

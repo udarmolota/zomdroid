@@ -15,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.SeekBar;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -51,6 +52,35 @@ public class ControlsEditorActivity extends AppCompatActivity {
 
         binding.inputControlsV.setEditMode(true);
         binding.inputControlsV.setBackgroundColor(0xFF232323);
+
+        binding.layoutsBtn.setOnClickListener(v -> {
+            new MaterialAlertDialogBuilder(this)
+                    .setTitle("Layout")
+                    .setItems(new CharSequence[]{
+                            "⌨\uFE0F Load Virtual KB+Mouse",
+                            "\uD83D\uDD79 Reset to default GAMEPAD"
+                    }, (dialog, which) -> {
+                        if (which == 0) {
+                            binding.inputControlsV.replaceControlsFromAsset(
+                                    "default_controls_vkbd.json",
+                                    true
+                            );
+                            Toast.makeText(this,
+                                    "Virtual Keyboard layout loaded",
+                                    Toast.LENGTH_SHORT).show();
+                        } else {
+                            binding.inputControlsV.replaceControlsFromAsset(
+                                    C.assets.DEFAULT_CONTROLS,
+                                    true
+                            );
+                            Toast.makeText(this,
+                                    "Original layout restored",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
+        });
 
         binding.inputControlsV.setElementSettingsController(new InputControlsView.ElementSettingsController() {
             private void loadElement(AbstractControlElement element) {
@@ -98,32 +128,42 @@ public class ControlsEditorActivity extends AppCompatActivity {
                 });
 
 
+                // apply UI for current type
                 applyInputType(element, element.getInputType());
 
-                ArrayAdapter<AbstractControlElement.InputType> inputTypeAdapter =
-                        new ArrayAdapter<>(ControlsEditorActivity.this, android.R.layout.simple_spinner_dropdown_item,
-                                AbstractControlElement.InputType.values());
-                binding.elementInputTypeS.setVisibility(View.GONE);
-                binding.elementInputTypeS.setAdapter(inputTypeAdapter);
-                binding.elementInputTypeS.setOnItemSelectedListener(null);
-                binding.elementInputTypeS.setSelection(inputTypeAdapter.getPosition(element.getInputType()));
-                binding.elementInputTypeS.post(() -> {
-                    binding.elementInputTypeS.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                        @Override
-                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                            AbstractControlElement.InputType inputType = (AbstractControlElement.InputType) parent.getSelectedItem();
-                            element.setInputType(inputType);
-                            applyInputType(element, inputType);
-                        }
+                // STICK_WASD / STICK_MOUSE: fixed MNK, не даём менять inputType
+                boolean fixedMnkStick = (element.getType() == AbstractControlElement.Type.STICK_WASD
+                        || element.getType() == AbstractControlElement.Type.STICK_MOUSE);
 
-                        @Override
-                        public void onNothingSelected(AdapterView<?> parent) {
+                if (fixedMnkStick) {
+                    element.setInputType(AbstractControlElement.InputType.MNK);
+                    applyInputType(element, AbstractControlElement.InputType.MNK);
 
-                        }
+                    binding.elementInputTypeS.setVisibility(View.GONE);
+                } else {
+                    ArrayAdapter<AbstractControlElement.InputType> inputTypeAdapter =
+                            new ArrayAdapter<>(ControlsEditorActivity.this, android.R.layout.simple_spinner_dropdown_item,
+                                    AbstractControlElement.InputType.values());
+
+                    binding.elementInputTypeS.setVisibility(View.GONE);
+                    binding.elementInputTypeS.setAdapter(inputTypeAdapter);
+                    binding.elementInputTypeS.setOnItemSelectedListener(null);
+                    binding.elementInputTypeS.setSelection(inputTypeAdapter.getPosition(element.getInputType()));
+                    binding.elementInputTypeS.post(() -> {
+                        binding.elementInputTypeS.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                            @Override
+                            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                                AbstractControlElement.InputType inputType = (AbstractControlElement.InputType) parent.getSelectedItem();
+                                element.setInputType(inputType);
+                                applyInputType(element, inputType);
+                            }
+
+                            @Override
+                            public void onNothingSelected(AdapterView<?> parent) { }
+                        });
                     });
-                });
-                binding.elementInputTypeS.setVisibility(View.VISIBLE);
-
+                    binding.elementInputTypeS.setVisibility(View.VISIBLE);
+                }
 
                 switch (element.getType()) {
                     case BUTTON_CIRCLE:
@@ -222,7 +262,9 @@ public class ControlsEditorActivity extends AppCompatActivity {
                         break;
                     }
                     case DPAD:
-                    case STICK: {
+                    case STICK:
+                    case STICK_WASD:
+                    case STICK_MOUSE: {
                         binding.elementTextTv.setVisibility(View.GONE);
                         binding.elementTextEt.setVisibility(View.GONE);
 
@@ -231,7 +273,6 @@ public class ControlsEditorActivity extends AppCompatActivity {
                         break;
                     }
                 }
-
             }
 
             @Override
@@ -413,6 +454,17 @@ public class ControlsEditorActivity extends AppCompatActivity {
 
                     binding.elementDirectionalBindingsCl.setVisibility(View.VISIBLE);
 
+                    binding.elementStickBindingTv.setVisibility(View.GONE);
+                    binding.elementStickBindingS.setVisibility(View.GONE);
+
+                } else if (element.getType() == AbstractControlElement.Type.STICK_WASD
+                        || element.getType() == AbstractControlElement.Type.STICK_MOUSE) {
+                    // скрыть все binding UI — эти стики “жёсткие”
+                    binding.elementBindingsTv.setVisibility(View.GONE);
+                    binding.elementBindingsAddIb.setVisibility(View.GONE);
+                    binding.elementBindingsContainerLl.removeAllViews();
+
+                    binding.elementDirectionalBindingsCl.setVisibility(View.GONE);
                     binding.elementStickBindingTv.setVisibility(View.GONE);
                     binding.elementStickBindingS.setVisibility(View.GONE);
                 }

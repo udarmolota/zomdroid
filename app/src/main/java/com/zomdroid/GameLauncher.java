@@ -64,10 +64,14 @@ public class GameLauncher {
                 Os.setenv("ZOMDROID_GLES_MAJOR", "3", true);
                 Os.setenv("ZOMDROID_GLES_MINOR", "1", true);
                 //Os.setenv("LIBGL_SIMPLE_SHADERCONV", "1", true);
+                Os.setenv("LIBGL_DBGSHADERCONV", "15", true);
+                // Force SPIRV-Cross path instead of old ConvertShader
+                // Without this, esversion stays 200 and shaders go through
+                // the old converter that doesn't understand modern GLSL
                 //Os.setenv("LIBGL_VGPU_FORCE", "1", true);
-                //Os.setenv("LIBGL_DBGSHADERCONV", "15", true);
+                Os.setenv("LIBGL_VGPU_PRECISION", "1", true);
               break;
-            } */
+            }*/
             default: {
                 Os.setenv("ZOMDROID_GLES_MAJOR", "2", false);
                 Os.setenv("ZOMDROID_GLES_MINOR", "1", false);

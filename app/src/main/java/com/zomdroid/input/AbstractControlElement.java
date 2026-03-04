@@ -48,6 +48,12 @@ public abstract class AbstractControlElement {
                 return new ButtonControlElement(parentView, description);
             case STICK:
                 return new StickControlElement(parentView, description);
+            case STICK_WASD:
+                return new WasdStickControlElement(parentView, description);
+            case STICK_MOUSE:
+                return new MouseStickControlElement(parentView, description);
+            case TOUCHPAD:
+                return new TouchpadControlElement(parentView, description);
             default:
                 throw new IllegalArgumentException("Unrecognized type " + description.type);
         }
@@ -239,13 +245,16 @@ public abstract class AbstractControlElement {
 
     public enum Type {
         STICK,
+        STICK_WASD,
+        STICK_MOUSE,
         DPAD,
         DPAD_UP,
         DPAD_RIGHT,
         DPAD_DOWN,
         DPAD_LEFT,
         BUTTON_RECT,
-        BUTTON_CIRCLE
+        BUTTON_CIRCLE,
+        TOUCHPAD
     }
 
     public enum InputType {

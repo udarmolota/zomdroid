@@ -1,0 +1,19 @@
+[
+  {"alpha":128,"bindings":[],"centerXRelative":0.09940625,"centerYRelative":0.7658384,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"scale":1.0,"type":"STICK_WASD"},
+  {"alpha":128,"bindings":[],"centerXRelative":0.8883289,"centerYRelative":0.7873318,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"scale":1.0,"type":"STICK_MOUSE"},
+  {"alpha":128,"bindings":["KEY_LEFT_SHIFT"],"centerXRelative":0.0963702,"centerYRelative":0.3335205,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"scale":1.0,"text":"Shift","type":"BUTTON_RECT"},
+  {"alpha":128,"bindings":["KEY_SPACE"],"centerXRelative":0.09617415,"centerYRelative":0.20488282,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"scale":1.0,"text":"Space","type":"BUTTON_RECT"},
+  {"alpha":128,"bindings":["KEY_E"],"centerXRelative":0.825,"centerYRelative":0.525,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"scale":1.0,"text":"E","type":"BUTTON_CIRCLE"},
+  {"alpha":128,"bindings":["KEY_C"],"centerXRelative":0.875,"centerYRelative":0.425,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"scale":1.0,"text":"C","type":"BUTTON_CIRCLE"},
+  {"alpha":128,"bindings":["KEY_Y"],"centerXRelative":0.775,"centerYRelative":0.425,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"scale":1.0,"text":"Y","type":"BUTTON_CIRCLE"},
+  {"alpha":128,"bindings":["KEY_ESCAPE"],"centerXRelative":0.825,"centerYRelative":0.325,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"scale":1.0,"text":"Esc","type":"BUTTON_CIRCLE"},
+  {"alpha":128,"bindings":["KEY_LEFT_CONTROL"],"centerXRelative":0.22471404,"centerYRelative":0.080609806,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"scale":0.75,"text":"Ctrl","type":"BUTTON_RECT"},
+  {"alpha":128,"bindings":["KEY_X"],"centerXRelative":0.94155324,"centerYRelative":0.3595043,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"scale":0.75,"text":"X","type":"BUTTON_CIRCLE"},
+  {"alpha":128,"bindings":["KEY_R"],"centerXRelative":0.94251454,"centerYRelative":0.50700325,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"scale":0.75,"text":"R","type":"BUTTON_CIRCLE"},
+  {"alpha":128,"bindings":["MOUSE_BUTTON_LEFT"],"centerXRelative":0.1,"centerYRelative":0.075,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"scale":1.0,"text":"LC","type":"BUTTON_RECT"},
+  {"alpha":128,"bindings":["MOUSE_BUTTON_RIGHT"],"centerXRelative":0.9,"centerYRelative":0.075,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"scale":1.0,"text":"RC","type":"BUTTON_RECT"},
+  {"alpha":128,"bindings":["UI_TOGGLE_OVERLAY"],"centerXRelative":0.46999997,"centerYRelative":0.08,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"scale":0.9,"text":"V","type":"BUTTON_CIRCLE"},
+  {"alpha":128,"bindings":["UI_TOGGLE_KEYBOARD"],"centerXRelative":0.53,"centerYRelative":0.08,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"scale":0.9,"text":"KB","type":"BUTTON_CIRCLE"},
+  {"alpha":128,"bindings":["KEY_MINUS"],"centerXRelative":0.23146725,"centerYRelative":0.40456364,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"scale":1.0,"text":"-","type":"BUTTON_CIRCLE"},
+  {"alpha":128,"bindings":["KEY_EQUAL"],"centerXRelative":0.2316316,"centerYRelative":0.247838,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"scale":1.0,"text":"+","type":"BUTTON_CIRCLE"}
+]

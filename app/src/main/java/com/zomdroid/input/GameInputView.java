@@ -1,4 +1,4 @@
-package com.zomdroid;
+package com.zomdroid.input;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -7,8 +7,7 @@ import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 
-import com.zomdroid.input.GLFWBinding;
-import com.zomdroid.input.InputNativeInterface;
+import android.view.inputmethod.InputMethodManager;
 
 /**
  * SurfaceView с поддержкой системной клавиатуры Android.
@@ -34,12 +33,31 @@ public class GameInputView extends SurfaceView {
 
     @Override
     public boolean onCheckIsTextEditor() {
-        // Говорим системе что этот View принимает текстовый ввод
-        return true;
+        return acceptingTextInput;
+    }
+
+    private boolean acceptingTextInput = false;
+
+    public void setAcceptingTextInput(boolean accepting) {
+        acceptingTextInput = accepting;
+        InputMethodManager imm = (InputMethodManager) getContext()
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            if (accepting) {
+                imm.showSoftInput(this, InputMethodManager.SHOW_FORCED);
+            } else {
+                imm.hideSoftInputFromWindow(getWindowToken(), 0);
+                imm.restartInput(this); // говорим Gboard перечитать onCheckIsTextEditor
+            }
+        }
     }
 
     @Override
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
+        if (!acceptingTextInput) {
+            return null; // <- ключевое: IME не получает канал ввода
+        }
+
         outAttrs.inputType = android.text.InputType.TYPE_CLASS_TEXT;
         outAttrs.imeOptions =
                 EditorInfo.IME_FLAG_NO_FULLSCREEN |

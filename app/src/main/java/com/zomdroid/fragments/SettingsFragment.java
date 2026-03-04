@@ -93,8 +93,7 @@ public class SettingsFragment extends Fragment {
                             .setTitle("Freedreno 8xx")
                             .setMessage(
                                     "Freedreno 8xx is experimental.\n\n" +
-                                    "If you get crashes or rendering issues, switch back to System driver.\n" +
-                                    "Recommended for Adreno 840/830/825/810/829. Snapdragon 8 Gen 3/4/5/Elite and 7 Gen 3 devices."
+                                    "Snapdragon 8 Gen 3/4/5/Elite and 7 Gen 3 devices."
                             )
                             .setPositiveButton("OK", null)
                             .show();
@@ -111,9 +110,7 @@ public class SettingsFragment extends Fragment {
                     new androidx.appcompat.app.AlertDialog.Builder(requireContext())
                             .setTitle("TURNIP bbdd688")
                             .setMessage(
-                                    "This driver is intended for Adreno 7xx GPUs.\n\n" +
-                                    "Snapdragon 4-series, 5-series, and Elite (Adreno 8xx) devices are not supported.\n\n" +
-                                    "For Snapdragon 4 / 5 / Elite select Freedreno 8xx."
+                                    "This driver is intended for Adreno 7xx GPUs."
                             )
                             .setPositiveButton("OK", null)
                             .show();
@@ -121,8 +118,7 @@ public class SettingsFragment extends Fragment {
                 new androidx.appcompat.app.AlertDialog.Builder(requireContext())
                         .setTitle("TURNIP 25.1.3 GMEM")
                         .setMessage(
-                                "This driver is intended for Adreno 710 GPU only.\n\n" +
-                                "Mostly for Snapdragon 7 Gen 1 and 778G+ devices."
+                                "This driver is for Adreno 710 GPU only. Snapdragon 7 Gen 1."
                         )
                         .setPositiveButton("OK", null)
                         .show();
