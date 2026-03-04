@@ -127,15 +127,20 @@ public class MouseStickControlElement extends AbstractControlElement {
             float s = parentView.pixelScale;
             float scale = 0.65f;
             // Геометрия треугольника
-            float h = 81f * s * scale;   // длина
-            float w = 42f * s * scale;   // ширина
+            float h = 75f * s * scale;   // длина
+            float w = 45f * s * scale;   // ширина
+
+            // параметры выемки
+            float notchX = 0.55f;   // где по ширине выемка (0..1)
+            float notchIn = 0.28f;  // насколько “внутрь” (доля w)
 
             Path p = new Path();
             p.moveTo(x, y);                      // TIP
 
             // два основания, но со смещением по X/Y, чтобы был наклон
-            p.lineTo(x - w,       y + h * 0.85f);   // нижний левый
-            p.lineTo(x - w * 0.15f, y + h);         // нижний “правее”
+            p.lineTo(x + w,       y + h * 0.85f);   // нижний левый
+            p.lineTo(x + w * notchX, y + h - w * notchIn); // выемка на нижней грани: точка чуть выше/левее линии основания
+            p.lineTo(x + w * 0.15f, y + h);         // нижний “правее”
             p.close();
 
             canvas.drawPath(p, cursorFill);
