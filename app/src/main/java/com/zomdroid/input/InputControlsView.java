@@ -260,7 +260,6 @@ public class InputControlsView extends View {
     public void loadControlElementsFromDisk() {
         String json = null;
 
-        // 1) Пытаемся прочитать controls.json из игровой папки
         File cfgFile = getControlsConfigFileInGameDir();
         if (cfgFile != null && cfgFile.isFile()) {
             try (FileInputStream fis = new FileInputStream(cfgFile)) {
