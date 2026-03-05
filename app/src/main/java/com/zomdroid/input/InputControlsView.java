@@ -187,14 +187,30 @@ public class InputControlsView extends View {
             }
             return gestureDetector.onTouchEvent(e);
         } else {
+            int action = e.getActionMasked();
+            boolean consumed = false;
+            // Эти события несут состояние всех pointers — их лучше раздать всем
+            boolean broadcast =
+                    action == MotionEvent.ACTION_MOVE ||
+                            action == MotionEvent.ACTION_UP ||
+                            action == MotionEvent.ACTION_POINTER_UP ||
+                            action == MotionEvent.ACTION_CANCEL;
+
+            if (broadcast) {
+                for (AbstractControlElement controlElement : controlElements) {
+                    if (!controlElement.isVisible()) continue;
+                    consumed |= controlElement.handleMotionEvent(e);
+                }
+                return consumed;
+            }
+
+            // DOWN/POINTER_DOWN: можно оставить “первый захватил”
             for (AbstractControlElement controlElement : controlElements) {
                 if (!controlElement.isVisible()) continue;
-                if (controlElement.handleMotionEvent(e)) {
-                    return true;
-                }
+                if (controlElement.handleMotionEvent(e)) return true;
             }
+            return false;
         }
-        return false;
     }
 
     private void selectElement(@NonNull AbstractControlElement element) {
