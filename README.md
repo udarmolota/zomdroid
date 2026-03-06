@@ -12,16 +12,16 @@
 ## Features
 
 - ✔️ Supports **Project Zomboid Build 41**
+- ✔️ Supports **Project Zomboid Build 42**
 - ✔️ Supports **Gamepad support** 
 - ✔️ Supports **Lua mods** 
-- ⭕ Supports **Project Zomboid Build 42 (partially)**
 - ⭕ Currently **MultiPlayer JOIN only**
-- ⭕ Currently **Keyboard + mouse support (no chat typing in MP)**
+- ✔️ Currently **Keyboard + mouse support**
 
 ## System requirements 
 
 - Android 11
-- 4GB of free RAM (usually achievable on devices with at least 6-8GB of total RAM for b41, 12GB for b42)
+- 6GB of free RAM (usually achievable on devices with at least 6-8GB of total RAM for b41, 8GB+ for b42)
 - 10-15 GB of free internal storage for downloading and installing the game
 
 ## Roadmap
@@ -29,7 +29,6 @@
 Planned features in order of priority:
 
 - [ ] Expand GPU and device compatibility
-- [ ] Add window typing in MP
 - [ ] Add full multiplayer support
 
 ## Prebuilt binaries and JARs
@@ -44,11 +43,11 @@ All Zomdroid dependencies—**except Box64 and GLFW**—can be either:
   
 ## Supporting Development
 
-This is an independent project. To help keep it going, financial contributions are welcome via [Ko-Fi](https://ko-fi.com/liamelui).
+This is an independent project. To help keep it going, financial contributions are welcome via [Ko-Fi](https://ko-fi.com/udarmolota).
 
 ## Feedback
 
-Please report issues or suggest features via [GitHub Issues](https://github.com/liamelui/zomdroid/issues)
+Please report issues or suggest features via [GitHub Issues](https://github.com/udarmolota/zomdroid/issues)
 
 ## Credits & Third-Party Sources
 - [OpenJDK](https://github.com/openjdk/jdk) (Android port by [PojavLauncherTeam](https://github.com/PojavLauncherTeam/android-openjdk-build-multiarch)) - Used as the Java backend
