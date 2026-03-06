@@ -147,7 +147,7 @@ public class LauncherPreferences {
         ZINK_ZFA("libzfa.so"),
         ZINK_OSMESA("libOSMesa.so"),
         GL4ES("libgl4es.so");
-        //NG_GL4ES("libgl4es_114.so");
+        //NG_GL4ES("libng_gl4es.so");
 
         final String libName;
         Renderer(String libName) {
@@ -157,10 +157,13 @@ public class LauncherPreferences {
 
     public enum VulkanDriver {
         SYSTEM_DEFAULT(null),
-        FREEDRENO("libvulkan_freedreno.so");
+        FREEDRENO("libvulkan_freedreno.so"),
+        FREEDRENO_8XX_Expr("libvulkan_freedreno_8xx.so"),
+        TURNIP_bbdd688("libvulkan.ad07XX_regular.so"),
+        TURNIP_bbdd688_8gen2("libvulkan.ad07XX.so"),
+        Turnip_25_1_3_GMEM("vulkan.turnip.710.so");
 
         final String libName;
-
         VulkanDriver(String libName) {
             this.libName = libName;
         }

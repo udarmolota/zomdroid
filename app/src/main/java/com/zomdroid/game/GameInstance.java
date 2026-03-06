@@ -1,6 +1,7 @@
 package com.zomdroid.game;
 
 import com.zomdroid.AppStorage;
+import com.zomdroid.BuildConfig;
 import com.zomdroid.FileUtils;
 
 import java.io.File;
@@ -97,9 +98,10 @@ public class GameInstance {
         jvmArgsList.add("-Djava.io.tmpdir=" + AppStorage.requireSingleton().getCachePath());
 
         jvmArgsList.add("-Djava.library.path=" + getJavaLibraryPath() + ":.");
-
-        jvmArgsList.add("-Dorg.lwjgl.util.Debug=true"); // debug
-        jvmArgsList.add("-Dorg.lwjgl.util.DebugLoader=true"); // debug
+        if (BuildConfig.DEBUG) {
+            jvmArgsList.add("-Dorg.lwjgl.util.Debug=true"); // debug
+            jvmArgsList.add("-Dorg.lwjgl.util.DebugLoader=true"); // debug
+        }
         StringJoiner jarsJoiner = new StringJoiner(":");
         for (String path : this.extraClassPath) {
             jarsJoiner.add(AppStorage.requireSingleton().getHomePath() + "/" + path);
@@ -118,6 +120,10 @@ public class GameInstance {
         }
 
         return jvmArgsList;
+    }
+
+    public String[] getClassPathArray() {
+        return this.classPath;
     }
 
     public ArrayList<String> getArgsAsList() {
@@ -150,6 +156,15 @@ public class GameInstance {
     }
 
     public boolean hasGameFiles() {
+        // New fat-jar structure (42.12+)
+        for (String cp : getClassPathArray()) {
+            if ("projectzomboid.jar".equals(cp)) {
+                File jar = new File(getGamePath(), "projectzomboid.jar");
+                return jar.exists();
+            }
+        }
+
+        // Old structure (41 / 42.6 - 42.11)
         File mainClassFile = new File(getGamePath() + "/" + getMainClassName() + ".class");
         return mainClassFile.exists();
     }

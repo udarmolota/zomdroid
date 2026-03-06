@@ -61,37 +61,55 @@ public class ControlElementDescription {
                         AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON, false);
 
             case DPAD_UP:
-              return new ControlElementDescription(
-                0.5f, 0.5f, 1.f, type,
-                new GLFWBinding[]{ GLFWBinding.GAMEPAD_DPAD_UP },
-                null, Color.LTGRAY, 150,
-                AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON, false);
+                return new ControlElementDescription(
+                        0.5f, 0.5f, 1.f, type,
+                        new GLFWBinding[]{ GLFWBinding.GAMEPAD_DPAD_UP },
+                        null, Color.LTGRAY, 150,
+                        AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON, false);
 
             case DPAD_RIGHT:
-              return new ControlElementDescription(
-                0.5f, 0.5f, 1.f, type,
-                new GLFWBinding[]{ GLFWBinding.GAMEPAD_DPAD_RIGHT },
-                null, Color.LTGRAY, 150,
-                AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON, false);
+                return new ControlElementDescription(
+                        0.5f, 0.5f, 1.f, type,
+                        new GLFWBinding[]{ GLFWBinding.GAMEPAD_DPAD_RIGHT },
+                        null, Color.LTGRAY, 150,
+                        AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON, false);
 
             case DPAD_DOWN:
-              return new ControlElementDescription(
-                0.5f, 0.5f, 1.f, type,
-                new GLFWBinding[]{ GLFWBinding.GAMEPAD_DPAD_DOWN },
-                null, Color.LTGRAY, 150,
-                AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON, false);
+                return new ControlElementDescription(
+                        0.5f, 0.5f, 1.f, type,
+                        new GLFWBinding[]{ GLFWBinding.GAMEPAD_DPAD_DOWN },
+                        null, Color.LTGRAY, 150,
+                        AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON, false);
 
             case DPAD_LEFT:
-              return new ControlElementDescription(
-                0.5f, 0.5f, 1.f, type,
-                new GLFWBinding[]{ GLFWBinding.GAMEPAD_DPAD_LEFT },
-                null, Color.LTGRAY, 150,
-                AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON, false);
-                
+                return new ControlElementDescription(
+                        0.5f, 0.5f, 1.f, type,
+                        new GLFWBinding[]{ GLFWBinding.GAMEPAD_DPAD_LEFT },
+                        null, Color.LTGRAY, 150,
+                        AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON, false);
+
             case STICK:
                 return new ControlElementDescription(0.5f, 0.5f, 1.f, type,
                         new GLFWBinding[]{GLFWBinding.LEFT_JOYSTICK}, null, Color.LTGRAY, 255,
                         AbstractControlElement.InputType.GAMEPAD, Icon.NO_ICON, false);
+            case STICK_WASD:
+                return new ControlElementDescription(
+                        0.14f, 0.70f, 1.f, type,
+                        new GLFWBinding[0], null, Color.LTGRAY, 255,
+                        AbstractControlElement.InputType.MNK, Icon.NO_ICON, false);
+
+            case STICK_MOUSE:
+                return new ControlElementDescription(
+                        0.86f, 0.70f, 1.f, type,
+                        new GLFWBinding[0], null, Color.LTGRAY, 255,
+                        AbstractControlElement.InputType.MNK, Icon.NO_ICON, false);
+            case TOUCHPAD:
+                return new ControlElementDescription(
+                        0.5f, 0.75f, 1.0f, type,
+                        new GLFWBinding[0],
+                        null, Color.LTGRAY, 128,
+                        AbstractControlElement.InputType.MNK,
+                        Icon.NO_ICON, false);
             default:
                 throw new IllegalArgumentException("Unrecognized type " + type.name());
         }
@@ -124,24 +142,45 @@ public class ControlElementDescription {
         final boolean isMNK = (this.inputType == AbstractControlElement.InputType.MNK);
         final boolean isGAMEPAD = (this.inputType == AbstractControlElement.InputType.GAMEPAD);
 
-        // --- MNK rules ---
-        if (isMNK) {
-            // Композитный DPAD и STICK в MNK используют 4 биндинга (WASD/стрелки)
-            if (this.type == AbstractControlElement.Type.DPAD || this.type == AbstractControlElement.Type.STICK) {
-                if (this.bindings.length != 4) {
-                    throw new IllegalStateException("DPAD/STICK with MNK input must have exactly 4 bindings, got " +
-                            this.bindings.length);
-                }
+        // --- hard rules for fixed MNK sticks ---
+        if (this.type == AbstractControlElement.Type.STICK_WASD
+                || this.type == AbstractControlElement.Type.STICK_MOUSE) {
+
+            if (this.inputType != AbstractControlElement.InputType.MNK) {
+                throw new IllegalStateException(this.type.name() + " must have MNK inputType");
             }
 
-            // Split-DPAD (UP/RIGHT/DOWN/LEFT) в MNK — ровно 1 биндинг на элемент
-            if (this.type == AbstractControlElement.Type.DPAD_UP
-                    || this.type == AbstractControlElement.Type.DPAD_RIGHT
-                    || this.type == AbstractControlElement.Type.DPAD_DOWN
-                    || this.type == AbstractControlElement.Type.DPAD_LEFT) {
-                if (this.bindings.length != 1) {
-                    throw new IllegalStateException("Split-DPAD with MNK input must have exactly 1 binding, got " +
-                            this.bindings.length);
+            int count = (this.bindings == null) ? 0 : this.bindings.length;
+
+            if (count != 0) {
+                throw new IllegalStateException(this.type.name()
+                        + " must have 0 bindings, got " + count);
+            }
+        }
+
+        // --- MNK rules ---
+        if (isMNK) {
+
+            // TOUCHPAD не требует биндингов — просто пропускаем проверки биндингов
+            if (this.type != AbstractControlElement.Type.TOUCHPAD) {
+
+                // Композитный DPAD и STICK в MNK используют 4 биндинга (WASD/стрелки)
+                if (this.type == AbstractControlElement.Type.DPAD || this.type == AbstractControlElement.Type.STICK) {
+                    if (this.bindings.length != 4) {
+                        throw new IllegalStateException("DPAD/STICK with MNK input must have exactly 4 bindings, got " +
+                                this.bindings.length);
+                    }
+                }
+
+                // Split-DPAD (UP/RIGHT/DOWN/LEFT) в MNK — ровно 1 биндинг на элемент
+                if (this.type == AbstractControlElement.Type.DPAD_UP
+                        || this.type == AbstractControlElement.Type.DPAD_RIGHT
+                        || this.type == AbstractControlElement.Type.DPAD_DOWN
+                        || this.type == AbstractControlElement.Type.DPAD_LEFT) {
+                    if (this.bindings.length != 1) {
+                        throw new IllegalStateException("Split-DPAD with MNK input must have exactly 1 binding, got " +
+                                this.bindings.length);
+                    }
                 }
             }
         }

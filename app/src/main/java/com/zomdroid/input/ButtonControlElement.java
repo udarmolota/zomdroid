@@ -11,6 +11,8 @@ import android.graphics.drawable.shapes.OvalShape;
 import android.graphics.drawable.shapes.RectShape;
 import android.text.TextPaint;
 import android.view.MotionEvent;
+import android.util.Log;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -38,6 +40,30 @@ public class ButtonControlElement extends AbstractControlElement {
     }
 
     private void dispatchEvent(boolean isPressed) {
+        for (GLFWBinding binding : bindings) {
+            if (binding == GLFWBinding.UI_TOGGLE_OVERLAY) {
+                if (isPressed) {
+                    parentView.toggleOverlayVisibility();
+                }
+                return; // важно: не отправлять дальше ни MNK, ни GAMEPAD
+            }
+            if (binding == GLFWBinding.UI_TOGGLE_KEYBOARD) {
+                if (isPressed) {
+                    if (parentView.isPhysicalKeyboardConnected()) {
+                        // Физическая клавиатура → маленькая встроенная клавиатурка
+                        TextInputOverlayView.toggle(
+                                parentView.getContext(),
+                                (ViewGroup) parentView.getParent()
+                        );
+                    } else {
+                        // Нет физической клавиатуры → системная Android IME
+                        parentView.showTextInputOverlay();
+                    }
+                }
+                return;
+            }
+        }
+
         switch (this.inputType) {
             case MNK:
                 for (GLFWBinding binding : bindings) {
@@ -65,7 +91,7 @@ public class ButtonControlElement extends AbstractControlElement {
                 float y = e.getY(actionIndex);
                 if (!this.drawable.isPointOver(x, y)) return false;
                 this.pointerId = pointerId;
-                
+
                 if (getToggle()) {
                     if (isToggledOn) {
                         this.dispatchEvent(false);
@@ -91,7 +117,7 @@ public class ButtonControlElement extends AbstractControlElement {
             case MotionEvent.ACTION_CANCEL: {
                 if (this.pointerId != -1) {
                     this.pointerId = -1;
-                    this.dispatchEvent(false); 
+                    this.dispatchEvent(false);
                     return true;
                 }
                 return false;
@@ -211,10 +237,11 @@ public class ButtonControlElement extends AbstractControlElement {
     }
 
     public class ButtonControlDrawable {
-        private static final int PAINT_STROKE_WIDTH = 6;
-        private static final int OUTLINE_ALPHA = 120;          // 0..255
-        private static final float OUTLINE_EXTRA_PX = 5f;
-        private static final float TEXT_OUTLINE_PX = 4f;
+        private static final int PAINT_STROKE_WIDTH = 4;
+        private static final int OUTLINE_ALPHA = 70;          // 0..255
+        //private static final float OUTLINE_EXTRA_PX = 5f;
+        private static final float OUTLINE_EXTRA_PX = 1.25f; // или 1.5f
+        private static final float TEXT_OUTLINE_PX = 2.5f; //4f;
         private static final float BUTTON_CIRCLE_DIAMETER = 160.f;
         private static final float BUTTON_RECT_WIDTH = 240.f;
         private static final float BUTTON_RECT_HEIGHT = 120.f;
@@ -272,18 +299,19 @@ public class ButtonControlElement extends AbstractControlElement {
         public void draw(@NonNull Canvas canvas) {
             // --- Outline pass (black, a bit thicker) ---
             Paint p = this.shapeDrawable.getPaint();
-        
+
             int oldColor = p.getColor();
             int oldAlpha = p.getAlpha();
             float oldStroke = p.getStrokeWidth();
             ColorFilter oldFilter = p.getColorFilter();
-        
-            p.setColor(android.graphics.Color.BLACK);
-            p.setAlpha(OUTLINE_ALPHA);
+
+            p.setColor(android.graphics.Color.rgb(40, 40, 40));
+            //p.setAlpha(OUTLINE_ALPHA);
+            p.setAlpha(Math.min(oldAlpha, OUTLINE_ALPHA));
             p.setStrokeWidth(oldStroke + OUTLINE_EXTRA_PX * parentView.pixelScale);
             p.setColorFilter(null);
             this.shapeDrawable.draw(canvas);
-        
+
             // --- Normal pass (your current style/color/alpha) ---
             p.setColor(oldColor);
             p.setAlpha(oldAlpha);
@@ -300,17 +328,19 @@ public class ButtonControlElement extends AbstractControlElement {
                 int oldTextColor = this.textPaint.getColor();
                 int oldTextAlpha = this.textPaint.getAlpha();
                 ColorFilter oldTextFilter = this.textPaint.getColorFilter();
-            
+
                 // outline pass: чёрный без фильтра
-                this.textPaint.setColor(android.graphics.Color.BLACK);
-                this.textPaint.setAlpha(OUTLINE_ALPHA);
+                //this.textPaint.setColor(android.graphics.Color.BLACK);
+                this.textPaint.setColor(android.graphics.Color.rgb(40, 40, 40));
+                //this.textPaint.setAlpha(OUTLINE_ALPHA);
+                this.textPaint.setAlpha(Math.min(oldAlpha, OUTLINE_ALPHA));
                 this.textPaint.setColorFilter(null);
-            
+
                 canvas.drawText(this.text, this.centerX - o, this.textY, this.textPaint);
                 canvas.drawText(this.text, this.centerX + o, this.textY, this.textPaint);
                 canvas.drawText(this.text, this.centerX, this.textY - o, this.textPaint);
                 canvas.drawText(this.text, this.centerX, this.textY + o, this.textPaint);
-            
+
                 // normal pass: вернуть как было
                 this.textPaint.setColor(oldTextColor);
                 this.textPaint.setAlpha(oldTextAlpha);

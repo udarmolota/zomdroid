@@ -29,6 +29,7 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
   private final Set<DevKey> goodKeyboards = new HashSet<>();
   private final java.util.Map<Integer, DevKey> idToKey = new java.util.HashMap<>();
   private static final String LOG_TAG = AbstractControlElement.class.getName();
+  private boolean lastKeyboardPresent = false;
 
   // Listener interface for keyboard events
   public interface KeyboardListener {
@@ -61,13 +62,18 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
           DevKey dk = new DevKey(dev);
           goodKeyboards.add(dk);
           idToKey.put(id, dk);
-          anyKeyboard = true;
+          //anyKeyboard = true;
         }
       }
-      if (anyKeyboard)
-        listener.onKeyboardConnected();
-      else
-        listener.onKeyboardDisconnected();
+      //if (anyKeyboard)
+      //  listener.onKeyboardConnected();
+      //else
+      //  listener.onKeyboardDisconnected();
+
+      // Force sync + notify
+      boolean now = !goodKeyboards.isEmpty();
+      lastKeyboardPresent = !now; // <-- маленький трюк: гарантируем, что notify сработает
+      notifyIfStateChanged();
   }
 
   // Unregister from keyboard device events
@@ -100,7 +106,15 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
     //Log.d(LOG_TAG, "[KB] glfw " + b.code + " , androidCode=" + androidCode);
     if (listener != null) {
         listener.onKeyboardKey(b.code, isPressed);
-        //listener.onKeyboardKey(glfwCode, isPressed);
+        if (isPressed) {
+            int unicode = event.getUnicodeChar(event.getMetaState() &
+                    (KeyEvent.META_SHIFT_ON | KeyEvent.META_ALT_ON));
+            //Log.d("ZomdroidChar", "unicode=" + unicode + " for androidKey=" + androidCode);
+            if (unicode > 0) {
+                InputNativeInterface.sendChar(unicode);
+                //Log.d("ZomdroidChar", "sendChar called with " + unicode);
+            }
+        }
     }
     return true;
   }
@@ -115,9 +129,10 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
         //Toast.makeText(context, "DeviceAdded KB true", Toast.LENGTH_SHORT).show();
         DevKey dk = new DevKey(d);
         idToKey.put(deviceId, dk);
-        boolean wasEmpty = goodKeyboards.isEmpty();
+        //boolean wasEmpty = goodKeyboards.isEmpty();
         goodKeyboards.add(dk);
-        if (wasEmpty) listener.onKeyboardConnected();
+        //if (wasEmpty) listener.onKeyboardConnected();
+        notifyIfStateChanged();
       }
   }
 
@@ -132,39 +147,50 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
       //Toast.makeText(context, "onInputDeviceRemoved", Toast.LENGTH_SHORT).show();
 
       // State recalculation
-      if (goodKeyboards.isEmpty())
-        listener.onKeyboardDisconnected();
-      else
-        listener.onKeyboardConnected();
+      //if (goodKeyboards.isEmpty())
+      //  listener.onKeyboardDisconnected();
+      //else
+      //  listener.onKeyboardConnected();
+
+      notifyIfStateChanged();
     }
     @Override
     public void onInputDeviceChanged(int deviceId) {
       //.makeText(context, "onInputDeviceChanged", Toast.LENGTH_SHORT).show();
       InputDevice d = inputManager.getInputDevice(deviceId);
       if (d == null) {
-        // Device already disappeared — recalculate overall state
-        boolean anyKeyboard = hasAnyKeyboard();
-        if (anyKeyboard) listener.onKeyboardConnected();
-        else listener.onKeyboardDisconnected();
-        return;
+            // устройство исчезло — считаем его removed
+            DevKey oldKey = idToKey.remove(deviceId);
+            if (oldKey != null) {
+                goodKeyboards.remove(oldKey);
+                quarantined.remove(oldKey);
+            }
+            notifyIfStateChanged();
+            return;
       }
-      DevKey key = new DevKey(d);
 
-      if (isPhysicalKeyboard(d)) {
-        quarantined.remove(key);
-        if (goodKeyboards.add(key)) {
-          // new - wasn't before
-          //Toast.makeText(context, "new device added", Toast.LENGTH_SHORT).show();
-          listener.onKeyboardConnected();
+      //DevKey key = new DevKey(d);
+      DevKey newKey = new DevKey(d);
+      DevKey oldKey = idToKey.get(deviceId);
+
+       // если был старый ключ — удаляем его из сетов, чтобы не оставлять "хвосты"
+       if (oldKey != null && !oldKey.equals(newKey)) {
+            goodKeyboards.remove(oldKey);
+            quarantined.remove(oldKey);
+       }
+
+        if (isPhysicalKeyboard(d)) {
+            idToKey.put(deviceId, newKey);
+            quarantined.remove(newKey);
+            goodKeyboards.add(newKey);
+        } else {
+            if (oldKey != null) {
+                goodKeyboards.remove(oldKey);
+                quarantined.remove(oldKey);
+                idToKey.remove(deviceId);
+            }
         }
-      } else {
-        // if it was in goodKeyboards will remove
-        boolean removed = goodKeyboards.remove(key);
-        if (removed && !hasAnyKeyboard()) {
-          //Toast.makeText(context, "device removed and disconnected", Toast.LENGTH_SHORT).show();
-          listener.onKeyboardDisconnected();
-        }
-      }
+        notifyIfStateChanged();
     }
 
     // True if InputDevice is a physical keyboard
@@ -219,5 +245,14 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
         }
       }
       return false;
+    }
+
+    private void notifyIfStateChanged() {
+        boolean nowPresent = !goodKeyboards.isEmpty();
+        if (nowPresent == lastKeyboardPresent) return;
+
+        lastKeyboardPresent = nowPresent;
+        if (nowPresent) listener.onKeyboardConnected();
+        else listener.onKeyboardDisconnected();
     }
   }

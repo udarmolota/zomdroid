@@ -33,6 +33,7 @@
         </activity>
         <service
             android:name=".InstallerService"
+            android:exported="false"
             android:foregroundServiceType="dataSync">
         </service>
         <provider

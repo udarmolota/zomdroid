@@ -78,10 +78,11 @@ static void monitor_stdio_and_memory() {
         if (i > 0) {
             buffer[i] = '\0';
             // splitting output into individual lines makes it easier for logcat to process and avoids truncation
-            char* line = strtok(buffer, "\n");
+            char* saveptr;
+            char* line = strtok_r(buffer, "\n", &saveptr);
             while (line) {
                 LOGI("%s", line);
-                line = strtok(NULL, "\n");
+                line = strtok_r(NULL, "\n", &saveptr);
             }
         }
 
@@ -199,6 +200,10 @@ static void create_jvm_and_launch_main(int jvm_argc, const char** jvm_argv, cons
 
     jclass main_class = (*env)->FindClass(env, main_class_name);
     if (main_class == NULL) {
+        if ((*env)->ExceptionCheck(env)) {
+            (*env)->ExceptionDescribe(env); // покажет UnsupportedClassVersionError или ClassNotFoundException
+            (*env)->ExceptionClear(env);
+        }
         LOGE("Failed to load main class");
         goto FINISH;
     }
@@ -234,7 +239,8 @@ static void create_jvm_and_launch_main(int jvm_argc, const char** jvm_argv, cons
         abort();
     }
 
-    (*jvm)->DestroyJavaVM(jvm);
+    LOGW("JNI: leaving create_jvm_and_launch_main() WITHOUT DestroyJavaVM");
+
 }
 
 static int init_zomdroid_namespace(const char* ld_library_path) {
@@ -436,17 +442,27 @@ void zomdroid_surface_init(ANativeWindow* wnd, int width, int height) {
     pthread_mutex_unlock(&g_zomdroid_surface.mutex);
 }
 
-#define ENQUEUE_EVENT(setup_code)                                     \
-    do {                                                              \
-        u_char head = atomic_load_explicit(&g_zomdroid_event_queue.head, memory_order_relaxed);  \
-        u_char tail = atomic_load_explicit(&g_zomdroid_event_queue.tail, memory_order_acquire);  \
-        u_char next = (head + 1) & EVENT_QUEUE_MAX;                   \
-        if (next == tail) {                                           \
-            break;                                                    \
-        }                                                             \
-        ZomdroidEvent* e = &g_zomdroid_event_queue.buffer[next];      \
-        setup_code                                                    \
-        atomic_store_explicit(&g_zomdroid_event_queue.head, next, memory_order_release); \
+// Thread-safe lock-free enqueue using compare-exchange to prevent two threads
+// from simultaneously claiming the same slot in the ring buffer.
+#define ENQUEUE_EVENT(setup_code)                                                           \
+    do {                                                                                    \
+        u_char head, next;                                                                  \
+        do {                                                                                \
+            head = atomic_load_explicit(&g_zomdroid_event_queue.head,                      \
+                                        memory_order_relaxed);                              \
+            u_char tail = atomic_load_explicit(&g_zomdroid_event_queue.tail,               \
+                                               memory_order_acquire);                       \
+            next = (head + 1) & EVENT_QUEUE_MAX;                                           \
+            if (next == tail) goto enqueue_full;                                            \
+        } while (!atomic_compare_exchange_weak_explicit(                                    \
+                    &g_zomdroid_event_queue.head,                                           \
+                    &head, next,                                                            \
+                    memory_order_acquire,                                                   \
+                    memory_order_relaxed));                                                 \
+        ZomdroidEvent* e = &g_zomdroid_event_queue.buffer[next];                           \
+        setup_code                                                                          \
+        atomic_thread_fence(memory_order_release);                                         \
+        enqueue_full:;                                                                      \
     } while (0)
 
 
@@ -456,6 +472,15 @@ void zomdroid_event_keyboard(int key, bool isPressed) {
         e->keyboard.key = key;
         e->keyboard.is_pressed = isPressed;
     });
+}
+
+void zomdroid_event_char(unsigned int codepoint) {
+    //LOGI("zomdroid_event_char: codepoint=%u", codepoint);
+    ENQUEUE_EVENT({
+                      e->type = CHAR_INPUT;
+                      e->charInput.codepoint = codepoint;
+                      //LOGI("zomdroid_event_char: enqueued at head=%d", next);
+                  });
 }
 
 void zomdroid_event_cursor_pos(double x, double y) {

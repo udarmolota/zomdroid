@@ -45,6 +45,8 @@ public class NewGameInstanceFragment extends Fragment {
     // URIs for selected ZIP files
     private Uri gameFilesZipUri = null;
     private Uri nativeLibsZipUri = null;
+    private Uri savesZipUri = null;
+    private Uri modsZipUri = null;
 
     // Launcher for selecting game ZIP
     private final ActivityResultLauncher<String> actionOpenDocumentLauncher =
@@ -116,7 +118,7 @@ public class NewGameInstanceFragment extends Fragment {
                         throw new RuntimeException(e);
                     }
 
-                    // Start InstallerService with both ZIPs
+                  // Start InstallerService with ZIPs
                   GameInstanceManager.requireSingleton().registerInstance(gameInstance);
 
                   Intent installerIntent = new Intent(requireContext(), InstallerService.class);
@@ -126,10 +128,16 @@ public class NewGameInstanceFragment extends Fragment {
                   if (nativeLibsZipUri != null) {
                     installerIntent.putExtra(InstallerService.EXTRA_NATIVE_LIBS_URI, nativeLibsZipUri);
                   }
-                  Navigation.findNavController(binding.getRoot()).navigateUp();
+                  if (savesZipUri != null) {
+                    installerIntent.putExtra(InstallerService.EXTRA_SAVES_URI, savesZipUri);
+                  }
+                    if (modsZipUri != null) {
+                        installerIntent.putExtra(InstallerService.EXTRA_MODS_URI, modsZipUri);
+                    }
+                    Navigation.findNavController(binding.getRoot()).navigateUp();
                   requireContext().startForegroundService(installerIntent);
 
-                    return true;
+                  return true;
                 }
                 return false;
             }
@@ -184,8 +192,6 @@ public class NewGameInstanceFragment extends Fragment {
       binding.newGameInstanceNativeLibsBrowseIb.setOnClickListener(v -> {
         actionOpenNativeLibsLauncher.launch(ZIP_MIME);
       });
-
-
     }
 
   @Override

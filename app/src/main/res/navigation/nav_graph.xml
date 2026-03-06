@@ -22,6 +22,16 @@
         <action
             android:id="@id/action_open_wiki_fragment"
             app:destination="@id/wiki_fragment"/>
+        <action
+            android:id="@+id/action_open_install_mod"
+            app:destination="@id/install_mod_fragment" />
+        <action
+            android:id="@+id/action_install_controls"
+            app:destination="@id/installControlsFragment" />
+        <action
+            android:id="@+id/action_install_saves"
+            app:destination="@id/install_saves_fragment" />
+
     </fragment>
 
     <fragment
@@ -57,5 +67,21 @@
         android:label="@string/fragment_label_touch_controls"
         tools:layout="@layout/fragment_touch_controls">
     </fragment>
+
+    <fragment
+        android:id="@+id/install_mod_fragment"
+        android:name="com.zomdroid.fragments.InstallModFragment"
+        android:label="@string/nav_menu_install_mod" />
+
+    <fragment
+        android:id="@+id/installControlsFragment"
+        android:name="com.zomdroid.fragments.InstallControlsFragment"
+        android:label="@string/menu_install_controls"
+        tools:layout="@layout/fragment_install_controls" />
+
+    <fragment
+        android:id="@+id/install_saves_fragment"
+        android:name="com.zomdroid.fragments.InstallSavesFragment"
+        android:label="@string/install_saves_menu" />
 
 </navigation>

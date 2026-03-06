@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 import android.content.Context;
 import androidx.annotation.NonNull;
@@ -32,7 +33,6 @@ import com.zomdroid.game.GameInstance;
 import com.zomdroid.game.GameInstanceManager;
 import com.zomdroid.input.InputControlsView;
 import com.zomdroid.input.KeyboardManager;
-
 
 import org.fmod.FMOD;
 
@@ -60,6 +60,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     private boolean leftMouseDown  = false;
     private boolean rightMouseDown = false;
 
+    private boolean systemKeyboardVisible = false;
     // Helps to calculate mouse cursor position
     private float renderScale = 1f;
 
@@ -75,6 +76,12 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         binding = ActivityGameBinding.inflate(getLayoutInflater());
         // Give focus to game surface to ensure it receives input events
         setContentView(binding.getRoot());
+
+        //binding.getRoot().setOnApplyWindowInsetsListener((v, insets) -> {
+        //    boolean imeVisible = insets.isVisible(WindowInsets.Type.ime());
+        //    systemKeyboardVisible = imeVisible;
+        //    return v.onApplyWindowInsets(insets);
+        //});
 
         binding.gameSv.setFocusable(true);
         binding.gameSv.setFocusableInTouchMode(true);
@@ -109,6 +116,8 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         }
         // Display on/off buttons overlay
         applyInputOverlay();
+        binding.inputControlsV.setKeyboardToggleListener(() -> toggleSystemKeyboard());
+        binding.inputControlsV.setRenderScale(renderScale);
 
         getWindow().setDecorFitsSystemWindows(false);
         final WindowInsetsController controller = getWindow().getInsetsController();
@@ -142,6 +151,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
                 int width = (int) (binding.gameSv.getWidth() * renderScale);
                 int height = (int) (binding.gameSv.getHeight() * renderScale);
                 binding.gameSv.getHolder().setFixedSize(width, height);
+                binding.inputControlsV.setRenderScale(renderScale);
             }
 
             @Override
@@ -184,6 +194,14 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
 
         @Override
         public boolean onTouch(View v, MotionEvent e) {
+            if (binding.inputControlsV != null
+                    && binding.inputControlsV.getVisibility() == View.VISIBLE
+                    && binding.inputControlsV.onTouchEvent(e)) {
+                //Log.v("ZomdroidTouch", "inputControlsV consumed event");
+                return true;
+            }
+            //Log.v("ZomdroidTouch", "inputControlsV did NOT consume, visibility="  + binding.inputControlsV.getVisibility());
+
           int action = e.getActionMasked();
           int idx = e.getActionIndex();
 
@@ -212,6 +230,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
                 if (isMouseEvent(e, p)) {
                     syncMouseReleaseFromMask(e.getButtonState());
                 }
+
                 return true;
               }
               case MotionEvent.ACTION_UP:
@@ -301,6 +320,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         if (keyboardManager != null) handled |= keyboardManager.handleKeyEvent(event);
         if (isGamepadConnected && (gamepadManager  != null)) handled |= gamepadManager.handleKeyEvent(event);
         if (handled) return true;
+        //if (isKeyboardConnected) return true; // if physical kb connected not sending to typing
         return super.onKeyDown(keyCode, event);
     }
 
@@ -311,6 +331,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         if (keyboardManager != null) handled |= keyboardManager.handleKeyEvent(event);
         if (isGamepadConnected && (gamepadManager  != null)) handled |= gamepadManager.handleKeyEvent(event);
         if (handled) return true;
+        //if (isKeyboardConnected) return true;
         return super.onKeyUp(keyCode, event);
     }
 
@@ -385,6 +406,14 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     @Override
     public void onKeyboardConnected() {
         isKeyboardConnected = true;
+        // 1) Жёстко выключаем IME-режим SurfaceView
+        systemKeyboardVisible = false;
+        if (binding != null && binding.gameSv != null) {
+            binding.gameSv.setAcceptingTextInput(false);
+        }
+        hideSystemKeyboard(); // на всякий случай
+        binding.inputControlsV.setKeyboardConnected(true);
+        reapplyImmersiveMode();
         applyInputOverlay();
         //Toast.makeText(this, "onKeyboardConnected()", Toast.LENGTH_SHORT).show();
     }
@@ -392,6 +421,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     @Override
     public void onKeyboardDisconnected() {
         isKeyboardConnected = false;
+        binding.inputControlsV.setKeyboardConnected(false);
         applyInputOverlay();
         //Toast.makeText(this, "onKeyboardDisconnected()", Toast.LENGTH_SHORT).show();
     }
@@ -451,4 +481,72 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         }
     }
 
+    public void showSystemKeyboard() {
+        binding.gameSv.requestFocus();
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.showSoftInput(binding.gameSv, InputMethodManager.SHOW_FORCED);
+        }
+    }
+
+    public void hideSystemKeyboard() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(binding.gameSv.getWindowToken(), 0);
+        }
+    }
+
+    private void toggleSystemKeyboard() {
+        if (isKeyboardConnected) return; // физическая клавиатура — не трогаем
+        boolean next = !systemKeyboardVisible;
+        binding.gameSv.setAcceptingTextInput(next);
+        systemKeyboardVisible = next;
+    }
+
+    private void reapplyImmersiveMode() {
+        final WindowInsetsController controller = getWindow().getInsetsController();
+        if (controller != null) {
+            controller.hide(WindowInsets.Type.statusBars()
+                    | WindowInsets.Type.navigationBars()
+                    | WindowInsets.Type.ime());
+            controller.setSystemBarsBehavior(
+                    WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+        }
+        binding.gameSv.requestFocus();
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        int kc = event.getKeyCode();
+        if (kc == KeyEvent.KEYCODE_BACK
+                || kc == KeyEvent.KEYCODE_VOLUME_UP
+                || kc == KeyEvent.KEYCODE_VOLUME_DOWN
+                || kc == KeyEvent.KEYCODE_VOLUME_MUTE) {
+            return super.dispatchKeyEvent(event);
+        }
+
+        boolean physicalKeyboardEvent = isTruePhysicalKeyboardEvent(event);
+        boolean textInputMode = binding != null
+                && binding.gameSv != null
+                && binding.gameSv.isAcceptingTextInput();
+
+        // Блокируем "утечку" физических клавиш в IME только когда НЕ идёт осознанный text input.
+        if (isKeyboardConnected && physicalKeyboardEvent && !textInputMode) {
+            if (keyboardManager != null && keyboardManager.handleKeyEvent(event)) {
+                return true;
+            }
+            return true; // глушим, чтобы Gboard не превращал аппаратный ввод в typing
+        }
+
+        return super.dispatchKeyEvent(event);
+    }
+
+    private boolean isTruePhysicalKeyboardEvent(KeyEvent event) {
+        InputDevice device = event.getDevice();
+        if (device == null) return false;
+
+        return !device.isVirtual()
+                && (event.isFromSource(InputDevice.SOURCE_KEYBOARD)
+                || (device.getSources() & InputDevice.SOURCE_KEYBOARD) == InputDevice.SOURCE_KEYBOARD);
+    }
 }

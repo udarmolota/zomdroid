@@ -248,7 +248,7 @@ public class StickControlElement extends AbstractControlElement {
     }
 
     public class StickControlDrawable {
-        private static final int PAINT_STROKE_WIDTH = 6;
+        private static final int PAINT_STROKE_WIDTH = 3;
         private static final float OUTER_CIRCLE_RADIUS = 160.f;
         private static final float INNER_CIRCLE_RADIUS = 90.f;
 
@@ -284,8 +284,9 @@ public class StickControlElement extends AbstractControlElement {
             int oa = op.getAlpha();
             float os = op.getStrokeWidth();
         
-            op.setColor(android.graphics.Color.BLACK);
-            op.setAlpha(120);
+            //op.setColor(android.graphics.Color.BLACK);
+            op.setColor(android.graphics.Color.rgb(40, 40, 40));
+            op.setAlpha(70);
             op.setStrokeWidth(os + 5f * parentView.pixelScale);
             outerShapeDrawable.draw(canvas);
         
@@ -303,8 +304,9 @@ public class StickControlElement extends AbstractControlElement {
             float iStroke = ip.getStrokeWidth();
         
             ip.setStyle(Paint.Style.STROKE);
-            ip.setColor(android.graphics.Color.BLACK);
-            ip.setAlpha(140);
+            //ip.setColor(android.graphics.Color.BLACK);
+            ip.setColor(android.graphics.Color.rgb(40, 40, 40));
+            ip.setAlpha(70);
             ip.setStrokeWidth(2f * parentView.pixelScale);
             innerShapeDrawable.draw(canvas);
         

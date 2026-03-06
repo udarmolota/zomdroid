@@ -48,6 +48,12 @@ public abstract class AbstractControlElement {
                 return new ButtonControlElement(parentView, description);
             case STICK:
                 return new StickControlElement(parentView, description);
+            case STICK_WASD:
+                return new WasdStickControlElement(parentView, description);
+            case STICK_MOUSE:
+                return new MouseStickControlElement(parentView, description);
+            case TOUCHPAD:
+                return new TouchpadControlElement(parentView, description);
             default:
                 throw new IllegalArgumentException("Unrecognized type " + description.type);
         }
@@ -206,18 +212,49 @@ public abstract class AbstractControlElement {
       }
       // MNK (GLFW-код)
       InputNativeInterface.sendKeyboard(binding.code, isPressed);
+
+      // Char event для текстовых полей
+      if (isPressed) {
+        int unicode = glfwBindingToUnicode(binding);
+        if (unicode > 0) {
+            InputNativeInterface.sendChar(unicode);
+        }
+      }
     }
 
+    private static int glfwBindingToUnicode(GLFWBinding binding) {
+        // Letters A-Z → a-z (97-122)
+        if (binding.ordinal() >= GLFWBinding.KEY_A.ordinal()
+                && binding.ordinal() <= GLFWBinding.KEY_Z.ordinal()) {
+            return binding.code + 32; // GLFW A=65 → 'a'=97
+        }
+        // Numbers 0-9
+        if (binding.ordinal() >= GLFWBinding.KEY_0.ordinal()
+                && binding.ordinal() <= GLFWBinding.KEY_9.ordinal()) {
+            return binding.code; // совпадают с ASCII
+        }
+        // Special signs for IP
+        switch (binding) {
+            case KEY_PERIOD:    return '.';
+            case KEY_MINUS:     return '-';
+            case KEY_SLASH:     return '/';
+            case KEY_SPACE:     return ' ';
+            default:            return 0; // Enter, Escape и т.д. — char не нужен
+        }
+    }
 
     public enum Type {
         STICK,
+        STICK_WASD,
+        STICK_MOUSE,
         DPAD,
         DPAD_UP,
         DPAD_RIGHT,
         DPAD_DOWN,
         DPAD_LEFT,
         BUTTON_RECT,
-        BUTTON_CIRCLE
+        BUTTON_CIRCLE,
+        TOUCHPAD
     }
 
     public enum InputType {
