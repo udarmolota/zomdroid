@@ -38,16 +38,26 @@ public class GameInputView extends SurfaceView {
 
     private boolean acceptingTextInput = false;
 
+    public boolean isAcceptingTextInput() {
+        return acceptingTextInput;
+    }
+
     public void setAcceptingTextInput(boolean accepting) {
-        acceptingTextInput = accepting;
-        InputMethodManager imm = (InputMethodManager) getContext()
-                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (this.acceptingTextInput == accepting) return;
+
+        this.acceptingTextInput = accepting;
+        requestFocus();
+
+        InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+
         if (imm != null) {
+            // ВАЖНО: при любом переключении заставляем IME перечитать editor state
+            imm.restartInput(this);
+
             if (accepting) {
                 imm.showSoftInput(this, InputMethodManager.SHOW_FORCED);
             } else {
                 imm.hideSoftInputFromWindow(getWindowToken(), 0);
-                imm.restartInput(this); // говорим Gboard перечитать onCheckIsTextEditor
             }
         }
     }

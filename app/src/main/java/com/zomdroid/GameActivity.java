@@ -517,7 +517,6 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        // Отфильтруем системные клавиши, чтобы не ломать поведение Android
         int kc = event.getKeyCode();
         if (kc == KeyEvent.KEYCODE_BACK
                 || kc == KeyEvent.KEYCODE_VOLUME_UP
@@ -526,22 +525,28 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
             return super.dispatchKeyEvent(event);
         }
 
-        boolean fromPhysicalKeyboard =
-                event.isFromSource(InputDevice.SOURCE_KEYBOARD)
-                        || event.getDeviceId() != KeyEvent.KEYCODE_UNKNOWN;
+        boolean physicalKeyboardEvent = isTruePhysicalKeyboardEvent(event);
+        boolean textInputMode = binding != null
+                && binding.gameSv != null
+                && binding.gameSv.isAcceptingTextInput();
 
-        // Если подключена физическая клавиатура — НЕ даём событию уйти в View/IME.
-        // Сначала пробуем отправить в игру через KeyboardManager.
-        if (isKeyboardConnected && fromPhysicalKeyboard) {
+        // Блокируем "утечку" физических клавиш в IME только когда НЕ идёт осознанный text input.
+        if (isKeyboardConnected && physicalKeyboardEvent && !textInputMode) {
             if (keyboardManager != null && keyboardManager.handleKeyEvent(event)) {
                 return true;
             }
-            // Даже если не мапится в glfw — всё равно глушим,
-            // чтобы Gboard не превращал в typing text.
-            return true;
+            return true; // глушим, чтобы Gboard не превращал аппаратный ввод в typing
         }
 
-        // Иначе — стандартная логика
         return super.dispatchKeyEvent(event);
+    }
+
+    private boolean isTruePhysicalKeyboardEvent(KeyEvent event) {
+        InputDevice device = event.getDevice();
+        if (device == null) return false;
+
+        return !device.isVirtual()
+                && (event.isFromSource(InputDevice.SOURCE_KEYBOARD)
+                || (device.getSources() & InputDevice.SOURCE_KEYBOARD) == InputDevice.SOURCE_KEYBOARD);
     }
 }
