@@ -10,6 +10,7 @@ typedef enum {
     KEYBOARD,
     CURSOR_POS,
     MOUSE_BUTTON,
+    MOUSE_SCROLL,
     JOYSTICK_CONNECTED,
     JOYSTICK_DISCONNECTED,
     JOYSTICK_AXIS,
@@ -42,6 +43,12 @@ typedef struct {
     int button;
     bool is_pressed;
 } MouseButtonEvent;
+
+typedef struct {
+    EventType type;
+    double xoffset;
+    double yoffset;
+} MouseScrollEvent;
 
 typedef struct {
     EventType type;
@@ -84,6 +91,7 @@ typedef union {
     KeyboardEvent keyboard;
     CursorPosEvent cursorPos;
     MouseButtonEvent mouseButton;
+    MouseScrollEvent mouseScroll;
     JoystickConnectedEvent joystickConnected;
     JoystickDisconnectedEvent joystickDisconnected;
     JoystickAxisEvent joystickAxis;

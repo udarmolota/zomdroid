@@ -205,21 +205,37 @@ public abstract class AbstractControlElement {
     }
 
     public static void handleMNKBinding(GLFWBinding binding, boolean isPressed) {
-      // Mouse
-      if (binding.name().startsWith("MOUSE_BUTTON_")) {
-        InputNativeInterface.sendMouseButton(binding.code, isPressed);
-        return;
-      }
-      // MNK (GLFW-код)
-      InputNativeInterface.sendKeyboard(binding.code, isPressed);
-
-      // Char event для текстовых полей
-      if (isPressed) {
-        int unicode = glfwBindingToUnicode(binding);
-        if (unicode > 0) {
-            InputNativeInterface.sendChar(unicode);
+        // Mouse buttons
+        if (binding.name().startsWith("MOUSE_BUTTON_")) {
+            InputNativeInterface.sendMouseButton(binding.code, isPressed);
+            return;
         }
-      }
+
+        // Mouse wheel: only on press, as impulse event
+        if (binding == GLFWBinding.MOUSE_WHEEL_UP) {
+            if (isPressed) {
+                InputNativeInterface.sendMouseScroll(0.0, 1.0);
+            }
+            return;
+        }
+
+        if (binding == GLFWBinding.MOUSE_WHEEL_DOWN) {
+            if (isPressed) {
+                InputNativeInterface.sendMouseScroll(0.0, -1.0);
+            }
+            return;
+        }
+
+        // Keyboard
+        InputNativeInterface.sendKeyboard(binding.code, isPressed);
+
+        // Char event для текстовых полей
+        if (isPressed) {
+            int unicode = glfwBindingToUnicode(binding);
+            if (unicode > 0) {
+                InputNativeInterface.sendChar(unicode);
+            }
+        }
     }
 
     private static int glfwBindingToUnicode(GLFWBinding binding) {

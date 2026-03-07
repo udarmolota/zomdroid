@@ -146,12 +146,6 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
 
       //Toast.makeText(context, "onInputDeviceRemoved", Toast.LENGTH_SHORT).show();
 
-      // State recalculation
-      //if (goodKeyboards.isEmpty())
-      //  listener.onKeyboardDisconnected();
-      //else
-      //  listener.onKeyboardConnected();
-
       notifyIfStateChanged();
     }
     @Override
