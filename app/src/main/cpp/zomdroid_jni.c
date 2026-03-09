@@ -105,6 +105,12 @@ Java_com_zomdroid_input_InputNativeInterface_sendMouseButton(JNIEnv *env, jobjec
 }
 
 JNIEXPORT void JNICALL
+Java_com_zomdroid_input_InputNativeInterface_sendMouseScroll(JNIEnv *env, jclass clazz,
+                                                             jdouble xoffset, jdouble yoffset) {
+    zomdroid_event_mouse_scroll(xoffset, yoffset);
+}
+
+JNIEXPORT void JNICALL
 Java_com_zomdroid_input_InputNativeInterface_sendJoystickAxis(JNIEnv *env, jclass clazz, jint axis, jfloat state) {
     zomdroid_event_joystick_axis(axis, state);
 }

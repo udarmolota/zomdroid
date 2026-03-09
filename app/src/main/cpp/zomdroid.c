@@ -499,6 +499,14 @@ void zomdroid_event_mouse_button(int button, bool isPressed) {
     });
 }
 
+void zomdroid_event_mouse_scroll(double xoffset, double yoffset) {
+    ENQUEUE_EVENT({
+          e->type = MOUSE_SCROLL;
+          e->mouseScroll.xoffset = xoffset;
+          e->mouseScroll.yoffset = yoffset;
+    });
+}
+
 void zomdroid_event_joystick_connected() {
     ENQUEUE_EVENT({
         e->type = JOYSTICK_CONNECTED;

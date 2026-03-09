@@ -123,6 +123,9 @@ public enum GLFWBinding {
     MOUSE_BUTTON_6(5),
     MOUSE_BUTTON_7(6),
     MOUSE_BUTTON_8(7),
+
+    MOUSE_WHEEL_UP(-110),
+    MOUSE_WHEEL_DOWN(-111),
     UI_TOGGLE_OVERLAY(-100),
     UI_TOGGLE_KEYBOARD(-101),
 
@@ -162,10 +165,6 @@ public enum GLFWBinding {
     RIGHT_JOYSTICK(-1);
 
     public final int code;
-    static final int MNK_MIN_ORDINAL = KEY_SPACE.ordinal();
-    static final int MNK_MAX_ORDINAL = MOUSE_BUTTON_8.ordinal();
-    static final int GAMEPAD_MIN_ORDINAL = GAMEPAD_BUTTON_A.ordinal();
-    static final int GAMEPAD_MAX_ORDINAL = GAMEPAD_DPAD_LEFT.ordinal(); //GAMEPAD_RTRIGGER.ordinal();
 
     GLFWBinding(int code) {
         this.code = code;

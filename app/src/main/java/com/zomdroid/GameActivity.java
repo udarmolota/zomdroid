@@ -368,16 +368,12 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
 
       if (action == MotionEvent.ACTION_SCROLL) {
         float v = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
-        if (v == 0) { v = event.getAxisValue(MotionEvent.AXIS_WHEEL); }
+        if (v == 0) {
+            v = event.getAxisValue(MotionEvent.AXIS_WHEEL);
+        }
 
         if (v != 0) {
-          int keyCode = v > 0 ? GLFWBinding.KEY_EQUAL.code : GLFWBinding.KEY_MINUS.code;
-          InputNativeInterface.sendKeyboard(keyCode, true);
-          //try { Thread.sleep(50); } catch (InterruptedException e) {}
-          //InputNativeInterface.sendKeyboard(keyCode, false);
-          binding.getRoot().postDelayed(() -> {
-                InputNativeInterface.sendKeyboard(keyCode, false);
-            }, 50);
+            InputNativeInterface.sendMouseScroll(0.0, v > 0 ? 1.0 : -1.0);
         }
         return true;
       }

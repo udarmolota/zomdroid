@@ -49,7 +49,9 @@ public class GameLauncher {
                 String vulkanDriverName = LauncherPreferences.requireSingleton().getVulkanDriver().libName;
                 if (vulkanDriverName != null) {
                     Os.setenv("ZOMDROID_VULKAN_DRIVER_NAME", vulkanDriverName, false);
-
+                    if (LauncherPreferences.VulkanDriver.FREEDRENO_8XX_Expr.libName.equals(vulkanDriverName)) {
+                        Os.setenv("TU_DEBUG", "noconform", false);
+                    }
                     // UBWC workaround for OEM Android 16 glitches
                     //Os.setenv("FD_DEV_FEATURES", "enable_tp_ubwc_flag_hint=1", false);
                 }
