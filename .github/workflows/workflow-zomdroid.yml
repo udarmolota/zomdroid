@@ -9,8 +9,7 @@ on:
         default: 'master'
         type: choice
         options:
-        - vkbd
-        - kb_2_mp
+        - master
         
 jobs:
   build:
