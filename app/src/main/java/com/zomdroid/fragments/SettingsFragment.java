@@ -191,10 +191,10 @@ public class SettingsFragment extends Fragment {
                     .setTitle("JVM arguments")
                     .setMessage("Additional JVM arguments, e.g.:\n\n" +
                             "• -Xmx2G - allocate 2Gb of memory\n" +
-                            "• -Xms1G - process starts with 1Gb RAM\n" +
+                            "• -Xms512M - process starts with 1Gb RAM\n" +
                             "• -XX:+UseG1GC - enable G1 garbage collector\n\n" +
-                            "Right now, we're not sure how much of an impact allocating more memory will have, but in theory, it should help when there's not enough.\n" +
-                            "Some arguments are already set by settings.")
+                            "In theory, it should help when there's not enough RAM. Some arguments are already set by settings.\n" +
+                            "If you set it incorrectly and the app doesn’t run, reinstall it or just clear the app cache.")
                     .setPositiveButton("OK", null)
                     .show();
         });

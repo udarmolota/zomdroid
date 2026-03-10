@@ -83,7 +83,7 @@ public class PresetManager {
                         "totp-1.0.jar",
                         "core-3.2.1.jar"
                 })
-                .setExtraJars(new String[0])
+                .setExtraJvmArgs(new String[0])
                 .setLibraryPathArray(new String[]{
                         C.deps.LIBS_LWJGL_336,
                         C.deps.LIBS_ANDROID_ARM64_v8a
@@ -92,7 +92,7 @@ public class PresetManager {
                         C.deps.LIBS_LINUX_X86_64
                 })
                 .setFmodLibraryPath(C.deps.LIBS_FMOD_20309)
-                .setExtraJvmArgs(new String[0])
+                //.setExtraJvmArgs(new String[0])
                 .setArgs(new String[]{
                         "-novoip"
                 })

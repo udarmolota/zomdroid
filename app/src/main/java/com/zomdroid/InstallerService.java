@@ -176,6 +176,8 @@ public class InstallerService extends Service implements TaskProgressListener {
 
                 // 42.13 problematic lib renaming
                 maybeDisableLibFor42(gameInstance);
+                // 42.15 fix for printSpecs()
+                maybePatchPrintSpecsFor4215(gameInstance);
 
             } catch (Exception e) {
                 finishWithError(getString(R.string.dialog_title_failed_to_create_instance), e.toString());
@@ -704,6 +706,40 @@ public class InstallerService extends Service implements TaskProgressListener {
         }
     
         Log.i(LOG_TAG, "42.13 patch: disabled " + libName + " -> " + disabled.getName());
+    }
+
+    private void maybePatchPrintSpecsFor4215(GameInstance gameInstance) {
+        File oshiDir = new File(gameInstance.getGamePath(), "oshi");
+        if (!oshiDir.exists() || !oshiDir.isDirectory()) return;
+
+        File target = new File(gameInstance.getGamePath(),
+                "zombie/gameStates/MainScreenState.class");
+        if (!target.exists()) return;
+
+        File disabled = new File(gameInstance.getGamePath(),
+                "zombie/gameStates/MainScreenState.class.disabled");
+
+        // Уже пропатчено
+        if (disabled.exists()) return;
+
+        if (!target.renameTo(disabled)) {
+            Log.e(LOG_TAG, "42.15 patch: failed to rename original MainScreenState.class");
+            return;
+        }
+
+        try (InputStream src = getAssets().open("patches/MainScreenState.class");
+             FileOutputStream out = new FileOutputStream(target)) {
+            byte[] buf = new byte[4096];
+            int n;
+            while ((n = src.read(buf)) != -1) out.write(buf, 0, n);
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Failed to apply printSpecs patch for 42.15", e);
+            // Откатываем переименование
+            disabled.renameTo(target);
+            return;
+        }
+
+        Log.i(LOG_TAG, "42.15 patch: patched MainScreenState.class");
     }
 
     private void extractProjectZomboidJarSimple(GameInstance gameInstance) throws IOException {
