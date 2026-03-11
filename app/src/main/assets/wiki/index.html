@@ -57,26 +57,23 @@
     <section id="download-game-files">
         <h3>1. Download game files from the official source</h3>
         <details>
-            <summary>Guide for Steam</summary>
+            <summary>Guide for DepotDownloader</summary>
             <div class="details-content">
-                Zomdroid requires Project Zomboid files for Linux in order to run. If you're using
-                Linux, simply download the game as usual through the Steam client. If you're using
-                Windows or MacOS, follow these steps:
+                <p>Zomdroid requires Project Zomboid files for Linux to run. The easiest way to get them on Windows is via <b>DepotDownloader</b> — a tool that lets you download any specific build directly from Steam.</p>
+                <p>You need to own Project Zomboid on Steam before downloading.</p>
                 <ol>
-                    <li>Open the Steam console. One way to do this is by typing <i>steam://open/console</i>
-                        into your browser’s address bar
+                    <li>Download <a href="https://github.com/SteamRE/DepotDownloader/releases/tag/DepotDownloader_3.4.0" target="_blank">DepotDownloader</a>.
+                        For Windows, grab <b>DepotDownloader-windows-x64.zip</b>.</li>
+                    <li>Extract it anywhere, for example: <b>C:\DepotDownloader</b></li>
+                    <li>Open the folder, right-click → <b>Open in Terminal / CMD</b></li>
+                    <li>Run the following command, replacing <b>YOURUSERNAME</b> and <b>YOURPASSWORD</b> with your Steam credentials:
+                        <br><br>
+                        <i>./DepotDownloader -app 108600 -depot 108603 -manifest 2093929250660436780 -beta unstable -username YOURUSERNAME -password YOURPASSWORD</i>
+                        <br><br>
+                        Steam Mobile authentication may be required.
                     </li>
-                    <li>Enter the following command: <i>download_depot 108600 108603</i>. This will
-                        download the latest stable version of Project Zomboid for Linux. If you want
-                        to download a specific version, you'll also need to provide a manifest id.
-                        For example, to download the unstable version from March 24, 2025, use: <i>download_depot
-                            108600 108603 2006259071304963476</i>. You can find a list of all
-                        manifests on the <a href=https://steamdb.info/depot/108603/manifests/>SteamDB</a>
-                        website (not affiliated with Steam or Valve).
-                        <b>Steam only allows downloading manifests that belong to the currently active branch. For example, if you want to download files from the Build 42 branch, you must first opt into the Unstable branch in your Steam game's properties.</b>
-                    </li>
-                    <img src="steam_console.png" style="width: 100%; height: auto;">
                 </ol>
+                <p>The manifest number above (<b>2093929250660436780</b>) corresponds to <b>Build 42.15.1</b>. To download a different build, look up its manifest on <a href="https://steamdb.info/depot/108603/manifests/" target="_blank">SteamDB</a>.</p>
             </div>
         </details>
     </section>

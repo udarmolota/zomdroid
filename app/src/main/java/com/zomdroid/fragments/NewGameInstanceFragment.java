@@ -151,6 +151,20 @@ public class NewGameInstanceFragment extends Fragment {
           return false;
         });
 
+        binding.newGameInstanceNativeLibsHelpIb.setOnClickListener(v -> {
+            new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                    .setTitle("Native libraries (optional)")
+                    .setMessage("Native libraries are files from build 42.12. These are mainly two files:\n\n" +
+                            "🌐 libRakNet64.so\n" +
+                            "🌐 libZNetNoSteam64.so\n\n" +
+                            "They are required for multiplayer support on build 41.78. " +
+                            "You can read more about them on the Wiki.")
+                    .setPositiveButton("OK", null)
+                    .setNeutralButton("Wiki", (dialog, which) ->
+                            Navigation.findNavController(v).navigate(R.id.wiki_fragment))
+                    .show();
+        });
+
         // Validate game instance name as user types
         binding.newGameInstanceNameEt.addTextChangedListener(new TextWatcher() {
           @Override
