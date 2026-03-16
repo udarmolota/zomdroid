@@ -1,0 +1,239 @@
+<resources>
+    <string name="app_name" translatable="false">Zomdroid</string>
+
+    <string name="percentage_format" translatable="false">%d%%</string>
+
+    <string name="legal_notice_title">法律声明</string>
+    <string name="legal_notice_message">此启动器是一个第三方工具，需要原版《Project Zomboid》文件才能运行。您必须拥有合法授权的游戏副本才能使用本软件。本启动器的开发者与原游戏创作者无任何关联，且不对因使用本软件而产生的任何法律后果承担责任。</string>
+
+    <string name="fragment_label_launcher">启动器</string>
+    <string name="fragment_label_new_game_instance">新建游戏实例</string>
+    <string name="fragment_label_settings">设置</string>
+    <string name="fragment_label_controls_editor">控制编辑器</string>
+    <string name="fragment_label_wiki">维基</string>
+    <string name="fragment_label_onscreen">仅屏幕按钮</string>
+    <string name="nav_menu_install_mod">导入模组</string>
+
+    <string name="controls_editor_instructions">长按空白区域打开上下文菜单。完成后更改将自动保存。</string>
+    <string name="controls_editor_add_element">添加控制元素</string>
+    <string name="control_element_scale">缩放</string>
+    <string name="control_element_text">文本</string>
+    <string name="control_element_text_empty">空</string>
+    <string name="control_element_bindings">绑定</string>
+    <string name="control_element_select_binding">选择绑定</string>
+    <string name="control_element_binding_invalid">无效绑定</string>
+    <string name="control_element_opacity">不透明度</string>
+    <string name="control_element_binding_left">绑定左</string>
+    <string name="control_element_binding_up">绑定上</string>
+    <string name="control_element_binding_right">绑定右</string>
+    <string name="control_element_binding_down">绑定下</string>
+    <string name="control_element_input_type_mnk">鼠标和键盘</string>
+    <string name="control_element_input_type_gamepad">游戏手柄</string>
+    <string name="gamepad_mapper_button_lt">LT（左扳机）</string>
+    <string name="gamepad_mapper_button_rt">RT（右扳机）</string>
+
+    <string name="game_instance_name">名称</string>
+    <string name="game_instance_preset">预设</string>
+    <string name="game_instance_files">游戏文件（.zip）</string>
+    <string name="game_instance_browse_files_hint">浏览文件…</string>
+    <string name="game_instance_no_file_selected">未选择文件</string>
+    <string name="game_instance_name_invalid">名称无效</string>
+    <string name="game_instance_name_already_exists">已存在</string>
+    <string name="game_instance_unsupported_extension">仅支持 .zip 压缩包</string>
+
+    <string name="dialog_button_ok">确定</string>
+    <string name="dialog_button_accept">接受</string>
+    <string name="dialog_button_quit">退出</string>
+    <string name="dialog_button_view_guide">查看指南</string>
+    <string name="dialog_button_close">关闭</string>
+    <string name="dialog_button_confirm">确认</string>
+    <string name="dialog_button_cancel">取消</string>
+    <string name="dialog_title_delete_game_instance">删除游戏实例？</string>
+    <string name="dialog_title_info">信息</string>
+    <string name="dialog_title_fatal_error">致命错误</string>
+    <string name="dialog_title_creating_instance">正在创建游戏实例…</string>
+    <string name="dialog_title_instance_created">实例创建成功</string>
+    <string name="dialog_title_failed_to_create_instance">创建实例失败</string>
+    <string name="dialog_title_deleting_game_instance">正在删除游戏实例…</string>
+    <string name="dialog_title_instance_deleted">实例删除成功</string>
+    <string name="dialog_title_failed_to_delete_instance">删除实例失败</string>
+    <string name="dialog_title_installing_dependencies">正在安装依赖项…</string>
+    <string name="dialog_title_dependencies_installed">依赖项安装成功</string>
+    <string name="dialog_title_failed_to_install_dependencies">安装依赖项失败</string>
+    <string name="dialog_title_donate">支持开发</string>
+    <string name="dialog_title_game_files_missing">游戏文件缺失</string>
+    <string name="dialog_title_game_files_not_for_linux">安装的文件不受支持</string>
+
+    <string name="installation_not_finished">安装未完成</string>
+    <string name="dependencies_not_installed">Zomdroid 依赖项未安装</string>
+
+    <string name="settings_renderer">渲染器</string>
+    <string name="settings_vulkan_driver">Vulkan 驱动程序</string>
+    <string name="settings_resolution_scale">分辨率缩放</string>
+    <string name="settings_audio_api">音频 API</string>
+    <string name="settings_render_hint">Build 41 → GL4ES, Build 42 → ZINK (天玑处理器：开启 ANGLE)</string>
+
+    <string name="nav_menu_controls_editor">控制编辑器</string>
+    <string name="nav_menu_gamepad_mapper">手柄映射器</string>
+    <string name="nav_menu_manage_storage">管理存储</string>
+    <string name="nav_menu_donate">支持</string>
+    <string name="control_element_delete">删除元素</string>
+    <string name="control_element_input_type">输入类型</string>
+    <string name="control_element_stick_binding">摇杆绑定</string>
+    <string name="control_element_icon">图标</string>
+
+    <string name="game_instance_manage_storage">管理存储</string>
+    <string name="game_instance_delete">删除</string>
+
+    <string name="donate_message">喜欢这个应用并想支持我们吗？\n\n由 ko-fi.com/liamelui 创建，现由 ko-fi.com/udarmolota 维护和开发。\n\n其他贡献者：\nshimux0, Wakort, LeHiepDuy。</string>
+
+    <string name="app_aborted">应用遇到意外问题，必须关闭。</string>
+    <string name="share_logs">分享日志文件</string>
+
+    <string name="delete_game_instance">与此实例关联的所有游戏文件和数据（存档、模组、收藏的服务器等）将永久丢失。</string>
+    <string name="game_files_missing">确保 ProjectZomboid64 位于用于安装的 .zip 压缩包的根目录。您可以按照维基上的指南操作，确保文件打包正确。</string>
+    <string name="game_files_not_for_linux">需要适用于 Linux 的《Project Zomboid》版本。您可以按照维基上的指南操作，确保下载正确的文件。</string>
+
+    <!-- Gamepad Mapper Strings -->
+    <string name="gamepad_mapper_title">手柄按钮映射</string>
+    <string name="gamepad_mapper_description">按请求的顺序按下手柄上的按钮以自定义您的控制。</string>
+    <string name="gamepad_mapper_start">开始映射</string>
+    <string name="gamepad_mapper_reset">重置为默认</string>
+    <string name="gamepad_mapper_step">按下：%s</string>
+    <string name="gamepad_mapper_save">映射完成！</string>
+    <string name="gamepad_mapper_success">手柄映射保存成功</string>
+    <string name="gamepad_mapper_reset_confirmation">手柄映射已重置为默认</string>
+
+    <!-- Gamepad Button Names -->
+    <string name="gamepad_mapper_button_a">A 键</string>
+    <string name="gamepad_mapper_button_b">B 键</string>
+    <string name="gamepad_mapper_button_x">X 键</string>
+    <string name="gamepad_mapper_button_y">Y 键</string>
+    <string name="gamepad_mapper_button_lb">左肩键</string>
+    <string name="gamepad_mapper_button_rb">右肩键</string>
+    <string name="gamepad_mapper_button_select">选择/返回</string>
+    <string name="gamepad_mapper_button_start">开始/菜单</string>
+    <string name="gamepad_mapper_button_guide">指南/主页</string>
+    <string name="gamepad_mapper_button_lstk">左摇杆按下</string>
+    <string name="gamepad_mapper_button_rstk">右摇杆按下</string>
+    <string name="gamepad_mapper_button_dpad_up">方向键上</string>
+    <string name="gamepad_mapper_button_dpad_down">方向键下</string>
+    <string name="gamepad_mapper_button_dpad_left">方向键左</string>
+    <string name="gamepad_mapper_button_dpad_right">方向键右</string>
+
+    <!-- Native Libraries -->
+    <string name="game_instance_native_libs_label">原生库 (.zip)</string>
+    <string name="game_instance_no_native_libs_selected">请选择原生库 ZIP（多人游戏可选）</string>
+    <string name="game_instance_browse_native_libs">浏览原生库 ZIP</string>
+
+    <!-- Saves -->
+    <string name="game_instance_saves_label">存档文件 (.zip)</string>
+    <string name="game_instance_no_saves_selected">请选择存档 ZIP</string>
+    <string name="game_instance_browse_saves">浏览存档 ZIP</string>
+
+    <!-- Mods -->
+    <string name="game_instance_mods_label">模组 ZIP（可选）</string>
+
+    <!-- Onscreen controls -->
+    <string name="touch_controls_description">触摸控制模式将禁用游戏手柄支持，仅启用屏幕按钮。</string>
+    <string name="touch_controls_switch_label">启用屏幕触摸控制</string>
+    <string name="touch_controls_enabled_toast">触摸控制已启用</string>
+    <string name="touch_controls_disabled_toast">触摸控制已禁用</string>
+    <string name="fragment_label_touch_controls">触摸控制</string>
+
+    <!-- Import Mod -->
+    <string name="install_mod_title">导入模组</string>
+    <string name="install_mod_instance_label">游戏实例</string>
+    <string name="install_mod_zip_label">模组 ZIP</string>
+    <string name="install_mod_browse">浏览…</string>
+    <string name="install_mod_install">导入</string>
+
+    <string name="install_mod_no_instances">未找到游戏实例</string>
+    <string name="install_mod_select_instance">选择一个游戏实例</string>
+    <string name="install_mod_select_zip">选择一个 ZIP 文件</string>
+
+    <string name="dialog_title_installing_mods">正在导入模组</string>
+    <string name="dialog_title_failed_to_install_mods">导入模组失败</string>
+    <string name="dialog_title_mods_installed">模组已安装</string>
+
+    <string name="dialog_title_installing_saves">正在导入存档</string>
+    <string name="dialog_title_failed_to_install_saves">导入存档失败</string>
+    <string name="dialog_title_saves_installed">存档已导入</string>
+
+    <string name="install_mod_zip_warning">ZIP 文件必须在根目录包含 mod.info。</string>
+
+    <string name="install_mod_zip_help_title">模组压缩包结构</string>
+
+    <string name="install_mod_zip_help_message">
+        ✅ 正确示例：\n\n
+        单个模组：\n
+        ModName/\n
+        \u00A0\u00A0mod.info\n
+        \u00A0\u00A0media/\n
+        \u00A0\u00A0scripts/\n\n
+        单个 ZIP 中包含多个模组：\n
+        ModA/\n
+        \u00A0\u00A0mod.info\n
+        ModB/\n
+        \u00A0\u00A0mod.info\n\n
+        ❌ 错误示例：\n\n
+        多余的外层文件夹：\n
+        Downloads/\n
+        \u00A0\u00A0ModName/\n
+        \u00A0\u00A0\u00A0\u00A0mod.info\n\n
+        缺少模组根目录：\n
+        media/\n
+        scripts/\n
+        （根目录无 mod.info）
+    </string>
+
+
+    <!-- Controls layout -->
+    <string name="menu_install_controls">导入/导出控制</string>
+
+    <string name="install_controls_instance_label">游戏实例</string>
+    <string name="install_controls_zip_label">控制 ZIP</string>
+    <string name="install_controls_install">导入</string>
+
+    <string name="dialog_title_installing_controls">正在导入控制…</string>
+    <string name="dialog_title_controls_installed">控制已导入</string>
+    <string name="dialog_title_failed_to_install_controls">导入控制失败</string>
+
+    <string name="install_controls_zip_warning">ZIP 文件必须在根目录包含 controls.json。否则可能安装不正确。</string>
+
+    <string name="install_controls_zip_help_title">控制 ZIP 格式</string>
+    <string name="install_controls_zip_help_message">✅ 正确：\n\ncontrols.json\n\n❌ 错误：\n\nSomeFolder/\n\u00A0\u00A0controls.json</string>
+
+    <string name="install_saves_instance_label">选择游戏实例</string>
+    <string name="install_saves_zip_label">存档 ZIP 压缩包</string>
+    <string name="install_saves_zip_warning">ZIP 文件必须直接包含存档文件夹（Sandbox、Survival 等）。</string>
+    <string name="install_saves_install">导入</string>
+    <string name="install_saves_menu">导入/导出存档</string>
+    <string name="install_saves_zip_help_title">存档 ZIP 应有的结构</string>
+    <string name="install_saves_zip_help_message">
+        ✅ 示例结构：
+        \u00A0\u00A0Sandbox/\n
+        \u00A0Survival/\n
+        \u00A0Builder/\n
+        \u00A0Apocalypse/\n\n
+        不要打包父文件夹。
+    </string>
+
+    <string name="install_saves_export">导出</string>
+    <string name="dialog_title_exporting_saves">正在导出存档</string>
+    <string name="dialog_title_saves_exported">存档已导出</string>
+    <string name="dialog_title_failed_to_export_saves">导出存档失败</string>
+
+    <string name="install_controls_export">导出</string>
+
+    <string name="dialog_title_exporting_controls">正在导出控制…</string>
+    <string name="dialog_title_controls_exported">控制已导出</string>
+    <string name="dialog_title_failed_to_export_controls">导出控制失败</string>
+    <string name="dialog_title_controls_export_skipped_default">使用默认控制 — 无内容可导出</string>
+    <string name="install_controls_global_hint">
+        控制布局是全局的。仅当您更改了布局时，导出保存的 controls.json。
+    </string>
+    <string name="controls_export_nothing_to_export">无内容可导出：使用默认控制布局。</string>
+    <string name="settings_debug_mode">调试模式 (-debug)</string>
+    <string name="select_instance">— 选择游戏实例 —</string>
+</resources>
