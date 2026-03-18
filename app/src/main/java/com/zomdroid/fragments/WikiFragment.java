@@ -32,10 +32,13 @@ public class WikiFragment extends Fragment {
             case "zh":
                 wikiFile = "index_zh.html";
                 break;
+            case "pt":
+                wikiFile = "index_pt.html";
+                break;
             default:
                 wikiFile = "index.html";
         }
-        webView.loadUrl("file:///android_asset/wiki/index.html");
+        webView.loadUrl("file:///android_asset/wiki/" + wikiFile);
 
         TypedValue typedValue = new TypedValue();
         context.getTheme().resolveAttribute(android.R.attr.colorBackground, typedValue, true);

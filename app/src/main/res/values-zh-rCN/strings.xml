@@ -236,4 +236,24 @@
     <string name="controls_export_nothing_to_export">无内容可导出：使用默认控制布局。</string>
     <string name="settings_debug_mode">调试模式 (-debug)</string>
     <string name="select_instance">— 选择游戏实例 —</string>
+
+    <!-- Vulkan Driver dialogs -->
+    <string name="vulkan_driver_freedreno_8xx_title">Freedreno 8xx</string>
+    <string name="vulkan_driver_freedreno_8xx_message">Freedreno 8xx 为实验性驱动。\n\n适用于骁龙 8 Gen 3/4/5/Elite 及 7 Gen 3 设备。</string>
+
+    <string name="vulkan_driver_freedreno_840_title">Freedreno 830/840</string>
+    <string name="vulkan_driver_freedreno_840_message">此 Freedreno 驱动最适合 Adreno 830/840。\n\n骁龙 8 Gen 4/5/Elite。</string>
+
+    <string name="vulkan_driver_turnip_8gen2_title">TURNIP bbdd688 8g2</string>
+    <string name="vulkan_driver_turnip_8gen2_message">仅适用于骁龙 8 Gen 2。\n\n修复升级至 HyperOS 3 后可能出现的画面闪烁问题。</string>
+
+    <string name="vulkan_driver_turnip_bbdd688_title">TURNIP bbdd688</string>
+    <string name="vulkan_driver_turnip_bbdd688_message">此驱动适用于 Adreno 7xx GPU。</string>
+
+    <string name="vulkan_driver_turnip_gmem_title">TURNIP 25.1.3 GMEM</string>
+    <string name="vulkan_driver_turnip_gmem_message">此驱动仅适用于 Adreno 710 GPU。骁龙 7 Gen 1。</string>
+
+    <!-- JVM args dialog -->
+    <string name="jvm_args_dialog_title">JVM 参数</string>
+    <string name="jvm_args_dialog_message">额外的 JVM 参数，例如：\n\n• -Xmx2G — 分配 2GB 内存\n• -Xms512M — 进程以 512MB RAM 启动\n• -XX:+UseG1GC — 启用 G1 垃圾回收器\n\n理论上在内存不足时有帮助。部分参数已由设置项自动配置。\n如果设置错误导致应用无法运行，请重新安装或清除应用缓存。</string>
 </resources>

@@ -30,7 +30,6 @@ public class SettingsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-
         ArrayAdapter<LauncherPreferences.Renderer> rendererArrayAdapter = new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_spinner_dropdown_item, LauncherPreferences.Renderer.values());
         binding.settingsRendererS.setAdapter(rendererArrayAdapter);
@@ -54,9 +53,7 @@ public class SettingsFragment extends Fragment {
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
+            public void onNothingSelected(AdapterView<?> parent) {}
         });
 
         binding.settingsRenderHintHelpIb.setOnClickListener(v -> {
@@ -90,40 +87,35 @@ public class SettingsFragment extends Fragment {
 
                 if (vulkanDriver == LauncherPreferences.VulkanDriver.FREEDRENO_8XX_Expr) {
                     new androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                            .setTitle("Freedreno 8xx")
-                            .setMessage(
-                                    "Freedreno 8xx is experimental.\n\n" +
-                                    "Snapdragon 8 Gen 3/4/5/Elite and 7 Gen 3 devices."
-                            )
-                            .setPositiveButton("OK", null)
+                            .setTitle(getString(R.string.vulkan_driver_freedreno_8xx_title))
+                            .setMessage(getString(R.string.vulkan_driver_freedreno_8xx_message))
+                            .setPositiveButton(getString(R.string.dialog_button_ok), null)
+                            .show();
+                } else if (vulkanDriver == LauncherPreferences.VulkanDriver.FREEDRENO_840_v26) {
+                    new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                            .setTitle(getString(R.string.vulkan_driver_freedreno_840_title))
+                            .setMessage(getString(R.string.vulkan_driver_freedreno_840_message))
+                            .setPositiveButton(getString(R.string.dialog_button_ok), null)
                             .show();
                 } else if (vulkanDriver == LauncherPreferences.VulkanDriver.TURNIP_bbdd688_8gen2) {
                     new androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                            .setTitle("TURNIP bbdd688 8g2")
-                            .setMessage(
-                                    "This is for Snapdragon 8 Gen 2 only.\n\n" +
-                                    "Fixes flickering that may occur after updating to HyperOS 3."
-                            )
-                            .setPositiveButton("OK", null)
+                            .setTitle(getString(R.string.vulkan_driver_turnip_8gen2_title))
+                            .setMessage(getString(R.string.vulkan_driver_turnip_8gen2_message))
+                            .setPositiveButton(getString(R.string.dialog_button_ok), null)
                             .show();
                 } else if (vulkanDriver == LauncherPreferences.VulkanDriver.TURNIP_bbdd688) {
                     new androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                            .setTitle("TURNIP bbdd688")
-                            .setMessage(
-                                    "This driver is intended for Adreno 7xx GPUs."
-                            )
-                            .setPositiveButton("OK", null)
+                            .setTitle(getString(R.string.vulkan_driver_turnip_bbdd688_title))
+                            .setMessage(getString(R.string.vulkan_driver_turnip_bbdd688_message))
+                            .setPositiveButton(getString(R.string.dialog_button_ok), null)
                             .show();
                 } else if (vulkanDriver == LauncherPreferences.VulkanDriver.Turnip_25_1_3_GMEM) {
-                new androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                        .setTitle("TURNIP 25.1.3 GMEM")
-                        .setMessage(
-                                "This driver is for Adreno 710 GPU only. Snapdragon 7 Gen 1."
-                        )
-                        .setPositiveButton("OK", null)
-                        .show();
-            }
-
+                    new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                            .setTitle(getString(R.string.vulkan_driver_turnip_gmem_title))
+                            .setMessage(getString(R.string.vulkan_driver_turnip_gmem_message))
+                            .setPositiveButton(getString(R.string.dialog_button_ok), null)
+                            .show();
+                }
             }
 
             @Override
@@ -138,14 +130,10 @@ public class SettingsFragment extends Fragment {
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
+            public void onStartTrackingTouch(SeekBar seekBar) {}
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
+            public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
         binding.settingsResolutionScaleSb.setProgress((int) (LauncherPreferences.requireSingleton().getRenderScale() * 100));
@@ -162,9 +150,7 @@ public class SettingsFragment extends Fragment {
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
+            public void onNothingSelected(AdapterView<?> parent) {}
         });
 
         binding.settingsJargsEt.setText(LauncherPreferences.requireSingleton().getJvmArgs());
@@ -184,18 +170,13 @@ public class SettingsFragment extends Fragment {
 
         binding.settingsDebugSwitch.setChecked(LauncherPreferences.requireSingleton().isDebug());
         binding.settingsDebugSwitch.setOnCheckedChangeListener((v, isChecked) ->
-            LauncherPreferences.requireSingleton().setDebug(isChecked));
+                LauncherPreferences.requireSingleton().setDebug(isChecked));
 
         binding.settingsJargsInfo.setOnClickListener(v -> {
             new androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                    .setTitle("JVM arguments")
-                    .setMessage("Additional JVM arguments, e.g.:\n\n" +
-                            "• -Xmx2G - allocate 2Gb of memory\n" +
-                            "• -Xms512M - process starts with 1Gb RAM\n" +
-                            "• -XX:+UseG1GC - enable G1 garbage collector\n\n" +
-                            "In theory, it should help when there's not enough RAM. Some arguments are already set by settings.\n" +
-                            "If you set it incorrectly and the app doesn’t run, reinstall it or just clear the app cache.")
-                    .setPositiveButton("OK", null)
+                    .setTitle(getString(R.string.jvm_args_dialog_title))
+                    .setMessage(getString(R.string.jvm_args_dialog_message))
+                    .setPositiveButton(getString(R.string.dialog_button_ok), null)
                     .show();
         });
     }

@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Zomdroid</string>
+
+    <string name="percentage_format" translatable="false">%d%%</string>
+
+    <string name="legal_notice_title">Aviso legal</string>
+    <string name="legal_notice_message">Este launcher é uma ferramenta de terceiros e requer os arquivos originais do Project Zomboid para funcionar. Você deve possuir uma cópia licenciada do jogo para usar este software. O desenvolvedor deste launcher não é afiliado aos criadores do jogo original e não assume nenhuma responsabilidade por quaisquer consequências legais decorrentes do uso deste software.</string>
+
+    <string name="fragment_label_launcher">Launcher</string>
+    <string name="fragment_label_new_game_instance">Nova instância do jogo</string>
+    <string name="fragment_label_settings">Configurações</string>
+    <string name="fragment_label_controls_editor">Editor de controles</string>
+    <string name="fragment_label_wiki">Wiki</string>
+    <string name="fragment_label_onscreen">Apenas botões na tela</string>
+    <string name="nav_menu_install_mod">Importar mods</string>
+
+    <string name="controls_editor_instructions">Pressione e segure em um espaço vazio para abrir o menu de contexto. As alterações são salvas automaticamente ao terminar</string>
+    <string name="controls_editor_add_element">Adicionar elemento de controle</string>
+    <string name="control_element_scale">Escala</string>
+    <string name="control_element_text">Texto</string>
+    <string name="control_element_text_empty">Vazio</string>
+    <string name="control_element_bindings">Atalhos</string>
+    <string name="control_element_select_binding">Selecionar atalho</string>
+    <string name="control_element_binding_invalid">Atalho inválido</string>
+    <string name="control_element_opacity">Opacidade</string>
+    <string name="control_element_binding_left">Atalho Esquerda</string>
+    <string name="control_element_binding_up">Atalho Cima</string>
+    <string name="control_element_binding_right">Atalho Direita</string>
+    <string name="control_element_binding_down">Atalho Baixo</string>
+    <string name="control_element_input_type_mnk">Mouse e Teclado</string>
+    <string name="control_element_input_type_gamepad">Gamepad</string>
+    <string name="gamepad_mapper_button_lt">LT (Gatilho Esquerdo)</string>
+    <string name="gamepad_mapper_button_rt">RT (Gatilho Direito)</string>
+
+    <string name="game_instance_name">Nome</string>
+    <string name="game_instance_preset">Preset</string>
+    <string name="game_instance_files">Arquivos do jogo (.zip)</string>
+    <string name="game_instance_browse_files_hint">Procurar arquivos…</string>
+    <string name="game_instance_no_file_selected">Nenhum arquivo selecionado</string>
+    <string name="game_instance_name_invalid">Nome inválido</string>
+    <string name="game_instance_name_already_exists">Já existe</string>
+    <string name="game_instance_unsupported_extension">Apenas arquivos .zip são suportados</string>
+
+    <string name="dialog_button_ok">OK</string>
+    <string name="dialog_button_accept">Aceitar</string>
+    <string name="dialog_button_quit">Sair</string>
+    <string name="dialog_button_view_guide">Ver guia</string>
+    <string name="dialog_button_close">Fechar</string>
+    <string name="dialog_button_confirm">Confirmar</string>
+    <string name="dialog_button_cancel">Cancelar</string>
+    <string name="dialog_title_delete_game_instance">Excluir instância do jogo?</string>
+    <string name="dialog_title_info">Informação</string>
+    <string name="dialog_title_fatal_error">Erro fatal</string>
+    <string name="dialog_title_creating_instance">Criando instância do jogo…</string>
+    <string name="dialog_title_instance_created">Instância criada com sucesso</string>
+    <string name="dialog_title_failed_to_create_instance">Falha ao criar instância</string>
+    <string name="dialog_title_deleting_game_instance">Excluindo instância do jogo…</string>
+    <string name="dialog_title_instance_deleted">Instância excluída com sucesso</string>
+    <string name="dialog_title_failed_to_delete_instance">Falha ao excluir instância</string>
+    <string name="dialog_title_installing_dependencies">Instalando dependências…</string>
+    <string name="dialog_title_dependencies_installed">Dependências instaladas com sucesso</string>
+    <string name="dialog_title_failed_to_install_dependencies">Falha ao instalar dependências</string>
+    <string name="dialog_title_donate">Apoiar o desenvolvimento</string>
+    <string name="dialog_title_game_files_missing">Arquivos do jogo não encontrados</string>
+    <string name="dialog_title_game_files_not_for_linux">Arquivos instalados não são suportados</string>
+
+    <string name="installation_not_finished">A instalação não foi concluída</string>
+    <string name="dependencies_not_installed">As dependências do Zomdroid não estão instaladas</string>
+
+    <string name="settings_renderer">Renderizador</string>
+    <string name="settings_vulkan_driver">Driver Vulkan</string>
+    <string name="settings_resolution_scale">Escala de resolução</string>
+    <string name="settings_audio_api">API de áudio</string>
+    <string name="settings_render_hint">Build 41 → GL4ES, Build 42 → ZINK (Dimensity: ativar ANGLE)</string>
+
+    <string name="nav_menu_controls_editor">Editor de controles</string>
+    <string name="nav_menu_gamepad_mapper">Configurar gamepad</string>
+    <string name="nav_menu_manage_storage">Gerenciar armazenamento</string>
+    <string name="nav_menu_donate">Apoiar</string>
+    <string name="control_element_delete">Excluir elemento</string>
+    <string name="control_element_input_type">Tipo de entrada</string>
+    <string name="control_element_stick_binding">Atalho do Analógico</string>
+    <string name="control_element_icon">Ícone</string>
+
+    <string name="game_instance_manage_storage">Gerenciar armazenamento</string>
+    <string name="game_instance_delete">Excluir</string>
+
+    <string name="donate_message">Gostando do app e quer nos apoiar? \n\nCriado por ko-fi.com/liamelui, agora mantido e desenvolvido por ko-fi.com/udarmolota. \n\nOutros colaboradores: \nshimux0, Wakort, LeHiepDuy.</string>
+
+    <string name="app_aborted">O aplicativo encontrou um problema inesperado e foi encerrado</string>
+    <string name="share_logs">Compartilhar arquivo de log</string>
+
+    <string name="delete_game_instance">Todos os arquivos do jogo e dados (saves, mods, servidores favoritos, etc.) associados a esta instância serão perdidos permanentemente</string>
+    <string name="game_files_missing">Certifique-se de que ProjectZomboid64 está no nível raiz do arquivo .zip usado para instalação. Siga o guia na wiki para garantir que os arquivos estejam empacotados corretamente</string>
+    <string name="game_files_not_for_linux">É necessária a versão do Project Zomboid para Linux. Siga o guia na wiki para garantir que os arquivos corretos sejam baixados</string>
+
+    <!-- Gamepad Mapper Strings -->
+    <string name="gamepad_mapper_title">Mapeamento de Botões do Gamepad</string>
+    <string name="gamepad_mapper_description">Pressione os botões do seu gamepad na ordem solicitada para personalizar seus controles.</string>
+    <string name="gamepad_mapper_start">Iniciar mapeamento</string>
+    <string name="gamepad_mapper_reset">Redefinir para o padrão</string>
+    <string name="gamepad_mapper_step">Pressione: %s</string>
+    <string name="gamepad_mapper_save">Mapeamento concluído!</string>
+    <string name="gamepad_mapper_success">Mapeamento do gamepad salvo com sucesso</string>
+    <string name="gamepad_mapper_reset_confirmation">Mapeamento do gamepad redefinido para o padrão</string>
+
+    <!-- Gamepad Button Names -->
+    <string name="gamepad_mapper_button_a">Botão A</string>
+    <string name="gamepad_mapper_button_b">Botão B</string>
+    <string name="gamepad_mapper_button_x">Botão X</string>
+    <string name="gamepad_mapper_button_y">Botão Y</string>
+    <string name="gamepad_mapper_button_lb">Bumper Esquerdo</string>
+    <string name="gamepad_mapper_button_rb">Bumper Direito</string>
+    <string name="gamepad_mapper_button_select">Select/Voltar</string>
+    <string name="gamepad_mapper_button_start">Start/Menu</string>
+    <string name="gamepad_mapper_button_guide">Guide/Home</string>
+    <string name="gamepad_mapper_button_lstk">Clique do Analógico Esquerdo</string>
+    <string name="gamepad_mapper_button_rstk">Clique do Analógico Direito</string>
+    <string name="gamepad_mapper_button_dpad_up">D-Pad Cima</string>
+    <string name="gamepad_mapper_button_dpad_down">D-Pad Baixo</string>
+    <string name="gamepad_mapper_button_dpad_left">D-Pad Esquerda</string>
+    <string name="gamepad_mapper_button_dpad_right">D-Pad Direita</string>
+
+    <!-- Native Libraries -->
+    <string name="game_instance_native_libs_label">Bibliotecas nativas (.zip)</string>
+    <string name="game_instance_no_native_libs_selected">Selecione o ZIP com bibliotecas nativas (opc. para mult.)</string>
+    <string name="game_instance_browse_native_libs">Procurar ZIP de bibliotecas nativas</string>
+
+    <!-- Saves -->
+    <string name="game_instance_saves_label">Arquivo de save (.zip)</string>
+    <string name="game_instance_no_saves_selected">Selecione o ZIP de saves</string>
+    <string name="game_instance_browse_saves">Procurar ZIP de saves</string>
+
+    <!-- Mods -->
+    <string name="game_instance_mods_label">ZIP de mods (opcional)</string>
+
+    <!-- Onscreen controls -->
+    <string name="touch_controls_description">O modo de controle por toque desativa o suporte ao gamepad e ativa apenas os botões na tela.</string>
+    <string name="touch_controls_switch_label">Ativar controles por toque na tela</string>
+    <string name="touch_controls_enabled_toast">Controles por toque ativados</string>
+    <string name="touch_controls_disabled_toast">Controles por toque desativados</string>
+    <string name="fragment_label_touch_controls">Controles por toque</string>
+
+    <!-- Import Mod -->
+    <string name="install_mod_title">Importar mods</string>
+    <string name="install_mod_instance_label">Instância do jogo</string>
+    <string name="install_mod_zip_label">ZIP do mod</string>
+    <string name="install_mod_browse">Procurar…</string>
+    <string name="install_mod_install">Importar</string>
+
+    <string name="install_mod_no_instances">Nenhuma instância do jogo encontrada</string>
+    <string name="install_mod_select_instance">Selecione uma instância do jogo</string>
+    <string name="install_mod_select_zip">Selecione um arquivo ZIP</string>
+
+    <string name="dialog_title_installing_mods">Importando mods</string>
+    <string name="dialog_title_failed_to_install_mods">Falha ao importar mods</string>
+    <string name="dialog_title_mods_installed">Mods instalados</string>
+
+    <string name="dialog_title_installing_saves">Importando saves</string>
+    <string name="dialog_title_failed_to_install_saves">Falha ao importar saves</string>
+    <string name="dialog_title_saves_installed">Saves importados</string>
+
+    <string name="install_mod_zip_warning">O ZIP deve conter mod.info no nível raiz.</string>
+
+    <string name="install_mod_zip_help_title">Estrutura do arquivo de mod</string>
+
+    <string name="install_mod_zip_help_message">
+        \u2705 Exemplos corretos:\n\n
+
+        Mod único:\n
+        ModName/\n
+        \u00A0\u00A0mod.info\n
+        \u00A0\u00A0media/\n
+        \u00A0\u00A0scripts/\n\n
+
+        Vários mods em um ZIP:\n
+        ModA/\n
+        \u00A0\u00A0mod.info\n
+        ModB/\n
+        \u00A0\u00A0mod.info\n\n
+
+        \u274C Exemplos incorretos:\n\n
+
+        Pasta extra de agrupamento:\n
+        Downloads/\n
+        \u00A0\u00A0ModName/\n
+        \u00A0\u00A0\u00A0\u00A0mod.info\n\n
+
+        Raiz do mod ausente:\n
+        media/\n
+        scripts/\n
+        (sem mod.info na raiz)
+    </string>
+
+    <!-- Controls layout -->
+    <string name="menu_install_controls">Importar/Exportar controles</string>
+
+    <string name="install_controls_instance_label">Instância do jogo</string>
+    <string name="install_controls_zip_label">ZIP de controles</string>
+    <string name="install_controls_install">Importar</string>
+
+    <string name="dialog_title_installing_controls">Importando controles…</string>
+    <string name="dialog_title_controls_installed">Controles importados</string>
+    <string name="dialog_title_failed_to_install_controls">Falha ao importar controles</string>
+
+    <string name="install_controls_zip_warning">O ZIP deve conter controls.json (no nível raiz). Caso contrário, pode ser instalado incorretamente.</string>
+
+    <string name="install_controls_zip_help_title">Formato do ZIP de controles</string>
+    <string name="install_controls_zip_help_message">✅ Correto:\n\ncontrols.json\n\n❌ Incorreto:\n\nAlgumapasta/\n\u00A0\u00A0controls.json</string>
+
+    <string name="install_saves_instance_label">Selecione a instância do jogo</string>
+    <string name="install_saves_zip_label">Arquivo ZIP de saves</string>
+    <string name="install_saves_zip_warning">O ZIP deve conter as pastas de saves diretamente (Sandbox, Survival, etc.).</string>
+    <string name="install_saves_install">Importar</string>
+    <string name="install_saves_menu">Importar/Exportar saves</string>
+    <string name="install_saves_zip_help_title">Como deve ser o ZIP de saves</string>
+    <string name="install_saves_zip_help_message">
+    \u2705 Exemplo de estrutura:
+    \u00A0\u00A0Sandbox/\n
+    \u00A0Survival/\n
+    \u00A0Builder/\n
+    \u00A0Apocalypse/\n\n
+
+    Não empacote a pasta pai.
+    </string>
+
+    <string name="install_saves_export">Exportar</string>
+    <string name="dialog_title_exporting_saves">Exportando saves</string>
+    <string name="dialog_title_saves_exported">Saves exportados</string>
+    <string name="dialog_title_failed_to_export_saves">Falha ao exportar saves</string>
+
+    <string name="install_controls_export">Exportar</string>
+
+    <string name="dialog_title_exporting_controls">Exportando controles…</string>
+    <string name="dialog_title_controls_exported">Controles exportados</string>
+    <string name="dialog_title_failed_to_export_controls">Falha ao exportar controles</string>
+    <string name="dialog_title_controls_export_skipped_default">Controles padrão em uso — nada para exportar</string>
+    <string name="install_controls_global_hint">
+       O layout de controles é global. O export salva controls.json apenas se você alterou o layout.
+    </string>
+    <string name="controls_export_nothing_to_export">Nada para exportar: layout de controles padrão está em uso.</string>
+    <string name="settings_debug_mode">Modo de depuração (-debug)</string>
+    <string name="select_instance">— Selecione uma instância do jogo —</string>
+
+    <!-- Vulkan Driver dialogs -->
+    <string name="vulkan_driver_freedreno_8xx_title">Freedreno 8xx</string>
+    <string name="vulkan_driver_freedreno_8xx_message">Freedreno 8xx é experimental.\n\nDispositivos Snapdragon 8 Gen 3/4/5/Elite e 7 Gen 3.</string>
+
+    <string name="vulkan_driver_freedreno_840_title">Freedreno 830/840</string>
+    <string name="vulkan_driver_freedreno_840_message">Este driver Freedreno funciona melhor para Adreno 830/840.\n\nSnapdragon 8 Gen 5/Elite.</string>
+
+    <string name="vulkan_driver_turnip_8gen2_title">TURNIP bbdd688 8g2</string>
+    <string name="vulkan_driver_turnip_8gen2_message">Este driver é apenas para Snapdragon 8 Gen 2.\n\nCorrige cintilação que pode ocorrer após atualizar para o HyperOS 3.</string>
+
+    <string name="vulkan_driver_turnip_bbdd688_title">TURNIP bbdd688</string>
+    <string name="vulkan_driver_turnip_bbdd688_message">Este driver é destinado a GPUs Adreno 7xx.</string>
+
+    <string name="vulkan_driver_turnip_gmem_title">TURNIP 25.1.3 GMEM</string>
+    <string name="vulkan_driver_turnip_gmem_message">Este driver é apenas para GPU Adreno 710. Snapdragon 7 Gen 1.</string>
+
+    <!-- JVM args dialog -->
+    <string name="jvm_args_dialog_title">Argumentos JVM</string>
+    <string name="jvm_args_dialog_message">Argumentos JVM adicionais, ex.:\n\n• -Xmx2G — alocar 2GB de memória\n• -Xms512M — processo inicia com 512MB de RAM\n• -XX:+UseG1GC — ativar o coletor de lixo G1\n\nEm teoria, ajuda quando há pouca RAM. Alguns argumentos já são definidos pelas configurações.\nSe configurar incorretamente e o app não iniciar, reinstale-o ou apenas limpe o cache do app.</string>
+</resources>

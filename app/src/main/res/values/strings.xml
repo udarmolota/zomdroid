@@ -242,4 +242,24 @@
     <string name="controls_export_nothing_to_export">Nothing to export: default controls layout is used.</string>
     <string name="settings_debug_mode">Debug mode (-debug)</string>
     <string name="select_instance">— Select game instance —</string>
+
+    <!-- Vulkan Driver dialogs -->
+    <string name="vulkan_driver_freedreno_8xx_title">Freedreno 8xx</string>
+    <string name="vulkan_driver_freedreno_8xx_message">Freedreno 8xx is experimental.\n\nSnapdragon 8 Gen 3/4/5/Elite and 7 Gen 3 devices.</string>
+
+    <string name="vulkan_driver_freedreno_840_title">Freedreno 830/840</string>
+    <string name="vulkan_driver_freedreno_840_message">This Freedreno driver works best for Adreno 830/840.\n\nSnapdragon 8 Gen 5/Elite.</string>
+
+    <string name="vulkan_driver_turnip_8gen2_title">TURNIP bbdd688 8g2</string>
+    <string name="vulkan_driver_turnip_8gen2_message">This is for Snapdragon 8 Gen 2 only.\n\nFixes flickering that may occur after updating to HyperOS 3.</string>
+
+    <string name="vulkan_driver_turnip_bbdd688_title">TURNIP bbdd688</string>
+    <string name="vulkan_driver_turnip_bbdd688_message">This driver is intended for Adreno 7xx GPUs.</string>
+
+    <string name="vulkan_driver_turnip_gmem_title">TURNIP 25.1.3 GMEM</string>
+    <string name="vulkan_driver_turnip_gmem_message">This driver is for Adreno 710 GPU only. Snapdragon 7 Gen 1.</string>
+
+    <!-- JVM args dialog -->
+    <string name="jvm_args_dialog_title">JVM arguments</string>
+    <string name="jvm_args_dialog_message">Additional JVM arguments, e.g.:\n\n• -Xmx2G - allocate 2Gb of memory\n• -Xms512M - process starts with 1Gb RAM\n• -XX:+UseG1GC - enable G1 garbage collector\n\nIn theory, it should help when there\'s not enough RAM. Some arguments are already set by settings.\nIf you set it incorrectly and the app doesn\'t run, reinstall it or just clear the app cache.</string>
 </resources>

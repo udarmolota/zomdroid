@@ -159,6 +159,7 @@ public class LauncherPreferences {
         SYSTEM_DEFAULT(null),
         FREEDRENO("libvulkan_freedreno.so"),
         FREEDRENO_8XX_Expr("libvulkan_freedreno_8xx.so"),
+        FREEDRENO_840_v26("libvulkan_freedreno_840.so"),
         TURNIP_bbdd688("libvulkan.ad07XX_regular.so"),
         TURNIP_bbdd688_8gen2("libvulkan.ad07XX.so"),
         Turnip_25_1_3_GMEM("vulkan.turnip.710.so");
