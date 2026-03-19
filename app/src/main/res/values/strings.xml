@@ -262,4 +262,20 @@
     <!-- JVM args dialog -->
     <string name="jvm_args_dialog_title">JVM arguments</string>
     <string name="jvm_args_dialog_message">Additional JVM arguments, e.g.:\n\n• -Xmx2G - allocate 2Gb of memory\n• -Xms512M - process starts with 1Gb RAM\n• -XX:+UseG1GC - enable G1 garbage collector\n\nIn theory, it should help when there\'s not enough RAM. Some arguments are already set by settings.\nIf you set it incorrectly and the app doesn\'t run, reinstall it or just clear the app cache.</string>
+
+    <!-- Custom Driver import/export -->
+    <string name="install_driver_menu">Import/Export Custom Driver</string>
+    <string name="install_driver_so_label">Custom Vulkan Driver (.so file)</string>
+    <string name="install_driver_warning">Replaces the previously loaded custom driver. Use at your own risk.</string>
+    <string name="install_driver_import">Import</string>
+    <string name="install_driver_export">Export</string>
+    <string name="install_driver_wrong_extension">Please select a .so file</string>
+ 
+    <!-- InstallerService task titles -->
+    <string name="dialog_title_importing_driver">Importing custom driver…</string>
+    <string name="dialog_title_driver_imported">Custom driver imported</string>
+    <string name="dialog_title_failed_to_import_driver">Failed to import driver</string>
+    <string name="dialog_title_exporting_driver">Exporting custom driver…</string>
+    <string name="dialog_title_driver_exported">Custom driver exported</string>
+    <string name="dialog_title_failed_to_export_driver">Failed to export driver</string>
 </resources>
