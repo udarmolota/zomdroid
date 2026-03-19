@@ -60,11 +60,40 @@ public class SettingsFragment extends Fragment {
             Navigation.findNavController(v).navigate(R.id.wiki_fragment);
         });
 
+        // Кастомный адаптер — отключает CUSTOM_DRIVER если файл не загружен
         ArrayAdapter<LauncherPreferences.VulkanDriver> vulkanDriverAdapter =
-                new ArrayAdapter<>(requireContext(),
+                new ArrayAdapter<LauncherPreferences.VulkanDriver>(requireContext(),
                         android.R.layout.simple_spinner_dropdown_item,
-                        LauncherPreferences.VulkanDriver.values());
-
+                        LauncherPreferences.VulkanDriver.values()) {
+ 
+                    private boolean isCustomDriverAvailable() {
+                        String homePath = com.zomdroid.AppStorage.requireSingleton().getHomePath();
+                        if (homePath == null || homePath.isEmpty()) return false;
+                        return new java.io.File(homePath, com.zomdroid.C.deps.CUSTOM_DRIVER).exists();
+                    }
+ 
+                    @Override
+                    public boolean isEnabled(int position) {
+                        LauncherPreferences.VulkanDriver item = getItem(position);
+                        if (item == LauncherPreferences.VulkanDriver.CUSTOM_DRIVER) {
+                            return isCustomDriverAvailable();
+                        }
+                        return true;
+                    }
+ 
+                    @Override
+                    public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                        View v = super.getDropDownView(position, convertView, parent);
+                        LauncherPreferences.VulkanDriver item = getItem(position);
+                        if (item == LauncherPreferences.VulkanDriver.CUSTOM_DRIVER) {
+                            v.setAlpha(isCustomDriverAvailable() ? 1f : 0.4f);
+                        } else {
+                            v.setAlpha(1f);
+                        }
+                        return v;
+                    }
+                };
+ 
         binding.settingsVulkanDriverS.setAdapter(vulkanDriverAdapter);
         binding.settingsVulkanDriverS.setSelection(
                 vulkanDriverAdapter.getPosition(LauncherPreferences.requireSingleton().getVulkanDriver())
