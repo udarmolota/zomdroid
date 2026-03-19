@@ -10,6 +10,7 @@ on:
         type: choice
         options:
         - master
+        - multilingual
         
 jobs:
   build:
