@@ -259,7 +259,38 @@
     <string name="vulkan_driver_turnip_gmem_title">TURNIP 25.1.3 GMEM</string>
     <string name="vulkan_driver_turnip_gmem_message">Este driver é apenas para GPU Adreno 710. Snapdragon 7 Gen 1.</string>
 
+    <string name="vulkan_driver_freedreno">Freedreno</string>
+    <string name="vulkan_driver_freedreno_message">Este driver é para Adreno 6xx/7xx (Snapdragons).</string>
+
     <!-- JVM args dialog -->
     <string name="jvm_args_dialog_title">Argumentos JVM</string>
     <string name="jvm_args_dialog_message">Argumentos JVM adicionais, ex.:\n\n• -Xmx2G — alocar 2GB de memória\n• -Xms512M — processo inicia com 512MB de RAM\n• -XX:+UseG1GC — ativar o coletor de lixo G1\n\nEm teoria, ajuda quando há pouca RAM. Alguns argumentos já são definidos pelas configurações.\nSe configurar incorretamente e o app não iniciar, reinstale-o ou apenas limpe o cache do app.</string>
+
+    <!-- Custom Driver import/export -->
+    <string name="install_driver_menu">Importar/Exportar Driver Personalizado</string>
+    <string name="install_driver_so_label">Driver Vulkan personalizado (arquivo .so)</string>
+    <string name="install_driver_warning">Substitui o driver personalizado carregado anteriormente. Use por sua conta e risco.</string>
+    <string name="install_driver_import">Importar</string>
+    <string name="install_driver_export">Exportar</string>
+    <string name="install_driver_wrong_extension">Por favor, selecione um arquivo .so</string>
+
+    <!-- InstallerService task titles -->
+    <string name="dialog_title_importing_driver">Importando driver personalizado…</string>
+    <string name="dialog_title_driver_imported">Driver personalizado importado</string>
+    <string name="dialog_title_failed_to_import_driver">Falha ao importar driver</string>
+    <string name="dialog_title_exporting_driver">Exportando driver personalizado…</string>
+    <string name="dialog_title_driver_exported">Driver personalizado exportado</string>
+    <string name="dialog_title_failed_to_export_driver">Falha ao exportar driver</string>
+
+    <string name="export_log_menu">Exportar Log do Jogo</string>
+    <string name="export_log_export">Exportar console.txt</string>
+    <string name="export_log_not_found">Arquivo de log não encontrado. O jogo pode não ter sido executado ainda, ou travou antes de criar a pasta Zomboid.</string>
+    <string name="dialog_title_exporting_log">Exportando log…</string>
+    <string name="dialog_title_log_exported">Log exportado</string>
+    <string name="dialog_title_failed_to_export_log">Falha ao exportar log</string>
+
+    <string name="nav_menu_reddit">Reddit</string>
+    <string name="reddit_dialog_title">Zomdroid no Reddit</string>
+    <string name="reddit_message">Junte-se à nossa comunidade no Reddit:\nhttps://www.reddit.com/r/zomdroid</string>
+
 </resources>

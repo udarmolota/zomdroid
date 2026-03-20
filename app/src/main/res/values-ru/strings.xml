@@ -86,7 +86,7 @@
     <string name="game_instance_manage_storage">Управление хранилищем</string>
     <string name="game_instance_delete">Удалить</string>
 
-    <string name="donate_message">Нравится приложение и хотите поддержать нас? \n\nСоздано ko-fi.com/liamelui, сейчас поддерживается и развивается ko-fi.com/udarmolota. \n\nДругие участники: \nshimux0, Wakort, LeHiepDuy.</string>
+    <string name="donate_message">Нравится приложение и хотите поддержать нас? \n\nАвтор: ko-fi.com/liamelui, развитие и поддержка: ko-fi.com/udarmolota. \n\nДругие участники: \nshimux0, Wakort, LeHiepDuy.</string>
 
     <string name="app_aborted">Приложение столкнулось с непредвиденной проблемой и было закрыто</string>
     <string name="share_logs">Поделиться файлом логов</string>
@@ -259,7 +259,37 @@
     <string name="vulkan_driver_turnip_gmem_title">TURNIP 25.1.3 GMEM</string>
     <string name="vulkan_driver_turnip_gmem_message">Этот драйвер только для GPU Adreno 710. Snapdragon 7 Gen 1.</string>
 
+    <string name="vulkan_driver_freedreno">Freedreno</string>
+    <string name="vulkan_driver_freedreno_message">Этот драйвер предназначен для Adreno 6xx/7xx (Snapdragon).</string>
+
     <!-- JVM args dialog -->
     <string name="jvm_args_dialog_title">Аргументы JVM</string>
     <string name="jvm_args_dialog_message">Дополнительные аргументы JVM, например:\n\n• -Xmx2G — выделить 2 ГБ памяти\n• -Xms512M — процесс стартует с 512 МБ RAM\n• -XX:+UseG1GC — включить сборщик мусора G1\n\nТеоретически помогает при нехватке RAM. Некоторые аргументы уже заданы настройками.\nЕсли настроено неверно и приложение не запускается — переустановите его или очистите кэш.</string>
+
+    <!-- Custom Driver import/export -->
+    <string name="install_driver_menu">Импорт/экспорт драйвера</string>
+    <string name="install_driver_so_label">Пользовательский драйвер Vulkan (файл .so)</string>
+    <string name="install_driver_warning">Заменяет ранее загруженный драйвер. Используйте на свой страх и риск.</string>
+    <string name="install_driver_import">Импорт</string>
+    <string name="install_driver_export">Экспорт</string>
+    <string name="install_driver_wrong_extension">Пожалуйста, выберите файл .so</string>
+
+    <!-- InstallerService task titles -->
+    <string name="dialog_title_importing_driver">Импорт драйвера…</string>
+    <string name="dialog_title_driver_imported">Драйвер импортирован</string>
+    <string name="dialog_title_failed_to_import_driver">Не удалось импортировать драйвер</string>
+    <string name="dialog_title_exporting_driver">Экспорт драйвера…</string>
+    <string name="dialog_title_driver_exported">Драйвер экспортирован</string>
+    <string name="dialog_title_failed_to_export_driver">Не удалось экспортировать драйвер</string>
+
+    <string name="export_log_menu">Экспорт лога игры</string>
+    <string name="export_log_export">Экспортировать console.txt</string>
+    <string name="export_log_not_found">Файл лога не найден. Возможно, игра ещё не запускалась или вылетела до создания папки Zomboid.</string>
+    <string name="dialog_title_exporting_log">Экспорт лога…</string>
+    <string name="dialog_title_log_exported">Лог экспортирован</string>
+    <string name="dialog_title_failed_to_export_log">Не удалось экспортировать лог</string>
+
+    <string name="nav_menu_reddit">Reddit</string>
+    <string name="reddit_dialog_title">Zomdroid на Reddit</string>
+    <string name="reddit_message">Mы на Reddit:\nhttps://www.reddit.com/r/zomdroid</string>
 </resources>

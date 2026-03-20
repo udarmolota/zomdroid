@@ -119,6 +119,10 @@ public class InstallerService extends Service implements TaskProgressListener {
                 doExportCustomDriver(intent);
                 break;
             }
+            case EXPORT_LOG: {
+                doExportLog(intent);
+                break;
+            }
         }
 
         return START_NOT_STICKY;
@@ -909,6 +913,46 @@ public class InstallerService extends Service implements TaskProgressListener {
         });
     }
 
+    private void doExportLog(Intent intent) {
+        String taskTitle = getString(R.string.dialog_title_exporting_log);
+
+        startForeground(NOTIFICATION_ID, buildNotification(taskTitle));
+        this.taskState.postValue(new TaskState(taskTitle, null, -1, 0, false, false));
+
+        String instanceName = intent.getStringExtra(EXTRA_GAME_INSTANCE_NAME);
+        Uri outUri = intent.getParcelableExtra(EXTRA_OUTPUT_URI);
+
+        if (instanceName == null) { finishWithError(taskTitle, "Game instance name is missing"); return; }
+        if (outUri == null) { finishWithError(taskTitle, "Output URI is missing"); return; }
+
+        GameInstance gi = GameInstanceManager.requireSingleton().getInstanceByName(instanceName);
+        if (gi == null) { finishWithError(taskTitle, "Game instance not found: " + instanceName); return; }
+
+        executorService.submit(() -> {
+            try {
+                File logFile = new File(gi.getHomePath() + "/Zomboid/console.txt");
+                if (!logFile.exists()) {
+                    finishWithError(taskTitle, "console.txt not found: " + logFile.getAbsolutePath());
+                    return;
+                }
+
+                try (InputStream is = new java.io.FileInputStream(logFile);
+                     OutputStream os = getContentResolver().openOutputStream(outUri)) {
+                    if (os == null) throw new IllegalStateException("openOutputStream returned null");
+                    byte[] buf = new byte[64 * 1024];
+                    int r;
+                    while ((r = is.read(buf)) != -1) {
+                        os.write(buf, 0, r);
+                    }
+                }
+
+                finish(getString(R.string.dialog_title_log_exported), null);
+            } catch (Exception e) {
+                finishWithError(getString(R.string.dialog_title_failed_to_export_log), e.toString());
+            }
+        });
+    }
+
     public enum Task {
         CREATE_GAME_INSTANCE,
         DELETE_GAME_INSTANCE,
@@ -919,7 +963,8 @@ public class InstallerService extends Service implements TaskProgressListener {
         EXPORT_SAVES_FROM_INSTANCE,
         EXPORT_CONTROLS_FROM_INSTANCE,
         IMPORT_CUSTOM_DRIVER,
-        EXPORT_CUSTOM_DRIVER
+        EXPORT_CUSTOM_DRIVER,
+        EXPORT_LOG
     }
 
     public static class TaskState {

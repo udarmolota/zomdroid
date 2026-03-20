@@ -253,7 +253,37 @@
     <string name="vulkan_driver_turnip_gmem_title">TURNIP 25.1.3 GMEM</string>
     <string name="vulkan_driver_turnip_gmem_message">此驱动仅适用于 Adreno 710 GPU。骁龙 7 Gen 1。</string>
 
+    <string name="vulkan_driver_freedreno">Freedreno</string>
+    <string name="vulkan_driver_freedreno_message">此驱动适用于 Adreno 6xx/7xx（骁龙系列）。</string>
+
     <!-- JVM args dialog -->
     <string name="jvm_args_dialog_title">JVM 参数</string>
     <string name="jvm_args_dialog_message">额外的 JVM 参数，例如：\n\n• -Xmx2G — 分配 2GB 内存\n• -Xms512M — 进程以 512MB RAM 启动\n• -XX:+UseG1GC — 启用 G1 垃圾回收器\n\n理论上在内存不足时有帮助。部分参数已由设置项自动配置。\n如果设置错误导致应用无法运行，请重新安装或清除应用缓存。</string>
+
+    <!-- Custom Driver import/export -->
+    <string name="install_driver_menu">导入/导出自定义驱动</string>
+    <string name="install_driver_so_label">自定义 Vulkan 驱动（.so 文件）</string>
+    <string name="install_driver_warning">将替换之前加载的自定义驱动，风险自负。</string>
+    <string name="install_driver_import">导入</string>
+    <string name="install_driver_export">导出</string>
+    <string name="install_driver_wrong_extension">请选择 .so 文件</string>
+
+    <!-- InstallerService task titles -->
+    <string name="dialog_title_importing_driver">正在导入自定义驱动…</string>
+    <string name="dialog_title_driver_imported">自定义驱动已导入</string>
+    <string name="dialog_title_failed_to_import_driver">驱动导入失败</string>
+    <string name="dialog_title_exporting_driver">正在导出自定义驱动…</string>
+    <string name="dialog_title_driver_exported">自定义驱动已导出</string>
+    <string name="dialog_title_failed_to_export_driver">驱动导出失败</string>
+
+    <string name="export_log_menu">导出游戏日志</string>
+    <string name="export_log_export">导出 console.txt</string>
+    <string name="export_log_not_found">未找到日志文件。游戏可能尚未运行，或在创建 Zomboid 文件夹之前已崩溃。</string>
+    <string name="dialog_title_exporting_log">正在导出日志…</string>
+    <string name="dialog_title_log_exported">日志已导出</string>
+    <string name="dialog_title_failed_to_export_log">日志导出失败</string>
+
+    <string name="nav_menu_reddit">Reddit</string>
+    <string name="reddit_dialog_title">Zomdroid Reddit 社区</string>
+    <string name="reddit_message">加入我们的 Reddit 社区：\nhttps://www.reddit.com/r/zomdroid</string>
 </resources>

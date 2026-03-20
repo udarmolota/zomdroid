@@ -144,6 +144,12 @@ public class SettingsFragment extends Fragment {
                             .setMessage(getString(R.string.vulkan_driver_turnip_gmem_message))
                             .setPositiveButton(getString(R.string.dialog_button_ok), null)
                             .show();
+                } else if (vulkanDriver == LauncherPreferences.VulkanDriver.FREEDRENO) {
+                    new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                            .setTitle(getString(R.string.vulkan_driver_freedreno))
+                            .setMessage(getString(R.string.vulkan_driver_freedreno_message))
+                            .setPositiveButton(getString(R.string.dialog_button_ok), null)
+                            .show();
                 }
             }
 

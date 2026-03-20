@@ -85,7 +85,7 @@
     <string name="game_instance_manage_storage">Manage storage</string>
     <string name="game_instance_delete">Delete</string>
 
-    <string name="donate_message">Enjoying the app and want to support us? \n\nCreated by ko-fi.com/liamelui, and is now maintained and developed by ko-fi.com/udarmolota. \n\nOther contributors: \nshimux0, Wakort, LeHiepDuy.</string>
+    <string name="donate_message">Enjoying the app and want to support us? \n\nCreator: ko-fi.com/liamelui, Maintained and Developed by: ko-fi.com/udarmolota. \n\nOther contributors: \nshimux0, Wakort, LeHiepDuy.</string>
 
     <string name="app_aborted">The app ran into an unexpected issue and had to close</string>
     <string name="share_logs">Share log file</string>
@@ -259,6 +259,9 @@
     <string name="vulkan_driver_turnip_gmem_title">TURNIP 25.1.3 GMEM</string>
     <string name="vulkan_driver_turnip_gmem_message">This driver is for Adreno 710 GPU only. Snapdragon 7 Gen 1.</string>
 
+    <string name="vulkan_driver_freedreno">Freedreno</string>
+    <string name="vulkan_driver_freedreno_message">This driver is for Adreno 6xx/7xx (Snapdragons).</string>
+
     <!-- JVM args dialog -->
     <string name="jvm_args_dialog_title">JVM arguments</string>
     <string name="jvm_args_dialog_message">Additional JVM arguments, e.g.:\n\n• -Xmx2G - allocate 2Gb of memory\n• -Xms512M - process starts with 1Gb RAM\n• -XX:+UseG1GC - enable G1 garbage collector\n\nIn theory, it should help when there\'s not enough RAM. Some arguments are already set by settings.\nIf you set it incorrectly and the app doesn\'t run, reinstall it or just clear the app cache.</string>
@@ -278,4 +281,16 @@
     <string name="dialog_title_exporting_driver">Exporting custom driver…</string>
     <string name="dialog_title_driver_exported">Custom driver exported</string>
     <string name="dialog_title_failed_to_export_driver">Failed to export driver</string>
+
+    <!-- Export log -->
+    <string name="export_log_menu">Export Game Log</string>
+    <string name="export_log_export">Export console.txt</string>
+    <string name="export_log_not_found">Log file not found. The game may not have run yet, or it crashed before creating the Zomboid folder.</string>
+    <string name="dialog_title_exporting_log">Exporting log…</string>
+    <string name="dialog_title_log_exported">Log exported</string>
+    <string name="dialog_title_failed_to_export_log">Failed to export log</string>
+
+    <string name="nav_menu_reddit">Reddit</string>
+    <string name="reddit_dialog_title">Zomdroid on Reddit</string>
+    <string name="reddit_message">Join our community on Reddit:\nhttps://www.reddit.com/r/zomdroid</string>
 </resources>
