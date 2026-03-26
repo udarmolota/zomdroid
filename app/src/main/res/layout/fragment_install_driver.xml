@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/install_driver_cl"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <!-- SO label -->
+    <TextView
+        android:id="@+id/install_driver_so_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/install_driver_so_label"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <!-- Warning -->
+    <TextView
+        android:id="@+id/install_driver_warning_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/install_driver_warning"
+        android:textSize="12sp"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/install_driver_so_tv"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- SO path -->
+    <EditText
+        android:id="@+id/install_driver_so_path_et"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/game_instance_no_file_selected"
+        android:enabled="false"
+        android:focusable="false"
+        android:clickable="false"
+        android:cursorVisible="false"
+        android:inputType="none"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/install_driver_warning_tv"
+        app:layout_constraintEnd_toStartOf="@id/install_driver_browse_ib"/>
+
+    <!-- Browse button -->
+    <ImageButton
+        style="@style/AppTheme.ImageButton"
+        android:id="@+id/install_driver_browse_ib"
+        android:src="@drawable/mt_icon_folder_open"
+        app:layout_constraintTop_toTopOf="@id/install_driver_so_path_et"
+        app:layout_constraintBottom_toBottomOf="@id/install_driver_so_path_et"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- Import button -->
+    <Button
+        android:id="@+id/install_driver_import_btn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/install_driver_import"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/install_driver_so_path_et"/>
+
+    <!-- Export button -->
+    <Button
+        android:id="@+id/install_driver_export_btn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/install_driver_export"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/install_driver_import_btn"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -31,7 +31,12 @@
         <action
             android:id="@+id/action_install_saves"
             app:destination="@id/install_saves_fragment" />
-
+        <action
+            android:id="@+id/action_install_driver"
+            app:destination="@id/install_driver_fragment" />
+        <action
+            android:id="@+id/action_export_log"
+            app:destination="@id/export_log_fragment" />
     </fragment>
 
     <fragment
@@ -83,5 +88,15 @@
         android:id="@+id/install_saves_fragment"
         android:name="com.zomdroid.fragments.InstallSavesFragment"
         android:label="@string/install_saves_menu" />
+
+    <fragment
+        android:id="@+id/install_driver_fragment"
+        android:name="com.zomdroid.fragments.InstallDriverFragment"
+        android:label="@string/install_driver_menu" />
+
+    <fragment
+        android:id="@+id/export_log_fragment"
+        android:name="com.zomdroid.fragments.ExportLogFragment"
+        android:label="@string/export_log_menu" />
 
 </navigation>

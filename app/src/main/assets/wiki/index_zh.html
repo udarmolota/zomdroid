@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>维基</title>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            body {
+                color: #E2E2E9;
+            }
+
+            a {
+                color: #8AB4F8;
+            }
+        }
+
+        details > summary {
+            font-style: italic;
+        }
+
+        p + details,
+        div + details,
+        body > details {
+            margin-top: 1em;
+        }
+
+        .details-content {
+            padding-top: 0.5em;
+        }
+    </style>
+</head>
+<body>
+<ul>
+    <li>
+        <a href="#how-to-get-game-files">如何获取游戏文件？</a>
+        <ol>
+            <li><a href="#download-game-files">从官方渠道下载游戏文件</a></li>
+            <li><a href="#add-files-to-archive">将文件添加到 .zip 压缩包</a></li>
+            <li><a href="#copy-archive-to-device">将 .zip 压缩包复制到手机</a></li>
+        </ol>
+    </li>
+    <li>
+        <a href="#native-libraries">原生库（Build 41 联机）</a>
+    </li>
+    <li>
+        <a href="#renderers">渲染器与驱动</a>
+    </li>
+    <li>
+        <a href="#known-issues">已知问题</a>
+    </li>
+</ul>
+
+<hr>
+
+<section id="how-to-get-game-files">
+    <h2>如何获取游戏文件？</h2>
+    <section id="download-game-files">
+        <h3>1. 从官方渠道下载游戏文件</h3>
+        <details>
+            <summary>DepotDownloader 使用指南</summary>
+            <div class="details-content">
+                <p>Zomdroid 需要 Linux 版本的《僵尸毁灭工程》文件才能运行。在 Windows 上获取这些文件最简单的方式是使用 <b>DepotDownloader</b> —— 一个可以直接从 Steam 下载指定版本的工具。</p>
+                <p>下载前您需要在 Steam 上拥有《僵尸毁灭工程》。</p>
+                <ol>
+                    <li>下载 <a href="https://github.com/SteamRE/DepotDownloader/releases/tag/DepotDownloader_3.4.0" target="_blank">DepotDownloader</a>。
+                        Windows 用户请选择 <b>DepotDownloader-windows-x64.zip</b>。</li>
+                    <li>解压到任意位置，例如：<b>C:\DepotDownloader</b></li>
+                    <li>打开文件夹，右键单击 → <b>在终端/CMD中打开</b></li>
+                    <li>使用以下命令作为基础，将 <b>YOURUSERNAME</b> 和
+                        <b>YOURPASSWORD</b> 替换为您的 Steam 账号信息：
+                        <br><br>
+                        <i>./DepotDownloader -app 108600 -depot 108603 -manifest MANIFESTNUMBER -username YOURUSERNAME -password YOURPASSWORD</i>
+                        <br><br>
+                        包含 manifest 编号和可选 <code>-beta</code> 标志
+                        （例如 <code>-beta unstable</code> 或 <code>-beta legacy_42_12</code>）的完整命令
+                        可直接从 <a href="https://steamdb.info/depot/108603/manifests/" target="_blank">SteamDB</a> 复制
+                        —— 在「Copy format」下拉菜单中选择 <b>DepotDownloader</b>，然后点击所需版本旁边的复制图标。
+                        可能需要通过 Steam 手机端进行验证。
+                    </li>
+                </ol>
+            </div>
+        </details>
+    </section>
+
+    <section id="add-files-to-archive">
+        <h3>2. 将文件添加到 .zip 压缩包</h3>
+        <p>Zomdroid 要求 .zip 压缩包的根目录直接包含游戏文件 —— 不能放在子文件夹内。</p>
+        <details>
+            <summary>Steam 使用指南</summary>
+            <div class="details-content">
+                <p>进入包含游戏文件的文件夹（含 ProjectZomboid64 可执行文件的文件夹）。
+                Linux 系统通常位于 <i>~/.local/share/Steam/steamapps/common/ProjectZomboid/projectzomboid</i>。
+                Windows 或 macOS 用户请记录上一步的 depot 下载目录
+                （下载完成后会显示在控制台中）。Windows 上通常为
+                <i>C:\Program Files (x86)\Steam\steamapps\content\app_108600\depot_108603\projectzomboid</i>。
+                全选所有文件（Ctrl + A 或 macOS 上的 Command + A），然后添加到 .zip 压缩包中。</p>
+            </div>
+        </details>
+    </section>
+    <section id="copy-archive-to-device">
+        <h3>3. 将 .zip 压缩包复制到手机</h3>
+        <p>将上一步创建的 .zip 压缩包复制到手机上的任意文件夹。之后可以用该文件创建新的游戏实例。游戏实例创建完成后，可以删除 .zip 压缩包以释放空间。</p>
+    </section>
+</section>
+<hr>
+
+<section id="native-libraries">
+    <h2>原生库（Build 41 联机）</h2>
+
+    <p>
+        在 <b>Build 41</b> 中使用联机功能需要额外的原生库。
+        这些库由《僵尸毁灭工程》开发者作为
+        <b>Build 42.12（Linux 版本）</b> 的一部分官方发布。
+    </p>
+
+    <p>
+        只需要<b>两个原生库</b>：
+    </p>
+
+    <ul>
+        <li><code>libRakNet64.so</code></li>
+        <li><code>libZNetNoSteam64.so</code></li>
+    </ul>
+
+    <p>
+        从 Linux Build 42.12 发行版中下载这两个文件，
+        将它们放入一个 <code>.zip</code> 压缩包，
+        并在创建新游戏实例时上传该压缩包。
+    </p>
+
+    <p>
+        <code>.zip</code> 压缩包应将两个 <code>.so</code> 文件
+        直接放在根目录（不在文件夹内）。
+    </p>
+
+    <p>
+        在创建新游戏实例时，可以将原生库压缩包与主游戏文件一起
+        上传到对应字段中。
+    </p>
+</section>
+<hr>
+
+<section id="renderers">
+    <h2>渲染器与驱动</h2>
+
+    <p>
+        Zomdroid 使用渲染器将《僵尸毁灭工程》的桌面端图形
+        转换为与 Android 设备兼容的图形。
+    </p>
+
+    <p>
+        启动器提供两种渲染方案：
+    </p>
+
+    <ul>
+        <li><b>GL4ES</b></li>
+        <li><b>ZINK</b>（<code>ZINK_ZFA</code> / <code>ZINK_OSMESA</code>）</li>
+    </ul>
+
+    <h3>GL4ES</h3>
+    <p>
+        GL4ES 是 <b>Build 41</b> 最稳定的渲染器。
+        但在 <b>Build 42</b> 中，它常常产生图形瑕疵，
+        因为它无法完全转换游戏更新后的渲染管线。
+    </p>
+
+    <h3>ZINK</h3>
+    <p>
+        ZINK 在 <b>Build 42</b> 上效果最佳，
+        通常能消除 GL4ES 产生的图形瑕疵。
+    </p>
+
+    <p>
+        ZINK 提供以下几种 Vulkan 驱动：
+    </p>
+
+    <ul>
+        <li><b>系统 Vulkan 驱动</b></li>
+        <li><b>Freedreno</b></li>
+        <li><b>Turnip</b></li>
+    </ul>
+    <p>
+        上述所有 Freedreno 和 Turnip 驱动都是同一款开源
+        Mesa Vulkan 驱动（适用于 Adreno GPU）的不同版本。<b>Turnip</b> 是
+        Mesa Freedreno 驱动栈中 Vulkan 组件的正式名称 —— 这两个名称有时可互换使用。
+        不同版本针对不同的骁龙处理器代进行了优化，
+        这也是为什么启动器提供多个驱动选项。
+    </p>
+    <p>
+        ZINK 主要适用于<b>骁龙设备（Adreno GPU）</b>。在联发科 Dimensity 上，
+        ZINK 可通过 ANGLE 图形驱动工作，但在 Dimensity 设备上启用 ANGLE 往往并不简单 ——
+        仅靠开发者选项很少能直接成功，可能需要第三方工具。联发科 Helio 不支持 ZINK，
+        但部分 Helio 设备可能能够通过 GL4ES 运行较早、要求较低的 Build 42 版本（如 42.6）——
+        目前尚无可靠方案，但未来情况可能改变。
+        对于其他处理器（Exynos、麒麟等），相关信息较少 ——
+        ZINK 通常无法正常工作或可能崩溃。
+    </p>
+
+    <p>
+        <b>Build 41</b> 的推荐配置为 <b>GL4ES</b>。
+        <b>Build 42</b> 的推荐配置为 <b>ZINK + Freedreno 驱动</b>。
+        Freedreno 驱动仅支持搭载 Adreno GPU 的骁龙设备。
+        不同驱动版本适用于不同的硬件代：
+    </p>
+
+    <ul>
+        <li><b>Freedreno</b> —— 稳定版，推荐用于 Adreno 6xx 和 7xx（骁龙 7 Gen 1 及以下）</li>
+        <li><b>Freedreno 8xx</b> —— 实验性，适用于 Adreno 8xx（骁龙 8 Gen 3 / Gen 4 / Gen 5 / Elite）</li>
+        <li><b>Freedreno 830/840</b> —— 实验性，专为 Adreno 830/840（骁龙 8 Elite / Elite 2，如 Galaxy S25/S26 系列）</li>
+    </ul>
+</section>
+<hr>
+<section id="known-issues">
+    <h2>已知问题</h2>
+
+    <h3>Build 42.12+ —— 创建世界时崩溃</h3>
+    <p>
+        从大约 <b>Build 42.12</b> 开始，游戏可能在创建世界时崩溃 ——
+        具体发生在创建角色后加载游戏的阶段。
+        这似乎是游戏本身的问题，与设备或驱动无关，
+        因为在多种不同设备和配置上均有发现。
+    </p>
+    <p>
+        <b>这不是永久性故障。</b> 如果游戏在此阶段崩溃，
+        只需重启 Zomdroid 再试一次。大多数用户需要 <b>2–4 次尝试</b>
+        才能成功首次加载世界。世界创建完成后，
+        后续加载同一存档通常会很稳定。
+    </p>
+
+    <h3>图形 MOD 兼容性</h3>
+    <p>
+        部分图形 MOD —— 例如服装、发型或载具的重贴图 —— 可能无法正确显示或完全无法使用。
+        这是在 Android 上运行游戏所用图形转换层的已知限制，
+        与具体设备或驱动无关。
+    </p>
+
+    <h3>在拆解车辆附近 GUI 消失</h3>
+    <p>
+        如果附近有被拆除了 <b>3 个或更多车轮</b> 的载具，游戏界面可能会消失。
+        原因是载具状态触发的渲染问题。
+        <b>解决方法：</b>避免从同一辆载具上拆除超过 2 个车轮。
+        如果界面已经消失，远离该载具或重新加载存档应该能恢复。
+    </p>
+</section>
+</body>
+</html>

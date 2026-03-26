@@ -21,6 +21,10 @@ public class C {
         public static final String LIBS_FMOD_20309 = LIBS_ANDROID_ARM64_v8a + "/fmod-2.03.09";
         public static final String JARS_SQLITE_JDBC_34800 = JARS + "/sqlite-jdbc-3.48.0.0.jar";
         public static final String JARS_ZOMDROID_AGENT = JARS + "/zomdroid-agent.jar";
+
+        // Custom user-supplied Vulkan driver. Stored directly in LIBS_ANDROID_ARM64_v8a.
+        public static final String CUSTOM_DRIVER_FILENAME = "custom_driver.so";
+        public static final String CUSTOM_DRIVER = LIBS_ANDROID_ARM64_v8a + "/" + CUSTOM_DRIVER_FILENAME;
     }
 
     public static class assets {

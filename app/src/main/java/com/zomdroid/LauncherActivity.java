@@ -116,6 +116,20 @@ public class LauncherActivity extends AppCompatActivity {
                     messageView.setMovementMethod(LinkMovementMethod.getInstance());
                 }
                 return true;
+            } else if (item.getItemId() == R.id.action_reddit) {
+                final SpannableString s = new SpannableString(getString(R.string.reddit_message));
+                Linkify.addLinks(s, Linkify.WEB_URLS);
+                AlertDialog dialog = new MaterialAlertDialogBuilder(this)
+                        .setTitle(R.string.reddit_dialog_title)
+                        .setMessage(s)
+                        .setPositiveButton(getString(R.string.dialog_button_ok), null)
+                        .create();
+                dialog.show();
+                TextView messageView = dialog.findViewById(android.R.id.message);
+                if (messageView != null) {
+                    messageView.setMovementMethod(LinkMovementMethod.getInstance());
+                }
+                return true;
             } else if (item.getItemId() == R.id.action_open_touch_controls) {
                 // Navigate to TouchControlsFragment
                 binding.drawerLayout.close();

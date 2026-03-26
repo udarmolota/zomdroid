@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wiki</title>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            body {
+                color: #E2E2E9;
+            }
+
+            a {
+                color: #8AB4F8;
+            }
+        }
+
+        details > summary {
+            font-style: italic;
+        }
+
+        p + details,
+        div + details,
+        body > details {
+            margin-top: 1em;
+        }
+
+        .details-content {
+            padding-top: 0.5em;
+        }
+    </style>
+</head>
+<body>
+<ul>
+    <li>
+        <a href="#how-to-get-game-files">Como obter os arquivos do jogo?</a>
+        <ol>
+            <li><a href="#download-game-files">Baixar os arquivos do jogo da fonte oficial</a></li>
+            <li><a href="#add-files-to-archive">Adicionar os arquivos a um arquivo .zip</a></li>
+            <li><a href="#copy-archive-to-device">Copiar o arquivo .zip para o dispositivo móvel</a></li>
+        </ol>
+    </li>
+    <li>
+        <a href="#native-libraries">Bibliotecas nativas (multiplayer do Build 41)</a>
+    </li>
+    <li>
+        <a href="#renderers">Renderizadores e drivers</a>
+    </li>
+    <li>
+        <a href="#known-issues">Problemas conhecidos</a>
+    </li>
+</ul>
+
+<hr>
+
+<section id="how-to-get-game-files">
+    <h2>Como obter os arquivos do jogo?</h2>
+    <section id="download-game-files">
+        <h3>1. Baixar os arquivos do jogo da fonte oficial</h3>
+        <details>
+            <summary>Guia para o DepotDownloader</summary>
+            <div class="details-content">
+                <p>O Zomdroid requer os arquivos do Project Zomboid para Linux. A maneira mais fácil de obtê-los no Windows é usando o <b>DepotDownloader</b> — uma ferramenta que permite baixar qualquer versão específica diretamente do Steam.</p>
+                <p>Você precisa possuir o Project Zomboid no Steam antes de fazer o download.</p>
+                <ol>
+                    <li>Baixe o <a href="https://github.com/SteamRE/DepotDownloader/releases/tag/DepotDownloader_3.4.0" target="_blank">DepotDownloader</a>.
+                        Para Windows, pegue o <b>DepotDownloader-windows-x64.zip</b>.</li>
+                    <li>Extraia em qualquer lugar, por exemplo: <b>C:\DepotDownloader</b></li>
+                    <li>Abra a pasta, clique com o botão direito → <b>Abrir no Terminal / CMD</b></li>
+                    <li>Use o seguinte comando como base, substituindo <b>SEUUSUARIO</b> e
+                        <b>SUASENHA</b> pelas suas credenciais do Steam:
+                        <br><br>
+                        <i>./DepotDownloader -app 108600 -depot 108603 -manifest NUMERODOMANIFEST -username SEUUSUARIO -password SUASENHA</i>
+                        <br><br>
+                        O comando exato com o número do manifest e o flag opcional <code>-beta</code>
+                        (ex.: <code>-beta unstable</code> ou <code>-beta legacy_42_12</code>) pode ser copiado
+                        diretamente do <a href="https://steamdb.info/depot/108603/manifests/" target="_blank">SteamDB</a>
+                        — selecione <b>DepotDownloader</b> no menu "Copy format" e clique no ícone de copiar ao lado
+                        da versão desejada. A autenticação pelo Steam Mobile pode ser necessária.
+                    </li>
+                </ol>
+            </div>
+        </details>
+    </section>
+
+    <section id="add-files-to-archive">
+        <h3>2. Adicionar os arquivos a um arquivo .zip</h3>
+        <p>O Zomdroid requer que o arquivo .zip contenha os arquivos do jogo no nível raiz — não dentro de uma pasta.</p>
+        <details>
+            <summary>Guia para o Steam</summary>
+            <div class="details-content">
+                <p>Navegue até a pasta contendo os arquivos do jogo (pasta com o executável ProjectZomboid64).
+                No Linux, ela geralmente está em <i>~/.local/share/Steam/steamapps/common/ProjectZomboid/projectzomboid</i>.
+                No Windows ou macOS, anote o diretório de download do depot da etapa anterior
+                (ele aparecerá no console ao término do download). No Windows, geralmente é
+                <i>C:\Program Files (x86)\Steam\steamapps\content\app_108600\depot_108603\projectzomboid</i>.
+                Selecione todos os arquivos (Ctrl + A ou Command + A no macOS) e adicione-os a um arquivo .zip.</p>
+            </div>
+        </details>
+    </section>
+    <section id="copy-archive-to-device">
+        <h3>3. Copiar o arquivo .zip para o dispositivo móvel</h3>
+        <p>Copie o arquivo .zip da etapa anterior para qualquer pasta no seu dispositivo móvel. Você poderá usar esse arquivo para criar uma nova instância do jogo. Após criar a instância, você pode excluir o arquivo .zip para liberar espaço.</p>
+    </section>
+</section>
+<hr>
+
+<section id="native-libraries">
+    <h2>Bibliotecas nativas (multiplayer do Build 41)</h2>
+
+    <p>
+        Para usar o multiplayer no <b>Build 41</b>, são necessárias bibliotecas nativas adicionais.
+        Essas bibliotecas são distribuídas oficialmente pelos desenvolvedores do Project Zomboid
+        como parte do <b>Build 42.12 (versão Linux)</b>.
+    </p>
+
+    <p>
+        Apenas <b>duas bibliotecas nativas</b> são necessárias:
+    </p>
+
+    <ul>
+        <li><code>libRakNet64.so</code></li>
+        <li><code>libZNetNoSteam64.so</code></li>
+    </ul>
+
+    <p>
+        Baixe esses arquivos da distribuição Linux do Build 42.12,
+        coloque ambos em um único arquivo <code>.zip</code>
+        e faça o upload desse arquivo ao criar uma nova instância do jogo.
+    </p>
+
+    <p>
+        O arquivo <code>.zip</code> deve conter os dois arquivos <code>.so</code>
+        no nível raiz (não dentro de uma pasta).
+    </p>
+
+    <p>
+        Você pode fazer o upload do arquivo de bibliotecas nativas junto com os arquivos principais do jogo
+        nos campos correspondentes ao criar uma nova instância do jogo.
+    </p>
+</section>
+<hr>
+
+<section id="renderers">
+    <h2>Renderizadores e drivers</h2>
+
+    <p>
+        O Zomdroid usa renderizadores para traduzir os gráficos desktop do Project Zomboid
+        em gráficos compatíveis com dispositivos Android.
+    </p>
+
+    <p>
+        O launcher oferece duas soluções de renderização:
+    </p>
+
+    <ul>
+        <li><b>GL4ES</b></li>
+        <li><b>ZINK</b> (<code>ZINK_ZFA</code> / <code>ZINK_OSMESA</code>)</li>
+    </ul>
+
+    <h3>GL4ES</h3>
+    <p>
+        O GL4ES é o renderizador mais estável para o <b>Build 41</b>.
+        No entanto, no <b>Build 42</b> frequentemente produz artefatos gráficos,
+        pois não consegue traduzir completamente o pipeline de renderização atualizado do jogo.
+    </p>
+
+    <h3>ZINK</h3>
+    <p>
+        O ZINK oferece os melhores resultados com o <b>Build 42</b>
+        e geralmente elimina os artefatos gráficos vistos com o GL4ES.
+    </p>
+
+    <p>
+        O ZINK oferece alguns drivers Vulkan:
+    </p>
+
+    <ul>
+        <li><b>Driver Vulkan do sistema</b></li>
+        <li><b>Freedreno</b></li>
+        <li><b>Turnip</b></li>
+    </ul>
+    <p>
+        Todos os drivers Freedreno e Turnip listados acima são versões do mesmo driver
+        Mesa Vulkan de código aberto para GPUs Adreno. <b>Turnip</b> é o nome oficial do
+        componente Vulkan dentro da pilha de drivers Mesa Freedreno — os nomes às vezes são
+        usados de forma intercambiável. Diferentes versões são otimizadas para diferentes gerações
+        de Snapdragon, por isso o launcher oferece várias opções de drivers.
+    </p>
+    <p>
+        O ZINK funciona principalmente em <b>dispositivos Snapdragon (GPUs Adreno)</b>. No MediaTek Dimensity,
+        o ZINK pode funcionar via driver gráfico ANGLE, porém habilitar o ANGLE em dispositivos Dimensity
+        frequentemente não é trivial — raramente funciona apenas pelas configurações do desenvolvedor e pode
+        exigir ferramentas de terceiros. No MediaTek Helio, o ZINK não é suportado, mas alguns dispositivos Helio
+        podem rodar versões anteriores e menos exigentes do Build 42 (como a 42.6) via GL4ES —
+        ainda não existe uma solução confiável, mas isso pode mudar no futuro.
+        Para outros processadores (Exynos, Kirin, etc.), há informações limitadas disponíveis —
+        o ZINK frequentemente não funciona ou pode travar.
+    </p>
+
+    <p>
+        A configuração recomendada para o <b>Build 41</b> é <b>GL4ES</b>.
+        Para o <b>Build 42</b>, a configuração recomendada é <b>ZINK + um driver Freedreno</b>.
+        Os drivers Freedreno são suportados apenas em dispositivos Snapdragon com GPUs Adreno.
+        Diferentes versões de drivers são destinadas a diferentes gerações de hardware:
+    </p>
+
+    <ul>
+        <li><b>Freedreno</b> — estável, recomendado para Adreno 6xx e 7xx (Snapdragon até 7 Gen 1)</li>
+        <li><b>Freedreno 8xx</b> — experimental, para Adreno 8xx (Snapdragon 8 Gen 3 / Gen 4 / Gen 5 / Elite)</li>
+        <li><b>Freedreno 830/840</b> — experimental, especificamente para Adreno 830/840 (Snapdragon 8 Elite / Elite 2, ex.: Galaxy S25/S26)</li>
+    </ul>
+</section>
+<hr>
+<section id="known-issues">
+    <h2>Problemas conhecidos</h2>
+
+    <h3>Build 42.12+ — travamentos durante a geração do mundo</h3>
+    <p>
+        A partir do <b>Build 42.12</b>, o jogo pode travar durante
+        a criação do mundo — especificamente ao carregar o jogo após a criação do personagem.
+        Isso parece ser um problema do próprio jogo, não relacionado ao dispositivo ou
+        driver, pois foi observado em vários dispositivos e configurações diferentes.
+    </p>
+    <p>
+        <b>Isso não é uma falha permanente.</b> Se o jogo travar nessa etapa,
+        simplesmente reinicie o Zomdroid e tente novamente. A maioria dos usuários precisa de
+        <b>2 a 4 tentativas</b> antes de carregar o mundo com sucesso pela primeira vez.
+        Após a criação do mundo, os carregamentos subsequentes do mesmo save geralmente são estáveis.
+    </p>
+
+    <h3>Compatibilidade de mods gráficos</h3>
+    <p>
+        Alguns mods gráficos — como retexturas de roupas, cabelos ou veículos — podem não
+        ser exibidos corretamente ou podem não funcionar de jeito nenhum. Esta é uma limitação conhecida
+        da camada de tradução gráfica usada para rodar o jogo no Android, e não é específica de
+        nenhum dispositivo ou driver em particular.
+    </p>
+
+    <h3>Interface desaparece perto de veículos desmontados</h3>
+    <p>
+        A interface do jogo pode desaparecer se houver um veículo próximo com <b>3 ou mais rodas
+        removidas</b>. A causa é um problema de renderização ativado pelo estado do veículo.
+        <b>Solução alternativa:</b> evite remover mais de 2 rodas de um único veículo.
+        Se a interface já desapareceu, afastar-se do veículo ou recarregar o save deve restaurá-la.
+    </p>
+</section>
+</body>
+</html>

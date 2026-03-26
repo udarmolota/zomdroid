@@ -50,9 +50,33 @@
         app:showAsAction="never"/>
 
     <item
+        android:id="@+id/action_install_driver"
+        android:title="@string/install_driver_menu"
+        android:icon="@drawable/mt_icon_folder"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_export_log"
+        android:title="@string/export_log_menu"
+        android:icon="@drawable/mt_icon_folder"
+        app:showAsAction="never"/>
+
+    <item
         android:id="@+id/action_donate"
         android:title="@string/nav_menu_donate"
         android:icon="@drawable/mt_icon_heart"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_reddit"
+        android:title="@string/nav_menu_reddit"
+        android:icon="@drawable/ic_reddit"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_version"
+        android:title="v1.4.0 by udar_molota"
+        android:enabled="false"
         app:showAsAction="never"/>
 
 </menu>

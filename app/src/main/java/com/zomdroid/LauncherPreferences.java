@@ -26,12 +26,7 @@ public class LauncherPreferences {
 
     private static final String KEY_TOUCH_CONTROLS = "touch_controls_enabled";
 
-    LauncherPreferences() {
-        //if (isKgslSupported()) {
-        //    this.renderer = Renderer.ZINK_ZFA;
-        //    this.vulkanDriver = VulkanDriver.FREEDRENO;
-        //}
-    }
+    LauncherPreferences() {}
 
     private static boolean isKgslSupported() {
         String[] paths = {
@@ -45,10 +40,7 @@ public class LauncherPreferences {
                 if (f.exists()) {
                     return true;
                 }
-            } catch (SecurityException ignored) {
-                // If access to /dev is restricted, treat as "unknown" (false) for this probe.
-                // Consider logging in debug builds.
-            }
+            } catch (SecurityException ignored) {}
         }
         return false;
     }
@@ -137,7 +129,7 @@ public class LauncherPreferences {
     public String getJvmArgs() {
         return jvmArgs;
     }
-    
+
     public void setJvmArgs(String jvmArgs) {
         this.jvmArgs = jvmArgs != null ? jvmArgs : "";
         saveToPreferences();
@@ -147,7 +139,6 @@ public class LauncherPreferences {
         ZINK_ZFA("libzfa.so"),
         ZINK_OSMESA("libOSMesa.so"),
         GL4ES("libgl4es.so");
-        //NG_GL4ES("libng_gl4es.so");
 
         final String libName;
         Renderer(String libName) {
@@ -159,9 +150,11 @@ public class LauncherPreferences {
         SYSTEM_DEFAULT(null),
         FREEDRENO("libvulkan_freedreno.so"),
         FREEDRENO_8XX_Expr("libvulkan_freedreno_8xx.so"),
+        FREEDRENO_840_v26("libvulkan_freedreno_840.so"),
         TURNIP_bbdd688("libvulkan.ad07XX_regular.so"),
         TURNIP_bbdd688_8gen2("libvulkan.ad07XX.so"),
-        Turnip_25_1_3_GMEM("vulkan.turnip.710.so");
+        Turnip_25_1_3_GMEM("vulkan.turnip.710.so"),
+        CUSTOM_DRIVER(C.deps.CUSTOM_DRIVER_FILENAME);
 
         final String libName;
         VulkanDriver(String libName) {
@@ -183,5 +176,4 @@ public class LauncherPreferences {
     public void setTouchControlsEnabled(boolean enabled) {
         touchControlsEnabled = enabled;
     }
-
 }

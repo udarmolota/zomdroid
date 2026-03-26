@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Zomdroid</string>
+
+    <string name="percentage_format" translatable="false">%d%%</string>
+
+    <string name="legal_notice_title">Правовое уведомление</string>
+    <string name="legal_notice_message">Этот лаунчер является сторонним инструментом и требует оригинальных файлов Project Zomboid для работы. Для использования этого программного обеспечения вы должны владеть лицензионной копией игры. Разработчик лаунчера не связан с создателями оригинальной игры и не несёт ответственности за какие-либо правовые последствия использования данного программного обеспечения.</string>
+
+    <string name="fragment_label_launcher">Лаунчер</string>
+    <string name="fragment_label_new_game_instance">Новый экземпляр игры</string>
+    <string name="fragment_label_settings">Настройки</string>
+    <string name="fragment_label_controls_editor">Редактор управления</string>
+    <string name="fragment_label_wiki">Вики</string>
+    <string name="fragment_label_onscreen">Только экранные кнопки</string>
+    <string name="nav_menu_install_mod">Импорт модов</string>
+
+    <string name="controls_editor_instructions">Долгое нажатие на пустое место открывает контекстное меню. Изменения сохраняются автоматически</string>
+    <string name="controls_editor_add_element">Добавить элемент управления</string>
+    <string name="control_element_scale">Масштаб</string>
+    <string name="control_element_text">Текст</string>
+    <string name="control_element_text_empty">Пусто</string>
+    <string name="control_element_bindings">Привязки</string>
+    <string name="control_element_select_binding">Выбрать привязку</string>
+    <string name="control_element_binding_invalid">Неверная привязка</string>
+    <string name="control_element_opacity">Прозрачность</string>
+    <string name="control_element_binding_left">Привязка влево</string>
+    <string name="control_element_binding_up">Привязка вверх</string>
+    <string name="control_element_binding_right">Привязка вправо</string>
+    <string name="control_element_binding_down">Привязка вниз</string>
+    <string name="control_element_input_type_mnk">Мышь и клавиатура</string>
+    <string name="control_element_input_type_gamepad">Геймпад</string>
+    <string name="gamepad_mapper_button_lt">LT (левый триггер)</string>
+    <string name="gamepad_mapper_button_rt">RT (правый триггер)</string>
+
+    <string name="game_instance_name">Название</string>
+    <string name="game_instance_preset">Пресет</string>
+    <string name="game_instance_files">Файлы игры (.zip)</string>
+    <string name="game_instance_browse_files_hint">Выбрать файлы…</string>
+    <string name="game_instance_no_file_selected">Файлы не выбраны</string>
+    <string name="game_instance_name_invalid">Недопустимое название</string>
+    <string name="game_instance_name_already_exists">Уже существует</string>
+    <string name="game_instance_unsupported_extension">Поддерживаются только .zip архивы</string>
+
+    <string name="dialog_button_ok">ОК</string>
+    <string name="dialog_button_accept">Принять</string>
+    <string name="dialog_button_quit">Выйти</string>
+    <string name="dialog_button_view_guide">Открыть гайд</string>
+    <string name="dialog_button_close">Закрыть</string>
+    <string name="dialog_button_confirm">Подтвердить</string>
+    <string name="dialog_button_cancel">Отмена</string>
+    <string name="dialog_title_delete_game_instance">Удалить экземпляр игры?</string>
+    <string name="dialog_title_info">Информация</string>
+    <string name="dialog_title_fatal_error">Критическая ошибка</string>
+    <string name="dialog_title_creating_instance">Создание экземпляра игры…</string>
+    <string name="dialog_title_instance_created">Экземпляр успешно создан</string>
+    <string name="dialog_title_failed_to_create_instance">Не удалось создать экземпляр</string>
+    <string name="dialog_title_deleting_game_instance">Удаление экземпляра игры…</string>
+    <string name="dialog_title_instance_deleted">Экземпляр успешно удалён</string>
+    <string name="dialog_title_failed_to_delete_instance">Не удалось удалить экземпляр</string>
+    <string name="dialog_title_installing_dependencies">Установка зависимостей…</string>
+    <string name="dialog_title_dependencies_installed">Зависимости успешно установлены</string>
+    <string name="dialog_title_failed_to_install_dependencies">Не удалось установить зависимости</string>
+    <string name="dialog_title_donate">Поддержать разработку</string>
+    <string name="dialog_title_game_files_missing">Файлы игры отсутствуют</string>
+    <string name="dialog_title_game_files_not_for_linux">Установленные файлы не поддерживаются</string>
+
+    <string name="installation_not_finished">Установка не завершена</string>
+    <string name="dependencies_not_installed">Зависимости Zomdroid не установлены</string>
+
+    <string name="settings_renderer">Рендерер</string>
+    <string name="settings_vulkan_driver">Драйвер Vulkan</string>
+    <string name="settings_resolution_scale">Масштаб разрешения</string>
+    <string name="settings_audio_api">Аудио API</string>
+    <string name="settings_render_hint">Build 41 → GL4ES, Build 42 → ZINK (Dimensity: включить ANGLE)</string>
+
+    <string name="nav_menu_controls_editor">Редактор управления</string>
+    <string name="nav_menu_gamepad_mapper">Настройка геймпада</string>
+    <string name="nav_menu_manage_storage">Управление хранилищем</string>
+    <string name="nav_menu_donate">Поддержать</string>
+    <string name="control_element_delete">Удалить элемент</string>
+    <string name="control_element_input_type">Тип ввода</string>
+    <string name="control_element_stick_binding">Привязка стика</string>
+    <string name="control_element_icon">Иконка</string>
+
+    <string name="game_instance_manage_storage">Управление хранилищем</string>
+    <string name="game_instance_delete">Удалить</string>
+
+    <string name="donate_message">Нравится приложение и хотите поддержать нас? \n\nАвтор: ko-fi.com/liamelui, развитие и поддержка: ko-fi.com/udarmolota. \n\nДругие участники: \nshimux0, Wakort, LeHiepDuy.</string>
+
+    <string name="app_aborted">Приложение столкнулось с непредвиденной проблемой и было закрыто</string>
+    <string name="share_logs">Поделиться файлом логов</string>
+
+    <string name="delete_game_instance">Все файлы игры и данные (сохранения, моды, избранные серверы и т.д.), связанные с этим экземпляром, будут безвозвратно удалены</string>
+    <string name="game_files_missing">Убедитесь, что ProjectZomboid64 находится на верхнем уровне .zip архива, использованного при установке. Следуйте гайду на вики для правильной упаковки файлов</string>
+    <string name="game_files_not_for_linux">Требуется версия Project Zomboid для Linux. Следуйте гайду на вики для загрузки правильных файлов</string>
+
+    <!-- Gamepad Mapper Strings -->
+    <string name="gamepad_mapper_title">Настройка кнопок геймпада</string>
+    <string name="gamepad_mapper_description">Нажимайте кнопки на геймпаде в указанном порядке для настройки управления.</string>
+    <string name="gamepad_mapper_start">Начать настройку</string>
+    <string name="gamepad_mapper_reset">Сбросить к умолчанию</string>
+    <string name="gamepad_mapper_step">Нажмите: %s</string>
+    <string name="gamepad_mapper_save">Настройка завершена!</string>
+    <string name="gamepad_mapper_success">Настройка геймпада сохранена</string>
+    <string name="gamepad_mapper_reset_confirmation">Настройка геймпада сброшена к умолчанию</string>
+
+    <!-- Gamepad Button Names -->
+    <string name="gamepad_mapper_button_a">Кнопка A</string>
+    <string name="gamepad_mapper_button_b">Кнопка B</string>
+    <string name="gamepad_mapper_button_x">Кнопка X</string>
+    <string name="gamepad_mapper_button_y">Кнопка Y</string>
+    <string name="gamepad_mapper_button_lb">Левый бампер</string>
+    <string name="gamepad_mapper_button_rb">Правый бампер</string>
+    <string name="gamepad_mapper_button_select">Select/Back</string>
+    <string name="gamepad_mapper_button_start">Start/Menu</string>
+    <string name="gamepad_mapper_button_guide">Guide/Home</string>
+    <string name="gamepad_mapper_button_lstk">Нажатие левого стика</string>
+    <string name="gamepad_mapper_button_rstk">Нажатие правого стика</string>
+    <string name="gamepad_mapper_button_dpad_up">D-Pad вверх</string>
+    <string name="gamepad_mapper_button_dpad_down">D-Pad вниз</string>
+    <string name="gamepad_mapper_button_dpad_left">D-Pad влево</string>
+    <string name="gamepad_mapper_button_dpad_right">D-Pad вправо</string>
+
+    <!-- Native Libraries -->
+    <string name="game_instance_native_libs_label">Нативные библиотеки (.zip)</string>
+    <string name="game_instance_no_native_libs_selected">Выберите ZIP с нативными библиотеками (опц. для мульт.)</string>
+    <string name="game_instance_browse_native_libs">Выбрать ZIP нативных библиотек</string>
+
+    <!-- Saves -->
+    <string name="game_instance_saves_label">Файл сохранения (.zip)</string>
+    <string name="game_instance_no_saves_selected">Выберите ZIP с сохранениями</string>
+    <string name="game_instance_browse_saves">Выбрать ZIP сохранений</string>
+
+    <!-- Mods -->
+    <string name="game_instance_mods_label">ZIP с модами (необязательно)</string>
+
+    <!-- Onscreen controls -->
+    <string name="touch_controls_description">Режим сенсорного управления отключает поддержку геймпада и включает только экранные кнопки.</string>
+    <string name="touch_controls_switch_label">Включить сенсорное управление</string>
+    <string name="touch_controls_enabled_toast">Сенсорное управление включено</string>
+    <string name="touch_controls_disabled_toast">Сенсорное управление отключено</string>
+    <string name="fragment_label_touch_controls">Сенсорное управление</string>
+
+    <!-- Import Mod -->
+    <string name="install_mod_title">Импорт модов</string>
+    <string name="install_mod_instance_label">Экземпляр игры</string>
+    <string name="install_mod_zip_label">ZIP с модом</string>
+    <string name="install_mod_browse">Обзор…</string>
+    <string name="install_mod_install">Импортировать</string>
+
+    <string name="install_mod_no_instances">Экземпляры игры не найдены</string>
+    <string name="install_mod_select_instance">Выберите экземпляр игры</string>
+    <string name="install_mod_select_zip">Выберите ZIP файл</string>
+
+    <string name="dialog_title_installing_mods">Импорт модов</string>
+    <string name="dialog_title_failed_to_install_mods">Не удалось импортировать моды</string>
+    <string name="dialog_title_mods_installed">Моды установлены</string>
+
+    <string name="dialog_title_installing_saves">Импорт сохранений</string>
+    <string name="dialog_title_failed_to_install_saves">Не удалось импортировать сохранения</string>
+    <string name="dialog_title_saves_installed">Сохранения импортированы</string>
+
+    <string name="install_mod_zip_warning">ZIP должен содержать mod.info на верхнем уровне.</string>
+
+    <string name="install_mod_zip_help_title">Структура архива с модом</string>
+
+    <string name="install_mod_zip_help_message">
+        \u2705 Правильные примеры:\n\n
+
+        Один мод:\n
+        ModName/\n
+        \u00A0\u00A0mod.info\n
+        \u00A0\u00A0media/\n
+        \u00A0\u00A0scripts/\n\n
+
+        Несколько модов в одном ZIP:\n
+        ModA/\n
+        \u00A0\u00A0mod.info\n
+        ModB/\n
+        \u00A0\u00A0mod.info\n\n
+
+        \u274C Неправильные примеры:\n\n
+
+        Лишняя папка-обёртка:\n
+        Downloads/\n
+        \u00A0\u00A0ModName/\n
+        \u00A0\u00A0\u00A0\u00A0mod.info\n\n
+
+        Отсутствует корень мода:\n
+        media/\n
+        scripts/\n
+        (нет mod.info в корне)
+    </string>
+
+    <!-- Controls layout -->
+    <string name="menu_install_controls">Импорт/экспорт управления</string>
+
+    <string name="install_controls_instance_label">Экземпляр игры</string>
+    <string name="install_controls_zip_label">ZIP с управлением</string>
+    <string name="install_controls_install">Импортировать</string>
+
+    <string name="dialog_title_installing_controls">Импорт управления…</string>
+    <string name="dialog_title_controls_installed">Управление импортировано</string>
+    <string name="dialog_title_failed_to_install_controls">Не удалось импортировать управление</string>
+
+    <string name="install_controls_zip_warning">ZIP должен содержать controls.json на верхнем уровне. Иначе может быть установлен некорректно.</string>
+
+    <string name="install_controls_zip_help_title">Формат ZIP с управлением</string>
+    <string name="install_controls_zip_help_message">✅ Правильно:\n\ncontrols.json\n\n❌ Неправильно:\n\nSomeFolder/\n\u00A0\u00A0controls.json</string>
+
+    <string name="install_saves_instance_label">Выберите экземпляр игры</string>
+    <string name="install_saves_zip_label">ZIP архив с сохранениями</string>
+    <string name="install_saves_zip_warning">ZIP должен содержать папки сохранений напрямую (Sandbox, Survival и т.д.).</string>
+    <string name="install_saves_install">Импортировать</string>
+    <string name="install_saves_menu">Импорт/экспорт сохранений</string>
+    <string name="install_saves_zip_help_title">Как должен выглядеть ZIP с сохранениями</string>
+    <string name="install_saves_zip_help_message">
+    \u2705 Пример структуры:
+    \u00A0\u00A0Sandbox/\n
+    \u00A0Survival/\n
+    \u00A0Builder/\n
+    \u00A0Apocalypse/\n\n
+
+    Не упаковывайте родительскую папку.
+    </string>
+
+    <string name="install_saves_export">Экспорт</string>
+    <string name="dialog_title_exporting_saves">Экспорт сохранений</string>
+    <string name="dialog_title_saves_exported">Сохранения экспортированы</string>
+    <string name="dialog_title_failed_to_export_saves">Не удалось экспортировать сохранения</string>
+
+    <string name="install_controls_export">Экспорт</string>
+
+    <string name="dialog_title_exporting_controls">Экспорт управления…</string>
+    <string name="dialog_title_controls_exported">Управление экспортировано</string>
+    <string name="dialog_title_failed_to_export_controls">Не удалось экспортировать управление</string>
+    <string name="dialog_title_controls_export_skipped_default">Используется стандартное управление — нечего экспортировать</string>
+    <string name="install_controls_global_hint">
+       Раскладка управления глобальная. Экспорт сохраняет controls.json только если вы изменили раскладку.
+    </string>
+    <string name="controls_export_nothing_to_export">Нечего экспортировать: используется стандартная раскладка управления.</string>
+    <string name="settings_debug_mode">Режим отладки (-debug)</string>
+    <string name="select_instance">— Выберите экземпляр игры —</string>
+
+    <!-- Vulkan Driver dialogs -->
+    <string name="vulkan_driver_freedreno_8xx_title">Freedreno 8xx</string>
+    <string name="vulkan_driver_freedreno_8xx_message">Freedreno 8xx — экспериментальный.\n\nУстройства Snapdragon 8 Gen 3/4/5/Elite и 7 Gen 3.</string>
+
+    <string name="vulkan_driver_freedreno_840_title">Freedreno 830/840</string>
+    <string name="vulkan_driver_freedreno_840_message">Этот драйвер Freedreno лучше всего работает для Adreno 830/840.\n\nSnapdragon 8 Gen 4/5/Elite.</string>
+
+    <string name="vulkan_driver_turnip_8gen2_title">TURNIP bbdd688 8g2</string>
+    <string name="vulkan_driver_turnip_8gen2_message">Только для Snapdragon 8 Gen 2.\n\nИсправляет мерцание, которое может возникнуть после обновления до HyperOS 3.</string>
+
+    <string name="vulkan_driver_turnip_bbdd688_title">TURNIP bbdd688</string>
+    <string name="vulkan_driver_turnip_bbdd688_message">Этот драйвер предназначен для GPU Adreno 7xx.</string>
+
+    <string name="vulkan_driver_turnip_gmem_title">TURNIP 25.1.3 GMEM</string>
+    <string name="vulkan_driver_turnip_gmem_message">Этот драйвер только для GPU Adreno 710. Snapdragon 7 Gen 1.</string>
+
+    <string name="vulkan_driver_freedreno">Freedreno</string>
+    <string name="vulkan_driver_freedreno_message">Этот драйвер предназначен для Adreno 6xx/7xx (Snapdragon).</string>
+
+    <!-- JVM args dialog -->
+    <string name="jvm_args_dialog_title">Аргументы JVM</string>
+    <string name="jvm_args_dialog_message">Дополнительные аргументы JVM, например:\n\n• -Xmx2G — выделить 2 ГБ памяти\n• -Xms512M — процесс стартует с 512 МБ RAM\n• -XX:+UseG1GC — включить сборщик мусора G1\n\nТеоретически помогает при нехватке RAM. Некоторые аргументы уже заданы настройками.\nЕсли настроено неверно и приложение не запускается — переустановите его или очистите кэш.</string>
+
+    <!-- Custom Driver import/export -->
+    <string name="install_driver_menu">Импорт/экспорт драйвера</string>
+    <string name="install_driver_so_label">Пользовательский драйвер Vulkan (файл .so)</string>
+    <string name="install_driver_warning">Заменяет ранее загруженный драйвер. Используйте на свой страх и риск.</string>
+    <string name="install_driver_import">Импорт</string>
+    <string name="install_driver_export">Экспорт</string>
+    <string name="install_driver_wrong_extension">Пожалуйста, выберите файл .so</string>
+
+    <!-- InstallerService task titles -->
+    <string name="dialog_title_importing_driver">Импорт драйвера…</string>
+    <string name="dialog_title_driver_imported">Драйвер импортирован</string>
+    <string name="dialog_title_failed_to_import_driver">Не удалось импортировать драйвер</string>
+    <string name="dialog_title_exporting_driver">Экспорт драйвера…</string>
+    <string name="dialog_title_driver_exported">Драйвер экспортирован</string>
+    <string name="dialog_title_failed_to_export_driver">Не удалось экспортировать драйвер</string>
+
+    <string name="export_log_menu">Экспорт лога игры</string>
+    <string name="export_log_export">Экспортировать console.txt</string>
+    <string name="export_log_not_found">Файл лога не найден. Возможно, игра ещё не запускалась или вылетела до создания папки Zomboid.</string>
+    <string name="dialog_title_exporting_log">Экспорт лога…</string>
+    <string name="dialog_title_log_exported">Лог экспортирован</string>
+    <string name="dialog_title_failed_to_export_log">Не удалось экспортировать лог</string>
+
+    <string name="nav_menu_reddit">Reddit</string>
+    <string name="reddit_dialog_title">Zomdroid на Reddit</string>
+    <string name="reddit_message">Mы на Reddit:\nhttps://www.reddit.com/r/zomdroid</string>
+</resources>

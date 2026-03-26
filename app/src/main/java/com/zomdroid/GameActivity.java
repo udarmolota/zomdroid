@@ -541,6 +541,11 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         InputDevice device = event.getDevice();
         if (device == null) return false;
 
+        // Геймпад тоже репортит SOURCE_KEYBOARD для кнопок A/B/X/Y/Start —
+        // исключаем его явно, иначе геймпадные кнопки тоже будут заглушены
+        boolean isGamepad = (device.getSources() & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD;
+        if (isGamepad) return false;
+
         return !device.isVirtual()
                 && (event.isFromSource(InputDevice.SOURCE_KEYBOARD)
                 || (device.getSources() & InputDevice.SOURCE_KEYBOARD) == InputDevice.SOURCE_KEYBOARD);
