@@ -292,4 +292,9 @@
     <string name="nav_menu_reddit">Reddit</string>
     <string name="reddit_dialog_title">Zomdroid на Reddit</string>
     <string name="reddit_message">Mы на Reddit:\nhttps://www.reddit.com/r/zomdroid</string>
+
+    <string name="settings_env_vars">Переменные окружения</string>
+    <string name="settings_env_vars_hint">Например: TU_DEBUG=nogmem</string>
+
+    <string name="settings_env_vars_dialog_message">Переменные окружения, передаваемые напрямую в систему перед запуском игры.\n\nИспользуются для настройки рендереров, драйверов и других компонентов, например:\n\nTU_DEBUG=nogmem\nZINK_DEBUG=norp\n\nИспользуйте с осторожностью — неверные значения могут вызвать сбои.</string>
 </resources>

@@ -135,6 +135,17 @@ public class LauncherPreferences {
         saveToPreferences();
     }
 
+    private String envVars = "";
+
+    public String getEnvVars() {
+        return envVars;
+    }
+
+    public void setEnvVars(String envVars) {
+        this.envVars = envVars != null ? envVars : "";
+        saveToPreferences();
+    }
+
     public enum Renderer {
         ZINK_ZFA("libzfa.so"),
         ZINK_OSMESA("libOSMesa.so"),

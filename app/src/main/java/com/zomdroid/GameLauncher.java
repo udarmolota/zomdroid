@@ -96,6 +96,7 @@ public class GameLauncher {
         initZomdroidWindow();
         InputNativeInterface.sendJoystickConnected();
 
+        // JVM args [variables] from user settings
         ArrayList<String> jvmArgs = gameInstance.getJvmArgsAsList();
         String rawArgs = LauncherPreferences.requireSingleton().getJvmArgs();
 
@@ -103,6 +104,17 @@ public class GameLauncher {
             String[] splitArgs = rawArgs.trim().split("\\s+");
             for (String arg : splitArgs) {
                 jvmArgs.add(arg);
+            }
+        }
+
+        // Environment variables from user settings
+        String rawEnvVars = LauncherPreferences.requireSingleton().getEnvVars();
+        if (rawEnvVars != null && !rawEnvVars.trim().isEmpty()) {
+            for (String token : rawEnvVars.trim().split("\\s+")) {
+                String[] parts = token.split("=", 2);
+                if (parts.length == 2) {
+                    Os.setenv(parts[0].trim(), parts[1].trim(), true);
+                }
             }
         }
 

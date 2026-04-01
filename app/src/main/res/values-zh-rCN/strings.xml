@@ -286,4 +286,9 @@
     <string name="nav_menu_reddit">Reddit</string>
     <string name="reddit_dialog_title">Zomdroid Reddit 社区</string>
     <string name="reddit_message">加入我们的 Reddit 社区：\nhttps://www.reddit.com/r/zomdroid</string>
+
+    <string name="settings_env_vars">环境变量</string>
+    <string name="settings_env_vars_hint">例如：TU_DEBUG=nogmem</string>
+
+    <string name="settings_env_vars_dialog_message">在游戏启动前直接传递给系统的环境变量。\n\n用于配置渲染器、驱动及其他组件，例如：\n\nTU_DEBUG=nogmem\nZINK_DEBUG=norp\n\n请谨慎使用——错误的值可能导致崩溃。</string>
 </resources>

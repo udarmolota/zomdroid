@@ -293,4 +293,9 @@
     <string name="nav_menu_reddit">Reddit</string>
     <string name="reddit_dialog_title">Zomdroid on Reddit</string>
     <string name="reddit_message">Join our community on Reddit:\nhttps://www.reddit.com/r/zomdroid</string>
+
+    <string name="settings_env_vars">Environment variables</string>
+    <string name="settings_env_vars_hint">For example: TU_DEBUG=nogmem</string>
+
+    <string name="settings_env_vars_dialog_message">Environment variables passed directly to the system before the game starts.\n\nUse to configure renderers, drivers and other components, e.g.:\n\nTU_DEBUG=nogmem\nZINK_DEBUG=norp\n\nUse with caution — incorrect values may cause crashes.</string>
 </resources>

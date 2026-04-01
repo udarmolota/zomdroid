@@ -203,6 +203,22 @@ public class SettingsFragment extends Fragment {
             }
         });
 
+        // Enviroment variables
+        binding.settingsEnvVarsEt.setText(LauncherPreferences.requireSingleton().getEnvVars());
+
+        binding.settingsEnvVarsEt.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                LauncherPreferences.requireSingleton().setEnvVars(s.toString().trim());
+            }
+        });
+
         binding.settingsDebugSwitch.setChecked(LauncherPreferences.requireSingleton().isDebug());
         binding.settingsDebugSwitch.setOnCheckedChangeListener((v, isChecked) ->
                 LauncherPreferences.requireSingleton().setDebug(isChecked));
@@ -211,6 +227,14 @@ public class SettingsFragment extends Fragment {
             new androidx.appcompat.app.AlertDialog.Builder(requireContext())
                     .setTitle(getString(R.string.jvm_args_dialog_title))
                     .setMessage(getString(R.string.jvm_args_dialog_message))
+                    .setPositiveButton(getString(R.string.dialog_button_ok), null)
+                    .show();
+        });
+
+        binding.settingsEnvVarsInfo.setOnClickListener(v -> {
+            new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                    .setTitle(getString(R.string.settings_env_vars))
+                    .setMessage(getString(R.string.settings_env_vars_dialog_message))
                     .setPositiveButton(getString(R.string.dialog_button_ok), null)
                     .show();
         });
