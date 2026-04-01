@@ -1,4 +1,28 @@
 
+## [1.4.0] - 2026-03-20
+### Added
+**✅ Custom Vulkan Driver**
+You can now import your own Snapdragon Vulkan driver (.so file) via the new Import/Export Custom Driver menu item.
+The driver is loaded alongside the built-in ones — select Custom Driver in Settings after importing.
+Export your loaded driver to share or back it up — note that it will be lost on uninstall.
+
+**✅ Game Log Export**
+Added Export Game Log menu item — exports console.txt directly from the game folder.
+Useful for bug reports and troubleshooting. If the game crashed before creating the Zomboid folder, the export will show a clear message.
+
+**✅ Gamepad Fix (Split Screen)**
+Fixed gamepad inputs being blocked when a physical keyboard is connected (bug in v1.3.7).
+Split screen co-op with keyboard + gamepad now works correctly.
+
+**✅ Localization**
+Added Russian by AI, Portuguese (Brazil) by AI and Chinese (Simplified) by AI + @neighbor-bear translations.
+More strings have been extracted and localized across the app.
+
+**✅ UI & Other**
+Added Reddit community link to the navigation menu.
+App version is now displayed at the bottom of the navigation menu.
+
+---
 
 ## [1.2.9.v4] - 2025-12-24
 ### Added
