@@ -34,6 +34,13 @@ import com.zomdroid.input.AbstractControlElement;
 import com.zomdroid.input.ControlElementDescription;
 import com.zomdroid.input.GamepadManager;
 
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 public class LauncherActivity extends AppCompatActivity {
     private static final String LOG_TAG = LauncherActivity.class.getName();
     ActivityLauncherBinding binding;
@@ -141,9 +148,12 @@ public class LauncherActivity extends AppCompatActivity {
                 navController.navigate(R.id.action_open_install_mod);
                 return true;
             } else if (item.getItemId() == R.id.action_install_controls) {
-            binding.drawerLayout.close();
-            navController.navigate(R.id.action_install_controls);
-            return true;
+                binding.drawerLayout.close();
+                navController.navigate(R.id.action_install_controls);
+                return true;
+            } else if (item.getItemId() == R.id.action_version) {
+                checkForUpdate();
+                return true;
         }
 
         binding.drawerLayout.close();
@@ -157,5 +167,59 @@ public class LauncherActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         return NavigationUI.navigateUp(navController, appBarConfiguration)
                 || super.onSupportNavigateUp();
+    }
+
+    private void checkForUpdate() {
+        new Thread(() -> {
+            try {
+                URL url = new URL("https://api.github.com/repos/udarmolota/zomdroid/releases/latest");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestProperty("Accept", "application/vnd.github+json");
+                conn.setConnectTimeout(5000);
+                conn.setReadTimeout(5000);
+
+                StringBuilder sb = new StringBuilder();
+                try (BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(conn.getInputStream()))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) sb.append(line);
+                }
+
+                JSONObject json = new JSONObject(sb.toString());
+                String latestTag = json.getString("tag_name"); // "v1.4.1"
+                String releaseUrl = json.getString("html_url");
+                String latest = latestTag.startsWith("v") ? latestTag.substring(1) : latestTag;
+                String current = BuildConfig.VERSION_NAME;
+
+                runOnUiThread(() -> showVersionDialog(current, latest, releaseUrl));
+
+            } catch (Exception e) {
+                runOnUiThread(() -> showVersionDialog(BuildConfig.VERSION_NAME, null, null));
+            }
+        }).start();
+    }
+
+    private void showVersionDialog(String current, String latest, String releaseUrl) {
+        String message;
+        if (latest == null) {
+            message = getString(R.string.version_check_error, current);
+        } else if (current.equals(latest)) {
+            message = getString(R.string.version_check_up_to_date, current);
+        } else {
+            message = getString(R.string.version_check_update_available, current, latest, releaseUrl);
+        }
+
+        SpannableString s = new SpannableString(message);
+        Linkify.addLinks(s, Linkify.WEB_URLS);
+        AlertDialog dialog = new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.version_check_title)
+                .setMessage(s)
+                .setPositiveButton(R.string.dialog_button_ok, null)
+                .create();
+        dialog.show();
+        TextView messageView = dialog.findViewById(android.R.id.message);
+        if (messageView != null) {
+            messageView.setMovementMethod(LinkMovementMethod.getInstance());
+        }
     }
 }

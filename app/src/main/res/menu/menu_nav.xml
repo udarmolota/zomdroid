@@ -75,8 +75,8 @@
 
     <item
         android:id="@+id/action_version"
-        android:title="v1.4.0 by udar_molota"
-        android:enabled="false"
+        android:title="@string/nav_menu_version"
+        android:icon="@drawable/ic_github"
         app:showAsAction="never"/>
 
 </menu>

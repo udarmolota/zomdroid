@@ -2,15 +2,13 @@ package com.zomdroid;
 
 import android.annotation.SuppressLint;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
-import android.hardware.input.InputManager;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.system.ErrnoException;
 import android.util.Log;
 
 import android.view.InputDevice;
-import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -33,6 +31,10 @@ import com.zomdroid.game.GameInstance;
 import com.zomdroid.game.GameInstanceManager;
 import com.zomdroid.input.InputControlsView;
 import com.zomdroid.input.KeyboardManager;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import android.Manifest;
 
 import org.fmod.FMOD;
 
@@ -64,14 +66,17 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     // Helps to calculate mouse cursor position
     private float renderScale = 1f;
 
-    //private void dbg(String s) {
-    //  runOnUiThread(() -> Toast.makeText(this, s, Toast.LENGTH_SHORT).show());
-    //}
-
     @SuppressLint({"UnsafeDynamicallyLoadedCode", "ClickableViewAccessibility"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.RECORD_AUDIO},
+                    0);
+        }
 
         binding = ActivityGameBinding.inflate(getLayoutInflater());
         // Give focus to game surface to ensure it receives input events

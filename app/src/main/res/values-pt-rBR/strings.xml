@@ -297,4 +297,31 @@
     <string name="settings_env_vars_hint">Por exemplo: TU_DEBUG=nogmem</string>
 
     <string name="settings_env_vars_dialog_message">Variáveis de ambiente passadas diretamente ao sistema antes do início do jogo.\n\nUsadas para configurar renderizadores, drivers e outros componentes, ex.:\n\nTU_DEBUG=nogmem\nZINK_DEBUG=norp\n\nUse com cuidado — valores incorretos podem causar travamentos.</string>
+
+    <!-- Controls Editor -->
+    <string name="controls_editor_layout_dialog_title">Layout</string>
+    <string name="controls_editor_load_vkbd">⌨️ Carregar Teclado+Mouse Virtual</string>
+    <string name="controls_editor_reset_gamepad">🕹 Redefinir para GAMEPAD padrão</string>
+    <string name="controls_editor_vkbd_loaded">Layout do teclado virtual carregado</string>
+    <string name="controls_editor_layout_restored">Layout original restaurado</string>
+
+    <!-- Version update -->
+    <string name="version_check_title">Zomdroid by udar_molota</string>
+    <string name="version_check_up_to_date">Você tem a versão mais recente: %1$s</string>
+    <string name="version_check_update_available">Instalada: %1$s\nDisponível: %2$s\n%3$s</string>
+    <string name="version_check_error">Não foi possível verificar atualizações\nVersão atual: %1$s</string>
+    <string name="nav_menu_version">Verificar atualizações</string>
+
+    <!-- New instance -->
+    <string name="native_libs_dialog_title">Bibliotecas nativas (opcional)</string>
+    <string name="native_libs_dialog_message">As bibliotecas nativas são arquivos do build 42.12. Principalmente dois arquivos:\n\n🌐 libRakNet64.so\n🌐 libZNetNoSteam64.so\n\nSão necessárias para suporte multiplayer no build 41.78. Leia mais na Wiki.</string>
+    <string name="dialog_button_wiki">Wiki</string>
+
+    <string name="preset_dialog_title_b41">Build 41</string>
+    <string name="preset_dialog_title_b42">Build 42</string>
+    <string name="preset_dialog_title_b4212">Build 42.12+</string>
+
+    <string name="preset_dialog_message_b41">Build 41.78 — a versão mais estável disponível hoje. Funciona na maioria dos dispositivos com 6GB de RAM ou mais.</string>
+    <string name="preset_dialog_message_b42">Build 42 (versões 42.0–42.11). Requer 6GB+ de RAM. Funciona principalmente em Snapdragon e também em Dimensity potentes (com ANGLE ativado).</string>
+    <string name="preset_dialog_message_b4212">Build 42.12 e superior. Requer configurações ligeiramente diferentes e no mínimo 8GB de RAM. Funciona principalmente em Snapdragon e Dimensity novos e potentes (com ANGLE ativado).</string>
 </resources>

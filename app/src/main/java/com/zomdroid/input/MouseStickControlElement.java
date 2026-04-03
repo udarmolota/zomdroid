@@ -14,10 +14,14 @@ public class MouseStickControlElement extends AbstractControlElement {
     private final MouseStickDrawable drawable;
 
     private int pointerId = -1;
-    private static final float SENSITIVITY = 2.0f; // можно потом сделать 1.2–1.8, если надо медленнее
-    private float lastX, lastY;
+    private static final float SENSITIVITY = 2.0f;
+    private static final float TAP_SLOP    = 12f;
+    private static final long  TAP_MAX_MS  = 250;
 
-    // “курсор” для crosshair (в координатах overlay)
+    private float lastX, lastY;
+    private float downX, downY;
+    private long  downTime;
+
     private double cursorX = -1;
     private double cursorY = -1;
 
@@ -43,7 +47,6 @@ public class MouseStickControlElement extends AbstractControlElement {
         cursorStroke.setStrokeCap(Paint.Cap.ROUND);
         cursorStroke.setAlpha(220);
 
-        // старт: “курсор” в центре стика
         cursorX = drawable.outerCenterX;
         cursorY = drawable.outerCenterY;
     }
@@ -68,6 +71,9 @@ public class MouseStickControlElement extends AbstractControlElement {
                 pointerId = pid;
                 lastX = x;
                 lastY = y;
+                downX = x;
+                downY = y;
+                downTime = System.currentTimeMillis();
                 drawable.setInnerFromTouch(x, y);
                 parentView.invalidate();
                 return true;
@@ -80,17 +86,14 @@ public class MouseStickControlElement extends AbstractControlElement {
 
                 float x = e.getX(idx), y = e.getY(idx);
 
-                // Визуально двигаем inner-кружок как раньше (чтобы выглядело как стик)
                 drawable.setInnerFromTouch(x, y);
 
-                // ТАЧПАДНАЯ ЛОГИКА: курсор двигается по реальному delta пальца
                 float dx = (x - lastX) * SENSITIVITY;
                 float dy = (y - lastY) * SENSITIVITY;
 
                 lastX = x;
                 lastY = y;
 
-                // курсор в пределах экрана overlay
                 cursorX = clamp(cursorX + dx, 0, parentView.getWidth()  - 1);
                 cursorY = clamp(cursorY + dy, 0, parentView.getHeight() - 1);
 
@@ -108,6 +111,19 @@ public class MouseStickControlElement extends AbstractControlElement {
                 pointerId = -1;
                 drawable.resetInner();
                 parentView.invalidate();
+
+                if (action != MotionEvent.ACTION_CANCEL) {
+                    float totalDist = dist(e.getX(actIndex), e.getY(actIndex), downX, downY);
+                    long elapsed = System.currentTimeMillis() - downTime;
+                    if (totalDist < TAP_SLOP && elapsed < TAP_MAX_MS) {
+                        double rs = parentView.getRenderScale();
+                        InputNativeInterface.sendCursorPos(cursorX * rs, cursorY * rs);
+                        InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, true);
+                        parentView.postDelayed(() ->
+                                        InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, false),
+                                50);
+                    }
+                }
                 return true;
             }
         }
@@ -119,28 +135,23 @@ public class MouseStickControlElement extends AbstractControlElement {
     public void draw(Canvas canvas) {
         drawable.draw(canvas);
 
-        // crosshair (как в TouchpadControlElement)
         if (cursorX >= 0 && cursorY >= 0) {
-            // Arrow cursor (Windows-like). Tip is exactly at (x, y).
             float x = (float) cursorX;
             float y = (float) cursorY;
             float s = parentView.pixelScale;
-            float scale = 0.65f;
-            // Геометрия треугольника
-            float h = 75f * s * scale;   // длина
-            float w = 45f * s * scale;   // ширина
+            float scale = 0.55f;
 
-            // параметры выемки
-            float notchX = 0.55f;   // где по ширине выемка (0..1)
-            float notchIn = 0.28f;  // насколько “внутрь” (доля w)
+            float h = 75f * s * scale;
+            float w = 50f * s * scale;
+
+            float notchX = 0.55f;
+            float notchIn = 0.28f;
 
             Path p = new Path();
-            p.moveTo(x, y);                      // TIP
-
-            // два основания, но со смещением по X/Y, чтобы был наклон
-            p.lineTo(x + w,       y + h * 0.85f);   // нижний левый
-            p.lineTo(x + w * notchX, y + h - w * notchIn); // выемка на нижней грани: точка чуть выше/левее линии основания
-            p.lineTo(x + w * 0.15f, y + h);         // нижний “правее”
+            p.moveTo(x, y);
+            p.lineTo(x + w,             y + h * 0.85f);
+            p.lineTo(x + w * notchX,    y + h - w * notchIn);
+            p.lineTo(x + w * 0.15f,     y + h);
             p.close();
 
             canvas.drawPath(p, cursorFill);
@@ -148,56 +159,15 @@ public class MouseStickControlElement extends AbstractControlElement {
         }
     }
 
-    @Override
-    public boolean isPointOver(float x, float y) {
-        return drawable.isPointOver(x, y);
-    }
-
-    @Override
-    public void setHighlighted(boolean highlighted) {
-        drawable.setColorFilter(highlighted ? HIGHLIGHT_COLOR_FILTER : null);
-        parentView.invalidate();
-    }
-
-    @Override
-    public void setAlpha(int alpha) {
-        drawable.setAlpha(alpha);
-        parentView.invalidate();
-    }
-
-    @Override
-    public int getAlpha() {
-        return drawable.alpha;
-    }
-
-    @Override
-    public void setScale(float value) {
-        value = Math.clamp(value, MIN_SCALE, MAX_SCALE);
-        drawable.setScale(value);
-        parentView.invalidate();
-    }
-
-    @Override
-    public float getScale() {
-        return drawable.scale;
-    }
-
-    @Override
-    public void setCenterPosition(float x, float y) {
-        drawable.setCenterPosition(x, y);
-        parentView.invalidate();
-    }
-
-    @Override
-    public void moveCenterPosition(float dx, float dy) {
-        drawable.moveCenterPosition(dx, dy);
-        parentView.invalidate();
-    }
-
-    @Override
-    public float getCenterX() {
-        return drawable.outerCenterX;
-    }
+    @Override public boolean isPointOver(float x, float y)       { return drawable.isPointOver(x, y); }
+    @Override public void setHighlighted(boolean highlighted)     { drawable.setColorFilter(highlighted ? HIGHLIGHT_COLOR_FILTER : null); parentView.invalidate(); }
+    @Override public void setAlpha(int alpha)                     { drawable.setAlpha(alpha); parentView.invalidate(); }
+    @Override public int getAlpha()                               { return drawable.alpha; }
+    @Override public void setScale(float value)                   { value = Math.clamp(value, MIN_SCALE, MAX_SCALE); drawable.setScale(value); parentView.invalidate(); }
+    @Override public float getScale()                             { return drawable.scale; }
+    @Override public void setCenterPosition(float x, float y)    { drawable.setCenterPosition(x, y); parentView.invalidate(); }
+    @Override public void moveCenterPosition(float dx, float dy)  { drawable.moveCenterPosition(dx, dy); parentView.invalidate(); }
+    @Override public float getCenterX()                           { return drawable.outerCenterX; }
 
     @Override
     public ControlElementDescription describe() {
@@ -220,12 +190,17 @@ public class MouseStickControlElement extends AbstractControlElement {
         return Math.max(lo, Math.min(hi, v));
     }
 
-    // ====================== Drawable: как обычный StickControlElement ======================
+    private static float dist(float x1, float y1, float x2, float y2) {
+        float dx = x1 - x2, dy = y1 - y2;
+        return (float) Math.sqrt(dx * dx + dy * dy);
+    }
+
+    // ====================== Drawable ======================
 
     static class MouseStickDrawable {
-        private static final int   PAINT_STROKE_WIDTH   = 3;
-        private static final float OUTER_CIRCLE_RADIUS  = 160.f;
-        private static final float INNER_CIRCLE_RADIUS  = 90.f;
+        private static final int   PAINT_STROKE_WIDTH  = 3;
+        private static final float OUTER_CIRCLE_RADIUS = 160.f;
+        private static final float INNER_CIRCLE_RADIUS = 90.f;
 
         int color;
         int alpha;
@@ -263,22 +238,9 @@ public class MouseStickControlElement extends AbstractControlElement {
             resetInner();
         }
 
-        void setColor(int c) {
-            color = c;
-            fillPaint.setColor(c);
-            strokePaint.setColor(c);
-        }
-
-        void setAlpha(int a) {
-            alpha = a;
-            fillPaint.setAlpha(a / 3);
-            strokePaint.setAlpha(a);
-        }
-
-        void setColorFilter(@Nullable ColorFilter cf) {
-            fillPaint.setColorFilter(cf);
-            strokePaint.setColorFilter(cf);
-        }
+        void setColor(int c)  { color = c; fillPaint.setColor(c); strokePaint.setColor(c); }
+        void setAlpha(int a)  { alpha = a; fillPaint.setAlpha(a / 3); strokePaint.setAlpha(a); }
+        void setColorFilter(@Nullable ColorFilter cf) { fillPaint.setColorFilter(cf); strokePaint.setColorFilter(cf); }
 
         void setScale(float s) {
             scale = s;
@@ -311,7 +273,6 @@ public class MouseStickControlElement extends AbstractControlElement {
         void setInnerFromTouch(float x, float y) {
             float dx = x - outerCenterX;
             float dy = y - outerCenterY;
-
             float max = outerRadius - innerRadius;
             float len = (float) Math.sqrt(dx * dx + dy * dy);
             if (len > max && len > 0.0001f) {
@@ -319,29 +280,26 @@ public class MouseStickControlElement extends AbstractControlElement {
                 dx *= k;
                 dy *= k;
             }
-
             innerCenterX = outerCenterX + dx;
             innerCenterY = outerCenterY + dy;
         }
 
         float getNormalizedX() {
-            float max = (outerRadius - innerRadius);
+            float max = outerRadius - innerRadius;
             if (max <= 0.0001f) return 0f;
             return (innerCenterX - outerCenterX) / max;
         }
 
         float getNormalizedY() {
-            float max = (outerRadius - innerRadius);
+            float max = outerRadius - innerRadius;
             if (max <= 0.0001f) return 0f;
             return (innerCenterY - outerCenterY) / max;
         }
 
         void draw(Canvas canvas) {
             strokePaint.setStrokeWidth(PAINT_STROKE_WIDTH * parentView.pixelScale);
-
             canvas.drawCircle(outerCenterX, outerCenterY, outerRadius, strokePaint);
             canvas.drawCircle(outerCenterX, outerCenterY, outerRadius, fillPaint);
-
             canvas.drawCircle(innerCenterX, innerCenterY, innerRadius, strokePaint);
             canvas.drawCircle(innerCenterX, innerCenterY, innerRadius, fillPaint);
         }

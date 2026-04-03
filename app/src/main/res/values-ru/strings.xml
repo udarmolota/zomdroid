@@ -297,4 +297,31 @@
     <string name="settings_env_vars_hint">Например: TU_DEBUG=nogmem</string>
 
     <string name="settings_env_vars_dialog_message">Переменные окружения, передаваемые напрямую в систему перед запуском игры.\n\nИспользуются для настройки рендереров, драйверов и других компонентов, например:\n\nTU_DEBUG=nogmem\nZINK_DEBUG=norp\n\nИспользуйте с осторожностью — неверные значения могут вызвать сбои.</string>
+
+    <!-- Controls Editor -->
+    <string name="controls_editor_layout_dialog_title">Раскладка</string>
+    <string name="controls_editor_load_vkbd">⌨️ Загрузить виртуальную К+М</string>
+    <string name="controls_editor_reset_gamepad">🕹 Сбросить на геймпад (по умолчанию)</string>
+    <string name="controls_editor_vkbd_loaded">Раскладка виртуальной клавиатуры загружена</string>
+    <string name="controls_editor_layout_restored">Исходная раскладка восстановлена</string>
+
+    <!-- Version update -->
+    <string name="version_check_title">Zomdroid by udar_molota</string>
+    <string name="version_check_up_to_date">Актуальная версия: %1$s</string>
+    <string name="version_check_update_available">Установлена: %1$s\nДоступна: %2$s\n%3$s</string>
+    <string name="version_check_error">Не удалось проверить обновления\nТекущая версия: %1$s</string>
+    <string name="nav_menu_version">Проверить обновления</string>
+
+    <!-- New instance -->
+    <string name="native_libs_dialog_title">Нативные библиотеки (необязательно)</string>
+    <string name="native_libs_dialog_message">Нативные библиотеки — это файлы от билда 42.12. В основном это два файла:\n\n🌐 libRakNet64.so\n🌐 libZNetNoSteam64.so\n\nОни необходимы для поддержки мультиплеера в билде 41.78. Подробнее можно прочитать в Вики.</string>
+    <string name="dialog_button_wiki">Вики</string>
+
+    <string name="preset_dialog_title_b41">Билд 41</string>
+    <string name="preset_dialog_title_b42">Билд 42</string>
+    <string name="preset_dialog_title_b4212">Билд 42.12+</string>
+
+    <string name="preset_dialog_message_b41">Билд 41.78 — самая стабильная версия на сегодняшний день. Запускается на большинстве смартфонов с 6 ГБ ОЗУ и выше.</string>
+    <string name="preset_dialog_message_b42">Билд 42 (версии 42.0–42.11). Требует 6 ГБ+ ОЗУ. Запускается в основном на Snapdragon, а также на мощных Dimensity (если включить ANGLE).</string>
+    <string name="preset_dialog_message_b4212">Билд 42.12 и выше. Требует немного других настроек и минимум 8 ГБ ОЗУ. Запускается в основном на Snapdragon и новых мощных Dimensity (если включить ANGLE).</string>
 </resources>

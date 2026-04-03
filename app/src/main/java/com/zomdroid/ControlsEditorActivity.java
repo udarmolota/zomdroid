@@ -55,10 +55,10 @@ public class ControlsEditorActivity extends AppCompatActivity {
 
         binding.layoutsBtn.setOnClickListener(v -> {
             new MaterialAlertDialogBuilder(this)
-                    .setTitle("Layout")
+                    .setTitle(R.string.controls_editor_layout_dialog_title)
                     .setItems(new CharSequence[]{
-                            "⌨\uFE0F Load Virtual KB+Mouse",
-                            "\uD83D\uDD79 Reset to default GAMEPAD"
+                            getString(R.string.controls_editor_load_vkbd),
+                            getString(R.string.controls_editor_reset_gamepad)
                     }, (dialog, which) -> {
                         if (which == 0) {
                             binding.inputControlsV.replaceControlsFromAsset(
@@ -66,7 +66,7 @@ public class ControlsEditorActivity extends AppCompatActivity {
                                     true
                             );
                             Toast.makeText(this,
-                                    "Virtual Keyboard layout loaded",
+                                    R.string.controls_editor_vkbd_loaded,
                                     Toast.LENGTH_SHORT).show();
                         } else {
                             binding.inputControlsV.replaceControlsFromAsset(
@@ -74,7 +74,7 @@ public class ControlsEditorActivity extends AppCompatActivity {
                                     true
                             );
                             Toast.makeText(this,
-                                    "Original layout restored",
+                                    R.string.controls_editor_layout_restored,
                                     Toast.LENGTH_SHORT).show();
                         }
                     })

@@ -9,13 +9,14 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 import androidx.annotation.Nullable;
+import android.graphics.Path;
 
 public class TouchpadControlElement extends AbstractControlElement {
 
     private static final String TAG = "ZomdroidTouch";
 
-    private static final float BASE_WIDTH  = 420f;
-    private static final float BASE_HEIGHT = 280f;
+    private static final float BASE_WIDTH  = 560f;
+    private static final float BASE_HEIGHT = 370f;
     private static final float SENSITIVITY = 2.0f;
     private static final float TAP_SLOP    = 12f;
     private static final long  TAP_MAX_MS  = 250;
@@ -138,8 +139,12 @@ public class TouchpadControlElement extends AbstractControlElement {
                 if (isTap) {
                     Log.d(TAG, "TAP → sendMouseButton LEFT code="
                             + GLFWBinding.MOUSE_BUTTON_LEFT.code);
+                    double rs = parentView.getRenderScale();
+                    InputNativeInterface.sendCursorPos(cursorX * rs, cursorY * rs);
                     InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, true);
-                    InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, false);
+                    parentView.postDelayed(() -> {
+                        InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, false);
+                    }, 50);
                 }
                 return true;
             }
@@ -153,10 +158,8 @@ public class TouchpadControlElement extends AbstractControlElement {
         return false;
     }
 
-    //@Override public void draw(Canvas canvas)                    { drawable.draw(canvas); }
     @Override
     public void draw(Canvas canvas) {
-        // draw touchpad itself
         drawable.draw(canvas);
 
         if (!DEBUG_DRAW_CURSOR) return;
@@ -164,18 +167,28 @@ public class TouchpadControlElement extends AbstractControlElement {
 
         float x = (float) cursorX;
         float y = (float) cursorY;
+        float s = parentView.pixelScale;
+        float scale = 0.55f;
 
-        // Big visible dot
-        float r = 22f * parentView.pixelScale;
+        float h = 75f * s * scale;
+        float w = 50f * s * scale;
 
-        // outline + fill (visible on any background)
-        canvas.drawCircle(x, y, r, debugCursorStroke);
-        canvas.drawCircle(x, y, r, debugCursorFill);
+        float notchX = 0.55f;
+        float notchIn = 0.28f;
 
-        // optional crosshair to see direction
-        float arm = 34f * parentView.pixelScale;
-        canvas.drawLine(x - arm, y, x + arm, y, debugCursorStroke);
-        canvas.drawLine(x, y - arm, x, y + arm, debugCursorStroke);
+        Path p = new Path();
+        p.moveTo(x, y);
+        p.lineTo(x + w,          y + h * 0.85f);
+        p.lineTo(x + w * notchX, y + h - w * notchIn);
+        p.lineTo(x + w * 0.15f,  y + h);
+        p.close();
+
+        canvas.drawPath(p, debugCursorFill);
+        canvas.drawPath(p, debugCursorStroke);
+
+        //float dotR = 5f * s * scale;
+        //canvas.drawCircle(x, y, dotR, debugCursorFill);
+        //canvas.drawCircle(x, y, dotR, debugCursorStroke);
     }
     @Override public boolean isPointOver(float x, float y)      { return drawable.isPointOver(x, y); }
     @Override public void setHighlighted(boolean h)             { drawable.setColorFilter(h ? HIGHLIGHT_COLOR_FILTER : null); parentView.invalidate(); }

@@ -291,4 +291,31 @@
     <string name="settings_env_vars_hint">例如：TU_DEBUG=nogmem</string>
 
     <string name="settings_env_vars_dialog_message">在游戏启动前直接传递给系统的环境变量。\n\n用于配置渲染器、驱动及其他组件，例如：\n\nTU_DEBUG=nogmem\nZINK_DEBUG=norp\n\n请谨慎使用——错误的值可能导致崩溃。</string>
+
+    <!-- Controls Editor -->
+    <string name="controls_editor_layout_dialog_title">布局</string>
+    <string name="controls_editor_load_vkbd">⌨️ 加载虚拟键鼠布局</string>
+    <string name="controls_editor_reset_gamepad">🕹 重置为默认手柄布局</string>
+    <string name="controls_editor_vkbd_loaded">已加载虚拟键盘布局</string>
+    <string name="controls_editor_layout_restored">已恢复原始布局</string>
+
+    <!-- Version update -->
+    <string name="version_check_title">Zomdroid by udar_molota</string>
+    <string name="version_check_up_to_date">当前已是最新版本：%1$s</string>
+    <string name="version_check_update_available">已安装：%1$s\n可用更新：%2$s\n%3$s</string>
+    <string name="version_check_error">无法检查更新\n当前版本：%1$s</string>
+    <string name="nav_menu_version">检查更新</string>
+
+    <!-- New instance -->
+    <string name="native_libs_dialog_title">原生库（可选）</string>
+    <string name="native_libs_dialog_message">原生库是来自42.12版本的文件，主要包含两个文件：\n\n🌐 libRakNet64.so\n🌐 libZNetNoSteam64.so\n\n这些文件是41.78版本多人游戏支持所必需的。详情请查阅Wiki。</string>
+    <string name="dialog_button_wiki">Wiki</string>
+
+    <string name="preset_dialog_title_b41">Build 41</string>
+    <string name="preset_dialog_title_b42">Build 42</string>
+    <string name="preset_dialog_title_b4212">Build 42.12+</string>
+
+    <string name="preset_dialog_message_b41">Build 41.78——目前最稳定的版本。可在大多数6GB及以上内存的设备上运行。</string>
+    <string name="preset_dialog_message_b42">Build 42（版本42.0–42.11）。需要6GB以上内存。主要在骁龙设备上运行，部分强力天玑设备也支持（需开启ANGLE）。</string>
+    <string name="preset_dialog_message_b4212">Build 42.12及以上版本。需要略有不同的设置，至少8GB内存。主要在骁龙和新款强力天玑设备上运行（需开启ANGLE）。</string>
 </resources>

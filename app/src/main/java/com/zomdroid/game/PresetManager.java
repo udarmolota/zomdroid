@@ -46,9 +46,7 @@ public class PresetManager {
                 })
                 .setFmodLibraryPath(C.deps.LIBS_FMOD_20224)
                 .setExtraJvmArgs(new String[0])
-                .setArgs(new String[]{
-                        "-novoip"
-                })
+                .setArgs(new String[0])
                 .setMainClassName("zombie/gameStates/MainScreenState")
                 .setJavaAgentPath(C.deps.JARS_ZOMDROID_AGENT)
                 //.setJavaAgentArgs("build=42")
@@ -93,9 +91,7 @@ public class PresetManager {
                 })
                 .setFmodLibraryPath(C.deps.LIBS_FMOD_20309)
                 //.setExtraJvmArgs(new String[0])
-                .setArgs(new String[]{
-                        "-novoip"
-                })
+                .setArgs(new String[0])
                 .setMainClassName("zombie/gameStates/MainScreenState")
                 .setJavaAgentPath(C.deps.JARS_ZOMDROID_AGENT)
                 //.setJavaAgentArgs("build=42")
@@ -134,9 +130,7 @@ public class PresetManager {
                 })
                 .setFmodLibraryPath(C.deps.LIBS_FMOD_20206)
                 .setExtraJvmArgs(new String[0])
-                .setArgs(new String[]{
-                        "-novoip"
-                })
+                .setArgs(new String[0])
                 .setMainClassName("zombie/gameStates/MainScreenState")
                 .setJavaAgentPath(C.deps.JARS_ZOMDROID_AGENT)
                 //.setJavaAgentArgs("build=41")

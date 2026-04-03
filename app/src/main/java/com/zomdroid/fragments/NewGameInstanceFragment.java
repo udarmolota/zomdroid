@@ -42,6 +42,8 @@ public class NewGameInstanceFragment extends Fragment {
     private FragmentNewGameInstanceBinding binding;
     private final String ZIP_MIME = "application/zip";
 
+    final boolean[] isInitialPresetSelection = { true };
+
     // URIs for selected ZIP files
     private Uri gameFilesZipUri = null;
     private Uri nativeLibsZipUri = null;
@@ -153,16 +155,48 @@ public class NewGameInstanceFragment extends Fragment {
 
         binding.newGameInstanceNativeLibsHelpIb.setOnClickListener(v -> {
             new androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                    .setTitle("Native libraries (optional)")
-                    .setMessage("Native libraries are files from build 42.12. These are mainly two files:\n\n" +
-                            "🌐 libRakNet64.so\n" +
-                            "🌐 libZNetNoSteam64.so\n\n" +
-                            "They are required for multiplayer support on build 41.78. " +
-                            "You can read more about them on the Wiki.")
-                    .setPositiveButton("OK", null)
-                    .setNeutralButton("Wiki", (dialog, which) ->
+                    .setTitle(R.string.native_libs_dialog_title)
+                    .setMessage(R.string.native_libs_dialog_message)
+                    .setPositiveButton(R.string.dialog_button_ok, null)
+                    .setNeutralButton(R.string.dialog_button_wiki, (dialog, which) ->
                             Navigation.findNavController(v).navigate(R.id.wiki_fragment))
                     .show();
+        });
+
+        binding.newGameInstancePresetS.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+                if (isInitialPresetSelection[0]) {
+                    isInitialPresetSelection[0] = false;
+                    return;
+                }
+
+                InstallationPreset preset = (InstallationPreset) parent.getItemAtPosition(position);
+                int titleRes;
+                int messageRes;
+                switch (preset.name) {
+                    case "Build 42.12+":
+                        titleRes = R.string.preset_dialog_title_b4212;
+                        messageRes = R.string.preset_dialog_message_b4212;
+                        break;
+                    case "Build 42":
+                        titleRes = R.string.preset_dialog_title_b42;
+                        messageRes = R.string.preset_dialog_message_b42;
+                        break;
+                    default:
+                        titleRes = R.string.preset_dialog_title_b41;
+                        messageRes = R.string.preset_dialog_message_b41;
+                        break;
+                }
+                new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                        .setTitle(titleRes)
+                        .setMessage(messageRes)
+                        .setPositiveButton(R.string.dialog_button_ok, null)
+                        .show();
+            }
+
+            @Override
+            public void onNothingSelected(android.widget.AdapterView<?> parent) {}
         });
 
         // Validate game instance name as user types

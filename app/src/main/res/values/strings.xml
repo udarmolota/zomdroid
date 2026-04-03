@@ -298,4 +298,31 @@
     <string name="settings_env_vars_hint">For example: TU_DEBUG=nogmem</string>
 
     <string name="settings_env_vars_dialog_message">Environment variables passed directly to the system before the game starts.\n\nUse to configure renderers, drivers and other components, e.g.:\n\nTU_DEBUG=nogmem\nZINK_DEBUG=norp\n\nUse with caution — incorrect values may cause crashes.</string>
+
+    <!-- Controls Editor -->
+    <string name="controls_editor_layout_dialog_title">Layout</string>
+    <string name="controls_editor_load_vkbd">⌨️ Load Virtual KB+Mouse</string>
+    <string name="controls_editor_reset_gamepad">🕹 Reset to default GAMEPAD</string>
+    <string name="controls_editor_vkbd_loaded">Virtual Keyboard layout loaded</string>
+    <string name="controls_editor_layout_restored">Original layout restored</string>
+
+    <!-- Version update -->
+    <string name="version_check_title">Zomdroid by udar_molota</string>
+    <string name="version_check_up_to_date">You have the latest version: %1$s</string>
+    <string name="version_check_update_available">Installed: %1$s\nAvailable: %2$s\n%3$s</string>
+    <string name="version_check_error">Could not check for updates\nCurrent version: %1$s</string>
+    <string name="nav_menu_version">Check for updates</string>
+
+    <!-- New instance -->
+    <string name="native_libs_dialog_title">Native libraries (optional)</string>
+    <string name="native_libs_dialog_message">Native libraries are files from build 42.12. These are mainly two files:\n\n🌐 libRakNet64.so\n🌐 libZNetNoSteam64.so\n\nThey are required for multiplayer support on build 41.78. You can read more about them on the Wiki.</string>
+    <string name="dialog_button_wiki">Wiki</string>
+
+    <string name="preset_dialog_title_b41">Build 41</string>
+    <string name="preset_dialog_title_b42">Build 42</string>
+    <string name="preset_dialog_title_b4212">Build 42.12+</string>
+
+    <string name="preset_dialog_message_b41">Build 41.78 — the most stable version available today. Runs on most devices with 6GB RAM or more.</string>
+    <string name="preset_dialog_message_b42">Build 42 (versions 42.0–42.11). Requires 6GB+ RAM. Runs mainly on Snapdragon, and also on powerful Dimensity devices (with ANGLE enabled).</string>
+    <string name="preset_dialog_message_b4212">Build 42.12 and above. Requires slightly different settings and at least 8GB RAM. Runs mainly on Snapdragon and newer powerful Dimensity devices (with ANGLE enabled).</string>
 </resources>
