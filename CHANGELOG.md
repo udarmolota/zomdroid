@@ -1,3 +1,23 @@
+## [1.4.1] - 2026-04-04
+### Added
+✅ Voice Chat Support (Experimental)
+Multiplayer voice chat is now enabled. Note: this feature is experimental — it may cause crashes on some devices when receiving incoming voice from other players. We need more data to investigate and fix these issues.
+If you experience problems, we'd greatly appreciate detailed feedback including your device model, chipset, and game build version.
+
+✅ Version Checker
+Tap the new "Check for updates" item in the navigation menu to see your current version and check if a newer release is available on GitHub. A direct link to the release is provided if an update is found.
+
+✅ Environment Variables
+Added an Environment Variables field in Settings — useful for advanced rendering tweaks and GPU driver flags (e.g. TU_DEBUG, ZINK_DEBUG, LIBGL_*).
+
+✅ Touchpad & Mouse Stick — Tap to Click
+Single tap on the Touchpad and Mouse Stick on-screen controls now sends a left mouse click.
+
+✅ Preset Info
+When creating a new game instance, selecting a build preset (Build 41 / 42 / 42.12+) now shows a short description — recommended RAM, supported devices, and what to expect.
+
+✅ Localization
+More strings have been localized across the app into Russian, Portuguese (Brazil) and Chinese (Simplified).
 
 ## [1.4.0] - 2026-03-20
 ### Added
