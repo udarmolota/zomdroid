@@ -341,4 +341,9 @@
         \u00A0\u00A0\u00A0\u00A0...
     </string>
     <string name="game_instance_files_help_title">游戏文件ZIP结构</string>
+
+    <!-- New instance layout names -->
+    <string name="new_game_instance_group_name">实例名称</string>
+    <string name="new_game_instance_group_preset">预设</string>
+    <string name="new_game_instance_group_files">文件</string>
 </resources>
