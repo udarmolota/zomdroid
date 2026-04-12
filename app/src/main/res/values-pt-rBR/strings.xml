@@ -347,4 +347,9 @@
         \u00A0\u00A0\u00A0\u00A0...
     </string>
     <string name="game_instance_files_help_title">Estrutura do ZIP dos arquivos do jogo</string>
+
+    <!-- New instance layout names -->
+    <string name="new_game_instance_group_name">Nome da instância</string>
+    <string name="new_game_instance_group_preset">Predefinição</string>
+    <string name="new_game_instance_group_files">Arquivos</string>
 </resources>
