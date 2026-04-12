@@ -9,13 +9,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp"
-        android:gap="12dp">
+        android:padding="16dp">
 
-        <!-- Группа 1: Рендеринг -->
+        <!-- Group 1: Rendering -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
             app:cardCornerRadius="12dp"
             app:strokeWidth="0dp">
 
@@ -23,21 +23,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp"
-                android:gap="8dp">
+                android:padding="16dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
                     android:text="@string/settings_group_rendering"
                     android:textAppearance="?attr/textAppearanceLabelSmall"
-                    android:textColor="?attr/colorPrimary"
-                    android:paddingBottom="4dp"/>
+                    android:textColor="?attr/colorPrimary"/>
 
                 <TextView
                     android:id="@+id/settings_render_hint_tv"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
                     android:text="@string/settings_render_hint"
                     android:textSize="12sp"
                     android:textColor="?android:attr/textColorSecondary"/>
@@ -47,6 +47,7 @@
                     android:id="@+id/settings_render_hint_help_ib"
                     android:layout_width="15dp"
                     android:layout_height="15dp"
+                    android:layout_marginBottom="8dp"
                     android:scaleType="fitCenter"
                     android:adjustViewBounds="true"
                     android:src="@drawable/mt_icon_help"/>
@@ -61,7 +62,8 @@
                 <Spinner
                     android:id="@+id/settings_renderer_s"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"/>
 
                 <TextView
                     android:id="@+id/settings_vulkan_driver_tv"
@@ -73,7 +75,8 @@
                 <Spinner
                     android:id="@+id/settings_vulkan_driver_s"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"/>
 
                 <TextView
                     android:id="@+id/settings_resolution_scale_tv"
@@ -109,10 +112,11 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Группа 2: Дополнительно -->
+        <!-- Group 2: Other -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
             app:cardCornerRadius="12dp"
             app:strokeWidth="0dp">
 
@@ -120,16 +124,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp"
-                android:gap="8dp">
+                android:padding="16dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
                     android:text="@string/settings_group_advanced"
                     android:textAppearance="?attr/textAppearanceLabelSmall"
-                    android:textColor="?attr/colorPrimary"
-                    android:paddingBottom="4dp"/>
+                    android:textColor="?attr/colorPrimary"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -159,6 +162,7 @@
                     android:id="@+id/settings_jargs_et"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
                     android:hint="-Xmx3G -Xms2G -Xmn1G"
                     android:inputType="textMultiLine|textNoSuggestions"
                     android:lines="2"
@@ -193,6 +197,7 @@
                     android:id="@+id/settings_env_vars_et"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
                     android:hint="@string/settings_env_vars_hint"
                     android:inputType="textMultiLine|textNoSuggestions"
                     android:lines="2"
@@ -209,10 +214,11 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Группа 3: Управление -->
+        <!-- Group 3: Controls -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
             app:cardCornerRadius="12dp"
             app:strokeWidth="0dp">
 
@@ -220,20 +226,20 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp"
-                android:gap="8dp">
+                android:padding="16dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
                     android:text="@string/settings_group_controls"
                     android:textAppearance="?attr/textAppearanceLabelSmall"
-                    android:textColor="?attr/colorPrimary"
-                    android:paddingBottom="4dp"/>
+                    android:textColor="?attr/colorPrimary"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
                     android:text="@string/touch_controls_description"
                     android:textSize="12sp"
                     android:textColor="?android:attr/textColorSecondary"/>
@@ -247,10 +253,11 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Группа 4: Звук -->
+        <!-- Group 4: Sound -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
             app:cardCornerRadius="12dp"
             app:strokeWidth="0dp">
 
@@ -258,21 +265,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp"
-                android:gap="8dp">
+                android:padding="16dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
                     android:text="@string/settings_group_audio"
                     android:textAppearance="?attr/textAppearanceLabelSmall"
-                    android:textColor="?attr/colorPrimary"
-                    android:paddingBottom="4dp"/>
+                    android:textColor="?attr/colorPrimary"/>
 
                 <TextView
                     android:id="@+id/settings_audio_api_tv"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
                     android:text="@string/settings_audio_api"/>
 
                 <Spinner
