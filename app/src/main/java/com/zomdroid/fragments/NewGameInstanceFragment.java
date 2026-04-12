@@ -228,7 +228,11 @@ public class NewGameInstanceFragment extends Fragment {
 
       // Help button opens wiki fragment
       binding.newGameInstanceFilesHelpIb.setOnClickListener(v -> {
-        Navigation.findNavController(v).navigate(R.id.wiki_fragment);
+            new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.game_instance_files_help_title)
+                    .setMessage(R.string.game_instance_files_help_message)
+                    .setPositiveButton(R.string.dialog_button_ok, null)
+                    .show();
       });
 
       // Browse button for game ZIP
