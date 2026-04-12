@@ -223,6 +223,16 @@ public class SettingsFragment extends Fragment {
         binding.settingsDebugSwitch.setOnCheckedChangeListener((v, isChecked) ->
                 LauncherPreferences.requireSingleton().setDebug(isChecked));
 
+        binding.touchControlsSwitch.setChecked(LauncherPreferences.requireSingleton().isTouchControlsEnabled());
+        binding.touchControlsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            LauncherPreferences.requireSingleton().setTouchControlsEnabled(isChecked);
+            GamepadManager.setTouchOverride(isChecked);
+            Toast.makeText(requireContext(),
+                isChecked ? getString(R.string.touch_controls_enabled_toast)
+                          : getString(R.string.touch_controls_disabled_toast),
+                Toast.LENGTH_SHORT).show();
+        });
+
         binding.settingsJargsInfo.setOnClickListener(v -> {
             new androidx.appcompat.app.AlertDialog.Builder(requireContext())
                     .setTitle(getString(R.string.jvm_args_dialog_title))
