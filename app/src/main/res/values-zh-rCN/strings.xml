@@ -340,4 +340,5 @@
         \u00A0\u00A0\u00A0\u00A0java/\n
         \u00A0\u00A0\u00A0\u00A0...
     </string>
+    <string name="game_instance_files_help_title">游戏文件ZIP结构</string>
 </resources>
