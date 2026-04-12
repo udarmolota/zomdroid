@@ -141,14 +141,17 @@ public class LauncherFragment extends Fragment {
                 nameTv.setText(gameInstance.getName());
 
                 ImageView bannerIv = itemView.findViewById(R.id.game_instance_item_banner_iv);
-                String buildVersion = gameInstance.getBuildVersion();
                 int bannerRes;
-                if (buildVersion != null && buildVersion.startsWith("42.12")) {
-                    bannerRes = R.drawable.banner_build42_12;
-                } else if (buildVersion != null && buildVersion.startsWith("42")) {
-                    bannerRes = R.drawable.banner_build42;
-                } else {
-                    bannerRes = R.drawable.banner_build41;
+                switch (gameInstance.getPresetName()) {
+                    case "Build 42.12+":
+                        bannerRes = R.drawable.banner_build42_12;
+                        break;
+                    case "Build 42":
+                        bannerRes = R.drawable.banner_build42;
+                        break;
+                    default:
+                        bannerRes = R.drawable.banner_build41;
+                        break;
                 }
                 bannerIv.setImageResource(bannerRes);
 
