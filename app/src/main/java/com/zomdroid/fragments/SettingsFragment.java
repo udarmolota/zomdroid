@@ -32,8 +32,12 @@ public class SettingsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        ArrayAdapter<LauncherPreferences.Renderer> rendererArrayAdapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_spinner_dropdown_item, LauncherPreferences.Renderer.values());
+        // Renderer
+        ArrayAdapter<LauncherPreferences.Renderer> rendererArrayAdapter = new ArrayAdapter<>(
+            requireContext(),
+            R.layout.spinner_item,
+            LauncherPreferences.Renderer.values());
+        rendererArrayAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         binding.settingsRendererS.setAdapter(rendererArrayAdapter);
         binding.settingsRendererS.setSelection(rendererArrayAdapter.getPosition(LauncherPreferences.requireSingleton().getRenderer()));
         binding.settingsRendererS.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -62,10 +66,10 @@ public class SettingsFragment extends Fragment {
             Navigation.findNavController(v).navigate(R.id.wiki_fragment);
         });
 
-        // Кастомный адаптер — отключает CUSTOM_DRIVER если файл не загружен
+        // Custom adapter — switches off CUSTOM_DRIVER if no driver uploaded
         ArrayAdapter<LauncherPreferences.VulkanDriver> vulkanDriverAdapter =
                 new ArrayAdapter<LauncherPreferences.VulkanDriver>(requireContext(),
-                        android.R.layout.simple_spinner_dropdown_item,
+                        R.layout.spinner_item,
                         LauncherPreferences.VulkanDriver.values()) {
  
                     private boolean isCustomDriverAvailable() {
@@ -95,7 +99,8 @@ public class SettingsFragment extends Fragment {
                         return v;
                     }
                 };
- 
+
+        vulkanDriverAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         binding.settingsVulkanDriverS.setAdapter(vulkanDriverAdapter);
         binding.settingsVulkanDriverS.setSelection(
                 vulkanDriverAdapter.getPosition(LauncherPreferences.requireSingleton().getVulkanDriver())
@@ -175,8 +180,12 @@ public class SettingsFragment extends Fragment {
 
         binding.settingsResolutionScaleSb.setProgress((int) (LauncherPreferences.requireSingleton().getRenderScale() * 100));
 
-        ArrayAdapter<LauncherPreferences.AudioAPI> audioAPIAdapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_spinner_dropdown_item, LauncherPreferences.AudioAPI.values());
+        // AudioAPI
+        ArrayAdapter<LauncherPreferences.AudioAPI> audioAPIAdapter = new ArrayAdapter<>(
+            requireContext(),
+            R.layout.spinner_item,
+            LauncherPreferences.AudioAPI.values());
+        audioAPIAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         binding.settingsAudioApiS.setAdapter(audioAPIAdapter);
         binding.settingsAudioApiS.setSelection(audioAPIAdapter.getPosition(LauncherPreferences.requireSingleton().getAudioAPI()));
         binding.settingsAudioApiS.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
