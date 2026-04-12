@@ -324,4 +324,10 @@
     <string name="preset_dialog_message_b41">Билд 41.78 — самая стабильная версия на сегодняшний день. Запускается на большинстве смартфонов с 6 ГБ ОЗУ и выше.</string>
     <string name="preset_dialog_message_b42">Билд 42 (версии 42.0–42.11). Требует 6 ГБ+ ОЗУ. Запускается в основном на Snapdragon, а также на мощных Dimensity (если включить ANGLE).</string>
     <string name="preset_dialog_message_b4212">Билд 42.12 и выше. Требует немного других настроек и минимум 8 ГБ ОЗУ. Запускается в основном на Snapdragon и новых мощных Dimensity (если включить ANGLE).</string>
+
+    <!-- Settings groups -->
+    <string name="settings_group_rendering">Рендеринг</string>
+    <string name="settings_group_advanced">Дополнительно</string>
+    <string name="settings_group_controls">Управление</string>
+    <string name="settings_group_audio">Звук</string>
 </resources>
