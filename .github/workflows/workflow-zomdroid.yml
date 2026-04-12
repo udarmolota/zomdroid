@@ -10,7 +10,7 @@ on:
         type: choice
         options:
         - master
-        - multilingual
+        - regroup
         
 jobs:
   build:
