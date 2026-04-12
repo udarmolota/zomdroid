@@ -170,6 +170,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
                     android:hint="-Xmx3G -Xms2G -Xmn1G"
+                    android:textSize="13sp"
                     android:inputType="textMultiLine|textNoSuggestions"
                     android:lines="2"
                     android:maxLines="3"/>
@@ -206,6 +207,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
                     android:hint="@string/settings_env_vars_hint"
+                    android:textSize="13sp"
                     android:inputType="textMultiLine|textNoSuggestions"
                     android:lines="2"
                     android:maxLines="5"
