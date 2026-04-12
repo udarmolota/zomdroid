@@ -318,4 +318,10 @@
     <string name="preset_dialog_message_b41">Build 41.78——目前最稳定的版本。可在大多数6GB及以上内存的设备上运行。</string>
     <string name="preset_dialog_message_b42">Build 42（版本42.0–42.11）。需要6GB以上内存。主要在骁龙设备上运行，部分强力天玑设备也支持（需开启ANGLE）。</string>
     <string name="preset_dialog_message_b4212">Build 42.12及以上版本。需要略有不同的设置，至少8GB内存。主要在骁龙和新款强力天玑设备上运行（需开启ANGLE）。</string>
+
+    <!-- Settings groups -->
+    <string name="settings_group_rendering">渲染</string>
+    <string name="settings_group_advanced">高级</string>
+    <string name="settings_group_controls">控制</string>
+    <string name="settings_group_audio">音频</string>
 </resources>
