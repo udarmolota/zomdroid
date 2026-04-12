@@ -325,4 +325,10 @@
     <string name="preset_dialog_message_b41">Build 41.78 — the most stable version available today. Runs on most devices with 6GB RAM or more.</string>
     <string name="preset_dialog_message_b42">Build 42 (versions 42.0–42.11). Requires 6GB+ RAM. Runs mainly on Snapdragon, and also on powerful Dimensity devices (with ANGLE enabled).</string>
     <string name="preset_dialog_message_b4212">Build 42.12 and above. Requires slightly different settings and at least 8GB RAM. Runs mainly on Snapdragon and newer powerful Dimensity devices (with ANGLE enabled).</string>
+
+    <!-- Settings groups -->
+    <string name="settings_group_rendering">Rendering</string>
+    <string name="settings_group_advanced">Advanced</string>
+    <string name="settings_group_controls">Controls</string>
+    <string name="settings_group_audio">Audio</string>
 </resources>
