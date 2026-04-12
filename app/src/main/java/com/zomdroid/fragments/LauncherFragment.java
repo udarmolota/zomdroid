@@ -54,6 +54,7 @@ import com.zomdroid.databinding.FragmentLauncherBinding;
 import com.zomdroid.databinding.TaskProgressDialogBinding;
 import com.zomdroid.game.GameInstance;
 import com.zomdroid.game.GameInstanceManager;
+import android.widget.ImageView;
 
 public class LauncherFragment extends Fragment {
     private static final String LOG_TAG = LauncherFragment.class.getName();
