@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="12dp">
 
         <!-- Group 1: Rendering -->
         <com.google.android.material.card.MaterialCardView
@@ -24,7 +24,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="12dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -40,7 +40,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="4dp"
                     android:text="@string/settings_render_hint"
-                    android:textSize="12sp"
+                    android:textSize="11sp"
                     android:textColor="?android:attr/textColorSecondary"/>
 
                 <ImageButton
@@ -129,7 +129,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="12dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -169,8 +169,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:hint="-Xmx3G -Xms2G -Xmn1G"
-                    android:textSize="13sp"
+                    android:hint=" -Xms2G -Xmx3G -Xmn1G"
+                    android:textSize="11sp"
                     android:inputType="textMultiLine|textNoSuggestions"
                     android:lines="2"
                     android:maxLines="3"/>
@@ -207,7 +207,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
                     android:hint="@string/settings_env_vars_hint"
-                    android:textSize="13sp"
+                    android:textSize="11sp"
                     android:inputType="textMultiLine|textNoSuggestions"
                     android:lines="2"
                     android:maxLines="5"
@@ -237,7 +237,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="12dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -278,7 +278,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="12dp">
 
                 <TextView
                     android:layout_width="wrap_content"
