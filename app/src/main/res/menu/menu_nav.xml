@@ -1,82 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
-        android:id="@+id/action_open_settings_fragment"
-        android:title="@string/fragment_label_settings"
-        android:icon="@drawable/mt_icon_settings"
-        app:showAsAction="never"/>
-    <item
-        android:id="@+id/action_open_controls_editor"
-        android:title="@string/nav_menu_controls_editor"
-        android:icon="@drawable/mt_icon_controller"
-        app:showAsAction="never"/>
-    <item
-        android:id="@+id/action_open_gamepad_mapper"
-        android:title="@string/nav_menu_gamepad_mapper"
-        android:icon="@drawable/mt_icon_controller"
-        app:showAsAction="never"/>
-    <item
-        android:id="@+id/action_open_touch_controls"
-        android:title="@string/fragment_label_onscreen"
-        android:icon="@drawable/mt_icon_nocontroller"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/action_open_wiki_fragment"
-        android:title="@string/fragment_label_wiki"
-        android:icon="@drawable/mt_icon_menu_book"
-        app:showAsAction="never"/>
-    <item
-        android:id="@+id/action_manage_storage"
-        android:title="@string/nav_menu_manage_storage"
-        android:icon="@drawable/mt_icon_folder"
-        app:showAsAction="never"/>
 
-    <item
-        android:id="@+id/action_open_install_mod"
-        android:title="@string/nav_menu_install_mod"
-        android:icon="@drawable/mt_icon_folder"
-        app:showAsAction="never"/>
+    <group android:id="@+id/group_controls" android:checkableBehavior="none">
+        <item
+            android:id="@+id/action_open_settings_fragment"
+            android:title="@string/fragment_label_settings"
+            android:icon="@drawable/mt_icon_settings"
+            app:showAsAction="never"/>
+        <item
+            android:id="@+id/action_open_controls_editor"
+            android:title="@string/nav_menu_controls_editor"
+            android:icon="@drawable/mt_icon_controller"
+            app:showAsAction="never"/>
+        <item
+            android:id="@+id/action_open_gamepad_mapper"
+            android:title="@string/nav_menu_gamepad_mapper"
+            android:icon="@drawable/mt_icon_controller"
+            app:showAsAction="never"/>
+    </group>
 
-    <item
-        android:id="@+id/action_install_controls"
-        android:title="@string/menu_install_controls"
-        android:icon="@drawable/mt_icon_folder" />
+    <group android:id="@+id/group_files" android:checkableBehavior="none">
+        <item
+            android:id="@+id/action_manage_storage"
+            android:title="@string/nav_menu_manage_storage"
+            android:icon="@drawable/mt_icon_folder"
+            app:showAsAction="never"/>
+        <item
+            android:id="@+id/action_open_install_mod"
+            android:title="@string/nav_menu_install_mod"
+            android:icon="@drawable/mt_icon_folder"
+            app:showAsAction="never"/>
+        <item
+            android:id="@+id/action_install_controls"
+            android:title="@string/menu_install_controls"
+            android:icon="@drawable/mt_icon_folder"
+            app:showAsAction="never"/>
+        <item
+            android:id="@+id/action_install_saves"
+            android:title="@string/install_saves_menu"
+            android:icon="@drawable/mt_icon_folder"
+            app:showAsAction="never"/>
+        <item
+            android:id="@+id/action_install_driver"
+            android:title="@string/install_driver_menu"
+            android:icon="@drawable/mt_icon_folder"
+            app:showAsAction="never"/>
+        <item
+            android:id="@+id/action_export_log"
+            android:title="@string/export_log_menu"
+            android:icon="@drawable/mt_icon_folder"
+            app:showAsAction="never"/>
+    </group>
 
-    <item
-        android:id="@+id/action_install_saves"
-        android:title="@string/install_saves_menu"
-        android:icon="@drawable/mt_icon_folder"
-        app:showAsAction="never"/>
-
-    <item
-        android:id="@+id/action_install_driver"
-        android:title="@string/install_driver_menu"
-        android:icon="@drawable/mt_icon_folder"
-        app:showAsAction="never"/>
-
-    <item
-        android:id="@+id/action_export_log"
-        android:title="@string/export_log_menu"
-        android:icon="@drawable/mt_icon_folder"
-        app:showAsAction="never"/>
-
-    <item
-        android:id="@+id/action_donate"
-        android:title="@string/nav_menu_donate"
-        android:icon="@drawable/mt_icon_heart"
-        app:showAsAction="never"/>
-
-    <item
-        android:id="@+id/action_reddit"
-        android:title="@string/nav_menu_reddit"
-        android:icon="@drawable/ic_reddit"
-        app:showAsAction="never"/>
-
-    <item
-        android:id="@+id/action_version"
-        android:title="@string/nav_menu_version"
-        android:icon="@drawable/ic_github"
-        app:showAsAction="never"/>
+    <group android:id="@+id/group_about" android:checkableBehavior="none">
+        <item
+            android:id="@+id/action_open_wiki_fragment"
+            android:title="@string/fragment_label_wiki"
+            android:icon="@drawable/mt_icon_menu_book"
+            app:showAsAction="never"/>
+        <item
+            android:id="@+id/action_donate"
+            android:title="@string/nav_menu_donate"
+            android:icon="@drawable/mt_icon_heart"
+            app:showAsAction="never"/>
+        <item
+            android:id="@+id/action_reddit"
+            android:title="@string/nav_menu_reddit"
+            android:icon="@drawable/ic_reddit"
+            app:showAsAction="never"/>
+        <item
+            android:id="@+id/action_version"
+            android:title="@string/nav_menu_version"
+            android:icon="@drawable/ic_github"
+            app:showAsAction="never"/>
+    </group>
 
 </menu>
