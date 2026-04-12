@@ -33,14 +33,7 @@
                     android:text="@string/new_game_instance_group_name"
                     android:textAppearance="?attr/textAppearanceLabelSmall"
                     android:textColor="?attr/colorPrimary"/>
-
-                <TextView
-                    android:id="@+id/new_game_instance_name_tv"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?attr/textAppearanceBodySmall"
-                    android:text="@string/game_instance_name"/>
-
+                
                 <EditText
                     android:id="@+id/new_game_instance_name_et"
                     android:layout_width="match_parent"
@@ -77,14 +70,7 @@
                     android:text="@string/new_game_instance_group_preset"
                     android:textAppearance="?attr/textAppearanceLabelSmall"
                     android:textColor="?attr/colorPrimary"/>
-
-                <TextView
-                    android:id="@+id/new_game_instance_preset_tv"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?attr/textAppearanceBodySmall"
-                    android:text="@string/game_instance_preset"/>
-
+                
                 <Spinner
                     android:id="@+id/new_game_instance_preset_s"
                     android:layout_width="wrap_content"
