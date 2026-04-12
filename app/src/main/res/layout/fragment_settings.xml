@@ -17,7 +17,8 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
             app:cardCornerRadius="12dp"
-            app:strokeWidth="0dp">
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -57,6 +58,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
                     android:text="@string/settings_renderer"/>
 
                 <Spinner
@@ -70,6 +72,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
                     android:text="@string/settings_vulkan_driver"/>
 
                 <Spinner
@@ -83,6 +86,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
                     android:text="@string/settings_resolution_scale"/>
 
                 <LinearLayout
@@ -118,7 +122,8 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
             app:cardCornerRadius="12dp"
-            app:strokeWidth="0dp">
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -144,6 +149,7 @@
                         android:id="@+id/settings_jargs_tv"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
                         android:text="JVM arguments"/>
 
                     <ImageButton
@@ -179,6 +185,7 @@
                         android:id="@+id/settings_env_vars_tv"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
                         android:text="@string/settings_env_vars"/>
 
                     <ImageButton
@@ -209,6 +216,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
                     android:text="@string/settings_debug_mode"/>
 
             </LinearLayout>
@@ -220,7 +228,8 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
             app:cardCornerRadius="12dp"
-            app:strokeWidth="0dp">
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -248,6 +257,7 @@
                     android:id="@+id/touch_controls_switch"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
                     android:text="@string/touch_controls_switch_label"/>
 
             </LinearLayout>
@@ -259,7 +269,8 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
             app:cardCornerRadius="12dp"
-            app:strokeWidth="0dp">
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -280,6 +291,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="4dp"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
                     android:text="@string/settings_audio_api"/>
 
                 <Spinner
