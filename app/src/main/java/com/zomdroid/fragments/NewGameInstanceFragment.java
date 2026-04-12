@@ -220,12 +220,13 @@ public class NewGameInstanceFragment extends Fragment {
         });
 
       // Populate version selection spinner
-      binding.newGameInstancePresetS.setAdapter(new ArrayAdapter<>(
-        requireContext(),
-        android.R.layout.simple_spinner_dropdown_item,
-        PresetManager.getPresets()
-      ));
-
+      ArrayAdapter<InstallationPreset> presetAdapter = new ArrayAdapter<>(
+            requireContext(),
+            R.layout.spinner_item,
+            PresetManager.getPresets());
+      presetAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+      binding.newGameInstancePresetS.setAdapter(presetAdapter);
+        
       // Help button opens wiki fragment
       binding.newGameInstanceFilesHelpIb.setOnClickListener(v -> {
             new androidx.appcompat.app.AlertDialog.Builder(requireContext())
