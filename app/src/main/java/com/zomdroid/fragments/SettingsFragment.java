@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.SeekBar;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -17,6 +18,7 @@ import androidx.navigation.Navigation;
 import com.zomdroid.LauncherPreferences;
 import com.zomdroid.R;
 import com.zomdroid.databinding.FragmentSettingsBinding;
+import com.zomdroid.input.GamepadManager;
 
 public class SettingsFragment extends Fragment {
     private FragmentSettingsBinding binding;
