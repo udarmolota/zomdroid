@@ -32,7 +32,8 @@
                     android:layout_marginBottom="4dp"
                     android:text="@string/settings_group_rendering"
                     android:textAppearance="?attr/textAppearanceLabelSmall"
-                    android:textColor="?attr/colorPrimary"/>
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="13sp"/>
 
                 <TextView
                     android:id="@+id/settings_render_hint_tv"
@@ -137,7 +138,8 @@
                     android:layout_marginBottom="4dp"
                     android:text="@string/settings_group_advanced"
                     android:textAppearance="?attr/textAppearanceLabelSmall"
-                    android:textColor="?attr/colorPrimary"/>
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="13sp"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -245,7 +247,8 @@
                     android:layout_marginBottom="4dp"
                     android:text="@string/settings_group_controls"
                     android:textAppearance="?attr/textAppearanceLabelSmall"
-                    android:textColor="?attr/colorPrimary"/>
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="13sp"/>
 
                 <TextView
                     android:layout_width="match_parent"
@@ -286,7 +289,8 @@
                     android:layout_marginBottom="4dp"
                     android:text="@string/settings_group_audio"
                     android:textAppearance="?attr/textAppearanceLabelSmall"
-                    android:textColor="?attr/colorPrimary"/>
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="13sp"/>
 
                 <TextView
                     android:id="@+id/settings_audio_api_tv"
