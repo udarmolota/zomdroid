@@ -346,4 +346,16 @@
     <string name="new_game_instance_group_name">实例名称</string>
     <string name="new_game_instance_group_preset">预设</string>
     <string name="new_game_instance_group_files">文件</string>
+
+    <string name="install_mod_group_instance">实例</string>
+    <string name="install_mod_group_file">Mod文件</string>
+    <string name="install_controls_group_file">按键布局文件</string>
+    <string name="install_saves_group_import">导入存档</string>
+    <string name="install_saves_group_export">导出存档</string>
+    <string name="install_saves_export_hint">将当前存档保存为ZIP压缩包。</string>
+    <string name="install_controls_group_export">导出按键布局</string>
+    <string name="install_controls_export_hint">将当前按键布局保存为ZIP压缩包。</string>
+    <string name="install_driver_group_import">导入驱动</string>
+    <string name="install_driver_group_export">导出驱动</string>
+    <string name="install_driver_export_hint">将已安装的自定义驱动保存为.so文件。</string>
 </resources>
