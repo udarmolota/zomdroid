@@ -365,4 +365,7 @@
     <string name="install_driver_group_import">Import driver</string>
     <string name="install_driver_group_export">Export driver</string>
     <string name="install_driver_export_hint">Save the currently installed custom driver as a .so file.</string>
+    <string name="export_log_group_export">Export log</string>
+    <string name="export_log_hint">Exports the console.txt log file from the selected instance.</string>
+
 </resources>
