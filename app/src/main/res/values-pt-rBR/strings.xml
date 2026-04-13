@@ -352,4 +352,16 @@
     <string name="new_game_instance_group_name">Nome da instância</string>
     <string name="new_game_instance_group_preset">Predefinição</string>
     <string name="new_game_instance_group_files">Arquivos</string>
+
+    <string name="install_mod_group_instance">Instância</string>
+    <string name="install_mod_group_file">Arquivo do mod</string>
+    <string name="install_controls_group_file">Arquivo de layout</string>
+    <string name="install_saves_group_import">Importar saves</string>
+    <string name="install_saves_group_export">Exportar saves</string>
+    <string name="install_saves_export_hint">Salvar os saves atuais como arquivo ZIP.</string>
+    <string name="install_controls_group_export">Exportar layout</string>
+    <string name="install_controls_export_hint">Salvar o layout de controles atual como arquivo ZIP.</string>
+    <string name="install_driver_group_import">Importar driver</string>
+    <string name="install_driver_group_export">Exportar driver</string>
+    <string name="install_driver_export_hint">Salvar o driver personalizado instalado como arquivo .so.</string>
 </resources>
