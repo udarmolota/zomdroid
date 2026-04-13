@@ -353,4 +353,16 @@
     <string name="new_game_instance_group_name">Instance name</string>
     <string name="new_game_instance_group_preset">Preset</string>
     <string name="new_game_instance_group_files">Files</string>
+
+    <string name="install_mod_group_instance">Instance</string>
+    <string name="install_mod_group_file">Mod file</string>
+    <string name="install_controls_group_file">Controls layout</string>
+    <string name="install_saves_group_import">Import saves</string>
+    <string name="install_saves_group_export">Export saves</string>
+    <string name="install_saves_export_hint">Save your current saves as a ZIP archive.</string>
+    <string name="install_controls_group_export">Export layout</string>
+    <string name="install_controls_export_hint">Save your current button layout as a ZIP archive.</string>
+    <string name="install_driver_group_import">Import driver</string>
+    <string name="install_driver_group_export">Export driver</string>
+    <string name="install_driver_export_hint">Save the currently installed custom driver as a .so file.</string>
 </resources>
