@@ -32,7 +32,8 @@
                     android:layout_marginBottom="4dp"
                     android:text="@string/new_game_instance_group_name"
                     android:textAppearance="?attr/textAppearanceLabelSmall"
-                    android:textColor="?attr/colorPrimary"/>
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="13sp"/>
                 
                 <EditText
                     android:id="@+id/new_game_instance_name_et"
@@ -69,7 +70,8 @@
                     android:layout_marginBottom="4dp"
                     android:text="@string/new_game_instance_group_preset"
                     android:textAppearance="?attr/textAppearanceLabelSmall"
-                    android:textColor="?attr/colorPrimary"/>
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="13sp"/>
                 
                 <Spinner
                     android:id="@+id/new_game_instance_preset_s"
@@ -100,7 +102,8 @@
                     android:layout_marginBottom="4dp"
                     android:text="@string/new_game_instance_group_files"
                     android:textAppearance="?attr/textAppearanceLabelSmall"
-                    android:textColor="?attr/colorPrimary"/>
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="13sp"/>
 
                 <!-- Game files -->
                 <LinearLayout

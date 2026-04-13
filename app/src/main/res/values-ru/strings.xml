@@ -232,10 +232,10 @@
 
     <string name="install_controls_export">Экспорт</string>
 
-    <string name="dialog_title_exporting_controls">Экспорт управления…</string>
-    <string name="dialog_title_controls_exported">Управление экспортировано</string>
-    <string name="dialog_title_failed_to_export_controls">Не удалось экспортировать управление</string>
-    <string name="dialog_title_controls_export_skipped_default">Используется стандартное управление — нечего экспортировать</string>
+    <string name="dialog_title_exporting_controls">Экспорт раскладки…</string>
+    <string name="dialog_title_controls_exported">Раскладка экспортирована</string>
+    <string name="dialog_title_failed_to_export_controls">Не удалось экспортировать раскладку</string>
+    <string name="dialog_title_controls_export_skipped_default">Используется стандартная раскладка — нечего экспортировать</string>
     <string name="install_controls_global_hint">
        Раскладка управления глобальная. Экспорт сохраняет controls.json только если вы изменили раскладку.
     </string>
@@ -330,7 +330,7 @@
     <string name="settings_group_advanced">Дополнительно</string>
     <string name="settings_group_controls">Управление</string>
     <string name="settings_group_audio">Звук</string>
-    
+
     <!-- Game files zip help text -->
     <string name="game_instance_files_help_message">
         \u2705 Верно:\n\n
@@ -349,7 +349,21 @@
     <string name="game_instance_files_help_title">Структура ZIP с файлами игры</string>
 
     <!-- New instance layout names -->
-    <string name="new_game_instance_group_name">Название инстанса</string>
+    <string name="new_game_instance_group_name">Название экземпляра</string>
     <string name="new_game_instance_group_preset">Пресет</string>
     <string name="new_game_instance_group_files">Файлы</string>
+
+    <string name="install_mod_group_instance">Экземпляр</string>
+    <string name="install_mod_group_file">Файл мода</string>
+    <string name="install_controls_group_file">Файл раскладки</string>
+    <string name="install_saves_group_import">Импорт сохранений</string>
+    <string name="install_saves_group_export">Экспорт сохранений</string>
+    <string name="install_saves_export_hint">Сохранить текущие сохранения в ZIP-архив.</string>
+    <string name="install_controls_group_export">Экспорт раскладки</string>
+    <string name="install_controls_export_hint">Сохранить текущую раскладку кнопок в ZIP-архив.</string>
+    <string name="install_driver_group_import">Импорт драйвера</string>
+    <string name="install_driver_group_export">Экспорт драйвера</string>
+    <string name="install_driver_export_hint">Сохранить установленный кастомный драйвер как .so файл.</string>
+    <string name="export_log_group_export">Экспорт лога</string>
+    <string name="export_log_hint">Экспортирует файл console.txt из выбранного экземпляра.</string>
 </resources>

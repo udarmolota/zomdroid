@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import com.zomdroid.R;
 import com.zomdroid.input.GamepadManager;
+import android.widget.ImageView;
 
 /**
  * Fragment for step-by-step mapping of 10 gamepad buttons (NOT including GUIDE).
@@ -163,6 +164,18 @@ public class GamepadMapperFragment extends Fragment {
       return false;
     });
     /* ========================= end NEW analog listener ========================= */
+
+    ImageView mapImage = view.findViewById(R.id.gamepad_mapper_image);
+    String lang = java.util.Locale.getDefault().getLanguage();
+    if (lang.equals("ru")) {
+        mapImage.setImageResource(R.drawable.gamepad_map_ru);
+    } else if (lang.equals("zh")) {
+        mapImage.setImageResource(R.drawable.gamepad_map_zh);
+    } else if (lang.equals("pt")) {
+        mapImage.setImageResource(R.drawable.gamepad_map_pt);
+    } else {
+        mapImage.setImageResource(R.drawable.gamepad_map_en);
+    }
 
     return view;
   }

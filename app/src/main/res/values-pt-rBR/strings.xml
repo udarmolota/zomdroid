@@ -194,19 +194,19 @@
     </string>
 
     <!-- Controls layout -->
-    <string name="menu_install_controls">Importar/Exportar controles</string>
+    <string name="menu_install_controls">Importar/Exportar layout</string>
 
     <string name="install_controls_instance_label">Instância do jogo</string>
-    <string name="install_controls_zip_label">ZIP de controles</string>
-    <string name="install_controls_install">Importar</string>
+    <string name="install_controls_zip_label">ZIP do layout</string>
+    <string name="install_controls_install">Importar layout</string>
 
-    <string name="dialog_title_installing_controls">Importando controles…</string>
-    <string name="dialog_title_controls_installed">Controles importados</string>
-    <string name="dialog_title_failed_to_install_controls">Falha ao importar controles</string>
+    <string name="dialog_title_installing_controls">Importando layout…</string>
+    <string name="dialog_title_controls_installed">Layout importado</string>
+    <string name="dialog_title_failed_to_install_controls">Falha ao importar layout</string>
 
     <string name="install_controls_zip_warning">O ZIP deve conter controls.json (no nível raiz). Caso contrário, pode ser instalado incorretamente.</string>
 
-    <string name="install_controls_zip_help_title">Formato do ZIP de controles</string>
+    <string name="install_controls_zip_help_title">Formato do ZIP de layout</string>
     <string name="install_controls_zip_help_message">✅ Correto:\n\ncontrols.json\n\n❌ Incorreto:\n\nAlgumapasta/\n\u00A0\u00A0controls.json</string>
 
     <string name="install_saves_instance_label">Selecione a instância do jogo</string>
@@ -230,16 +230,16 @@
     <string name="dialog_title_saves_exported">Saves exportados</string>
     <string name="dialog_title_failed_to_export_saves">Falha ao exportar saves</string>
 
-    <string name="install_controls_export">Exportar</string>
+    <string name="install_controls_export">Exportar layout</string>
 
-    <string name="dialog_title_exporting_controls">Exportando controles…</string>
-    <string name="dialog_title_controls_exported">Controles exportados</string>
-    <string name="dialog_title_failed_to_export_controls">Falha ao exportar controles</string>
-    <string name="dialog_title_controls_export_skipped_default">Controles padrão em uso — nada para exportar</string>
+    <string name="dialog_title_exporting_controls">Exportando layout…</string>
+    <string name="dialog_title_controls_exported">Layout exportado</string>
+    <string name="dialog_title_failed_to_export_controls">Falha ao exportar layout</string>
+    <string name="dialog_title_controls_export_skipped_default">Layout padrão em uso — nada para exportar</string>
     <string name="install_controls_global_hint">
-       O layout de controles é global. O export salva controls.json apenas se você alterou o layout.
+       O layout é global. O export salva controls.json apenas se você alterou o layout.
     </string>
-    <string name="controls_export_nothing_to_export">Nada para exportar: layout de controles padrão está em uso.</string>
+    <string name="controls_export_nothing_to_export">Nada para exportar: layout padrão está em uso.</string>
     <string name="settings_debug_mode">Modo de depuração (-debug)</string>
     <string name="select_instance">— Selecione uma instância do jogo —</string>
 
@@ -352,4 +352,18 @@
     <string name="new_game_instance_group_name">Nome da instância</string>
     <string name="new_game_instance_group_preset">Predefinição</string>
     <string name="new_game_instance_group_files">Arquivos</string>
+
+    <string name="install_mod_group_instance">Instância</string>
+    <string name="install_mod_group_file">Arquivo do mod</string>
+    <string name="install_controls_group_file">Arquivo de layout</string>
+    <string name="install_saves_group_import">Importar saves</string>
+    <string name="install_saves_group_export">Exportar saves</string>
+    <string name="install_saves_export_hint">Salvar os saves atuais como arquivo ZIP.</string>
+    <string name="install_controls_group_export">Exportar layout</string>
+    <string name="install_controls_export_hint">Salvar o layout atual como arquivo ZIP.</string>
+    <string name="install_driver_group_import">Importar driver</string>
+    <string name="install_driver_group_export">Exportar driver</string>
+    <string name="install_driver_export_hint">Salvar o driver personalizado instalado como arquivo .so.</string>
+    <string name="export_log_group_export">Exportar log</string>
+    <string name="export_log_hint">Exporta o arquivo console.txt da instância selecionada.</string>
 </resources>
