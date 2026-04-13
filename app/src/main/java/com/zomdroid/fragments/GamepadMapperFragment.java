@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import com.zomdroid.R;
 import com.zomdroid.input.GamepadManager;
+import android.widget.ImageView;
 
 /**
  * Fragment for step-by-step mapping of 10 gamepad buttons (NOT including GUIDE).
