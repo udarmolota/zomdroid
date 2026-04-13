@@ -164,6 +164,18 @@ public class GamepadMapperFragment extends Fragment {
     });
     /* ========================= end NEW analog listener ========================= */
 
+    ImageView mapImage = view.findViewById(R.id.gamepad_mapper_image);
+    String lang = java.util.Locale.getDefault().getLanguage();
+    if (lang.equals("ru")) {
+        mapImage.setImageResource(R.drawable.gamepad_map_ru);
+    } else if (lang.equals("zh")) {
+        mapImage.setImageResource(R.drawable.gamepad_map_zh);
+    } else if (lang.equals("pt")) {
+        mapImage.setImageResource(R.drawable.gamepad_map_pt);
+    } else {
+        mapImage.setImageResource(R.drawable.gamepad_map_en);
+    }
+
     return view;
   }
 
