@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">Zomdroid</string>
 
@@ -187,21 +188,20 @@
         （根目录无 mod.info）
     </string>
 
-
     <!-- Controls layout -->
-    <string name="menu_install_controls">导入/导出控制</string>
+    <string name="menu_install_controls">导入/导出按键布局</string>
 
     <string name="install_controls_instance_label">游戏实例</string>
-    <string name="install_controls_zip_label">控制 ZIP</string>
-    <string name="install_controls_install">导入</string>
+    <string name="install_controls_zip_label">按键布局 ZIP</string>
+    <string name="install_controls_install">导入按键布局</string>
 
-    <string name="dialog_title_installing_controls">正在导入控制…</string>
-    <string name="dialog_title_controls_installed">控制已导入</string>
-    <string name="dialog_title_failed_to_install_controls">导入控制失败</string>
+    <string name="dialog_title_installing_controls">正在导入按键布局…</string>
+    <string name="dialog_title_controls_installed">按键布局已导入</string>
+    <string name="dialog_title_failed_to_install_controls">导入按键布局失败</string>
 
     <string name="install_controls_zip_warning">ZIP 文件必须在根目录包含 controls.json。否则可能安装不正确。</string>
 
-    <string name="install_controls_zip_help_title">控制 ZIP 格式</string>
+    <string name="install_controls_zip_help_title">按键布局 ZIP 格式</string>
     <string name="install_controls_zip_help_message">✅ 正确：\n\ncontrols.json\n\n❌ 错误：\n\nSomeFolder/\n\u00A0\u00A0controls.json</string>
 
     <string name="install_saves_instance_label">选择游戏实例</string>
@@ -224,16 +224,16 @@
     <string name="dialog_title_saves_exported">存档已导出</string>
     <string name="dialog_title_failed_to_export_saves">导出存档失败</string>
 
-    <string name="install_controls_export">导出</string>
+    <string name="install_controls_export">导出按键布局</string>
 
-    <string name="dialog_title_exporting_controls">正在导出控制…</string>
-    <string name="dialog_title_controls_exported">控制已导出</string>
-    <string name="dialog_title_failed_to_export_controls">导出控制失败</string>
-    <string name="dialog_title_controls_export_skipped_default">使用默认控制 — 无内容可导出</string>
+    <string name="dialog_title_exporting_controls">正在导出按键布局…</string>
+    <string name="dialog_title_controls_exported">按键布局已导出</string>
+    <string name="dialog_title_failed_to_export_controls">导出按键布局失败</string>
+    <string name="dialog_title_controls_export_skipped_default">使用默认按键布局 — 无内容可导出</string>
     <string name="install_controls_global_hint">
-        控制布局是全局的。仅当您更改了布局时，导出保存的 controls.json。
+        按键布局是全局的。仅当您更改了布局时，导出保存的 controls.json。
     </string>
-    <string name="controls_export_nothing_to_export">无内容可导出：使用默认控制布局。</string>
+    <string name="controls_export_nothing_to_export">无内容可导出：使用默认按键布局。</string>
     <string name="settings_debug_mode">调试模式 (-debug)</string>
     <string name="select_instance">— 选择游戏实例 —</string>
 
@@ -358,4 +358,6 @@
     <string name="install_driver_group_import">导入驱动</string>
     <string name="install_driver_group_export">导出驱动</string>
     <string name="install_driver_export_hint">将已安装的自定义驱动保存为.so文件。</string>
+    <string name="export_log_group_export">导出日志</string>
+    <string name="export_log_hint">从所选实例导出console.txt日志文件。</string>
 </resources>
