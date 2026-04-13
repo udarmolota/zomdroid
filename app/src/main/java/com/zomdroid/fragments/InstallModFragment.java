@@ -148,10 +148,10 @@ public class InstallModFragment extends Fragment {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 requireContext(),
-                android.R.layout.simple_spinner_dropdown_item,
+                R.layout.spinner_item,
                 names
         );
-        binding.installModInstanceSpinner.setAdapter(adapter);
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         binding.installModInstanceSpinner.setOnItemSelectedListener(
         new android.widget.AdapterView.OnItemSelectedListener() {
             @Override
