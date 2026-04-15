@@ -16,7 +16,7 @@
 - ✔️ Supports **Gamepad support** 
 - ✔️ Supports **Lua mods** 
 - ⭕ Currently **MultiPlayer JOIN only**
-- ✔️ Currently **Keyboard + mouse support**
+- ✔️ Supports **Keyboard + mouse support**
 
 ## System requirements 
 
