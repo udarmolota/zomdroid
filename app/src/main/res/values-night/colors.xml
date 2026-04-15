@@ -140,4 +140,6 @@
     <color name="md_theme_surfaceContainer_highContrast">#2E3036</color>
     <color name="md_theme_surfaceContainerHigh_highContrast">#393B41</color>
     <color name="md_theme_surfaceContainerHighest_highContrast">#45474C</color>
+    <color name="pz_orange">#FF8C00</color>
+    <color name="pz_orange_dark">#E65100</color>
 </resources>

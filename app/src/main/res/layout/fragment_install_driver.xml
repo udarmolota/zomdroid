@@ -81,8 +81,10 @@
 
                 <Button
                     android:id="@+id/install_driver_import_btn"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:minWidth="160dp"
                     android:text="@string/install_driver_import"/>
 
             </LinearLayout>
@@ -122,8 +124,10 @@
 
                 <Button
                     android:id="@+id/install_driver_export_btn"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:minWidth="160dp"
                     android:text="@string/install_driver_export"/>
 
             </LinearLayout>

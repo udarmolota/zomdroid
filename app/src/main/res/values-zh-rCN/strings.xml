@@ -360,4 +360,9 @@
     <string name="install_driver_export_hint">将已安装的自定义驱动保存为.so文件。</string>
     <string name="export_log_group_export">导出日志</string>
     <string name="export_log_hint">从所选实例导出console.txt日志文件。</string>
+
+    <string name="new_game_instance_create">创建</string>
+    <string name="new_game_instance_select_preset">选择预设…</string>
+    <string name="new_game_instance_no_preset_selected">请选择预设。它必须与您的游戏版本匹配：Build 41 有一个预设，Build 42 分为两个——请仔细选择。</string>
+    <string name="new_game_instance_no_preset_title">选择预设</string>
 </resources>

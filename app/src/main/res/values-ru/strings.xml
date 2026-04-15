@@ -366,4 +366,9 @@
     <string name="install_driver_export_hint">Сохранить установленный кастомный драйвер как .so файл.</string>
     <string name="export_log_group_export">Экспорт лога</string>
     <string name="export_log_hint">Экспортирует файл console.txt из выбранного экземпляра.</string>
+
+    <string name="new_game_instance_create">Создать</string>
+    <string name="new_game_instance_select_preset">Выберите пресет…</string>
+    <string name="new_game_instance_no_preset_selected">Выберите пресет. Он должен соответствовать версии игры: у билда 41 один пресет, билд 42 делится на два — выбирайте внимательно.</string>
+    <string name="new_game_instance_no_preset_title">Выберите пресет</string>
 </resources>

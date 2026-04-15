@@ -62,9 +62,9 @@ public class SettingsFragment extends Fragment {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-        binding.settingsRenderHintHelpIb.setOnClickListener(v -> {
-            Navigation.findNavController(v).navigate(R.id.wiki_fragment);
-        });
+        //binding.settingsRenderHintHelpIb.setOnClickListener(v -> {
+        //    Navigation.findNavController(v).navigate(R.id.wiki_fragment);
+        //});
 
         // Custom adapter — switches off CUSTOM_DRIVER if no driver uploaded
         ArrayAdapter<LauncherPreferences.VulkanDriver> vulkanDriverAdapter =
@@ -257,6 +257,17 @@ public class SettingsFragment extends Fragment {
                     .setTitle(getString(R.string.settings_env_vars))
                     .setMessage(getString(R.string.settings_env_vars_dialog_message))
                     .setPositiveButton(getString(R.string.dialog_button_ok), null)
+                    .show();
+        });
+
+        binding.settingsRendererTvInfo.setOnClickListener(v -> {
+            new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                    .setTitle(getString(R.string.settings_renderer))
+                    .setMessage(getString(R.string.settings_render_hint))
+                    .setPositiveButton(getString(R.string.dialog_button_ok), null)
+                    .setNeutralButton(getString(R.string.dialog_button_wiki), (dialog, which) -> {
+                        Navigation.findNavController(v).navigate(R.id.wiki_fragment);
+                    })
                     .show();
         });
     }

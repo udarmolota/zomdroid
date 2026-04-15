@@ -24,11 +24,12 @@ JavaVM* g_zomdroid_art_vm;
 JavaVM* g_zomdroid_jvm;
 __thread JNIEnv* g_zomdroid_jni_env;
 jvmtiEnv* g_zomdroid_jvmti_env;
+static void* g_original_fork_and_exec = NULL;
 jobject g_zomdroid_main_class_loader;
 const char* g_zomdroid_vulkan_driver_name;
 
 ZomdroidSurface g_zomdroid_surface = {.mutex = PTHREAD_MUTEX_INITIALIZER,
-                                      .ready_for_destroy_cond = PTHREAD_COND_INITIALIZER};
+        .ready_for_destroy_cond = PTHREAD_COND_INITIALIZER};
 
 Renderer g_zomdroid_renderer;
 
@@ -124,6 +125,126 @@ _Noreturn void handle_abort() {
     _exit(1);
 }
 
+typedef struct {
+    JavaVM* jvm;
+    char game_dir[512];
+    char cachedir[512];
+} ServerThreadArgs;
+
+// ПРИМЕЧАНИЕ: server_thread_func оставлен закомментированным — сервер теперь запускается
+// через ZomdroidProcess в патче CoopMaster.class. Раскомментировать если нужно откатиться.
+/*
+static void* server_thread_func(void* arg) {
+    ServerThreadArgs* args = (ServerThreadArgs*)arg;
+    JNIEnv* env = NULL;
+    (*args->jvm)->AttachCurrentThread(args->jvm, (void**)&env, NULL);
+
+    jclass server_class = (*env)->FindClass(env, "zombie/network/GameServer");
+    if (server_class == NULL) {
+        LOGE("Failed to find zombie/network/GameServer");
+        goto DONE;
+    }
+
+    jmethodID main_method = (*env)->GetStaticMethodID(env, server_class, "main", "([Ljava/lang/String;)V");
+    if (main_method == NULL) {
+        LOGE("Failed to find GameServer.main()");
+        goto DONE;
+    }
+
+    jclass stringClass = (*env)->FindClass(env, "java/lang/String");
+
+    char cachedir_arg[600];
+    snprintf(cachedir_arg, sizeof(cachedir_arg), "-cachedir=%s", args->cachedir);
+
+    jobjectArray main_args = (*env)->NewObjectArray(env, 2, stringClass, NULL);
+    (*env)->SetObjectArrayElement(env, main_args, 0, (*env)->NewStringUTF(env, "-coop"));
+    (*env)->SetObjectArrayElement(env, main_args, 1, (*env)->NewStringUTF(env, cachedir_arg));
+
+    LOGI("Starting GameServer thread with -coop -cachedir=%s", args->cachedir);
+    (*env)->CallStaticVoidMethod(env, server_class, main_method, main_args);
+
+    DONE:
+    if ((*env)->ExceptionCheck(env)) {
+        (*env)->ExceptionDescribe(env);
+        (*env)->ExceptionClear(env);
+    }
+    (*args->jvm)->DetachCurrentThread(args->jvm);
+    free(args);
+    return NULL;
+}
+*/
+
+// ПРИМЕЧАНИЕ: zomdroid_fork_and_exec и onNativeMethodBind закомментированы —
+// сервер теперь запускается через ZomdroidProcess в патче CoopMaster.class.
+// Раскомментировать вместе с JVMTI блоком в create_jvm_and_launch_main если нужно откатиться.
+/*
+static jint zomdroid_fork_and_exec(JNIEnv *env, jobject process,
+                                   jint mode, jbyteArray helperpath,
+                                   jbyteArray prog,
+                                   jbyteArray argBlock, jint argc,
+                                   jbyteArray envBlock, jint envc,
+                                   jbyteArray dir, jintArray std_fds,
+                                   jboolean redirectErrorStream) {
+    LOGI("zomdroid_fork_and_exec: launching GameServer thread");
+
+    if (prog != NULL) {
+        jsize len = (*env)->GetArrayLength(env, prog);
+        jbyte* bytes = (*env)->GetByteArrayElements(env, prog, NULL);
+        jboolean isOurJava = JNI_FALSE;
+        for (int i = 0; i <= len - 5; i++) {
+            if (memcmp(bytes + i, "/data/", 6) == 0) {
+                isOurJava = JNI_TRUE;
+                break;
+            }
+        }
+        (*env)->ReleaseByteArrayElements(env, prog, bytes, JNI_ABORT);
+        if (!isOurJava) {
+            LOGI("zomdroid_fork_and_exec: not our java, calling original");
+            if (g_original_fork_and_exec != NULL) {
+                typedef jint (*fork_fn)(JNIEnv*, jobject, jint, jbyteArray, jbyteArray,
+                                        jbyteArray, jint, jbyteArray, jint,
+                                        jbyteArray, jintArray, jboolean);
+                return ((fork_fn)g_original_fork_and_exec)(env, process, mode, helperpath,
+                                                           prog, argBlock, argc, envBlock, envc, dir, std_fds, redirectErrorStream);
+            }
+            return -1;
+        }
+    }
+
+    ServerThreadArgs* args = malloc(sizeof(ServerThreadArgs));
+    (*env)->GetJavaVM(env, &args->jvm);
+    const char* cachedir = getenv("ZOMDROID_CACHE_DIR");
+    if (cachedir != NULL) {
+        strncpy(args->cachedir, cachedir, sizeof(args->cachedir) - 1);
+        args->cachedir[sizeof(args->cachedir) - 1] = '\0';
+    } else {
+        args->cachedir[0] = '\0';
+    }
+
+    pthread_t thread;
+    pthread_attr_t attr;
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    pthread_create(&thread, &attr, server_thread_func, args);
+    pthread_attr_destroy(&attr);
+
+    return 42;
+}
+
+static void JNICALL onNativeMethodBind(jvmtiEnv *jvmti, JNIEnv *env,
+                                       jthread thread, jmethodID method,
+                                       void *address, void **new_address_ptr) {
+    char *name = NULL;
+    (*jvmti)->GetMethodName(jvmti, method, &name, NULL, NULL);
+    if (name && strcmp(name, "forkAndExec") == 0) {
+        LOGI("Registered forkAndExec hook");
+        g_original_fork_and_exec = address;
+        *new_address_ptr = &zomdroid_fork_and_exec;
+    }
+    if (name) (*jvmti)->Deallocate(jvmti, (unsigned char*)name);
+}
+*/
+
 static void create_jvm_and_launch_main(int jvm_argc, const char** jvm_argv, const char* main_class_name, int argc, const char** argv) {
     void* libjvm = linkernsbypass_namespace_dlopen("libjvm.so", RTLD_GLOBAL, zomdroid_ns);
     if (libjvm == NULL) {
@@ -161,40 +282,44 @@ static void create_jvm_and_launch_main(int jvm_argc, const char** jvm_argv, cons
     }
     g_zomdroid_jvmti_env = jvmtiEnv;
 
+    // ПРИМЕЧАНИЕ: JVMTI хук для forkAndExec закомментирован — сервер теперь запускается
+    // через ZomdroidProcess в патче CoopMaster.class. Раскомментировать вместе с
+    // zomdroid_fork_and_exec и onNativeMethodBind выше если нужно откатиться.
+    /*
     jvmtiError err;
-//    jvmtiCapabilities potentialCaps;
-//    err = (*jvmtiEnv)->GetPotentialCapabilities(jvmtiEnv, &potentialCaps);
-//    if (err != JVMTI_ERROR_NONE) {
-//        LOGE("Failed to get potential capabilities for JVM TI env, error code: %d", err);
-//        return;
-//    }
-//    if (!potentialCaps.can_generate_native_method_bind_events) {
-//        LOGE("JVM TI env doesn't have a required potential capability: can_generate_native_method_bind_events");
-//        return;
-//    }
-//
-//    jvmtiCapabilities caps = { 0 };
-//    caps.can_generate_native_method_bind_events = 1;
-//    err = (*jvmtiEnv)->AddCapabilities(jvmtiEnv, &caps);
-//    if (err != JVMTI_ERROR_NONE) {
-//        LOGE("Failed to add necessary capabilities to JVM TI env, error code: %d", err);
-//        return;
-//    }
-//
-//
-//    jvmtiEventCallbacks callbacks;
-//    callbacks.NativeMethodBind = &onNativeMethodBind;
-//    err = (*jvmtiEnv)->SetEventCallbacks(jvmtiEnv, &callbacks, sizeof(callbacks));
-//    if (err != JVMTI_ERROR_NONE) {
-//        LOGE("Failed to set event callbacks for JVM TI env, error code: %d", err);
-//        return;
-//    }
-//
-//    err = (*jvmtiEnv)->SetEventNotificationMode(jvmtiEnv, JVMTI_ENABLE, JVMTI_EVENT_NATIVE_METHOD_BIND, NULL);
-//    if (err != JVMTI_ERROR_NONE) {
-//        LOGE("Failed to enable NATIVE_METHOD_BIND event for JVM TI env, error code: %d", err);
-//        return;
-//    }
+    jvmtiCapabilities caps = { 0 };
+    caps.can_generate_native_method_bind_events = 1;
+    caps.can_retransform_classes = 1;
+    err = (*jvmtiEnv)->AddCapabilities(jvmtiEnv, &caps);
+    if (err != JVMTI_ERROR_NONE) {
+        LOGE("Failed to add necessary capabilities to JVM TI env, error code: %d", err);
+        return;
+    }
+
+    jvmtiEventCallbacks callbacks = { 0 };
+    callbacks.NativeMethodBind = &onNativeMethodBind;
+    err = (*jvmtiEnv)->SetEventCallbacks(jvmtiEnv, &callbacks, sizeof(callbacks));
+    if (err != JVMTI_ERROR_NONE) {
+        LOGE("Failed to set event callbacks for JVM TI env, error code: %d", err);
+        return;
+    }
+
+    err = (*jvmtiEnv)->SetEventNotificationMode(jvmtiEnv, JVMTI_ENABLE, JVMTI_EVENT_NATIVE_METHOD_BIND, NULL);
+    if (err != JVMTI_ERROR_NONE) {
+        LOGE("Failed to enable NATIVE_METHOD_BIND event for JVM TI env, error code: %d", err);
+        return;
+    }
+
+    jclass processImplClass = (*env)->FindClass(env, "java/lang/ProcessImpl");
+    if (processImplClass != NULL) {
+        err = (*jvmtiEnv)->RetransformClasses(jvmtiEnv, 1, &processImplClass);
+        if (err != JVMTI_ERROR_NONE) {
+            LOGW("RetransformClasses failed: %d", err);
+        }
+    }
+    */
+
+    jvmtiError err; // объявление сохранено — используется в GetClassLoader ниже
 
     g_zomdroid_jvm = jvm;
 
@@ -262,15 +387,15 @@ static int load_linker_hook() {
         return -1;
     }
     void (*zomdroid_linker_set_proc_addrs)(void*, void*, void*) =
-            dlsym(zomdroid_linker, "zomdroid_linker_set_proc_addrs");
+    dlsym(zomdroid_linker, "zomdroid_linker_set_proc_addrs");
     int (*zomdroid_linker_init)() =
-            dlsym(zomdroid_linker, "zomdroid_linker_init");
+    dlsym(zomdroid_linker, "zomdroid_linker_init");
     void (*zomdroid_linker_set_vulkan_loader_handle)(void*) =
-            dlsym(zomdroid_linker, "zomdroid_linker_set_vulkan_loader_handle");
+    dlsym(zomdroid_linker, "zomdroid_linker_set_vulkan_loader_handle");
     void (*zomdroid_linker_set_vulkan_driver_handle)(void*) =
-            dlsym(zomdroid_linker, "zomdroid_linker_set_vulkan_driver_handle");
+    dlsym(zomdroid_linker, "zomdroid_linker_set_vulkan_driver_handle");
     if (!zomdroid_linker_init || !zomdroid_linker_set_proc_addrs ||
-            !zomdroid_linker_set_vulkan_loader_handle || !zomdroid_linker_set_vulkan_driver_handle) {
+        !zomdroid_linker_set_vulkan_loader_handle || !zomdroid_linker_set_vulkan_driver_handle) {
         dlerror();
         LOGE("Failed to locate symbols for libzomdroidlinker.so");
         return -1;
@@ -298,7 +423,7 @@ static int load_linker_hook() {
 
     if (g_zomdroid_vulkan_driver_name != NULL) {
         void* vulkan_loader = linkernsbypass_namespace_dlopen_unique("/system/lib64/libvulkan.so",
-                                                               getenv("ZOMDROID_CACHE_DIR"), RTLD_LOCAL, zomdroid_ns);
+                                                                     getenv("ZOMDROID_CACHE_DIR"), RTLD_LOCAL, zomdroid_ns);
         if (!vulkan_loader) {
             LOGE("%s", dlerror());
             return -1;
@@ -468,10 +593,10 @@ void zomdroid_surface_init(ANativeWindow* wnd, int width, int height) {
 
 void zomdroid_event_keyboard(int key, bool isPressed) {
     ENQUEUE_EVENT({
-        e->type = KEYBOARD;
-        e->keyboard.key = key;
-        e->keyboard.is_pressed = isPressed;
-    });
+                      e->type = KEYBOARD;
+                      e->keyboard.key = key;
+                      e->keyboard.is_pressed = isPressed;
+                  });
 }
 
 void zomdroid_event_char(unsigned int codepoint) {
@@ -485,60 +610,60 @@ void zomdroid_event_char(unsigned int codepoint) {
 
 void zomdroid_event_cursor_pos(double x, double y) {
     ENQUEUE_EVENT({
-        e->type = CURSOR_POS;
-        e->cursorPos.x = x;
-        e->cursorPos.y = y;
-    });
+                      e->type = CURSOR_POS;
+                      e->cursorPos.x = x;
+                      e->cursorPos.y = y;
+                  });
 }
 
 void zomdroid_event_mouse_button(int button, bool isPressed) {
     ENQUEUE_EVENT({
-        e->type = MOUSE_BUTTON;
-        e->mouseButton.button = button;
-        e->mouseButton.is_pressed = isPressed;
-    });
+                      e->type = MOUSE_BUTTON;
+                      e->mouseButton.button = button;
+                      e->mouseButton.is_pressed = isPressed;
+                  });
 }
 
 void zomdroid_event_mouse_scroll(double xoffset, double yoffset) {
     ENQUEUE_EVENT({
-          e->type = MOUSE_SCROLL;
-          e->mouseScroll.xoffset = xoffset;
-          e->mouseScroll.yoffset = yoffset;
-    });
+                      e->type = MOUSE_SCROLL;
+                      e->mouseScroll.xoffset = xoffset;
+                      e->mouseScroll.yoffset = yoffset;
+                  });
 }
 
 void zomdroid_event_joystick_connected() {
     ENQUEUE_EVENT({
-        e->type = JOYSTICK_CONNECTED;
-        // controller is described in GLFW mappings.h
-        e->joystickConnected.joystick_name = "Zomdroid Controller";
-        e->joystickConnected.joystick_guid = "00000000000000000000000000000000";
-        e->joystickConnected.axis_count = 6;
-        e->joystickConnected.button_count = 11;
-        e->joystickConnected.hat_count = 1;
-    });
+                      e->type = JOYSTICK_CONNECTED;
+                      // controller is described in GLFW mappings.h
+                      e->joystickConnected.joystick_name = "Zomdroid Controller";
+                      e->joystickConnected.joystick_guid = "00000000000000000000000000000000";
+                      e->joystickConnected.axis_count = 6;
+                      e->joystickConnected.button_count = 11;
+                      e->joystickConnected.hat_count = 1;
+                  });
 }
 
 void zomdroid_event_joystick_axis(int axis, float state) {
     ENQUEUE_EVENT({
-        e->type = JOYSTICK_AXIS;
-        e->joystickAxis.axis = axis;
-        e->joystickAxis.state = state;
-    });
+                      e->type = JOYSTICK_AXIS;
+                      e->joystickAxis.axis = axis;
+                      e->joystickAxis.state = state;
+                  });
 }
 
 void zomdroid_event_joystick_dpad(int dpad, char state) {
     ENQUEUE_EVENT({
-        e->type = JOYSTICK_DPAD;
-        e->joystickDpad.dpad = dpad;
-        e->joystickDpad.state = state;
-    });
+                      e->type = JOYSTICK_DPAD;
+                      e->joystickDpad.dpad = dpad;
+                      e->joystickDpad.state = state;
+                  });
 }
 
 void zomdroid_event_joystick_button(int button, bool is_pressed) {
     ENQUEUE_EVENT({
-        e->type = JOYSTICK_BUTTON;
-        e->joystickButton.button = button;
-        e->joystickButton.is_pressed = is_pressed;
-    });
+                      e->type = JOYSTICK_BUTTON;
+                      e->joystickButton.button = button;
+                      e->joystickButton.is_pressed = is_pressed;
+                  });
 }

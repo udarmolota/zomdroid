@@ -8,210 +8,261 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:orientation="vertical">
 
-        <!-- Card 1: Instance Name -->
-        <com.google.android.material.card.MaterialCardView
+        <!-- Banner -->
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="140dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="16dp"
             android:layout_marginBottom="12dp"
             app:cardCornerRadius="12dp"
-            app:strokeWidth="0dp"
+            app:cardElevation="4dp"
             app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
 
-            <LinearLayout
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:layout_height="match_parent">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"
-                    android:text="@string/new_game_instance_group_name"
-                    android:textAppearance="?attr/textAppearanceLabelSmall"
-                    android:textColor="?attr/colorPrimary"
-                    android:textSize="13sp"/>
-                
-                <EditText
-                    android:id="@+id/new_game_instance_name_et"
+                <ImageView
+                    android:id="@+id/new_game_instance_banner_iv"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="13sp"
-                    android:imeOptions="actionDone"
-                    android:inputType="text|textNoSuggestions"
-                    android:maxLength="40"
-                    android:maxLines="1"
-                    android:text="Project Zomboid"/>
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/banner_default"/>
 
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+                <View
+                    android:id="@+id/new_game_instance_banner_overlay"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/banner_gradient_overlay"/>
 
-        <!-- Card 2: Preset -->
-        <com.google.android.material.card.MaterialCardView
+            </FrameLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Контент с padding -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            app:cardCornerRadius="12dp"
-            app:strokeWidth="0dp"
-            app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="16dp">
 
-            <LinearLayout
+            <!-- Card 1: Instance Name -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:layout_marginBottom="12dp"
+                app:cardCornerRadius="12dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"
-                    android:text="@string/new_game_instance_group_preset"
-                    android:textAppearance="?attr/textAppearanceLabelSmall"
-                    android:textColor="?attr/colorPrimary"
-                    android:textSize="13sp"/>
-                
-                <Spinner
-                    android:id="@+id/new_game_instance_preset_s"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Card 3: Files -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            app:cardCornerRadius="12dp"
-            app:strokeWidth="0dp"
-            app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"
-                    android:text="@string/new_game_instance_group_files"
-                    android:textAppearance="?attr/textAppearanceLabelSmall"
-                    android:textColor="?attr/colorPrimary"
-                    android:textSize="13sp"/>
-
-                <!-- Game files -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="4dp">
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
                     <TextView
-                        android:id="@+id/new_game_instance_files_tv"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textAppearance="?attr/textAppearanceBodySmall"
-                        android:text="@string/game_instance_files"/>
-
-                    <ImageButton
-                        style="@style/AppTheme.ImageButton"
-                        android:id="@+id/new_game_instance_files_help_ib"
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:layout_marginStart="4dp"
-                        android:scaleType="fitCenter"
-                        android:adjustViewBounds="true"
-                        android:src="@drawable/mt_icon_help"/>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
+                        android:layout_marginBottom="4dp"
+                        android:text="@string/new_game_instance_group_name"
+                        android:textAppearance="?attr/textAppearanceLabelSmall"
+                        android:textColor="?attr/colorPrimary"
+                        android:textSize="13sp"/>
 
                     <EditText
-                        android:id="@+id/new_game_instance_files_path_et"
-                        android:layout_width="0dp"
+                        android:id="@+id/new_game_instance_name_et"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:textSize="13sp"
-                        android:hint="@string/game_instance_browse_files_hint"
-                        android:enabled="false"/>
-
-                    <ImageButton
-                        style="@style/AppTheme.ImageButton"
-                        android:id="@+id/new_game_instance_files_browse_ib"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:src="@drawable/mt_icon_folder_open"/>
+                        android:imeOptions="actionDone"
+                        android:inputType="text|textNoSuggestions"
+                        android:maxLength="40"
+                        android:maxLines="1"
+                        android:text="Project Zomboid"/>
 
                 </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-                <!-- Native libs -->
+            <!-- Card 2: Preset -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:cardCornerRadius="12dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="4dp">
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
                     <TextView
-                        android:id="@+id/new_game_instance_native_libs_tv"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textAppearance="?attr/textAppearanceBodySmall"
-                        android:text="@string/game_instance_native_libs_label"/>
+                        android:layout_marginBottom="4dp"
+                        android:text="@string/new_game_instance_group_preset"
+                        android:textAppearance="?attr/textAppearanceLabelSmall"
+                        android:textColor="?attr/colorPrimary"
+                        android:textSize="13sp"/>
 
-                    <ImageButton
-                        style="@style/AppTheme.ImageButton"
-                        android:id="@+id/new_game_instance_native_libs_help_ib"
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:layout_marginStart="4dp"
-                        android:scaleType="fitCenter"
-                        android:adjustViewBounds="true"
-                        android:src="@drawable/mt_icon_help"/>
+                    <Spinner
+                        android:id="@+id/new_game_instance_preset_s"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
 
                 </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Card 3: Files -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:cardCornerRadius="12dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-                    <EditText
-                        android:id="@+id/new_game_instance_native_libs_path_et"
-                        android:layout_width="0dp"
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:textSize="13sp"
-                        android:hint="@string/game_instance_no_file_selected"
-                        android:enabled="false"
-                        android:focusable="false"
-                        android:inputType="none"/>
+                        android:layout_marginBottom="4dp"
+                        android:text="@string/new_game_instance_group_files"
+                        android:textAppearance="?attr/textAppearanceLabelSmall"
+                        android:textColor="?attr/colorPrimary"
+                        android:textSize="13sp"/>
 
-                    <ImageButton
-                        style="@style/AppTheme.ImageButton"
-                        android:id="@+id/new_game_instance_native_libs_browse_ib"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:src="@drawable/mt_icon_folder_open"/>
+                    <!-- Game files -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="4dp">
+
+                        <TextView
+                            android:id="@+id/new_game_instance_files_tv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?attr/textAppearanceBodySmall"
+                            android:text="@string/game_instance_files"/>
+
+                        <ImageButton
+                            style="@style/AppTheme.ImageButton"
+                            android:id="@+id/new_game_instance_files_help_ib"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_marginStart="4dp"
+                            android:scaleType="fitCenter"
+                            android:adjustViewBounds="true"
+                            android:src="@drawable/mt_icon_help"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp">
+
+                        <EditText
+                            android:id="@+id/new_game_instance_files_path_et"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textSize="13sp"
+                            android:hint="@string/game_instance_browse_files_hint"
+                            android:enabled="false"/>
+
+                        <ImageButton
+                            style="@style/AppTheme.ImageButton"
+                            android:id="@+id/new_game_instance_files_browse_ib"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:src="@drawable/mt_icon_folder_open"/>
+
+                    </LinearLayout>
+
+                    <!-- Native libs -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="4dp">
+
+                        <TextView
+                            android:id="@+id/new_game_instance_native_libs_tv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?attr/textAppearanceBodySmall"
+                            android:text="@string/game_instance_native_libs_label"/>
+
+                        <ImageButton
+                            style="@style/AppTheme.ImageButton"
+                            android:id="@+id/new_game_instance_native_libs_help_ib"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_marginStart="4dp"
+                            android:scaleType="fitCenter"
+                            android:adjustViewBounds="true"
+                            android:src="@drawable/mt_icon_help"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <EditText
+                            android:id="@+id/new_game_instance_native_libs_path_et"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textSize="13sp"
+                            android:hint="@string/game_instance_no_file_selected"
+                            android:enabled="false"
+                            android:focusable="false"
+                            android:inputType="none"/>
+
+                        <ImageButton
+                            style="@style/AppTheme.ImageButton"
+                            android:id="@+id/new_game_instance_native_libs_browse_ib"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:src="@drawable/mt_icon_folder_open"/>
+
+                    </LinearLayout>
 
                 </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+            <!-- Create button -->
+            <Button
+                android:id="@+id/new_game_instance_create_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:minWidth="160dp"
+                android:text="@string/new_game_instance_create"/>
 
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

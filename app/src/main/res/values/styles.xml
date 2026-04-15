@@ -10,4 +10,9 @@
         <item name="android:background">@null</item>
         <item name="android:tint">?attr/colorOnSurface</item>
     </style>
+    <style name="AppTheme.Button" parent="Widget.Material3.Button">
+        <item name="android:minWidth">0dp</item>
+        <item name="android:paddingStart">24dp</item>
+        <item name="android:paddingEnd">24dp</item>
+    </style>
 </resources>

@@ -120,8 +120,10 @@
 
                 <Button
                     android:id="@+id/export_log_export_btn"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:minWidth="160dp"
                     android:text="@string/export_log_export"/>
 
             </LinearLayout>

@@ -31,7 +31,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
-                    android:visibility="invisible"/>
+                    android:src="@drawable/banner_default"
+                    android:visibility="visible"/>
 
                 <View
                     android:layout_width="match_parent"
@@ -177,8 +178,10 @@
 
                 <Button
                     android:id="@+id/install_mod_install_btn"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:minWidth="160dp"
                     android:text="@string/install_mod_install"/>
 
             </LinearLayout>

@@ -35,32 +35,29 @@
                     android:textColor="?attr/colorPrimary"
                     android:textSize="13sp"/>
 
-                <TextView
-                    android:id="@+id/settings_render_hint_tv"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"
-                    android:text="@string/settings_render_hint"
-                    android:textSize="11sp"
-                    android:textColor="?android:attr/textColorSecondary"/>
-
-                <ImageButton
-                    style="@style/AppTheme.ImageButton"
-                    android:id="@+id/settings_render_hint_help_ib"
-                    android:layout_width="15dp"
-                    android:layout_height="15dp"
-                    android:layout_marginBottom="8dp"
-                    android:scaleType="fitCenter"
-                    android:adjustViewBounds="true"
-                    android:src="@drawable/mt_icon_help"/>
-
-                <TextView
-                    android:id="@+id/settings_renderer_tv"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:textAppearance="?attr/textAppearanceBodySmall"
-                    android:text="@string/settings_renderer"/>
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/settings_renderer_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:text="@string/settings_renderer"/>
+
+                    <ImageButton
+                        style="@style/AppTheme.ImageButton"
+                        android:id="@+id/settings_renderer_tv_info"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginStart="8dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/mt_icon_help"/>
+                </LinearLayout>
 
                 <Spinner
                     android:id="@+id/settings_renderer_s"
