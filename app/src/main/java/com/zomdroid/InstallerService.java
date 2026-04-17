@@ -1080,45 +1080,56 @@ public class InstallerService extends Service implements TaskProgressListener {
                     }
                 }
 
-                // Step 2: check this is a B42 mod
+                // Step 2: find actual mod root
+                File modRoot = tmpDir;
                 if (!hasB42Folders(tmpDir)) {
-                    finishWithError(taskTitle,
-                            getString(R.string.mod_fix_error_not_b42, tmpDir.getName()));
-                    return;
+                    File[] topLevel = tmpDir.listFiles(File::isDirectory);
+                    if (topLevel != null && topLevel.length == 1 && hasB42Folders(topLevel[0])) {
+                        modRoot = topLevel[0];
+                    } else {
+                        finishWithError(taskTitle,
+                                getString(R.string.mod_fix_error_not_b42, "unknown"));
+                        return;
+                    }
                 }
-                Log.d("ModFix", "hasB42Folders: true, tmpDir contents:");
-                for (File f : tmpDir.listFiles()) {
-                    Log.d("ModFix", "  " + f.getName() + (f.isDirectory() ? "/" : ""));
+
+                Log.d("ModFix", "modRoot: " + modRoot.getAbsolutePath());
+                if (modRoot.listFiles() != null) {
+                    for (File f : modRoot.listFiles()) {
+                        Log.d("ModFix", "  " + f.getName() + (f.isDirectory() ? "/" : ""));
+                    }
                 }
 
                 // Step 3: merge versions into 42/
-                mergeVersionsInto42(tmpDir);
-                Log.d("ModFix", "After merge, tmpDir contents:");
-                for (File f : tmpDir.listFiles()) {
-                    Log.d("ModFix", "  " + f.getName() + (f.isDirectory() ? "/" : ""));
+                mergeVersionsInto42(modRoot);
+
+                Log.d("ModFix", "After merge:");
+                if (modRoot.listFiles() != null) {
+                    for (File f : modRoot.listFiles()) {
+                        Log.d("ModFix", "  " + f.getName() + (f.isDirectory() ? "/" : ""));
+                    }
                 }
+
                 // Step 4: check if needs inception
-                boolean needsInception = hasScriptsFolder(tmpDir);
+                boolean needsInception = hasScriptsFolder(modRoot);
                 Log.d("ModFix", "needsInception: " + needsInception);
+
                 // Step 5: determine mod name from mod.info
-                String modId = readModId(tmpDir);
+                String modId = readModId(modRoot);
                 if (modId == null || modId.isEmpty()) {
-                    // fallback to zip name if mod.info not found
                     modId = extractZipName(archiveUri);
                 }
-                String zipName = modId;
-                Log.d("ModFix", "zipName: " + zipName);
+                Log.d("ModFix", "modId: " + modId);
 
                 String modsPath = gameInstance.getHomePath() + "/Zomboid/mods";
                 new File(modsPath).mkdirs();
-                Log.d("ModFix", "modsPath: " + modsPath);
 
                 // Step 6: install normal case copy
-                File normalDest = new File(modsPath, zipName);
+                File normalDest = new File(modsPath, modId);
                 if (normalDest.exists()) FileUtils.deleteDirectory(normalDest);
-                copyDirectory(tmpDir, normalDest);
+                copyDirectory(modRoot, normalDest);
 
-                // Step 7: if needs inception, install lowercase copy too
+                // Step 7: if needs inception, install lowercase copy inside data/ path
                 if (needsInception) {
                     String instanceNameLower = gameInstance.getName().toLowerCase();
                     String inceptionRelPath = "data/user/0/com.zomdroid/files/instances/"
@@ -1129,7 +1140,7 @@ public class InstallerService extends Service implements TaskProgressListener {
                     String lowerName = modId.toLowerCase();
                     File lowerDest = new File(inceptionDir, lowerName);
                     if (lowerDest.exists()) FileUtils.deleteDirectory(lowerDest);
-                    copyDirectoryLowercase(tmpDir, lowerDest);
+                    copyDirectoryLowercase(modRoot, lowerDest);
                 }
 
                 finish(getString(R.string.mod_fix_installed), null);

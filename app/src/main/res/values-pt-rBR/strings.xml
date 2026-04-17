@@ -86,7 +86,7 @@
     <string name="game_instance_manage_storage">Gerenciar armazenamento</string>
     <string name="game_instance_delete">Excluir</string>
 
-    <string name="donate_message">Gostando do app e quer nos apoiar? \n\nCriado por ko-fi.com/liamelui, agora mantido e desenvolvido por ko-fi.com/udarmolota. \n\nOutros colaboradores: \nshimux0, Wakort, LeHiepDuy.</string>
+    <string name="donate_message">Gostando do app e quer nos apoiar? \n\nAgora mantido e desenvolvido por ko-fi.com/udarmolota, \ncriado por ko-fi.com/liamelui. \n\nColaboradores: \nshimux0, Wakort, LeHiepDuy, deadgamer182, Liko.</string>
 
     <string name="app_aborted">O aplicativo encontrou um problema inesperado e foi encerrado</string>
     <string name="share_logs">Compartilhar arquivo de log</string>

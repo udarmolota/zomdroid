@@ -86,7 +86,7 @@
     <string name="game_instance_manage_storage">管理存储</string>
     <string name="game_instance_delete">删除</string>
 
-    <string name="donate_message">喜欢这个应用并想支持我们吗？\n\n由 ko-fi.com/liamelui 创建，现由 ko-fi.com/udarmolota 维护和开发。\n\n其他贡献者：\nshimux0, Wakort, LeHiepDuy。</string>
+    <string name="donate_message">喜欢这个应用并想支持我们吗？\n\n现由 ko-fi.com/udarmolota 维护和开发，\n由 ko-fi.com/liamelui 创建。\n\n其他贡献者：\nshimux0, Wakort, LeHiepDuy, deadgamer182, Liko。</string>
 
     <string name="app_aborted">应用遇到意外问题，必须关闭。</string>
     <string name="share_logs">分享日志文件</string>

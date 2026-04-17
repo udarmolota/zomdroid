@@ -86,7 +86,7 @@
     <string name="game_instance_manage_storage">Управление хранилищем</string>
     <string name="game_instance_delete">Удалить</string>
 
-    <string name="donate_message">Нравится приложение и хотите поддержать нас? \n\nАвтор: ko-fi.com/liamelui, развитие и поддержка: ko-fi.com/udarmolota. \n\nДругие участники: \nshimux0, Wakort, LeHiepDuy.</string>
+    <string name="donate_message">Нравится приложение и хотите поддержать нас? \n\nРазвитие и поддержка: ko-fi.com/udarmolota, автор: ko-fi.com/liamelui. \n\nДругие участники: \nshimux0, Wakort, LeHiepDuy, deadgamer182, Liko.</string>
 
     <string name="app_aborted">Приложение столкнулось с непредвиденной проблемой и было закрыто</string>
     <string name="share_logs">Поделиться файлом логов</string>
