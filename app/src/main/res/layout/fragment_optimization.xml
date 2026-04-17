@@ -100,7 +100,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="-Xms512M -Xmx2048M -XX:+UseZGC"
+                            android:text="-Xms512M -Xmx2048M"
                             android:textSize="11sp"
                             android:fontFamily="monospace"
                             android:textColor="?android:attr/textColorSecondary"/>
@@ -137,7 +137,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="-Xms512M -Xmx2560M -XX:+UseZGC -XX:MaxDirectMemorySize=384m"
+                            android:text="-Xms512M -Xmx2560M -XX:MaxDirectMemorySize=384m"
                             android:textSize="11sp"
                             android:fontFamily="monospace"
                             android:textColor="?android:attr/textColorSecondary"/>
@@ -183,7 +183,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="-Xms512M -Xmx3072M -XX:+UseZGC"
+                            android:text="-Xms512M -Xmx3072M"
                             android:textSize="11sp"
                             android:fontFamily="monospace"
                             android:textColor="?android:attr/textColorSecondary"/>
@@ -220,7 +220,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="-Xms512M -Xmx4096M -XX:+UseZGC -XX:MaxDirectMemorySize=512m"
+                            android:text="-Xms512M -Xmx4096M -XX:MaxDirectMemorySize=512m"
                             android:textSize="11sp"
                             android:fontFamily="monospace"
                             android:textColor="?android:attr/textColorSecondary"/>

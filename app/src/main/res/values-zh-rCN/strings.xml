@@ -378,7 +378,7 @@
     <string name="optimization_jvm_aggressive_label">激进</string>
     <string name="optimization_copy">复制</string>
     <string name="optimization_open_settings">→ 打开设置</string>
-    <string name="optimization_group_betterfps">BetterFPS</string>
+    <string name="optimization_group_betterfps">BetterFPS b41</string>
     <string name="optimization_betterfps_hint">减少玩家周围的渲染区域。Steam 创意工坊 ID：3022543997。下载模组，选择变体（从 90×90 开始），压缩 IsoChunkMap.class 文件后安装。</string>
     <string name="optimization_betterfps_file_label">IsoChunkMap.class（压缩包）</string>
     <string name="optimization_install">安装</string>

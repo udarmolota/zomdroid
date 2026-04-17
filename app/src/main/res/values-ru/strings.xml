@@ -384,7 +384,7 @@
     <string name="optimization_jvm_aggressive_label">Агрессивный</string>
     <string name="optimization_copy">Копировать</string>
     <string name="optimization_open_settings">→ Открыть Настройки</string>
-    <string name="optimization_group_betterfps">BetterFPS</string>
+    <string name="optimization_group_betterfps">BetterFPS b41</string>
     <string name="optimization_betterfps_hint">Уменьшает зону отрисовки вокруг игрока. Steam Workshop ID: 3022543997. Скачайте мод, выберите вариант (начните с 90×90), заархивируйте IsoChunkMap.class и установите ниже.</string>
     <string name="optimization_betterfps_file_label">IsoChunkMap.class (в архиве)</string>
     <string name="optimization_install">Установить</string>

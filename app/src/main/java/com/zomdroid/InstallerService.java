@@ -34,7 +34,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -997,7 +999,11 @@ public class InstallerService extends Service implements TaskProgressListener {
                     while ((entry = zis.getNextEntry()) != null) {
                         String name = entry.getName();
                         if (name.endsWith("IsoChunkMap.class")) {
-                            classBytes = zis.readAllBytes();
+                            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+                            byte[] buf = new byte[64 * 1024];
+                            int r;
+                            while ((r = zis.read(buf)) != -1) baos.write(buf, 0, r);
+                            classBytes = baos.toByteArray();
                             break;
                         }
                         zis.closeEntry();
@@ -1187,36 +1193,80 @@ public class InstallerService extends Service implements TaskProgressListener {
 
     // Merges all 42.x folders into 42/, injects media/ and common/ from root
     private void mergeVersionsInto42(File modDir) throws IOException {
-        File target = new File(modDir, "42");
+        File[] entries = modDir.listFiles(File::isDirectory);
+        if (entries == null) return;
+
+        // Step 1: scan for version folders matching 42 or 42.x
+        List<String> versions = new ArrayList<>();
+        for (File f : entries) {
+            if (f.getName().matches("^42(\\.\\d+)?$")) {
+                versions.add(f.getName());
+            }
+        }
+        if (versions.isEmpty()) return;
+
+        // Step 2: sort version-aware oldest → newest
+        // 42 < 42.1 < 42.9 < 42.10 < 42.13 < 42.15
+        versions.sort((a, b) -> {
+            String[] pa = a.split("\\.");
+            String[] pb = b.split("\\.");
+            int maxLen = Math.max(pa.length, pb.length);
+            for (int i = 0; i < maxLen; i++) {
+                int na = i < pa.length ? Integer.parseInt(pa[i]) : 0;
+                int nb = i < pb.length ? Integer.parseInt(pb[i]) : 0;
+                if (na != nb) return Integer.compare(na, nb);
+            }
+            return 0;
+        });
+
+        String latest = versions.get(versions.size() - 1);
+        File target = new File(modDir, latest);
         target.mkdirs();
 
-        File[] children = modDir.listFiles(File::isDirectory);
-        if (children == null) return;
-
-        for (File f : children) {
-            String name = f.getName();
-            // Skip the target itself
-            if (name.equals("42")) continue;
-            // Only process 42.x folders
-            if (!name.matches("^42\\.\\d+$")) continue;
-            // Merge into 42/ without overwriting existing files
-            copyDirectoryNoOverwrite(f, target);
-            FileUtils.deleteDirectory(f);
+        // Step 3: merge older versions into latest, oldest first (no overwrite)
+        // newest files take priority — copy oldest first so newer ones win
+        for (int i = 0; i < versions.size() - 1; i++) {
+            File older = new File(modDir, versions.get(i));
+            copyDirectoryNoOverwrite(older, target);
         }
 
-        // Inject root media/ into 42/media/
+        // Step 4 is implicit — copyDirectoryNoOverwrite skips existing files
+
+        // Step 5: inject root media/ → latest/media/ (no overwrite)
         File rootMedia = new File(modDir, "media");
         if (rootMedia.exists() && rootMedia.isDirectory()) {
             copyDirectoryNoOverwrite(rootMedia, new File(target, "media"));
             FileUtils.deleteDirectory(rootMedia);
         }
 
-        // Inject root common/ into 42/
+        // Step 6: inject common/ → latest/ (no overwrite), empty common/ but keep folder
         File rootCommon = new File(modDir, "common");
         if (rootCommon.exists() && rootCommon.isDirectory()) {
             copyDirectoryNoOverwrite(rootCommon, target);
-            FileUtils.deleteDirectory(rootCommon);
+            File[] commonContents = rootCommon.listFiles();
+            if (commonContents != null) {
+                for (File f : commonContents) {
+                    FileUtils.deleteDirectory(f);
+                }
+            }
+            // keep empty common/ folder
         }
+
+        // Step 7: delete all old version folders and root media/
+        for (int i = 0; i < versions.size() - 1; i++) {
+            FileUtils.deleteDirectory(new File(modDir, versions.get(i)));
+        }
+
+        // Step 8: rename latest → 42 for cross-version compatibility
+        if (!latest.equals("42")) {
+            File renamed = new File(modDir, "42");
+            if (renamed.exists()) FileUtils.deleteDirectory(renamed);
+            target.renameTo(renamed);
+        }
+
+        // Remove root mod.info — 42/mod.info is authoritative for B42
+        File rootModInfo = new File(modDir, "mod.info");
+        if (rootModInfo.exists()) rootModInfo.delete();
     }
 
     // Returns true if any subfolder named "scripts" exists anywhere in the tree
@@ -1288,8 +1338,8 @@ public class InstallerService extends Service implements TaskProgressListener {
     private String readModId(File modDir) {
         // mod.info может быть в корне или внутри 42/
         File[] candidates = {
-                new File(modDir, "mod.info"),
-                new File(modDir, "42/mod.info")
+                new File(modDir, "42/mod.info"),  // сначала из 42/ — правильный для B42
+                new File(modDir, "mod.info")       // fallback — корневой
         };
         for (File f : candidates) {
             if (!f.exists()) continue;
