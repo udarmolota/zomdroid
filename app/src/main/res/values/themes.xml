@@ -22,7 +22,7 @@
         <item name="colorOnSurface">@color/md_theme_onSurface</item>
         <item name="colorSurfaceVariant">@color/md_theme_surfaceVariant</item>
         <item name="colorOnSurfaceVariant">@color/md_theme_onSurfaceVariant</item>
-        <item name="colorOutline">@color/md_theme_outline</item>
+        <item name="colorOutline">@color/pz_orange</item>
         <item name="colorOutlineVariant">@color/md_theme_outlineVariant</item>
         <item name="colorSurfaceInverse">@color/md_theme_inverseSurface</item>
         <item name="colorOnSurfaceInverse">@color/md_theme_inverseOnSurface</item>
@@ -51,5 +51,6 @@
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowLightNavigationBar">true</item>
         <item name="materialButtonStyle">@style/AppTheme.Button</item>
+        <item name="navigationViewStyle">@style/AppTheme.NavigationView</item>
     </style>
 </resources>

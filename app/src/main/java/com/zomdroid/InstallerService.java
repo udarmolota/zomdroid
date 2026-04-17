@@ -123,6 +123,13 @@ public class InstallerService extends Service implements TaskProgressListener {
                 doExportLog(intent);
                 break;
             }
+            case INSTALL_BETTERFPS: {
+                doInstallBetterFps(intent);
+                break;
+            }
+            case INSTALL_MOD_WITH_FIX: {
+                doInstallModWithFix(intent); break;
+            }
         }
 
         return START_NOT_STICKY;
@@ -953,6 +960,343 @@ public class InstallerService extends Service implements TaskProgressListener {
         });
     }
 
+    private void doInstallBetterFps(Intent intent) {
+        String taskTitle = getString(R.string.optimization_betterfps_installing);
+
+        startForeground(NOTIFICATION_ID, buildNotification(taskTitle));
+        this.taskState.postValue(new TaskState(taskTitle, null, -1, 0, false, false));
+
+        String gameInstanceName = intent.getStringExtra(EXTRA_GAME_INSTANCE_NAME);
+        if (gameInstanceName == null) {
+            finishWithError(taskTitle, "Game instance name is missing");
+            return;
+        }
+        GameInstance gameInstance = GameInstanceManager.requireSingleton().getInstanceByName(gameInstanceName);
+        if (gameInstance == null) {
+            finishWithError(taskTitle, "Game instance not found: " + gameInstanceName);
+            return;
+        }
+
+        Uri archiveUri = intent.getParcelableExtra(EXTRA_ARCHIVE_URI);
+        if (archiveUri == null) {
+            finishWithError(taskTitle, "Archive URI is missing");
+            return;
+        }
+
+        executorService.submit(() -> {
+            try {
+                String targetDir = gameInstance.getGamePath() + "/zombie/iso";
+                String targetFile = targetDir + "/IsoChunkMap.class";
+                String backupFile = targetFile + ".original";
+
+                // Найти IsoChunkMap.class в ZIP
+                byte[] classBytes = null;
+                try (InputStream is = getContentResolver().openInputStream(archiveUri);
+                     ZipInputStream zis = new ZipInputStream(is)) {
+                    ZipEntry entry;
+                    while ((entry = zis.getNextEntry()) != null) {
+                        String name = entry.getName();
+                        if (name.endsWith("IsoChunkMap.class")) {
+                            classBytes = zis.readAllBytes();
+                            break;
+                        }
+                        zis.closeEntry();
+                    }
+                }
+
+                if (classBytes == null) {
+                    finishWithError(taskTitle, "IsoChunkMap.class not found in archive");
+                    return;
+                }
+
+                // Переименовать оригинал если ещё не бэкапнут
+                File original = new File(targetFile);
+                File backup = new File(backupFile);
+                if (original.exists() && !backup.exists()) {
+                    original.renameTo(backup);
+                }
+
+                // Записать новый файл
+                new File(targetDir).mkdirs();
+                try (FileOutputStream fos = new FileOutputStream(targetFile)) {
+                    fos.write(classBytes);
+                }
+
+                finish(getString(R.string.optimization_betterfps_installed), null);
+            } catch (Exception e) {
+                finishWithError(taskTitle, e.toString());
+            }
+        });
+    }
+
+    // ================================================
+    // INSTALL_MOD_WITH_FIX — double path fix for B42 mods
+    // ================================================
+
+    private void doInstallModWithFix(Intent intent) {
+        String taskTitle = getString(R.string.mod_fix_installing);
+
+        startForeground(NOTIFICATION_ID, buildNotification(taskTitle));
+        this.taskState.postValue(new TaskState(taskTitle, null, -1, 0, false, false));
+
+        String gameInstanceName = intent.getStringExtra(EXTRA_GAME_INSTANCE_NAME);
+        if (gameInstanceName == null) {
+            finishWithError(taskTitle, "Game instance name is missing");
+            return;
+        }
+        GameInstance gameInstance = GameInstanceManager.requireSingleton().getInstanceByName(gameInstanceName);
+        if (gameInstance == null) {
+            finishWithError(taskTitle, "Game instance not found: " + gameInstanceName);
+            return;
+        }
+
+        Uri archiveUri = intent.getParcelableExtra(EXTRA_MODS_URI);
+        if (archiveUri == null) {
+            finishWithError(taskTitle, "Archive URI is missing");
+            return;
+        }
+
+        executorService.submit(() -> {
+            File tmpDir = new File(getCacheDir(), "mod_fix_tmp_" + System.currentTimeMillis());
+            try {
+                // Step 1: extract ZIP to temp dir
+                tmpDir.mkdirs();
+                try (InputStream is = getContentResolver().openInputStream(archiveUri);
+                     ZipInputStream zis = new ZipInputStream(is)) {
+                    ZipEntry entry;
+                    while ((entry = zis.getNextEntry()) != null) {
+                        File outFile = new File(tmpDir, entry.getName());
+                        if (entry.isDirectory()) {
+                            outFile.mkdirs();
+                        } else {
+                            outFile.getParentFile().mkdirs();
+                            try (FileOutputStream fos = new FileOutputStream(outFile)) {
+                                byte[] buf = new byte[64 * 1024];
+                                int r;
+                                while ((r = zis.read(buf)) != -1) fos.write(buf, 0, r);
+                            }
+                        }
+                        zis.closeEntry();
+                    }
+                }
+
+                // Step 2: check this is a B42 mod
+                if (!hasB42Folders(tmpDir)) {
+                    finishWithError(taskTitle,
+                            getString(R.string.mod_fix_error_not_b42, tmpDir.getName()));
+                    return;
+                }
+                Log.d("ModFix", "hasB42Folders: true, tmpDir contents:");
+                for (File f : tmpDir.listFiles()) {
+                    Log.d("ModFix", "  " + f.getName() + (f.isDirectory() ? "/" : ""));
+                }
+
+                // Step 3: merge versions into 42/
+                mergeVersionsInto42(tmpDir);
+                Log.d("ModFix", "After merge, tmpDir contents:");
+                for (File f : tmpDir.listFiles()) {
+                    Log.d("ModFix", "  " + f.getName() + (f.isDirectory() ? "/" : ""));
+                }
+                // Step 4: check if needs inception
+                boolean needsInception = hasScriptsFolder(tmpDir);
+                Log.d("ModFix", "needsInception: " + needsInception);
+                // Step 5: determine mod name from mod.info
+                String modId = readModId(tmpDir);
+                if (modId == null || modId.isEmpty()) {
+                    // fallback to zip name if mod.info not found
+                    modId = extractZipName(archiveUri);
+                }
+                String zipName = modId;
+                Log.d("ModFix", "zipName: " + zipName);
+
+                String modsPath = gameInstance.getHomePath() + "/Zomboid/mods";
+                new File(modsPath).mkdirs();
+                Log.d("ModFix", "modsPath: " + modsPath);
+
+                // Step 6: install normal case copy
+                File normalDest = new File(modsPath, zipName);
+                if (normalDest.exists()) FileUtils.deleteDirectory(normalDest);
+                copyDirectory(tmpDir, normalDest);
+
+                // Step 7: if needs inception, install lowercase copy too
+                if (needsInception) {
+                    String instanceNameLower = gameInstance.getName().toLowerCase();
+                    String inceptionRelPath = "data/user/0/com.zomdroid/files/instances/"
+                            + instanceNameLower + "/zomboid/mods";
+                    File inceptionDir = new File(modsPath, inceptionRelPath);
+                    inceptionDir.mkdirs();
+
+                    String lowerName = modId.toLowerCase();
+                    File lowerDest = new File(inceptionDir, lowerName);
+                    if (lowerDest.exists()) FileUtils.deleteDirectory(lowerDest);
+                    copyDirectoryLowercase(tmpDir, lowerDest);
+                }
+
+                finish(getString(R.string.mod_fix_installed), null);
+
+            } catch (Exception e) {
+                finishWithError(taskTitle, e.toString());
+            } finally {
+                try { FileUtils.deleteDirectory(tmpDir); } catch (Exception ignored) {}
+            }
+        });
+    }
+
+    // Extract mod name from ZIP URI — uses ContentResolver, works with any file provider
+    private String extractZipName(Uri uri) {
+        String name = null;
+        try (android.database.Cursor cursor = getContentResolver().query(
+                uri,
+                new String[]{android.provider.MediaStore.MediaColumns.DISPLAY_NAME},
+                null, null, null)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                int idx = cursor.getColumnIndex(android.provider.MediaStore.MediaColumns.DISPLAY_NAME);
+                if (idx != -1) name = cursor.getString(idx);
+            }
+        } catch (Exception ignored) {}
+
+        if (name != null && name.toLowerCase().endsWith(".zip")) {
+            name = name.substring(0, name.length() - 4);
+        }
+        if (name == null || name.isEmpty()) {
+            name = "mod_" + System.currentTimeMillis();
+        }
+        return name;
+    }
+
+    // Returns true if mod folder contains any folder matching 42 or 42.x
+    private boolean hasB42Folders(File modDir) {
+        File[] children = modDir.listFiles(File::isDirectory);
+        if (children == null) return false;
+        for (File f : children) {
+            if (f.getName().matches("^42(\\.\\d+)?$")) return true;
+        }
+        return false;
+    }
+
+    // Merges all 42.x folders into 42/, injects media/ and common/ from root
+    private void mergeVersionsInto42(File modDir) throws IOException {
+        File target = new File(modDir, "42");
+        target.mkdirs();
+
+        File[] children = modDir.listFiles(File::isDirectory);
+        if (children == null) return;
+
+        for (File f : children) {
+            String name = f.getName();
+            // Skip the target itself
+            if (name.equals("42")) continue;
+            // Only process 42.x folders
+            if (!name.matches("^42\\.\\d+$")) continue;
+            // Merge into 42/ without overwriting existing files
+            copyDirectoryNoOverwrite(f, target);
+            FileUtils.deleteDirectory(f);
+        }
+
+        // Inject root media/ into 42/media/
+        File rootMedia = new File(modDir, "media");
+        if (rootMedia.exists() && rootMedia.isDirectory()) {
+            copyDirectoryNoOverwrite(rootMedia, new File(target, "media"));
+            FileUtils.deleteDirectory(rootMedia);
+        }
+
+        // Inject root common/ into 42/
+        File rootCommon = new File(modDir, "common");
+        if (rootCommon.exists() && rootCommon.isDirectory()) {
+            copyDirectoryNoOverwrite(rootCommon, target);
+            FileUtils.deleteDirectory(rootCommon);
+        }
+    }
+
+    // Returns true if any subfolder named "scripts" exists anywhere in the tree
+    private boolean hasScriptsFolder(File dir) {
+        if (dir.getName().equals("scripts") && dir.isDirectory()) return true;
+        File[] children = dir.listFiles();
+        if (children == null) return false;
+        for (File f : children) {
+            if (f.isDirectory() && hasScriptsFolder(f)) return true;
+        }
+        return false;
+    }
+
+    // Copy directory recursively
+    private void copyDirectory(File src, File dst) throws IOException {
+        dst.mkdirs();
+        File[] files = src.listFiles();
+        if (files == null) return;
+        for (File f : files) {
+            File target = new File(dst, f.getName());
+            if (f.isDirectory()) {
+                copyDirectory(f, target);
+            } else {
+                copyFile(f, target);
+            }
+        }
+    }
+
+    // Copy directory recursively, all names lowercased
+    private void copyDirectoryLowercase(File src, File dst) throws IOException {
+        dst.mkdirs();
+        File[] files = src.listFiles();
+        if (files == null) return;
+        for (File f : files) {
+            File target = new File(dst, f.getName().toLowerCase());
+            if (f.isDirectory()) {
+                copyDirectoryLowercase(f, target);
+            } else {
+                copyFile(f, target);
+            }
+        }
+    }
+
+    // Copy directory recursively, skip if destination file already exists
+    private void copyDirectoryNoOverwrite(File src, File dst) throws IOException {
+        dst.mkdirs();
+        File[] files = src.listFiles();
+        if (files == null) return;
+        for (File f : files) {
+            File target = new File(dst, f.getName());
+            if (f.isDirectory()) {
+                copyDirectoryNoOverwrite(f, target);
+            } else if (!target.exists()) {
+                copyFile(f, target);
+            }
+        }
+    }
+
+    // Copy single file
+    private void copyFile(File src, File dst) throws IOException {
+        try (InputStream is = new FileInputStream(src);
+             OutputStream os = new FileOutputStream(dst)) {
+            byte[] buf = new byte[64 * 1024];
+            int r;
+            while ((r = is.read(buf)) != -1) os.write(buf, 0, r);
+        }
+    }
+
+    private String readModId(File modDir) {
+        // mod.info может быть в корне или внутри 42/
+        File[] candidates = {
+                new File(modDir, "mod.info"),
+                new File(modDir, "42/mod.info")
+        };
+        for (File f : candidates) {
+            if (!f.exists()) continue;
+            try (java.io.BufferedReader br = new java.io.BufferedReader(
+                    new java.io.FileReader(f))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    line = line.trim();
+                    if (line.startsWith("id=")) {
+                        String id = line.substring(3).trim();
+                        if (!id.isEmpty()) return id;
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
+        return null;
+    }
+
     public enum Task {
         CREATE_GAME_INSTANCE,
         DELETE_GAME_INSTANCE,
@@ -964,7 +1308,9 @@ public class InstallerService extends Service implements TaskProgressListener {
         EXPORT_CONTROLS_FROM_INSTANCE,
         IMPORT_CUSTOM_DRIVER,
         EXPORT_CUSTOM_DRIVER,
-        EXPORT_LOG
+        EXPORT_LOG,
+        INSTALL_BETTERFPS,
+        INSTALL_MOD_WITH_FIX
     }
 
     public static class TaskState {

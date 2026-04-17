@@ -38,6 +38,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
+        app:dividerColor="@color/pz_orange"
         app:menu="@menu/menu_nav"/>
 
 </androidx.drawerlayout.widget.DrawerLayout>

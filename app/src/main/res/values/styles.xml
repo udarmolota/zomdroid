@@ -15,4 +15,7 @@
         <item name="android:paddingStart">24dp</item>
         <item name="android:paddingEnd">24dp</item>
     </style>
+    <style name="AppTheme.NavigationView" parent="Widget.Material3.NavigationView">
+        <item name="dividerColor">@color/pz_orange</item>
+    </style>
 </resources>

@@ -27,11 +27,6 @@
             android:icon="@drawable/mt_icon_folder"
             app:showAsAction="never"/>
         <item
-            android:id="@+id/action_open_install_mod"
-            android:title="@string/nav_menu_install_mod"
-            android:icon="@drawable/mt_icon_folder"
-            app:showAsAction="never"/>
-        <item
             android:id="@+id/action_install_controls"
             android:title="@string/menu_install_controls"
             android:icon="@drawable/mt_icon_folder"
@@ -49,6 +44,27 @@
         <item
             android:id="@+id/action_export_log"
             android:title="@string/export_log_menu"
+            android:icon="@drawable/mt_icon_folder"
+            app:showAsAction="never"/>
+    </group>
+
+    <group android:id="@+id/group_mods" android:checkableBehavior="none">
+        <item
+            android:id="@+id/action_open_install_mod"
+            android:title="@string/nav_menu_install_mod"
+            android:icon="@drawable/mt_icon_folder"
+            app:showAsAction="never"/>
+        <item
+            android:id="@+id/action_open_mod_fixes"
+            android:title="@string/nav_menu_mod_fixes"
+            android:icon="@drawable/mt_icon_folder"
+            app:showAsAction="never"/>
+    </group>
+
+    <group android:id="@+id/group_android" android:checkableBehavior="none">
+        <item
+            android:id="@+id/action_open_optimization"
+            android:title="@string/nav_menu_optimization"
             android:icon="@drawable/mt_icon_folder"
             app:showAsAction="never"/>
     </group>

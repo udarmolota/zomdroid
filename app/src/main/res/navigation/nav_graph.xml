@@ -37,6 +37,12 @@
         <action
             android:id="@+id/action_export_log"
             app:destination="@id/export_log_fragment" />
+        <action
+            android:id="@+id/action_open_optimization"
+            app:destination="@id/optimization_fragment" />
+        <action
+            android:id="@+id/action_open_mod_fixes"
+            app:destination="@id/mod_fixes_fragment" />
     </fragment>
 
     <fragment
@@ -91,5 +97,16 @@
         android:id="@+id/export_log_fragment"
         android:name="com.zomdroid.fragments.ExportLogFragment"
         android:label="@string/export_log_menu" />
+
+    <fragment
+        android:id="@+id/optimization_fragment"
+        android:name="com.zomdroid.fragments.OptimizationFragment"
+        android:label="@string/nav_menu_optimization" />
+
+    <fragment
+        android:id="@+id/mod_fixes_fragment"
+        android:name="com.zomdroid.fragments.ModFixesFragment"
+        android:label="@string/nav_menu_mod_fixes"
+        tools:layout="@layout/fragment_mod_fixes"/>
 
 </navigation>

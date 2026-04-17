@@ -372,4 +372,36 @@
     <string name="new_game_instance_select_preset">Select preset…</string>
     <string name="new_game_instance_no_preset_selected">Please select a preset. It must match your game build: Build 41 has one preset, Build 42 is split into two — choose carefully.</string>
     <string name="new_game_instance_no_preset_title">Select preset</string>
+
+    <string name="nav_menu_optimization">Optimization</string>
+    <string name="nav_menu_mod_fixes">Mod Fixes</string>
+
+    <!-- Optimization page -->
+    <string name="optimization_group_jvm">JVM arguments</string>
+    <string name="optimization_jvm_hint">Copy a preset and paste it in Settings → JVM arguments. Choose based on your device RAM.</string>
+    <string name="optimization_jvm_4gb_label">4 GB RAM</string>
+    <string name="optimization_jvm_6gb_label">6 GB RAM</string>
+    <string name="optimization_jvm_balanced_label">Balanced</string>
+    <string name="optimization_jvm_aggressive_label">Aggressive</string>
+    <string name="optimization_copy">Copy</string>
+    <string name="optimization_open_settings">→ Open Settings</string>
+    <string name="optimization_group_betterfps">BetterFPS</string>
+    <string name="optimization_betterfps_hint">Reduces the render zone around the player. Steam Workshop ID: 3022543997. Download the mod, choose a variant (start with 90×90), zip the IsoChunkMap.class file and install below.</string>
+    <string name="optimization_betterfps_file_label">IsoChunkMap.class (zipped)</string>
+    <string name="optimization_install">Install</string>
+    <string name="optimization_betterfps_help_title">How BetterFPS works</string>
+    <string name="optimization_betterfps_help_message">Steam Workshop ID: 3022543997\n\n\"Project Zomboid renders a 190×190 tile zone around the player. This mod reduces the size of this zone and avoids loading unnecessary chunks.\"\n— mod description\n\nVariants:\n• PotatoePC — maximum performance\n• 1080 — balanced\n• 4k — best quality\n• All_Settings — custom zone sizes from 30×30 to 190×190\n\nWe recommend starting with 90×90 — noticeably smaller than the default 190×190, but not too aggressive. You can go lower if needed.\n\nAfter downloading, open the mod folder, pick your variant, zip only the IsoChunkMap.class file and load it here.</string>
+    <string name="optimization_jvm_copied">Copied to clipboard</string>
+    <string name="optimization_betterfps_installed">BetterFPS installed successfully</string>
+    <string name="optimization_betterfps_installing">Installing BetterFPS…</string>
+
+    <!-- ===== Mods fix ===== -->
+    <string name="mod_fix_installing">Installing mod with fix…</string>
+    <string name="mod_fix_installed">Mod installed successfully</string>
+    <string name="mod_fix_error_no_mod_folder">No mod folder found in archive</string>
+    <string name="mod_fix_error_not_b42">This mod does not appear to be a Build 42 mod: %1$s</string>
+    <string name="mod_fix_group_double_path">Double path fix</string>
+    <string name="mod_fix_double_path_hint">Fix for Build 42 mods with path errors on Android. Known mods: Tsar\'s Common Library (ID: 3402491515), Simple Flashlight on Belt (ID: 3394588830).</string>
+    <string name="mod_fix_help_title">What is this fix?</string>
+    <string name="mod_fix_help_message">Some Build 42 mods use a folder structure that causes a path conflict on Android due to case sensitivity. The game ends up looking for files in a doubled path and cannot find them.\n\nThis fix installs the mod twice — once with the original folder names, and once with all names in lowercase — so the game finds the files regardless of which path it uses.\n\nKnown affected mods:\n• Tsar\'s Common Library — ID: 3402491515\n• [B42] Simple Flashlight on Belt — ID: 3394588830\n\nTo use: download the mod from Steam Workshop, zip the mod folder as-is and load it here.</string>
 </resources>

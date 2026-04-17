@@ -371,4 +371,36 @@
     <string name="new_game_instance_select_preset">Выберите пресет…</string>
     <string name="new_game_instance_no_preset_selected">Выберите пресет. Он должен соответствовать версии игры: у билда 41 один пресет, билд 42 делится на два — выбирайте внимательно.</string>
     <string name="new_game_instance_no_preset_title">Выберите пресет</string>
+
+    <string name="nav_menu_optimization">Оптимизация</string>
+    <string name="nav_menu_mod_fixes">Фикс модов</string>
+
+    <!-- Optimization page -->
+    <string name="optimization_group_jvm">Аргументы JVM</string>
+    <string name="optimization_jvm_hint">Скопируйте пресет и вставьте в Настройки → Аргументы JVM. Выберите по объёму RAM вашего устройства.</string>
+    <string name="optimization_jvm_4gb_label">4 ГБ RAM</string>
+    <string name="optimization_jvm_6gb_label">6 ГБ RAM</string>
+    <string name="optimization_jvm_balanced_label">Баланс</string>
+    <string name="optimization_jvm_aggressive_label">Агрессивный</string>
+    <string name="optimization_copy">Копировать</string>
+    <string name="optimization_open_settings">→ Открыть Настройки</string>
+    <string name="optimization_group_betterfps">BetterFPS</string>
+    <string name="optimization_betterfps_hint">Уменьшает зону отрисовки вокруг игрока. Steam Workshop ID: 3022543997. Скачайте мод, выберите вариант (начните с 90×90), заархивируйте IsoChunkMap.class и установите ниже.</string>
+    <string name="optimization_betterfps_file_label">IsoChunkMap.class (в архиве)</string>
+    <string name="optimization_install">Установить</string>
+    <string name="optimization_betterfps_help_title">Как работает BetterFPS</string>
+    <string name="optimization_betterfps_help_message">Steam Workshop ID: 3022543997\n\n«Project Zomboid отрисовывает зону 190×190 тайлов вокруг игрока. Этот мод уменьшает размер этой зоны и избавляет от загрузки ненужных чанков.»\n— описание мода\n\nВарианты:\n• PotatoePC — максимальная производительность\n• 1080 — баланс\n• 4k — лучшее качество\n• All_Settings — размер зоны на выбор от 30×30 до 190×190\n\nРекомендуем начать с 90×90 — заметно меньше дефолтных 190×190, но без фанатизма. Если всё хорошо — можно попробовать ещё меньше.\n\nПосле скачивания откройте папку мода, выберите вариант, заархивируйте только файл IsoChunkMap.class и загрузите здесь.</string>
+    <string name="optimization_jvm_copied">Скопировано в буфер</string>
+    <string name="optimization_betterfps_installed">BetterFPS успешно установлен</string>
+    <string name="optimization_betterfps_installing">Установка BetterFPS…</string>
+
+    <!-- ===== Mods fix ===== -->
+    <string name="mod_fix_installing">Установка мода с фиксом…</string>
+    <string name="mod_fix_installed">Мод успешно установлен</string>
+    <string name="mod_fix_error_no_mod_folder">В архиве не найдена папка мода</string>
+    <string name="mod_fix_error_not_b42">Этот мод не является модом для билда 42: %1$s</string>
+    <string name="mod_fix_group_double_path">Фикс двойного пути</string>
+    <string name="mod_fix_double_path_hint">Фикс для модов билда 42 с ошибкой пути на Android. Известные моды: Tsar\'s Common Library (ID: 3402491515), Simple Flashlight on Belt (ID: 3394588830).</string>
+    <string name="mod_fix_help_title">Что это за фикс?</string>
+    <string name="mod_fix_help_message">Некоторые моды для билда 42 используют структуру папок, которая вызывает конфликт путей на Android из-за чувствительности к регистру. Игра ищет файлы по двойному пути и не может их найти.\n\nФикс устанавливает мод дважды — один раз с оригинальными именами папок, второй раз со всеми именами в нижнем регистре — чтобы игра находила файлы независимо от того, какой путь использует.\n\nИзвестные проблемные моды:\n• Tsar\'s Common Library — ID: 3402491515\n• [B42] Simple Flashlight on Belt — ID: 3394588830\n\nКак использовать: скачайте мод из Steam Workshop, заархивируйте папку мода как есть и загрузите сюда.</string>
 </resources>
