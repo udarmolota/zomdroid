@@ -136,12 +136,7 @@ public class LauncherActivity extends AppCompatActivity {
                 if (messageView != null) {
                     messageView.setMovementMethod(LinkMovementMethod.getInstance());
                 }
-                return true;
-            } else if (item.getItemId() == R.id.action_open_touch_controls) {
-                // Navigate to TouchControlsFragment
-                binding.drawerLayout.close();
-                navController.navigate(R.id.action_open_touch_controls);
-                return true;
+                return true;            
             } else if (item.getItemId() == R.id.action_open_install_mod) {
                 // Navigate to Mod installation
                 binding.drawerLayout.close();
@@ -154,6 +149,15 @@ public class LauncherActivity extends AppCompatActivity {
             } else if (item.getItemId() == R.id.action_version) {
                 checkForUpdate();
                 return true;
+            } else if (item.getItemId() == R.id.action_open_optimization) {
+                binding.drawerLayout.close();
+                navController.navigate(R.id.action_open_optimization);
+                return true;
+            } else if (item.getItemId() == R.id.action_open_mod_fixes) {
+                binding.drawerLayout.close();
+                navController.navigate(R.id.action_open_mod_fixes);
+                return true;
+
         }
 
         binding.drawerLayout.close();

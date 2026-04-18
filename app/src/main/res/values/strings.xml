@@ -85,7 +85,7 @@
     <string name="game_instance_manage_storage">Manage storage</string>
     <string name="game_instance_delete">Delete</string>
 
-    <string name="donate_message">Enjoying the app and want to support us? \n\nCreator: ko-fi.com/liamelui, Maintained and Developed by: ko-fi.com/udarmolota. \n\nOther contributors: \nshimux0, Wakort, LeHiepDuy.</string>
+    <string name="donate_message">Enjoying the app and want to support us? \n\nMaintained and Developed by: ko-fi.com/udarmolota, \ncreator: ko-fi.com/liamelui.  \n\nContributors: \nshimux0, Wakort, LeHiepDuy, deadgamer182, Liko.</string>
 
     <string name="app_aborted">The app ran into an unexpected issue and had to close</string>
     <string name="share_logs">Share log file</string>
@@ -325,4 +325,83 @@
     <string name="preset_dialog_message_b41">Build 41.78 — the most stable version available today. Runs on most devices with 6GB RAM or more.</string>
     <string name="preset_dialog_message_b42">Build 42 (versions 42.0–42.11). Requires 6GB+ RAM. Runs mainly on Snapdragon, and also on powerful Dimensity devices (with ANGLE enabled).</string>
     <string name="preset_dialog_message_b4212">Build 42.12 and above. Requires slightly different settings and at least 8GB RAM. Runs mainly on Snapdragon and newer powerful Dimensity devices (with ANGLE enabled).</string>
+
+    <!-- Settings groups -->
+    <string name="settings_group_rendering">Rendering</string>
+    <string name="settings_group_advanced">Advanced</string>
+    <string name="settings_group_controls">Controls</string>
+    <string name="settings_group_audio">Audio</string>
+
+    <!-- Game files zip help text -->
+    <string name="game_instance_files_help_message">
+        \u2705 Correct:\n\n
+        projectzomboid.zip/\n
+        \u00A0\u00A0ProjectZomboid64.json\n
+        \u00A0\u00A0java/\n
+        \u00A0\u00A0natives/\n
+        \u00A0\u00A0...\n\n
+        \u274C Incorrect:\n\n
+        projectzomboid.zip/\n
+        \u00A0\u00A0Project Zomboid/\n
+        \u00A0\u00A0\u00A0\u00A0ProjectZomboid64.json\n
+        \u00A0\u00A0\u00A0\u00A0java/\n
+        \u00A0\u00A0\u00A0\u00A0...
+    </string>
+    <string name="game_instance_files_help_title">Game files ZIP structure</string>
+
+    <!-- New instance layout names -->
+    <string name="new_game_instance_group_name">Instance name</string>
+    <string name="new_game_instance_group_preset">Preset</string>
+    <string name="new_game_instance_group_files">Files</string>
+
+    <string name="install_mod_group_instance">Instance</string>
+    <string name="install_mod_group_file">Mod file</string>
+    <string name="install_controls_group_file">Controls layout</string>
+    <string name="install_saves_group_import">Import saves</string>
+    <string name="install_saves_group_export">Export saves</string>
+    <string name="install_saves_export_hint">Save your current saves as a ZIP archive.</string>
+    <string name="install_controls_group_export">Export layout</string>
+    <string name="install_controls_export_hint">Save your current button layout as a ZIP archive.</string>
+    <string name="install_driver_group_import">Import driver</string>
+    <string name="install_driver_group_export">Export driver</string>
+    <string name="install_driver_export_hint">Save the currently installed custom driver as a .so file.</string>
+    <string name="export_log_group_export">Export log</string>
+    <string name="export_log_hint">Exports the console.txt log file from the selected instance.</string>
+
+    <string name="new_game_instance_create">Create</string>
+    <string name="new_game_instance_select_preset">Select preset…</string>
+    <string name="new_game_instance_no_preset_selected">Please select a preset. It must match your game build: Build 41 has one preset, Build 42 is split into two — choose carefully.</string>
+    <string name="new_game_instance_no_preset_title">Select preset</string>
+
+    <string name="nav_menu_optimization">Optimization</string>
+    <string name="nav_menu_mod_fixes">Mod Fixes</string>
+
+    <!-- Optimization page -->
+    <string name="optimization_group_jvm">JVM arguments</string>
+    <string name="optimization_jvm_hint">Copy a preset and paste it in Settings → JVM arguments. Choose based on your device RAM.</string>
+    <string name="optimization_jvm_4gb_label">4 GB RAM</string>
+    <string name="optimization_jvm_6gb_label">6 GB RAM</string>
+    <string name="optimization_jvm_balanced_label">Balanced</string>
+    <string name="optimization_jvm_aggressive_label">Aggressive</string>
+    <string name="optimization_copy">Copy</string>
+    <string name="optimization_open_settings">→ Open Settings</string>
+    <string name="optimization_group_betterfps">BetterFPS b41</string>
+    <string name="optimization_betterfps_hint">Reduces the render zone around the player. Steam Workshop ID: 3022543997. Download the mod, choose a variant (start with 90×90), zip the IsoChunkMap.class file and install below.</string>
+    <string name="optimization_betterfps_file_label">IsoChunkMap.class (zipped)</string>
+    <string name="optimization_install">Install</string>
+    <string name="optimization_betterfps_help_title">How BetterFPS works</string>
+    <string name="optimization_betterfps_help_message">Steam Workshop ID: 3022543997\n\n\"Project Zomboid renders a 190×190 tile zone around the player. This mod reduces the size of this zone and avoids loading unnecessary chunks.\"\n— mod description\n\nVariants:\n• PotatoePC — maximum performance\n• 1080 — balanced\n• 4k — best quality\n• All_Settings — custom zone sizes from 30×30 to 190×190\n\nWe recommend starting with 90×90 — noticeably smaller than the default 190×190, but not too aggressive. You can go lower if needed.\n\nAfter downloading, open the mod folder, pick your variant, zip only the IsoChunkMap.class file and load it here.</string>
+    <string name="optimization_jvm_copied">Copied to clipboard</string>
+    <string name="optimization_betterfps_installed">BetterFPS installed successfully</string>
+    <string name="optimization_betterfps_installing">Installing BetterFPS…</string>
+
+    <!-- ===== Mods fix ===== -->
+    <string name="mod_fix_installing">Installing mod with fix…</string>
+    <string name="mod_fix_installed">Mod installed successfully</string>
+    <string name="mod_fix_error_no_mod_folder">No mod folder found in archive</string>
+    <string name="mod_fix_error_not_b42">This mod does not appear to be a Build 42 mod: %1$s</string>
+    <string name="mod_fix_group_double_path">Double path fix</string>
+    <string name="mod_fix_double_path_hint">Fix for Build 42 mods with path errors on Android. Known mods: Tsar\'s Common Library (ID: 3402491515), Simple Flashlight on Belt (ID: 3394588830).</string>
+    <string name="mod_fix_help_title">What is this fix?</string>
+    <string name="mod_fix_help_message">Some Build 42 mods use a folder structure that causes a path conflict on Android due to case sensitivity. The game ends up looking for files in a doubled path and cannot find them.\n\nThis fix installs the mod twice — once with the original folder names, and once with all names in lowercase — so the game finds the files regardless of which path it uses.\n\nKnown affected mods:\n• Tsar\'s Common Library — ID: 3402491515\n• [B42] Simple Flashlight on Belt — ID: 3394588830\n\nTo use: download the mod from Steam Workshop, zip the mod folder as-is and load it here.</string>
 </resources>

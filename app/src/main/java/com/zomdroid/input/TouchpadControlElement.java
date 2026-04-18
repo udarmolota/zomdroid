@@ -133,12 +133,12 @@ public class TouchpadControlElement extends AbstractControlElement {
                 float totalDist = dist(e.getX(actIndex), e.getY(actIndex), downX, downY);
                 long elapsed    = System.currentTimeMillis() - downTime;
                 boolean isTap   = totalDist < TAP_SLOP && elapsed < TAP_MAX_MS;
-                Log.d(TAG, "UP dist=" + totalDist + " elapsed=" + elapsed
-                        + "ms isTap=" + isTap);
+                //Log.d(TAG, "UP dist=" + totalDist + " elapsed=" + elapsed
+                //        + "ms isTap=" + isTap);
 
                 if (isTap) {
-                    Log.d(TAG, "TAP → sendMouseButton LEFT code="
-                            + GLFWBinding.MOUSE_BUTTON_LEFT.code);
+                    //Log.d(TAG, "TAP → sendMouseButton LEFT code="
+                    //        + GLFWBinding.MOUSE_BUTTON_LEFT.code);
                     double rs = parentView.getRenderScale();
                     InputNativeInterface.sendCursorPos(cursorX * rs, cursorY * rs);
                     InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, true);
@@ -150,7 +150,7 @@ public class TouchpadControlElement extends AbstractControlElement {
             }
 
             case MotionEvent.ACTION_CANCEL: {
-                Log.d(TAG, "CANCEL");
+                //Log.d(TAG, "CANCEL");
                 pointerId = -1;
                 return true;
             }

@@ -28,6 +28,7 @@ public class GameInstance {
     private String mainClassName;
     private String javaAgentPath;
     private String javaAgentArgs;
+    private String presetName;
 
     public GameInstance(String name, InstallationPreset preset) throws FileSystemException {
         this.name = name;
@@ -43,6 +44,7 @@ public class GameInstance {
         this.mainClassName = preset.mainClassName;
         this.javaAgentPath = preset.javaAgentPath;
         this.javaAgentArgs = preset.javaAgentArgs;
+        this.presetName = preset.name;
     }
 
     private static String buildHomePath(String name) {
@@ -172,5 +174,9 @@ public class GameInstance {
     public boolean hasFilesForLinux() {
         File pzBulletFile = new File(getGamePath() + "/libPZBullet64.so");
         return pzBulletFile.exists();
+    }
+
+    public String getPresetName() {
+        return this.presetName;
     }
 }

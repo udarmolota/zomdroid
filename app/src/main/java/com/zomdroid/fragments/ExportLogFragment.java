@@ -144,10 +144,46 @@ public class ExportLogFragment extends Fragment {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 requireContext(),
-                android.R.layout.simple_spinner_dropdown_item,
+                R.layout.spinner_item,
                 names
         );
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         binding.exportLogInstanceSpinner.setAdapter(adapter);
+        binding.exportLogInstanceSpinner.setOnItemSelectedListener(
+            new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(android.widget.AdapterView<?> parent,
+                                       View view, int position, long id) {
+                int instanceIndex = instances.size() > 1 ? position - 1 : position;
+                if (instanceIndex < 0 || instanceIndex >= instances.size()) {
+                    binding.exportLogBannerIv.setVisibility(View.INVISIBLE);
+                    binding.exportLogBannerOverlay.setVisibility(View.INVISIBLE);
+                    return;
+                }
+                GameInstance selected = instances.get(instanceIndex);
+                int bannerRes;
+                switch (selected.getPresetName()) {
+                    case "Build 42.12+":
+                        bannerRes = R.drawable.banner_build42_12;
+                        break;
+                    case "Build 42":
+                        bannerRes = R.drawable.banner_build42;
+                        break;
+                    default:
+                        bannerRes = R.drawable.banner_build41;
+                        break;
+                }
+                binding.exportLogBannerIv.setImageResource(bannerRes);
+                binding.exportLogBannerIv.setVisibility(View.VISIBLE);
+                binding.exportLogBannerOverlay.setVisibility(View.VISIBLE);
+            }
+    
+            @Override
+            public void onNothingSelected(android.widget.AdapterView<?> parent) {
+                binding.exportLogBannerIv.setVisibility(View.INVISIBLE);
+                binding.exportLogBannerOverlay.setVisibility(View.INVISIBLE);
+            }
+        });
 
         if (instances.size() == 1) {
             binding.exportLogInstanceSpinner.setSelection(0);

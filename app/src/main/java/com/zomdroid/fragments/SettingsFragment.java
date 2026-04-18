@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.SeekBar;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -17,6 +18,7 @@ import androidx.navigation.Navigation;
 import com.zomdroid.LauncherPreferences;
 import com.zomdroid.R;
 import com.zomdroid.databinding.FragmentSettingsBinding;
+import com.zomdroid.input.GamepadManager;
 
 public class SettingsFragment extends Fragment {
     private FragmentSettingsBinding binding;
@@ -30,8 +32,12 @@ public class SettingsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        ArrayAdapter<LauncherPreferences.Renderer> rendererArrayAdapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_spinner_dropdown_item, LauncherPreferences.Renderer.values());
+        // Renderer
+        ArrayAdapter<LauncherPreferences.Renderer> rendererArrayAdapter = new ArrayAdapter<>(
+            requireContext(),
+            R.layout.spinner_item,
+            LauncherPreferences.Renderer.values());
+        rendererArrayAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         binding.settingsRendererS.setAdapter(rendererArrayAdapter);
         binding.settingsRendererS.setSelection(rendererArrayAdapter.getPosition(LauncherPreferences.requireSingleton().getRenderer()));
         binding.settingsRendererS.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -56,14 +62,14 @@ public class SettingsFragment extends Fragment {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-        binding.settingsRenderHintHelpIb.setOnClickListener(v -> {
-            Navigation.findNavController(v).navigate(R.id.wiki_fragment);
-        });
+        //binding.settingsRenderHintHelpIb.setOnClickListener(v -> {
+        //    Navigation.findNavController(v).navigate(R.id.wiki_fragment);
+        //});
 
-        // Кастомный адаптер — отключает CUSTOM_DRIVER если файл не загружен
+        // Custom adapter — switches off CUSTOM_DRIVER if no driver uploaded
         ArrayAdapter<LauncherPreferences.VulkanDriver> vulkanDriverAdapter =
                 new ArrayAdapter<LauncherPreferences.VulkanDriver>(requireContext(),
-                        android.R.layout.simple_spinner_dropdown_item,
+                        R.layout.spinner_item,
                         LauncherPreferences.VulkanDriver.values()) {
  
                     private boolean isCustomDriverAvailable() {
@@ -93,7 +99,8 @@ public class SettingsFragment extends Fragment {
                         return v;
                     }
                 };
- 
+
+        vulkanDriverAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         binding.settingsVulkanDriverS.setAdapter(vulkanDriverAdapter);
         binding.settingsVulkanDriverS.setSelection(
                 vulkanDriverAdapter.getPosition(LauncherPreferences.requireSingleton().getVulkanDriver())
@@ -173,8 +180,12 @@ public class SettingsFragment extends Fragment {
 
         binding.settingsResolutionScaleSb.setProgress((int) (LauncherPreferences.requireSingleton().getRenderScale() * 100));
 
-        ArrayAdapter<LauncherPreferences.AudioAPI> audioAPIAdapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_spinner_dropdown_item, LauncherPreferences.AudioAPI.values());
+        // AudioAPI
+        ArrayAdapter<LauncherPreferences.AudioAPI> audioAPIAdapter = new ArrayAdapter<>(
+            requireContext(),
+            R.layout.spinner_item,
+            LauncherPreferences.AudioAPI.values());
+        audioAPIAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         binding.settingsAudioApiS.setAdapter(audioAPIAdapter);
         binding.settingsAudioApiS.setSelection(audioAPIAdapter.getPosition(LauncherPreferences.requireSingleton().getAudioAPI()));
         binding.settingsAudioApiS.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -223,6 +234,16 @@ public class SettingsFragment extends Fragment {
         binding.settingsDebugSwitch.setOnCheckedChangeListener((v, isChecked) ->
                 LauncherPreferences.requireSingleton().setDebug(isChecked));
 
+        binding.touchControlsSwitch.setChecked(LauncherPreferences.requireSingleton().isTouchControlsEnabled());
+        binding.touchControlsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            LauncherPreferences.requireSingleton().setTouchControlsEnabled(isChecked);
+            GamepadManager.setTouchOverride(isChecked);
+            Toast.makeText(requireContext(),
+                isChecked ? getString(R.string.touch_controls_enabled_toast)
+                          : getString(R.string.touch_controls_disabled_toast),
+                Toast.LENGTH_SHORT).show();
+        });
+
         binding.settingsJargsInfo.setOnClickListener(v -> {
             new androidx.appcompat.app.AlertDialog.Builder(requireContext())
                     .setTitle(getString(R.string.jvm_args_dialog_title))
@@ -236,6 +257,17 @@ public class SettingsFragment extends Fragment {
                     .setTitle(getString(R.string.settings_env_vars))
                     .setMessage(getString(R.string.settings_env_vars_dialog_message))
                     .setPositiveButton(getString(R.string.dialog_button_ok), null)
+                    .show();
+        });
+
+        binding.settingsRendererTvInfo.setOnClickListener(v -> {
+            new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                    .setTitle(getString(R.string.settings_renderer))
+                    .setMessage(getString(R.string.settings_render_hint))
+                    .setPositiveButton(getString(R.string.dialog_button_ok), null)
+                    .setNeutralButton(getString(R.string.dialog_button_wiki), (dialog, which) -> {
+                        Navigation.findNavController(v).navigate(R.id.wiki_fragment);
+                    })
                     .show();
         });
     }

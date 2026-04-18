@@ -54,6 +54,7 @@ import com.zomdroid.databinding.FragmentLauncherBinding;
 import com.zomdroid.databinding.TaskProgressDialogBinding;
 import com.zomdroid.game.GameInstance;
 import com.zomdroid.game.GameInstanceManager;
+import android.widget.ImageView;
 
 public class LauncherFragment extends Fragment {
     private static final String LOG_TAG = LauncherFragment.class.getName();
@@ -138,6 +139,21 @@ public class LauncherFragment extends Fragment {
                 ImageButton settingsIb = itemView.findViewById(R.id.game_instance_item_settings_ib);
 
                 nameTv.setText(gameInstance.getName());
+
+                ImageView bannerIv = itemView.findViewById(R.id.game_instance_item_banner_iv);
+                int bannerRes;
+                switch (gameInstance.getPresetName()) {
+                    case "Build 42.12+":
+                        bannerRes = R.drawable.banner_build42_12;
+                        break;
+                    case "Build 42":
+                        bannerRes = R.drawable.banner_build42;
+                        break;
+                    default:
+                        bannerRes = R.drawable.banner_build41;
+                        break;
+                }
+                bannerIv.setImageResource(bannerRes);
 
                 launchIb.setOnClickListener(v -> {
                     if (!gameInstance.isInstallationFinished()) {

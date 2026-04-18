@@ -1,183 +1,309 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp">
+    android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/settings_render_hint_tv"
-        android:layout_width="0dp"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/settings_render_hint"
-        android:textSize="12sp"
-        android:textColor="?android:attr/textColorSecondary"
-        android:paddingBottom="8dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/settings_render_hint_help_ib"
-        app:layout_constraintTop_toTopOf="parent"/>
+        android:orientation="vertical"
+        android:padding="12dp">
 
-    <ImageButton
-        style="@style/AppTheme.ImageButton"
-        android:id="@+id/settings_render_hint_help_ib"
-        android:layout_width="15dp"
-        android:layout_height="15dp"
-        android:layout_marginStart="6dp"
-        android:scaleType="fitCenter"
-        android:adjustViewBounds="true"
-        android:src="@drawable/mt_icon_help"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/settings_render_hint_tv"/>
+        <!-- Group 1: Rendering -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="12dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
 
-    <TextView
-        android:id="@+id/settings_renderer_tv"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settings_render_hint_tv"
-        android:layout_marginTop="12dp"
-        android:text="@string/settings_renderer"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
 
-    <Spinner
-        android:id="@+id/settings_renderer_s"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settings_renderer_tv"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:text="@string/settings_group_rendering"
+                    android:textAppearance="?attr/textAppearanceLabelSmall"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="13sp"/>
 
-    <TextView
-        android:id="@+id/settings_vulkan_driver_tv"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settings_renderer_s"
-        android:text="@string/settings_vulkan_driver"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
-    <Spinner
-        android:id="@+id/settings_vulkan_driver_s"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settings_vulkan_driver_tv"/>
+                    <TextView
+                        android:id="@+id/settings_renderer_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:text="@string/settings_renderer"/>
 
-    <TextView
-        android:id="@+id/settings_resolution_scale_tv"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settings_vulkan_driver_s"
-        android:text="@string/settings_resolution_scale"/>
+                    <ImageButton
+                        style="@style/AppTheme.ImageButton"
+                        android:id="@+id/settings_renderer_tv_info"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginStart="8dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/mt_icon_help"/>
+                </LinearLayout>
 
-    <TextView
-        android:id="@+id/settings_resolution_scale_percent_tv"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="@id/settings_resolution_scale_tv"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:text="100%"/>
+                <Spinner
+                    android:id="@+id/settings_renderer_s"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"/>
 
-    <SeekBar
-        android:id="@+id/settings_resolution_scale_sb"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@null"
-        android:min="25"
-        android:max="100"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settings_resolution_scale_tv"
-        app:layout_constraintEnd_toEndOf="parent"/>
+                <TextView
+                    android:id="@+id/settings_vulkan_driver_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:text="@string/settings_vulkan_driver"/>
 
-    <TextView
-        android:id="@+id/settings_audio_api_tv"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settings_resolution_scale_sb"
-        android:text="@string/settings_audio_api"/>
+                <Spinner
+                    android:id="@+id/settings_vulkan_driver_s"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"/>
 
-    <Spinner
-        android:id="@+id/settings_audio_api_s"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settings_audio_api_tv"/>
+                <TextView
+                    android:id="@+id/settings_resolution_scale_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:text="@string/settings_resolution_scale"/>
 
-    <TextView
-        android:id="@+id/settings_jargs_tv"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="JVM arguments"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/settings_audio_api_s" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
-    <ImageButton
-        android:id="@+id/settings_jargs_info"
-        android:scaleType="centerInside"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:layout_marginStart="8dp"
-        android:src="@drawable/mt_icon_help"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:contentDescription="About"
-        app:layout_constraintStart_toEndOf="@id/settings_jargs_tv"
-        app:layout_constraintTop_toTopOf="@id/settings_jargs_tv"
-        app:layout_constraintBottom_toBottomOf="@id/settings_jargs_tv" />
+                    <SeekBar
+                        android:id="@+id/settings_resolution_scale_sb"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@null"
+                        android:min="25"
+                        android:max="100"/>
 
-    <EditText
-        android:id="@+id/settings_jargs_et"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:hint="-Xmx3G -Xms2G -Xmn1G"
-        android:inputType="textMultiLine|textNoSuggestions"
-        android:lines="2"
-        android:maxLines="3"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settings_jargs_tv" />
+                    <TextView
+                        android:id="@+id/settings_resolution_scale_percent_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        tools:text="100%"/>
 
-    <TextView
-        android:id="@+id/settings_env_vars_tv"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:text="@string/settings_env_vars"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settings_jargs_et" />
+                </LinearLayout>
 
-    <ImageButton
-        android:id="@+id/settings_env_vars_info"
-        android:scaleType="centerInside"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:layout_marginStart="8dp"
-        android:src="@drawable/mt_icon_help"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:contentDescription="About"
-        app:layout_constraintStart_toEndOf="@id/settings_env_vars_tv"
-        app:layout_constraintTop_toTopOf="@id/settings_env_vars_tv"
-        app:layout_constraintBottom_toBottomOf="@id/settings_env_vars_tv" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-    <EditText
-        android:id="@+id/settings_env_vars_et"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:hint="@string/settings_env_vars_hint"
-        android:inputType="textMultiLine|textNoSuggestions"
-        android:lines="2"
-        android:maxLines="5"
-        android:gravity="top"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settings_env_vars_tv" />
+        <!-- Group 2: Other -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="12dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
 
-    <androidx.appcompat.widget.SwitchCompat
-        android:id="@+id/settings_debug_switch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:text="@string/settings_debug_mode"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/settings_env_vars_et" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:text="@string/settings_group_advanced"
+                    android:textAppearance="?attr/textAppearanceLabelSmall"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="13sp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/settings_jargs_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:text="JVM arguments"/>
+
+                    <ImageButton
+                        android:id="@+id/settings_jargs_info"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginStart="8dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/mt_icon_help"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="About"/>
+
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/settings_jargs_et"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:hint=" -Xms2G -Xmx3G -Xmn1G"
+                    android:textSize="11sp"
+                    android:inputType="textMultiLine|textNoSuggestions"
+                    android:lines="2"
+                    android:maxLines="3"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="4dp"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/settings_env_vars_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:text="@string/settings_env_vars"/>
+
+                    <ImageButton
+                        android:id="@+id/settings_env_vars_info"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginStart="8dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/mt_icon_help"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="About"/>
+
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/settings_env_vars_et"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:hint="@string/settings_env_vars_hint"
+                    android:textSize="11sp"
+                    android:inputType="textMultiLine|textNoSuggestions"
+                    android:lines="2"
+                    android:maxLines="5"
+                    android:gravity="top"/>
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/settings_debug_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:text="@string/settings_debug_mode"/>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Group 3: Controls -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="12dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:text="@string/settings_group_controls"
+                    android:textAppearance="?attr/textAppearanceLabelSmall"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="13sp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:text="@string/touch_controls_description"
+                    android:textSize="12sp"
+                    android:textColor="?android:attr/textColorSecondary"/>
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/touch_controls_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:text="@string/touch_controls_switch_label"/>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Group 4: Sound -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="12dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:text="@string/settings_group_audio"
+                    android:textAppearance="?attr/textAppearanceLabelSmall"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="13sp"/>
+
+                <TextView
+                    android:id="@+id/settings_audio_api_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:text="@string/settings_audio_api"/>
+
+                <Spinner
+                    android:id="@+id/settings_audio_api_s"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+</ScrollView>

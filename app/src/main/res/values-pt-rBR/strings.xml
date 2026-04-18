@@ -86,7 +86,7 @@
     <string name="game_instance_manage_storage">Gerenciar armazenamento</string>
     <string name="game_instance_delete">Excluir</string>
 
-    <string name="donate_message">Gostando do app e quer nos apoiar? \n\nCriado por ko-fi.com/liamelui, agora mantido e desenvolvido por ko-fi.com/udarmolota. \n\nOutros colaboradores: \nshimux0, Wakort, LeHiepDuy.</string>
+    <string name="donate_message">Gostando do app e quer nos apoiar? \n\nAgora mantido e desenvolvido por ko-fi.com/udarmolota, \ncriado por ko-fi.com/liamelui. \n\nColaboradores: \nshimux0, Wakort, LeHiepDuy, deadgamer182, Liko.</string>
 
     <string name="app_aborted">O aplicativo encontrou um problema inesperado e foi encerrado</string>
     <string name="share_logs">Compartilhar arquivo de log</string>
@@ -194,19 +194,19 @@
     </string>
 
     <!-- Controls layout -->
-    <string name="menu_install_controls">Importar/Exportar controles</string>
+    <string name="menu_install_controls">Importar/Exportar layout</string>
 
     <string name="install_controls_instance_label">Instância do jogo</string>
-    <string name="install_controls_zip_label">ZIP de controles</string>
-    <string name="install_controls_install">Importar</string>
+    <string name="install_controls_zip_label">ZIP do layout</string>
+    <string name="install_controls_install">Importar layout</string>
 
-    <string name="dialog_title_installing_controls">Importando controles…</string>
-    <string name="dialog_title_controls_installed">Controles importados</string>
-    <string name="dialog_title_failed_to_install_controls">Falha ao importar controles</string>
+    <string name="dialog_title_installing_controls">Importando layout…</string>
+    <string name="dialog_title_controls_installed">Layout importado</string>
+    <string name="dialog_title_failed_to_install_controls">Falha ao importar layout</string>
 
     <string name="install_controls_zip_warning">O ZIP deve conter controls.json (no nível raiz). Caso contrário, pode ser instalado incorretamente.</string>
 
-    <string name="install_controls_zip_help_title">Formato do ZIP de controles</string>
+    <string name="install_controls_zip_help_title">Formato do ZIP de layout</string>
     <string name="install_controls_zip_help_message">✅ Correto:\n\ncontrols.json\n\n❌ Incorreto:\n\nAlgumapasta/\n\u00A0\u00A0controls.json</string>
 
     <string name="install_saves_instance_label">Selecione a instância do jogo</string>
@@ -230,16 +230,16 @@
     <string name="dialog_title_saves_exported">Saves exportados</string>
     <string name="dialog_title_failed_to_export_saves">Falha ao exportar saves</string>
 
-    <string name="install_controls_export">Exportar</string>
+    <string name="install_controls_export">Exportar layout</string>
 
-    <string name="dialog_title_exporting_controls">Exportando controles…</string>
-    <string name="dialog_title_controls_exported">Controles exportados</string>
-    <string name="dialog_title_failed_to_export_controls">Falha ao exportar controles</string>
-    <string name="dialog_title_controls_export_skipped_default">Controles padrão em uso — nada para exportar</string>
+    <string name="dialog_title_exporting_controls">Exportando layout…</string>
+    <string name="dialog_title_controls_exported">Layout exportado</string>
+    <string name="dialog_title_failed_to_export_controls">Falha ao exportar layout</string>
+    <string name="dialog_title_controls_export_skipped_default">Layout padrão em uso — nada para exportar</string>
     <string name="install_controls_global_hint">
-       O layout de controles é global. O export salva controls.json apenas se você alterou o layout.
+       O layout é global. O export salva controls.json apenas se você alterou o layout.
     </string>
-    <string name="controls_export_nothing_to_export">Nada para exportar: layout de controles padrão está em uso.</string>
+    <string name="controls_export_nothing_to_export">Nada para exportar: layout padrão está em uso.</string>
     <string name="settings_debug_mode">Modo de depuração (-debug)</string>
     <string name="select_instance">— Selecione uma instância do jogo —</string>
 
@@ -324,4 +324,83 @@
     <string name="preset_dialog_message_b41">Build 41.78 — a versão mais estável disponível hoje. Funciona na maioria dos dispositivos com 6GB de RAM ou mais.</string>
     <string name="preset_dialog_message_b42">Build 42 (versões 42.0–42.11). Requer 6GB+ de RAM. Funciona principalmente em Snapdragon e também em Dimensity potentes (com ANGLE ativado).</string>
     <string name="preset_dialog_message_b4212">Build 42.12 e superior. Requer configurações ligeiramente diferentes e no mínimo 8GB de RAM. Funciona principalmente em Snapdragon e Dimensity novos e potentes (com ANGLE ativado).</string>
+
+    <!-- Settings groups -->
+    <string name="settings_group_rendering">Renderização</string>
+    <string name="settings_group_advanced">Avançado</string>
+    <string name="settings_group_controls">Controles</string>
+    <string name="settings_group_audio">Áudio</string>
+
+    <!-- Game files zip help text -->
+    <string name="game_instance_files_help_message">
+        \u2705 Correto:\n\n
+        projectzomboid.zip/\n
+        \u00A0\u00A0ProjectZomboid64.json\n
+        \u00A0\u00A0java/\n
+        \u00A0\u00A0natives/\n
+        \u00A0\u00A0...\n\n
+        \u274C Incorreto:\n\n
+        projectzomboid.zip/\n
+        \u00A0\u00A0Project Zomboid/\n
+        \u00A0\u00A0\u00A0\u00A0ProjectZomboid64.json\n
+        \u00A0\u00A0\u00A0\u00A0java/\n
+        \u00A0\u00A0\u00A0\u00A0...
+    </string>
+    <string name="game_instance_files_help_title">Estrutura do ZIP dos arquivos do jogo</string>
+
+    <!-- New instance layout names -->
+    <string name="new_game_instance_group_name">Nome da instância</string>
+    <string name="new_game_instance_group_preset">Predefinição</string>
+    <string name="new_game_instance_group_files">Arquivos</string>
+
+    <string name="install_mod_group_instance">Instância</string>
+    <string name="install_mod_group_file">Arquivo do mod</string>
+    <string name="install_controls_group_file">Arquivo de layout</string>
+    <string name="install_saves_group_import">Importar saves</string>
+    <string name="install_saves_group_export">Exportar saves</string>
+    <string name="install_saves_export_hint">Salvar os saves atuais como arquivo ZIP.</string>
+    <string name="install_controls_group_export">Exportar layout</string>
+    <string name="install_controls_export_hint">Salvar o layout atual como arquivo ZIP.</string>
+    <string name="install_driver_group_import">Importar driver</string>
+    <string name="install_driver_group_export">Exportar driver</string>
+    <string name="install_driver_export_hint">Salvar o driver personalizado instalado como arquivo .so.</string>
+    <string name="export_log_group_export">Exportar log</string>
+    <string name="export_log_hint">Exporta o arquivo console.txt da instância selecionada.</string>
+
+    <string name="new_game_instance_create">Criar</string>
+    <string name="new_game_instance_select_preset">Selecione um preset…</string>
+    <string name="new_game_instance_no_preset_selected">Selecione um preset. Ele deve corresponder à versão do jogo: Build 41 tem um preset, Build 42 é dividido em dois — escolha com cuidado.</string>
+    <string name="new_game_instance_no_preset_title">Selecione um preset</string>
+
+    <string name="nav_menu_optimization">Otimização</string>
+    <string name="nav_menu_mod_fixes">Correção de Mods</string>
+
+    <!-- Optimization page -->
+    <string name="optimization_group_jvm">Argumentos JVM</string>
+    <string name="optimization_jvm_hint">Copie um preset e cole em Configurações → Argumentos JVM. Escolha de acordo com a RAM do seu dispositivo.</string>
+    <string name="optimization_jvm_4gb_label">4 GB RAM</string>
+    <string name="optimization_jvm_6gb_label">6 GB RAM</string>
+    <string name="optimization_jvm_balanced_label">Balanceado</string>
+    <string name="optimization_jvm_aggressive_label">Agressivo</string>
+    <string name="optimization_copy">Copiar</string>
+    <string name="optimization_open_settings">→ Abrir Configurações</string>
+    <string name="optimization_group_betterfps">BetterFPS b41</string>
+    <string name="optimization_betterfps_hint">Reduz a zona de renderização ao redor do jogador. Steam Workshop ID: 3022543997. Baixe o mod, escolha uma variante (comece com 90×90), compacte o arquivo IsoChunkMap.class e instale abaixo.</string>
+    <string name="optimization_betterfps_file_label">IsoChunkMap.class (compactado)</string>
+    <string name="optimization_install">Instalar</string>
+    <string name="optimization_betterfps_help_title">Como o BetterFPS funciona</string>
+    <string name="optimization_betterfps_help_message">Steam Workshop ID: 3022543997\n\n\"Project Zomboid renderiza uma zona de 190×190 tiles ao redor do jogador. Este mod reduz o tamanho dessa zona e evita carregar chunks desnecessários.\"\n— descrição do mod\n\nVariantes:\n• PotatoePC — máximo desempenho\n• 1080 — balanceado\n• 4k — melhor qualidade\n• All_Settings — tamanhos personalizados de 30×30 a 190×190\n\nRecomendamos começar com 90×90 — visivelmente menor que o padrão 190×190, mas sem exagerar. Se estiver bom, pode tentar ainda menor.\n\nApós baixar, abra a pasta do mod, escolha a variante, compacte apenas o arquivo IsoChunkMap.class e carregue aqui.</string>
+    <string name="optimization_jvm_copied">Copiado para a área de transferência</string>
+    <string name="optimization_betterfps_installed">BetterFPS instalado com sucesso</string>
+    <string name="optimization_betterfps_installing">Instalando BetterFPS…</string>
+
+    <!-- ===== Mods fix ===== -->
+    <string name="mod_fix_installing">Instalando mod com correção…</string>
+    <string name="mod_fix_installed">Mod instalado com sucesso</string>
+    <string name="mod_fix_error_no_mod_folder">Nenhuma pasta de mod encontrada no arquivo</string>
+    <string name="mod_fix_error_not_b42">Este mod não parece ser um mod para Build 42: %1$s</string>
+    <string name="mod_fix_group_double_path">Correção de caminho duplo</string>
+    <string name="mod_fix_double_path_hint">Correção para mods do Build 42 com erros de caminho no Android. Mods conhecidos: Tsar\'s Common Library (ID: 3402491515), Simple Flashlight on Belt (ID: 3394588830).</string>
+    <string name="mod_fix_help_title">O que é esta correção?</string>
+    <string name="mod_fix_help_message">Alguns mods do Build 42 usam uma estrutura de pastas que causa conflito de caminho no Android devido à sensibilidade a maiúsculas. O jogo procura os arquivos em um caminho duplicado e não consegue encontrá-los.\n\nEsta correção instala o mod duas vezes — uma com os nomes de pasta originais e outra com todos os nomes em minúsculas — para que o jogo encontre os arquivos independentemente do caminho usado.\n\nMods afetados conhecidos:\n• Tsar\'s Common Library — ID: 3402491515\n• [B42] Simple Flashlight on Belt — ID: 3394588830\n\nComo usar: baixe o mod do Steam Workshop, compacte a pasta do mod como está e carregue aqui.</string>
 </resources>

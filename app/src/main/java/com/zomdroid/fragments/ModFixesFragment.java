@@ -26,29 +26,25 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.zomdroid.InstallerService;
 import com.zomdroid.R;
-import com.zomdroid.databinding.FragmentInstallModBinding;
+import com.zomdroid.databinding.FragmentModFixesBinding;
 import com.zomdroid.databinding.TaskProgressDialogBinding;
 import com.zomdroid.game.GameInstance;
 import com.zomdroid.game.GameInstanceManager;
-
-import android.graphics.Typeface;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class InstallModFragment extends Fragment {
+public class ModFixesFragment extends Fragment {
 
-    private static final String LOG_TAG = InstallModFragment.class.getName();
+    private static final String LOG_TAG = ModFixesFragment.class.getName();
 
-    private FragmentInstallModBinding binding;
+    private FragmentModFixesBinding binding;
     private TaskProgressDialogBinding taskProgressDialogBinding;
     private AlertDialog taskProgressDialog;
     private boolean isInstallerServiceBound = false;
 
     private final String ZIP_MIME = "application/zip";
-
     private Uri modZipUri = null;
     private List<GameInstance> instances;
 
@@ -60,7 +56,7 @@ public class InstallModFragment extends Fragment {
             isInstallerServiceBound = true;
 
             handleTaskState(installerService.getTaskState().getValue());
-            installerService.getTaskState().observe(InstallModFragment.this, InstallModFragment.this::handleTaskState);
+            installerService.getTaskState().observe(ModFixesFragment.this, ModFixesFragment.this::handleTaskState);
         }
 
         @Override
@@ -78,7 +74,7 @@ public class InstallModFragment extends Fragment {
             unbindInstallerService();
             requireContext().stopService(new Intent(requireContext(), InstallerService.class));
             Toast.makeText(requireContext(),
-                    getString(R.string.dialog_title_mods_installed),
+                    getString(R.string.mod_fix_installed),
                     Toast.LENGTH_SHORT).show();
         } else if (state.isFinishedWithError) {
             showTaskFinishedWithErrorDialog(state.title, state.message);
@@ -89,16 +85,13 @@ public class InstallModFragment extends Fragment {
         }
     }
 
-    // ZIP picker
-    private final ActivityResultLauncher<String> actionOpenModsLauncher =
+    private final ActivityResultLauncher<String> modZipLauncher =
             registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
                 if (uri == null) return;
-
                 ContentResolver cr = requireContext().getContentResolver();
-
                 if (Objects.equals(cr.getType(uri), ZIP_MIME)) {
                     modZipUri = uri;
-                    binding.installModZipPathEt.setText(extractFileName(uri));
+                    binding.modFixesZipPathEt.setText(extractFileName(uri));
                 } else {
                     Toast.makeText(requireContext(),
                             getString(R.string.game_instance_unsupported_extension),
@@ -107,10 +100,8 @@ public class InstallModFragment extends Fragment {
             });
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container,
-                             Bundle savedInstanceState) {
-        binding = FragmentInstallModBinding.inflate(inflater, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        binding = FragmentModFixesBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
@@ -125,81 +116,80 @@ public class InstallModFragment extends Fragment {
                 .setCancelable(false)
                 .create();
         taskProgressDialogBinding.progressDialogOkMb.setOnClickListener(v ->
-                taskProgressDialog.dismiss()
-        );
+                taskProgressDialog.dismiss());
 
+        // Help button
+        binding.modFixesHelpIb.setOnClickListener(v ->
+                new MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(R.string.mod_fix_help_title)
+                        .setMessage(R.string.mod_fix_help_message)
+                        .setPositiveButton(R.string.dialog_button_ok, null)
+                        .show());
+
+        // Instance spinner
         instances = GameInstanceManager.requireSingleton().getInstances();
 
         if (instances == null || instances.isEmpty()) {
-            Toast.makeText(requireContext(),
-                    "No game instances found",
-                    Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Spinner population
-        List<String> names = new ArrayList<>();
-        if (instances.size() > 1) {
-            names.add(getString(R.string.select_instance)); // holder
-        }
-        for (GameInstance gi : instances) {
-            names.add(gi.getName());
-        }
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                requireContext(),
-                R.layout.spinner_item,
-                names
-        );
-        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        binding.installModInstanceSpinner.setAdapter(adapter);
-        binding.installModInstanceSpinner.setOnItemSelectedListener(
-        new android.widget.AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(android.widget.AdapterView<?> parent,
-                                       View view, int position, long id) {
-                int instanceIndex = instances.size() > 1 ? position - 1 : position;
-                if (instanceIndex < 0 || instanceIndex >= instances.size()) {
-                    binding.installModBannerIv.setVisibility(View.INVISIBLE);
-                    binding.installModBannerOverlay.setVisibility(View.INVISIBLE);
-                    return;
-                }
-                GameInstance selected = instances.get(instanceIndex);
-                int bannerRes;
-                switch (selected.getPresetName()) {
-                    case "Build 42.12+":
-                        bannerRes = R.drawable.banner_build42_12;
-                        break;
-                    case "Build 42":
-                        bannerRes = R.drawable.banner_build42;
-                        break;
-                    default:
-                        bannerRes = R.drawable.banner_build41;
-                        break;
-                }
-                binding.installModBannerIv.setImageResource(bannerRes);
-                binding.installModBannerIv.setVisibility(View.VISIBLE);
-                binding.installModBannerOverlay.setVisibility(View.VISIBLE);
+            binding.modFixesInstanceSpinner.setEnabled(false);
+            binding.modFixesInstallBtn.setEnabled(false);
+        } else {
+            List<String> names = new ArrayList<>();
+            if (instances.size() > 1) {
+                names.add(getString(R.string.select_instance));
             }
-    
-            @Override
-            public void onNothingSelected(android.widget.AdapterView<?> parent) {
-                binding.installModBannerIv.setVisibility(View.INVISIBLE);
-                binding.installModBannerOverlay.setVisibility(View.INVISIBLE);
+            for (GameInstance gi : instances) {
+                names.add(gi.getName());
             }
-        });
-        if (instances.size() == 1) {
-            binding.installModInstanceSpinner.setSelection(0);
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                    requireContext(),
+                    R.layout.spinner_item,
+                    names);
+            adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+            binding.modFixesInstanceSpinner.setAdapter(adapter);
+
+            binding.modFixesInstanceSpinner.setOnItemSelectedListener(
+                new android.widget.AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(android.widget.AdapterView<?> parent,
+                                               View view, int position, long id) {
+                        int instanceIndex = instances.size() > 1 ? position - 1 : position;
+                        if (instanceIndex < 0 || instanceIndex >= instances.size()) {
+                            binding.modFixesBannerIv.setImageResource(R.drawable.banner_default);
+                            return;
+                        }
+                        GameInstance selected = instances.get(instanceIndex);
+                        int bannerRes;
+                        switch (selected.getPresetName()) {
+                            case "Build 42.12+":
+                                bannerRes = R.drawable.banner_build42_12;
+                                break;
+                            case "Build 42":
+                                bannerRes = R.drawable.banner_build42;
+                                break;
+                            default:
+                                bannerRes = R.drawable.banner_build41;
+                                break;
+                        }
+                        binding.modFixesBannerIv.setImageResource(bannerRes);
+                    }
+
+                    @Override
+                    public void onNothingSelected(android.widget.AdapterView<?> parent) {
+                        binding.modFixesBannerIv.setImageResource(R.drawable.banner_default);
+                    }
+                });
+
+            if (instances.size() == 1) {
+                binding.modFixesInstanceSpinner.setSelection(0);
+            }
         }
 
         // Browse button
-        binding.installModBrowseIb.setOnClickListener(v ->
-                actionOpenModsLauncher.launch(ZIP_MIME)
-        );
+        binding.modFixesBrowseIb.setOnClickListener(v ->
+                modZipLauncher.launch(ZIP_MIME));
 
         // Install button
-        binding.installModInstallBtn.setOnClickListener(v -> {
-
+        binding.modFixesInstallBtn.setOnClickListener(v -> {
             if (modZipUri == null) {
                 Toast.makeText(requireContext(),
                         R.string.game_instance_no_file_selected,
@@ -207,8 +197,7 @@ public class InstallModFragment extends Fragment {
                 return;
             }
 
-            int position = binding.installModInstanceSpinner.getSelectedItemPosition();
-            // если инстансов > 1, первый элемент — заглушка, сдвигаем индекс
+            int position = binding.modFixesInstanceSpinner.getSelectedItemPosition();
             int instanceIndex = instances.size() > 1 ? position - 1 : position;
 
             if (instanceIndex < 0 || instanceIndex >= instances.size()) {
@@ -223,36 +212,19 @@ public class InstallModFragment extends Fragment {
             Intent installerIntent = new Intent(requireContext(), InstallerService.class);
             installerIntent.putExtra(
                     InstallerService.EXTRA_COMMAND,
-                    InstallerService.Task.INSTALL_MOD_TO_INSTANCE.ordinal()
-            );
+                    InstallerService.Task.INSTALL_MOD_WITH_FIX.ordinal());
             installerIntent.putExtra(
                     InstallerService.EXTRA_GAME_INSTANCE_NAME,
-                    selectedInstance.getName()
-            );
+                    selectedInstance.getName());
             installerIntent.putExtra(
                     InstallerService.EXTRA_MODS_URI,
-                    modZipUri
-            );
+                    modZipUri);
 
-            clearSelectedModZip();
+            modZipUri = null;
+            binding.modFixesZipPathEt.setText(getString(R.string.game_instance_no_file_selected));
 
             requireContext().startForegroundService(installerIntent);
             bindInstallerService();
-        });
-
-        binding.installModZipHelpIb.setOnClickListener(v -> {
-            MaterialAlertDialogBuilder builder =
-                    new MaterialAlertDialogBuilder(requireContext())
-                            .setTitle(R.string.install_mod_zip_help_title)
-                            .setMessage(getString(R.string.install_mod_zip_help_message))
-                            .setPositiveButton(android.R.string.ok, null);
-
-            AlertDialog dialog = builder.show();
-
-            TextView messageView = dialog.findViewById(android.R.id.message);
-            if (messageView != null) {
-                messageView.setTypeface(Typeface.MONOSPACE);
-            }
         });
     }
 
@@ -282,25 +254,21 @@ public class InstallModFragment extends Fragment {
         } else {
             taskProgressDialogBinding.progressDialogTitleTv.setVisibility(View.GONE);
         }
-
         if (message != null) {
             taskProgressDialogBinding.progressDialogMessageTv.setText(message);
             taskProgressDialogBinding.progressDialogMessageTv.setVisibility(View.VISIBLE);
         } else {
             taskProgressDialogBinding.progressDialogMessageTv.setVisibility(View.GONE);
         }
-
         taskProgressDialogBinding.progressDialogProgressLpi.setVisibility(View.VISIBLE);
-        if (progress < 0)
+        if (progress < 0) {
             taskProgressDialogBinding.progressDialogProgressLpi.setIndeterminate(true);
-        else {
+        } else {
             taskProgressDialogBinding.progressDialogProgressLpi.setIndeterminate(false);
             taskProgressDialogBinding.progressDialogProgressLpi.setMax(progressMax);
             taskProgressDialogBinding.progressDialogProgressLpi.setProgress(progress);
         }
-
         taskProgressDialogBinding.progressDialogOkMb.setVisibility(View.GONE);
-
         taskProgressDialog.show();
     }
 
@@ -311,46 +279,28 @@ public class InstallModFragment extends Fragment {
         } else {
             taskProgressDialogBinding.progressDialogTitleTv.setVisibility(View.GONE);
         }
-
         if (message != null) {
             taskProgressDialogBinding.progressDialogMessageTv.setText(message);
             taskProgressDialogBinding.progressDialogMessageTv.setVisibility(View.VISIBLE);
         } else {
             taskProgressDialogBinding.progressDialogMessageTv.setVisibility(View.GONE);
         }
-
         taskProgressDialogBinding.progressDialogProgressLpi.setVisibility(View.GONE);
         taskProgressDialogBinding.progressDialogOkMb.setVisibility(View.VISIBLE);
-
         taskProgressDialog.show();
-    }
-
-    private void clearSelectedModZip() {
-        modZipUri = null;
-        if (binding != null) {
-            binding.installModZipPathEt.setText(getString(R.string.game_instance_no_file_selected));
-        }
     }
 
     private String extractFileName(Uri uri) {
         String fileName = null;
-
         Cursor cursor = requireContext().getContentResolver().query(
                 uri,
                 new String[]{MediaStore.MediaColumns.DISPLAY_NAME},
-                null,
-                null,
-                null
-        );
-
+                null, null, null);
         if (cursor != null && cursor.moveToFirst()) {
             int nameIndex = cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME);
-            if (nameIndex != -1) {
-                fileName = cursor.getString(nameIndex);
-            }
+            if (nameIndex != -1) fileName = cursor.getString(nameIndex);
             cursor.close();
         }
-
         return fileName;
     }
 }

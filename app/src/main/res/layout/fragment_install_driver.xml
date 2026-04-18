@@ -1,78 +1,137 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/install_driver_cl"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp">
+    android:layout_height="match_parent">
 
-    <!-- SO label -->
-    <TextView
-        android:id="@+id/install_driver_so_tv"
-        android:layout_width="0dp"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/install_driver_so_label"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        android:orientation="vertical"
+        android:padding="16dp">
 
-    <!-- Warning -->
-    <TextView
-        android:id="@+id/install_driver_warning_tv"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/install_driver_warning"
-        android:textSize="12sp"
-        android:textColor="?attr/colorOnSurfaceVariant"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/install_driver_so_tv"
-        app:layout_constraintEnd_toEndOf="parent" />
+        <!-- Card 1: Import driver -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="12dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
 
-    <!-- SO path -->
-    <EditText
-        android:id="@+id/install_driver_so_path_et"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:hint="@string/game_instance_no_file_selected"
-        android:enabled="false"
-        android:focusable="false"
-        android:clickable="false"
-        android:cursorVisible="false"
-        android:inputType="none"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/install_driver_warning_tv"
-        app:layout_constraintEnd_toStartOf="@id/install_driver_browse_ib"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
 
-    <!-- Browse button -->
-    <ImageButton
-        style="@style/AppTheme.ImageButton"
-        android:id="@+id/install_driver_browse_ib"
-        android:src="@drawable/mt_icon_folder_open"
-        app:layout_constraintTop_toTopOf="@id/install_driver_so_path_et"
-        app:layout_constraintBottom_toBottomOf="@id/install_driver_so_path_et"
-        app:layout_constraintEnd_toEndOf="parent"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:text="@string/install_driver_group_import"
+                    android:textAppearance="?attr/textAppearanceLabelSmall"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="13sp"/>
 
-    <!-- Import button -->
-    <Button
-        android:id="@+id/install_driver_import_btn"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/install_driver_import"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/install_driver_so_path_et"/>
+                <TextView
+                    android:id="@+id/install_driver_so_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:text="@string/install_driver_so_label"/>
 
-    <!-- Export button -->
-    <Button
-        android:id="@+id/install_driver_export_btn"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="@string/install_driver_export"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/install_driver_import_btn"/>
+                <TextView
+                    android:id="@+id/install_driver_warning_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:text="@string/install_driver_warning"
+                    android:textSize="11sp"
+                    android:textColor="?attr/colorOnSurfaceVariant"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <EditText
+                        android:id="@+id/install_driver_so_path_et"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textSize="13sp"
+                        android:hint="@string/game_instance_no_file_selected"
+                        android:enabled="false"
+                        android:focusable="false"
+                        android:clickable="false"
+                        android:cursorVisible="false"
+                        android:inputType="none"/>
+
+                    <ImageButton
+                        style="@style/AppTheme.ImageButton"
+                        android:id="@+id/install_driver_browse_ib"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/mt_icon_folder_open"/>
+
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/install_driver_import_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:minWidth="160dp"
+                    android:text="@string/install_driver_import"/>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Card 2: Export driver -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="12dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:text="@string/install_driver_group_export"
+                    android:textAppearance="?attr/textAppearanceLabelSmall"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="13sp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:text="@string/install_driver_export_hint"
+                    android:textSize="11sp"
+                    android:textColor="?attr/colorOnSurfaceVariant"/>
+
+                <Button
+                    android:id="@+id/install_driver_export_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:minWidth="160dp"
+                    android:text="@string/install_driver_export"/>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+</ScrollView>

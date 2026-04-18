@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">Zomdroid</string>
 
@@ -85,7 +86,7 @@
     <string name="game_instance_manage_storage">管理存储</string>
     <string name="game_instance_delete">删除</string>
 
-    <string name="donate_message">喜欢这个应用并想支持我们吗？\n\n由 ko-fi.com/liamelui 创建，现由 ko-fi.com/udarmolota 维护和开发。\n\n其他贡献者：\nshimux0, Wakort, LeHiepDuy。</string>
+    <string name="donate_message">喜欢这个应用并想支持我们吗？\n\n现由 ko-fi.com/udarmolota 维护和开发，\n由 ko-fi.com/liamelui 创建。\n\n其他贡献者：\nshimux0, Wakort, LeHiepDuy, deadgamer182, Liko。</string>
 
     <string name="app_aborted">应用遇到意外问题，必须关闭。</string>
     <string name="share_logs">分享日志文件</string>
@@ -187,21 +188,20 @@
         （根目录无 mod.info）
     </string>
 
-
     <!-- Controls layout -->
-    <string name="menu_install_controls">导入/导出控制</string>
+    <string name="menu_install_controls">导入/导出按键布局</string>
 
     <string name="install_controls_instance_label">游戏实例</string>
-    <string name="install_controls_zip_label">控制 ZIP</string>
-    <string name="install_controls_install">导入</string>
+    <string name="install_controls_zip_label">按键布局 ZIP</string>
+    <string name="install_controls_install">导入按键布局</string>
 
-    <string name="dialog_title_installing_controls">正在导入控制…</string>
-    <string name="dialog_title_controls_installed">控制已导入</string>
-    <string name="dialog_title_failed_to_install_controls">导入控制失败</string>
+    <string name="dialog_title_installing_controls">正在导入按键布局…</string>
+    <string name="dialog_title_controls_installed">按键布局已导入</string>
+    <string name="dialog_title_failed_to_install_controls">导入按键布局失败</string>
 
     <string name="install_controls_zip_warning">ZIP 文件必须在根目录包含 controls.json。否则可能安装不正确。</string>
 
-    <string name="install_controls_zip_help_title">控制 ZIP 格式</string>
+    <string name="install_controls_zip_help_title">按键布局 ZIP 格式</string>
     <string name="install_controls_zip_help_message">✅ 正确：\n\ncontrols.json\n\n❌ 错误：\n\nSomeFolder/\n\u00A0\u00A0controls.json</string>
 
     <string name="install_saves_instance_label">选择游戏实例</string>
@@ -224,16 +224,16 @@
     <string name="dialog_title_saves_exported">存档已导出</string>
     <string name="dialog_title_failed_to_export_saves">导出存档失败</string>
 
-    <string name="install_controls_export">导出</string>
+    <string name="install_controls_export">导出按键布局</string>
 
-    <string name="dialog_title_exporting_controls">正在导出控制…</string>
-    <string name="dialog_title_controls_exported">控制已导出</string>
-    <string name="dialog_title_failed_to_export_controls">导出控制失败</string>
-    <string name="dialog_title_controls_export_skipped_default">使用默认控制 — 无内容可导出</string>
+    <string name="dialog_title_exporting_controls">正在导出按键布局…</string>
+    <string name="dialog_title_controls_exported">按键布局已导出</string>
+    <string name="dialog_title_failed_to_export_controls">导出按键布局失败</string>
+    <string name="dialog_title_controls_export_skipped_default">使用默认按键布局 — 无内容可导出</string>
     <string name="install_controls_global_hint">
-        控制布局是全局的。仅当您更改了布局时，导出保存的 controls.json。
+        按键布局是全局的。仅当您更改了布局时，导出保存的 controls.json。
     </string>
-    <string name="controls_export_nothing_to_export">无内容可导出：使用默认控制布局。</string>
+    <string name="controls_export_nothing_to_export">无内容可导出：使用默认按键布局。</string>
     <string name="settings_debug_mode">调试模式 (-debug)</string>
     <string name="select_instance">— 选择游戏实例 —</string>
 
@@ -318,4 +318,84 @@
     <string name="preset_dialog_message_b41">Build 41.78——目前最稳定的版本。可在大多数6GB及以上内存的设备上运行。</string>
     <string name="preset_dialog_message_b42">Build 42（版本42.0–42.11）。需要6GB以上内存。主要在骁龙设备上运行，部分强力天玑设备也支持（需开启ANGLE）。</string>
     <string name="preset_dialog_message_b4212">Build 42.12及以上版本。需要略有不同的设置，至少8GB内存。主要在骁龙和新款强力天玑设备上运行（需开启ANGLE）。</string>
+
+    <!-- Settings groups -->
+    <string name="settings_group_rendering">渲染</string>
+    <string name="settings_group_advanced">高级</string>
+    <string name="settings_group_controls">控制</string>
+    <string name="settings_group_audio">音频</string>
+
+    <!-- Game files zip help text -->
+    <string name="game_instance_files_help_message">
+        \u2705 正确:\n\n
+        projectzomboid.zip/\n
+        \u00A0\u00A0ProjectZomboid64.json\n
+        \u00A0\u00A0java/\n
+        \u00A0\u00A0natives/\n
+        \u00A0\u00A0...\n\n
+        \u274C 错误:\n\n
+        projectzomboid.zip/\n
+        \u00A0\u00A0Project Zomboid/\n
+        \u00A0\u00A0\u00A0\u00A0ProjectZomboid64.json\n
+        \u00A0\u00A0\u00A0\u00A0java/\n
+        \u00A0\u00A0\u00A0\u00A0...
+    </string>
+    <string name="game_instance_files_help_title">游戏文件ZIP结构</string>
+
+    <!-- New instance layout names -->
+    <string name="new_game_instance_group_name">实例名称</string>
+    <string name="new_game_instance_group_preset">预设</string>
+    <string name="new_game_instance_group_files">文件</string>
+
+    <string name="install_mod_group_instance">实例</string>
+    <string name="install_mod_group_file">Mod文件</string>
+    <string name="install_controls_group_file">按键布局文件</string>
+    <string name="install_saves_group_import">导入存档</string>
+    <string name="install_saves_group_export">导出存档</string>
+    <string name="install_saves_export_hint">将当前存档保存为ZIP压缩包。</string>
+    <string name="install_controls_group_export">导出按键布局</string>
+    <string name="install_controls_export_hint">将当前按键布局保存为ZIP压缩包。</string>
+    <string name="install_driver_group_import">导入驱动</string>
+    <string name="install_driver_group_export">导出驱动</string>
+    <string name="install_driver_export_hint">将已安装的自定义驱动保存为.so文件。</string>
+    <string name="export_log_group_export">导出日志</string>
+    <string name="export_log_hint">从所选实例导出console.txt日志文件。</string>
+
+    <string name="new_game_instance_create">创建</string>
+    <string name="new_game_instance_select_preset">选择预设…</string>
+    <string name="new_game_instance_no_preset_selected">请选择预设。它必须与您的游戏版本匹配：Build 41 有一个预设，Build 42 分为两个——请仔细选择。</string>
+    <string name="new_game_instance_no_preset_title">选择预设</string>
+
+    <string name="nav_menu_optimization">优化</string>
+    <string name="nav_menu_mod_fixes">修复模组</string>
+
+    <!-- Optimization page -->
+    <string name="optimization_group_jvm">JVM 参数</string>
+    <string name="optimization_jvm_hint">复制预设并粘贴到设置 → JVM 参数中。根据设备内存选择。</string>
+    <string name="optimization_jvm_4gb_label">4 GB 内存</string>
+    <string name="optimization_jvm_6gb_label">6 GB 内存</string>
+    <string name="optimization_jvm_balanced_label">平衡</string>
+    <string name="optimization_jvm_aggressive_label">激进</string>
+    <string name="optimization_copy">复制</string>
+    <string name="optimization_open_settings">→ 打开设置</string>
+    <string name="optimization_group_betterfps">BetterFPS b41</string>
+    <string name="optimization_betterfps_hint">减少玩家周围的渲染区域。Steam 创意工坊 ID：3022543997。下载模组，选择变体（从 90×90 开始），压缩 IsoChunkMap.class 文件后安装。</string>
+    <string name="optimization_betterfps_file_label">IsoChunkMap.class（压缩包）</string>
+    <string name="optimization_install">安装</string>
+    <string name="optimization_betterfps_help_title">BetterFPS 原理</string>
+    <string name="optimization_betterfps_help_message">Steam 创意工坊 ID：3022543997\n\n\"Project Zomboid 在玩家周围渲染 190×190 格的区域。此模组缩小该区域，避免加载不必要的区块。\"\n— 模组描述\n\n变体：\n• PotatoePC — 最高性能\n• 1080 — 平衡\n• 4k — 最佳画质\n• All_Settings — 自定义区域大小（30×30 至 190×190）\n\n建议从 90×90 开始——明显小于默认的 190×190，但不过于激进。如果效果好可以继续降低。\n\n下载后打开模组文件夹，选择变体，仅压缩 IsoChunkMap.class 文件后在此加载。</string>
+    <string name="optimization_jvm_copied">已复制到剪贴板</string>
+    <string name="optimization_betterfps_installed">BetterFPS 安装成功</string>
+    <string name="optimization_betterfps_installing">正在安装 BetterFPS…</string>
+
+    <!-- ===== Mods fix ===== -->
+    <string name="mod_fix_installing">正在安装修复版模组…</string>
+    <string name="mod_fix_installed">模组安装成功</string>
+    <string name="mod_fix_error_no_mod_folder">压缩包中未找到模组文件夹</string>
+    <string name="mod_fix_error_not_b42">此模组似乎不是 Build 42 模组：%1$s</string>
+    <string name="mod_fix_group_double_path">双路径修复</string>
+    <string name="mod_fix_double_path_hint">修复 Build 42 模组在 Android 上的路径错误。已知问题模组：Tsar\'s Common Library（ID：3402491515）、Simple Flashlight on Belt（ID：3394588830）。</string>
+    <string name="mod_fix_help_title">这是什么修复？</string>
+    <string name="mod_fix_help_message">某些 Build 42 模组的文件夹结构在 Android 上因大小写敏感而导致路径冲突。游戏会在双重路径中查找文件但无法找到。\n\n此修复会将模组安装两次——一次使用原始文件夹名称，一次使用全小写名称——以确保游戏无论使用哪条路径都能找到文件。\n\n已知受影响的模组：\n• Tsar\'s Common Library — ID：3402491515\n• [B42] Simple Flashlight on Belt — ID：3394588830\n\n使用方法：从 Steam 创意工坊下载模组，将模组文件夹原样压缩后在此加载。</string>
+
 </resources>
