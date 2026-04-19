@@ -1035,6 +1035,7 @@ public class InstallerService extends Service implements TaskProgressListener {
         });
     }
 
+
     // ================================================
     // INSTALL_MOD_WITH_FIX — double path fix for B42 mods
     // ================================================
@@ -1050,6 +1051,7 @@ public class InstallerService extends Service implements TaskProgressListener {
             finishWithError(taskTitle, "Game instance name is missing");
             return;
         }
+
         GameInstance gameInstance = GameInstanceManager.requireSingleton().getInstanceByName(gameInstanceName);
         if (gameInstance == null) {
             finishWithError(taskTitle, "Game instance not found: " + gameInstanceName);
@@ -1065,8 +1067,9 @@ public class InstallerService extends Service implements TaskProgressListener {
         executorService.submit(() -> {
             File tmpDir = new File(getCacheDir(), "mod_fix_tmp_" + System.currentTimeMillis());
             try {
-                // Step 1: extract ZIP to temp dir
                 tmpDir.mkdirs();
+
+                // Step 1: extract ZIP to temp dir
                 try (InputStream is = getContentResolver().openInputStream(archiveUri);
                      ZipInputStream zis = new ZipInputStream(is)) {
                     ZipEntry entry;
@@ -1075,78 +1078,77 @@ public class InstallerService extends Service implements TaskProgressListener {
                         if (entry.isDirectory()) {
                             outFile.mkdirs();
                         } else {
-                            outFile.getParentFile().mkdirs();
+                            File parent = outFile.getParentFile();
+                            if (parent != null) parent.mkdirs();
                             try (FileOutputStream fos = new FileOutputStream(outFile)) {
                                 byte[] buf = new byte[64 * 1024];
                                 int r;
-                                while ((r = zis.read(buf)) != -1) fos.write(buf, 0, r);
+                                while ((r = zis.read(buf)) != -1) {
+                                    fos.write(buf, 0, r);
+                                }
                             }
                         }
                         zis.closeEntry();
                     }
                 }
 
-                // Step 2: find actual mod root
-                File modRoot = tmpDir;
-                if (!hasB42Folders(tmpDir)) {
-                    File[] topLevel = tmpDir.listFiles(File::isDirectory);
-                    if (topLevel != null && topLevel.length == 1 && hasB42Folders(topLevel[0])) {
-                        modRoot = topLevel[0];
-                    } else {
-                        finishWithError(taskTitle,
-                                getString(R.string.mod_fix_error_not_b42, "unknown"));
-                        return;
-                    }
+                // Step 2: detect actual mod folders.
+                // We intentionally use real folder names, matching the successful Termux script logic.
+                List<File> modRoots = findB42ModRoots(tmpDir);
+                if (modRoots.isEmpty()) {
+                    finishWithError(taskTitle, getString(R.string.mod_fix_error_not_b42, "unknown"));
+                    return;
                 }
-
-                Log.d("ModFix", "modRoot: " + modRoot.getAbsolutePath());
-                if (modRoot.listFiles() != null) {
-                    for (File f : modRoot.listFiles()) {
-                        Log.d("ModFix", "  " + f.getName() + (f.isDirectory() ? "/" : ""));
-                    }
-                }
-
-                // Step 3: merge versions into 42/
-                mergeVersionsInto42(modRoot);
-
-                Log.d("ModFix", "After merge:");
-                if (modRoot.listFiles() != null) {
-                    for (File f : modRoot.listFiles()) {
-                        Log.d("ModFix", "  " + f.getName() + (f.isDirectory() ? "/" : ""));
-                    }
-                }
-
-                // Step 4: check if needs inception
-                boolean needsInception = hasScriptsFolder(modRoot);
-                Log.d("ModFix", "needsInception: " + needsInception);
-
-                // Step 5: determine mod name from mod.info
-                String modId = readModId(modRoot);
-                if (modId == null || modId.isEmpty()) {
-                    modId = extractZipName(archiveUri);
-                }
-                Log.d("ModFix", "modId: " + modId);
 
                 String modsPath = gameInstance.getHomePath() + "/Zomboid/mods";
-                new File(modsPath).mkdirs();
+                File modsRoot = new File(modsPath);
+                modsRoot.mkdirs();
 
-                // Step 6: install normal case copy
-                File normalDest = new File(modsPath, modId);
-                if (normalDest.exists()) FileUtils.deleteDirectory(normalDest);
-                copyDirectory(modRoot, normalDest);
+                boolean installedAny = false;
 
-                // Step 7: if needs inception, install lowercase copy inside data/ path
-                if (needsInception) {
-                    String instanceNameLower = gameInstance.getName().toLowerCase();
-                    String inceptionRelPath = "data/user/0/com.zomdroid/files/instances/"
-                            + instanceNameLower + "/zomboid/mods";
-                    File inceptionDir = new File(modsPath, inceptionRelPath);
-                    inceptionDir.mkdirs();
+                for (File modRoot : modRoots) {
+                    String modFolderName = modRoot.getName();
+                    if (modFolderName == null || modFolderName.trim().isEmpty()) {
+                        Log.w("ModFix", "Skipping mod with empty folder name: " + modRoot.getAbsolutePath());
+                        continue;
+                    }
 
-                    String lowerName = modId.toLowerCase();
-                    File lowerDest = new File(inceptionDir, lowerName);
-                    if (lowerDest.exists()) FileUtils.deleteDirectory(lowerDest);
-                    copyDirectoryLowercase(modRoot, lowerDest);
+                    Log.d("ModFix", "Processing modRoot: " + modRoot.getAbsolutePath());
+
+                    // Step 3: merge versions into latest version folder (DO NOT rename latest -> 42).
+                    mergeVersionsLikePZTool(modRoot);
+
+                    // Step 4: determine whether lower-case inception copy is needed.
+                    boolean needsInception = hasScriptsFolder(modRoot);
+                    Log.d("ModFix", "needsInception for " + modFolderName + ": " + needsInception);
+
+                    // Step 5: install normal-case copy under the REAL mod folder name.
+                    File normalDest = new File(modsRoot, modFolderName);
+                    if (normalDest.exists()) FileUtils.deleteDirectory(normalDest);
+                    copyDirectory(modRoot, normalDest);
+
+                    // Step 6: install lower-case copy inside the nested /data/... path, also using folder name.
+                    if (needsInception) {
+                        String instanceNameLower = gameInstance.getName().toLowerCase();
+                        String inceptionRelPath = "data/user/0/com.zomdroid/files/instances/"
+                                + instanceNameLower + "/zomboid/mods";
+                        File inceptionDir = new File(modsRoot, inceptionRelPath);
+                        inceptionDir.mkdirs();
+
+                        String lowerName = modFolderName.toLowerCase();
+                        File lowerDest = new File(inceptionDir, lowerName);
+                        if (lowerDest.exists()) FileUtils.deleteDirectory(lowerDest);
+
+                        copyDirectory(modRoot, lowerDest);
+                        lowercaseTreeInPlace(lowerDest);
+                    }
+
+                    installedAny = true;
+                }
+
+                if (!installedAny) {
+                    finishWithError(taskTitle, "No valid B42 mod folders were installed");
+                    return;
                 }
 
                 finish(getString(R.string.mod_fix_installed), null);
@@ -1154,31 +1156,39 @@ public class InstallerService extends Service implements TaskProgressListener {
             } catch (Exception e) {
                 finishWithError(taskTitle, e.toString());
             } finally {
-                try { FileUtils.deleteDirectory(tmpDir); } catch (Exception ignored) {}
+                try {
+                    FileUtils.deleteDirectory(tmpDir);
+                } catch (Exception ignored) {}
             }
         });
     }
 
-    // Extract mod name from ZIP URI — uses ContentResolver, works with any file provider
-    private String extractZipName(Uri uri) {
-        String name = null;
-        try (android.database.Cursor cursor = getContentResolver().query(
-                uri,
-                new String[]{android.provider.MediaStore.MediaColumns.DISPLAY_NAME},
-                null, null, null)) {
-            if (cursor != null && cursor.moveToFirst()) {
-                int idx = cursor.getColumnIndex(android.provider.MediaStore.MediaColumns.DISPLAY_NAME);
-                if (idx != -1) name = cursor.getString(idx);
-            }
-        } catch (Exception ignored) {}
+    // Finds actual B42 mod roots.
+    // Supported shapes:
+    // 1) zip/modName/{42,42.x,...}
+    // 2) zip/wrapper/modName/{42,42.x,...}
+    private List<File> findB42ModRoots(File extractedRoot) {
+        List<File> result = new ArrayList<>();
 
-        if (name != null && name.toLowerCase().endsWith(".zip")) {
-            name = name.substring(0, name.length() - 4);
+        File[] topLevel = listDirs(extractedRoot);
+        for (File dir : topLevel) {
+            if (hasB42Folders(dir)) {
+                result.add(dir);
+            }
         }
-        if (name == null || name.isEmpty()) {
-            name = "mod_" + System.currentTimeMillis();
+
+        if (!result.isEmpty()) return result;
+
+        if (topLevel.length == 1) {
+            File[] inner = listDirs(topLevel[0]);
+            for (File dir : inner) {
+                if (hasB42Folders(dir)) {
+                    result.add(dir);
+                }
+            }
         }
-        return name;
+
+        return result;
     }
 
     // Returns true if mod folder contains any folder matching 42 or 42.x
@@ -1191,12 +1201,19 @@ public class InstallerService extends Service implements TaskProgressListener {
         return false;
     }
 
-    // Merges all 42.x folders into 42/, injects media/ and common/ from root
-    private void mergeVersionsInto42(File modDir) throws IOException {
+    // Mirrors the successful PZTool merge logic:
+    // - merge older versions into latest
+    // - keep latest folder name as-is
+    // - inject root media/ into latest/media/
+    // - inject common/ into latest/
+    // - delete older version folders
+    // - delete root media/
+    // - delete root logo.png, poster.png, mod.info
+    // - DO NOT rename latest to 42
+    private void mergeVersionsLikePZTool(File modDir) throws IOException {
         File[] entries = modDir.listFiles(File::isDirectory);
         if (entries == null) return;
 
-        // Step 1: scan for version folders matching 42 or 42.x
         List<String> versions = new ArrayList<>();
         for (File f : entries) {
             if (f.getName().matches("^42(\\.\\d+)?$")) {
@@ -1205,8 +1222,6 @@ public class InstallerService extends Service implements TaskProgressListener {
         }
         if (versions.isEmpty()) return;
 
-        // Step 2: sort version-aware oldest → newest
-        // 42 < 42.1 < 42.9 < 42.10 < 42.13 < 42.15
         versions.sort((a, b) -> {
             String[] pa = a.split("\\.");
             String[] pb = b.split("\\.");
@@ -1220,53 +1235,54 @@ public class InstallerService extends Service implements TaskProgressListener {
         });
 
         String latest = versions.get(versions.size() - 1);
-        File target = new File(modDir, latest);
-        target.mkdirs();
+        File latestDir = new File(modDir, latest);
+        latestDir.mkdirs();
 
-        // Step 3: merge older versions into latest, oldest first (no overwrite)
-        // newest files take priority — copy oldest first so newer ones win
-        for (int i = 0; i < versions.size() - 1; i++) {
-            File older = new File(modDir, versions.get(i));
-            copyDirectoryNoOverwrite(older, target);
+        // Merge older -> latest without overwrite, so newest files win.
+        for (String version : versions) {
+            if (!version.equals(latest)) {
+                File older = new File(modDir, version);
+                copyDirectoryNoOverwrite(older, latestDir);
+            }
         }
 
-        // Step 4 is implicit — copyDirectoryNoOverwrite skips existing files
-
-        // Step 5: inject root media/ → latest/media/ (no overwrite)
         File rootMedia = new File(modDir, "media");
         if (rootMedia.exists() && rootMedia.isDirectory()) {
-            copyDirectoryNoOverwrite(rootMedia, new File(target, "media"));
-            FileUtils.deleteDirectory(rootMedia);
+            File latestMedia = new File(latestDir, "media");
+            latestMedia.mkdirs();
+            copyDirectoryNoOverwrite(rootMedia, latestMedia);
         }
 
-        // Step 6: inject common/ → latest/ (no overwrite), empty common/ but keep folder
         File rootCommon = new File(modDir, "common");
         if (rootCommon.exists() && rootCommon.isDirectory()) {
-            copyDirectoryNoOverwrite(rootCommon, target);
+            copyDirectoryNoOverwrite(rootCommon, latestDir);
+
             File[] commonContents = rootCommon.listFiles();
             if (commonContents != null) {
                 for (File f : commonContents) {
                     FileUtils.deleteDirectory(f);
                 }
             }
-            // keep empty common/ folder
         }
 
-        // Step 7: delete all old version folders and root media/
-        for (int i = 0; i < versions.size() - 1; i++) {
-            FileUtils.deleteDirectory(new File(modDir, versions.get(i)));
+        for (String version : versions) {
+            if (!version.equals(latest)) {
+                FileUtils.deleteDirectory(new File(modDir, version));
+            }
         }
 
-        // Step 8: rename latest → 42 for cross-version compatibility
-        if (!latest.equals("42")) {
-            File renamed = new File(modDir, "42");
-            if (renamed.exists()) FileUtils.deleteDirectory(renamed);
-            target.renameTo(renamed);
+        if (rootMedia.exists() && rootMedia.isDirectory()) {
+            FileUtils.deleteDirectory(rootMedia);
         }
 
-        // Remove root mod.info — 42/mod.info is authoritative for B42
         File rootModInfo = new File(modDir, "mod.info");
         if (rootModInfo.exists()) rootModInfo.delete();
+
+        File rootLogo = new File(modDir, "logo.png");
+        if (rootLogo.exists()) rootLogo.delete();
+
+        File rootPoster = new File(modDir, "poster.png");
+        if (rootPoster.exists()) rootPoster.delete();
     }
 
     // Returns true if any subfolder named "scripts" exists anywhere in the tree
@@ -1295,17 +1311,98 @@ public class InstallerService extends Service implements TaskProgressListener {
         }
     }
 
-    // Copy directory recursively, all names lowercased
-    private void copyDirectoryLowercase(File src, File dst) throws IOException {
-        dst.mkdirs();
-        File[] files = src.listFiles();
-        if (files == null) return;
-        for (File f : files) {
-            File target = new File(dst, f.getName().toLowerCase());
-            if (f.isDirectory()) {
-                copyDirectoryLowercase(f, target);
+    // Lowercase the whole tree in place, using a temp prefix first to avoid case-collision issues.
+    private void lowercaseTreeInPlace(File target) {
+        prefixFilesForLowercase(target);
+        prefixDirectoriesForLowercase(target);
+        lowercaseFilesInPlace(target);
+        lowercaseDirectoriesInPlace(target);
+    }
+
+    private void prefixFilesForLowercase(File root) {
+        File[] children = root.listFiles();
+        if (children == null) return;
+
+        for (File child : children) {
+            if (child.isDirectory()) {
+                prefixFilesForLowercase(child);
             } else {
-                copyFile(f, target);
+                File renamed = new File(child.getParentFile(), "tmp_lc_" + child.getName());
+                //noinspection ResultOfMethodCallIgnored
+                child.renameTo(renamed);
+            }
+        }
+    }
+
+    private void prefixDirectoriesForLowercase(File root) {
+        File[] children = root.listFiles();
+        if (children == null) return;
+
+        for (File child : children) {
+            if (child.isDirectory()) {
+                prefixDirectoriesForLowercase(child);
+            }
+        }
+
+        File[] dirs = root.listFiles(File::isDirectory);
+        if (dirs == null) return;
+
+        for (File dir : dirs) {
+            if (!dir.getName().startsWith("tmp_lc_")) {
+                File renamed = new File(dir.getParentFile(), "tmp_lc_" + dir.getName());
+                //noinspection ResultOfMethodCallIgnored
+                dir.renameTo(renamed);
+            }
+        }
+    }
+
+    private void lowercaseFilesInPlace(File root) {
+        File[] children = root.listFiles();
+        if (children == null) return;
+
+        for (File child : children) {
+            if (child.isDirectory()) {
+                lowercaseFilesInPlace(child);
+            } else {
+                String cleanName = child.getName();
+                if (cleanName.startsWith("tmp_lc_")) {
+                    cleanName = cleanName.substring("tmp_lc_".length());
+                }
+                cleanName = cleanName.toLowerCase();
+
+                File renamed = new File(child.getParentFile(), cleanName);
+                if (!child.equals(renamed)) {
+                    //noinspection ResultOfMethodCallIgnored
+                    child.renameTo(renamed);
+                }
+            }
+        }
+    }
+
+    private void lowercaseDirectoriesInPlace(File root) {
+        File[] children = root.listFiles();
+        if (children == null) return;
+
+        for (File child : children) {
+            if (child.isDirectory()) {
+                lowercaseDirectoriesInPlace(child);
+            }
+        }
+
+        File[] dirs = root.listFiles(File::isDirectory);
+        if (dirs == null) return;
+
+        for (File dir : dirs) {
+            String cleanName = dir.getName();
+            if (cleanName.startsWith("tmp_lc_")) {
+                cleanName = cleanName.substring("tmp_lc_".length());
+            }
+            cleanName = cleanName.toLowerCase();
+
+            File renamed = new File(dir.getParentFile(), cleanName);
+            if (!dir.equals(renamed)) {
+                //noinspection ResultOfMethodCallIgnored
+                dir.renameTo(renamed);
             }
         }
     }
@@ -1327,6 +1424,9 @@ public class InstallerService extends Service implements TaskProgressListener {
 
     // Copy single file
     private void copyFile(File src, File dst) throws IOException {
+        File parent = dst.getParentFile();
+        if (parent != null && !parent.exists()) parent.mkdirs();
+
         try (InputStream is = new FileInputStream(src);
              OutputStream os = new FileOutputStream(dst)) {
             byte[] buf = new byte[64 * 1024];
@@ -1334,30 +1434,6 @@ public class InstallerService extends Service implements TaskProgressListener {
             while ((r = is.read(buf)) != -1) os.write(buf, 0, r);
         }
     }
-
-    private String readModId(File modDir) {
-        // mod.info может быть в корне или внутри 42/
-        File[] candidates = {
-                new File(modDir, "42/mod.info"),  // сначала из 42/ — правильный для B42
-                new File(modDir, "mod.info")       // fallback — корневой
-        };
-        for (File f : candidates) {
-            if (!f.exists()) continue;
-            try (java.io.BufferedReader br = new java.io.BufferedReader(
-                    new java.io.FileReader(f))) {
-                String line;
-                while ((line = br.readLine()) != null) {
-                    line = line.trim();
-                    if (line.startsWith("id=")) {
-                        String id = line.substring(3).trim();
-                        if (!id.isEmpty()) return id;
-                    }
-                }
-            } catch (Exception ignored) {}
-        }
-        return null;
-    }
-
     public enum Task {
         CREATE_GAME_INSTANCE,
         DELETE_GAME_INSTANCE,
