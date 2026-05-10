@@ -27,7 +27,9 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import android.content.SharedPreferences;
 import com.zomdroid.InstallerService;
+import com.zomdroid.LauncherPreferences;
 import com.zomdroid.R;
 import com.zomdroid.databinding.FragmentOptimizationBinding;
 import com.zomdroid.databinding.TaskProgressDialogBinding;
@@ -77,7 +79,7 @@ public class OptimizationFragment extends Fragment {
             unbindInstallerService();
             requireContext().stopService(new Intent(requireContext(), InstallerService.class));
             Toast.makeText(requireContext(),
-                    getString(R.string.optimization_betterfps_installed),
+                    getString(R.string.mod_fix_installed),
                     Toast.LENGTH_SHORT).show();
         } else if (state.isFinishedWithError) {
             showTaskFinishedWithErrorDialog(state.title, state.message);
@@ -134,6 +136,8 @@ public class OptimizationFragment extends Fragment {
         // Open Settings link
         binding.optimizationOpenSettingsTv.setOnClickListener(v ->
                 Navigation.findNavController(v).navigate(R.id.settings_fragment));
+        binding.optimizationOpenSettingsTv2.setOnClickListener(v ->
+                Navigation.findNavController(v).navigate(R.id.settings_fragment));
 
         // BetterFPS help
         binding.optimizationBetterfpsHelpIb.setOnClickListener(v ->
@@ -146,42 +150,53 @@ public class OptimizationFragment extends Fragment {
         // Instance spinner
         instances = GameInstanceManager.requireSingleton().getInstances();
 
+        List<String> names = new ArrayList<>();
         if (instances == null || instances.isEmpty()) {
-            binding.optimizationBetterfpsInstanceSpinner.setEnabled(false);
+            instances = new ArrayList<>();
+            names.add(getString(R.string.select_instance));
             binding.optimizationBetterfpsInstallBtn.setEnabled(false);
         } else {
-            List<String> names = new ArrayList<>();
             if (instances.size() > 1) {
                 names.add(getString(R.string.select_instance));
             }
             for (GameInstance gi : instances) {
                 names.add(gi.getName());
             }
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                    requireContext(),
-                    R.layout.spinner_item,
-                    names);
-            adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-            binding.optimizationBetterfpsInstanceSpinner.setAdapter(adapter);
-
-            binding.optimizationBetterfpsInstanceSpinner.setOnItemSelectedListener(
-                    new android.widget.AdapterView.OnItemSelectedListener() {
-                        @Override
-                        public void onItemSelected(android.widget.AdapterView<?> parent,
-                                                   View view, int position, long id) {
-                        }
-
-                        @Override
-                        public void onNothingSelected(android.widget.AdapterView<?> parent) {
-                        }
-                    });
-
-            if (instances.size() == 1) {
-                binding.optimizationBetterfpsInstanceSpinner.setSelection(0);
-            }
+        }
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                requireContext(),
+                R.layout.spinner_item,
+                names);
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        binding.optimizationBetterfpsInstanceSpinner.setAdapter(adapter);
+        binding.optimizationBetterfpsInstanceSpinner.setOnItemSelectedListener(
+                new android.widget.AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(android.widget.AdapterView<?> parent,
+                                               View view, int position, long id) {
+                    }
+                    @Override
+                    public void onNothingSelected(android.widget.AdapterView<?> parent) {
+                    }
+                });
+        if (instances.size() == 1) {
+            binding.optimizationBetterfpsInstanceSpinner.setSelection(0);
         }
 
         // Browse button
+        // BetterFPS mode spinner — PotatoePC / 1080p / 4K (only meaningful for B41)
+        ArrayAdapter<String> modeAdapter = new ArrayAdapter<>(
+                requireContext(),
+                R.layout.spinner_item,
+                new String[]{
+                        getString(R.string.optimization_betterfps_mode_potato),
+                        getString(R.string.optimization_betterfps_mode_1080p),
+                        getString(R.string.optimization_betterfps_mode_4k)
+                });
+        modeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        binding.optimizationBetterfpsModeSpinner.setAdapter(modeAdapter);
+        binding.optimizationBetterfpsModeSpinner.setSelection(0); // PotatoePC by default
+
         binding.optimizationBetterfpsBrowseIb.setOnClickListener(v ->
                 betterFpsLauncher.launch(ZIP_MIME));
 
@@ -207,12 +222,19 @@ public class OptimizationFragment extends Fragment {
             GameInstance selectedInstance = instances.get(instanceIndex);
 
             Intent installerIntent = new Intent(requireContext(), InstallerService.class);
+            String[] betterfpsModes = {"PotatoePC", "1080p", "4k"};
+            int modePos = binding.optimizationBetterfpsModeSpinner.getSelectedItemPosition();
+            String selectedMode = betterfpsModes[Math.max(0, Math.min(modePos, betterfpsModes.length - 1))];
+
             installerIntent.putExtra(
                     InstallerService.EXTRA_COMMAND,
                     InstallerService.Task.INSTALL_BETTERFPS.ordinal());
             installerIntent.putExtra(
                     InstallerService.EXTRA_GAME_INSTANCE_NAME,
                     selectedInstance.getName());
+            installerIntent.putExtra(
+                    InstallerService.EXTRA_BETTERFPS_MODE,
+                    selectedMode);
             installerIntent.putExtra(
                     InstallerService.EXTRA_ARCHIVE_URI,
                     betterFpsZipUri);
@@ -222,6 +244,32 @@ public class OptimizationFragment extends Fragment {
 
             requireContext().startForegroundService(installerIntent);
             bindInstallerService();
+        });
+
+        // ===== Collapsible sections =====
+        setupCollapsible(
+                binding.optimizationJvm4gbHeader,
+                binding.optimizationJvm4gbContent,
+                binding.optimizationJvm4gbExpandIv);
+        setupCollapsible(
+                binding.optimizationJvm6gbHeader,
+                binding.optimizationJvm6gbContent,
+                binding.optimizationJvm6gbExpandIv);
+        setupCollapsible(
+                binding.optimizationBetterfpsHeader,
+                binding.optimizationBetterfpsContent,
+                binding.optimizationBetterfpsExpandIv);
+    }
+
+
+    private void setupCollapsible(android.view.View header, android.view.View content,
+                                  android.widget.ImageView expandIcon) {
+        header.setOnClickListener(v -> {
+            boolean expanded = content.getVisibility() == android.view.View.VISIBLE;
+            content.setVisibility(expanded ? android.view.View.GONE : android.view.View.VISIBLE);
+            expandIcon.setImageResource(expanded
+                    ? R.drawable.mt_icon_expand_more
+                    : R.drawable.mt_icon_expand_less);
         });
     }
 

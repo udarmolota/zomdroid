@@ -154,21 +154,23 @@ public class InstallSavesFragment extends Fragment {
                 taskProgressDialog.dismiss()
         );
 
-        instances = GameInstanceManager.requireSingleton().getInstances();
-        if (instances == null || instances.isEmpty()) {
-            Toast.makeText(requireContext(),
-                    "No game instances found",
-                    Toast.LENGTH_SHORT).show();
-            return;
-        }
+        // Default banner — always show before any early return
+        binding.installSavesBannerIv.setImageResource(R.drawable.banner_default);
 
+        instances = GameInstanceManager.requireSingleton().getInstances();
         // Spinner population
         List<String> names = new ArrayList<>();
-        if (instances.size() > 1) {
+        if (instances == null || instances.isEmpty()) {
+            instances = new ArrayList<>();
             names.add(getString(R.string.select_instance));
-        }
-        for (GameInstance gi : instances) {
-            names.add(gi.getName());
+            binding.installSavesInstallBtn.setEnabled(false);
+        } else {
+            if (instances.size() > 1) {
+                names.add(getString(R.string.select_instance));
+            }
+            for (GameInstance gi : instances) {
+                names.add(gi.getName());
+            }
         }
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
@@ -177,46 +179,42 @@ public class InstallSavesFragment extends Fragment {
                 names
         );
         adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+
         binding.installSavesInstanceSpinner.setAdapter(adapter);
         binding.installSavesInstanceSpinner.setOnItemSelectedListener(
-            new android.widget.AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(android.widget.AdapterView<?> parent,
-                                           View view, int position, long id) {
-                    int instanceIndex = instances.size() > 1 ? position - 1 : position;
-                    if (instanceIndex < 0 || instanceIndex >= instances.size()) {
-                        binding.installSavesBannerIv.setVisibility(View.INVISIBLE);
+                new android.widget.AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(android.widget.AdapterView<?> parent,
+                                               View view, int position, long id) {
+                        int instanceIndex = instances.size() > 1 ? position - 1 : position;
+                        if (instanceIndex < 0 || instanceIndex >= instances.size()) {
+                            binding.installSavesBannerIv.setImageResource(R.drawable.banner_default);
+                            binding.installSavesBannerOverlay.setVisibility(View.INVISIBLE);
+                            return;
+                        }
+                        GameInstance selected = instances.get(instanceIndex);
+                        int bannerRes;
+                        switch (selected.getPresetName()) {
+                            case "Build 42.12+":
+                                bannerRes = R.drawable.banner_build42_12;
+                                break;
+                            case "Build 42":
+                                bannerRes = R.drawable.banner_build42;
+                                break;
+                            default:
+                                bannerRes = R.drawable.banner_build41;
+                                break;
+                        }
+                        binding.installSavesBannerIv.setImageResource(bannerRes);
+                        binding.installSavesBannerOverlay.setVisibility(View.VISIBLE);
+                    }
+
+                    @Override
+                    public void onNothingSelected(android.widget.AdapterView<?> parent) {
+                        binding.installSavesBannerIv.setImageResource(R.drawable.banner_default);
                         binding.installSavesBannerOverlay.setVisibility(View.INVISIBLE);
-                        return;
                     }
-                    GameInstance selected = instances.get(instanceIndex);
-                    int bannerRes;
-                    switch (selected.getPresetName()) {
-                        case "Build 42.12+":
-                            bannerRes = R.drawable.banner_build42_12;
-                            break;
-                        case "Build 42":
-                            bannerRes = R.drawable.banner_build42;
-                            break;
-                        default:
-                            bannerRes = R.drawable.banner_build41;
-                            break;
-                    }
-                    binding.installSavesBannerIv.setImageResource(bannerRes);
-                    binding.installSavesBannerIv.setVisibility(View.VISIBLE);
-                    binding.installSavesBannerOverlay.setVisibility(View.VISIBLE);
-                }
-        
-                @Override
-                public void onNothingSelected(android.widget.AdapterView<?> parent) {
-                    binding.installSavesBannerIv.setVisibility(View.INVISIBLE);
-                    binding.installSavesBannerOverlay.setVisibility(View.INVISIBLE);
-                }
-            });
-        
-        if (instances.size() == 1) {
-            binding.installSavesInstanceSpinner.setSelection(0);
-        }
+                });
 
         if (instances.size() == 1) {
             binding.installSavesInstanceSpinner.setSelection(0);

@@ -26,24 +26,16 @@
                 android:layout_height="match_parent">
 
                 <ImageView
-                    android:id="@+id/export_log_banner_iv"
+                    android:id="@+id/controls_editor_banner_iv"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
-                    android:visibility="visible"/>
-
-                <View
-                    android:id="@+id/export_log_banner_overlay"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/banner_gradient_overlay"
-                    android:visibility="invisible"/>
+                    android:src="@drawable/banner_default"/>
 
             </FrameLayout>
-
         </androidx.cardview.widget.CardView>
 
-        <!-- Card 1: Instance -->
+        <!-- Card 1: Background image -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -64,48 +56,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="4dp"
-                    android:text="@string/install_mod_group_instance"
-                    android:textAppearance="?attr/textAppearanceLabelSmall"
-                    android:textColor="?attr/colorPrimary"
-                    android:textSize="13sp"/>
-
-                <TextView
-                    android:id="@+id/export_log_instance_tv"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?attr/textAppearanceBodySmall"
-                    android:text="@string/install_saves_instance_label"/>
-
-                <Spinner
-                    android:id="@+id/export_log_instance_spinner"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Card 2: Export log -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="12dp"
-            app:cardCornerRadius="12dp"
-            app:strokeWidth="0dp"
-            app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"
-                    android:text="@string/export_log_group_export"
+                    android:text="@string/controls_editor_bg_group"
                     android:textAppearance="?attr/textAppearanceLabelSmall"
                     android:textColor="?attr/colorPrimary"
                     android:textSize="13sp"/>
@@ -114,17 +65,92 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="12dp"
-                    android:text="@string/export_log_hint"
+                    android:text="@string/controls_editor_bg_hint"
+                    android:textSize="11sp"
+                    android:textColor="?attr/colorOnSurfaceVariant"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <EditText
+                        android:id="@+id/controls_editor_bg_path_et"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textSize="13sp"
+                        android:hint="@string/game_instance_no_file_selected"
+                        android:enabled="false"
+                        android:focusable="false"
+                        android:clickable="false"
+                        android:cursorVisible="false"
+                        android:inputType="none"/>
+
+                    <ImageButton
+                        style="@style/AppTheme.ImageButton"
+                        android:id="@+id/controls_editor_bg_browse_ib"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/mt_icon_folder_open"/>
+
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/controls_editor_bg_clear_btn"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:visibility="gone"
+                    android:text="@string/controls_editor_bg_clear"/>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Card 2: Open editor -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="12dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:text="@string/controls_editor_open_group"
+                    android:textAppearance="?attr/textAppearanceLabelSmall"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="13sp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:text="@string/controls_editor_open_hint"
                     android:textSize="11sp"
                     android:textColor="?attr/colorOnSurfaceVariant"/>
 
                 <Button
-                    android:id="@+id/export_log_export_btn"
+                    android:id="@+id/controls_editor_open_btn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:minWidth="160dp"
-                    android:text="@string/export_log_export"/>
+                    android:text="@string/controls_editor_open_btn"/>
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

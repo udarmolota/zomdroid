@@ -17,6 +17,8 @@ import android.widget.FrameLayout;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,6 +32,8 @@ import com.zomdroid.databinding.ActivityControlsEditorBinding;
 import com.zomdroid.databinding.ElementBindingFieldBinding;
 
 public class ControlsEditorActivity extends AppCompatActivity {
+    public static final String EXTRA_BACKGROUND_PATH = "com.zomdroid.ControlsEditorActivity.EXTRA_BACKGROUND_PATH";
+
     private ActivityControlsEditorBinding binding;
     private TextWatcher controlElementTextWatcher = null;
 
@@ -51,7 +55,19 @@ public class ControlsEditorActivity extends AppCompatActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
 
         binding.inputControlsV.setEditMode(true);
-        binding.inputControlsV.setBackgroundColor(0xFF232323);
+
+        binding.inputControlsV.setBackgroundColor(0x00000000);
+
+        // Load background image into the ImageView behind InputControlsView
+        // This avoids touching InputControlsView state (which would reset the layout)
+        String bgPath = getIntent().getStringExtra(EXTRA_BACKGROUND_PATH);
+        if (bgPath != null) {
+            Bitmap bg = BitmapFactory.decodeFile(bgPath);
+            if (bg != null) {
+                binding.controlsEditorBgIv.setImageBitmap(bg);
+                binding.controlsEditorBgIv.setVisibility(android.view.View.VISIBLE);
+            }
+        }
 
         binding.layoutsBtn.setOnClickListener(v -> {
             new MaterialAlertDialogBuilder(this)

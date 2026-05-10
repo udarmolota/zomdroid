@@ -11,7 +11,7 @@
         <item
             android:id="@+id/action_open_controls_editor"
             android:title="@string/nav_menu_controls_editor"
-            android:icon="@drawable/mt_icon_controller"
+            android:icon="@drawable/ic_controls"
             app:showAsAction="never"/>
         <item
             android:id="@+id/action_open_gamepad_mapper"
@@ -24,27 +24,27 @@
         <item
             android:id="@+id/action_manage_storage"
             android:title="@string/nav_menu_manage_storage"
-            android:icon="@drawable/mt_icon_folder"
+            android:icon="@drawable/ic_storage"
             app:showAsAction="never"/>
         <item
             android:id="@+id/action_install_controls"
             android:title="@string/menu_install_controls"
-            android:icon="@drawable/mt_icon_folder"
+            android:icon="@drawable/ic_controls"
             app:showAsAction="never"/>
         <item
             android:id="@+id/action_install_saves"
             android:title="@string/install_saves_menu"
-            android:icon="@drawable/mt_icon_folder"
+            android:icon="@drawable/mt_icon_save"
             app:showAsAction="never"/>
         <item
             android:id="@+id/action_install_driver"
             android:title="@string/install_driver_menu"
-            android:icon="@drawable/mt_icon_folder"
+            android:icon="@drawable/mt_icon_driver"
             app:showAsAction="never"/>
         <item
             android:id="@+id/action_export_log"
             android:title="@string/export_log_menu"
-            android:icon="@drawable/mt_icon_folder"
+            android:icon="@drawable/ic_log_file"
             app:showAsAction="never"/>
     </group>
 
@@ -52,7 +52,7 @@
         <item
             android:id="@+id/action_open_install_mod"
             android:title="@string/nav_menu_install_mod"
-            android:icon="@drawable/mt_icon_folder"
+            android:icon="@drawable/ic_mods"
             app:showAsAction="never"/>
         <item
             android:id="@+id/action_open_mod_fixes"
@@ -65,7 +65,7 @@
         <item
             android:id="@+id/action_open_optimization"
             android:title="@string/nav_menu_optimization"
-            android:icon="@drawable/mt_icon_folder"
+            android:icon="@drawable/ic_optimization"
             app:showAsAction="never"/>
     </group>
 

@@ -41,8 +41,8 @@
             android:id="@+id/action_open_optimization"
             app:destination="@id/optimization_fragment" />
         <action
-            android:id="@+id/action_open_mod_fixes"
-            app:destination="@id/mod_fixes_fragment" />
+            android:id="@+id/action_open_controls_editor_launch"
+            app:destination="@id/controls_editor_launch_fragment" />
     </fragment>
 
     <fragment
@@ -104,9 +104,9 @@
         android:label="@string/nav_menu_optimization" />
 
     <fragment
-        android:id="@+id/mod_fixes_fragment"
-        android:name="com.zomdroid.fragments.ModFixesFragment"
-        android:label="@string/nav_menu_mod_fixes"
-        tools:layout="@layout/fragment_mod_fixes"/>
+        android:id="@+id/controls_editor_launch_fragment"
+        android:name="com.zomdroid.fragments.ControlsEditorLaunchFragment"
+        android:label="@string/nav_menu_controls_editor"
+        tools:layout="@layout/fragment_controls_editor_launch" />
 
 </navigation>

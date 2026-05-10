@@ -270,6 +270,23 @@ public class SettingsFragment extends Fragment {
                     })
                     .show();
         });
+
+        // Advanced section — collapsible
+        setupCollapsible(
+                binding.settingsAdvancedHeader,
+                binding.settingsAdvancedContent,
+                binding.settingsAdvancedExpandIv);
+    }
+
+    private void setupCollapsible(android.view.View header, android.view.View content,
+                                   android.widget.ImageView expandIcon) {
+        header.setOnClickListener(v -> {
+            boolean expanded = content.getVisibility() == android.view.View.VISIBLE;
+            content.setVisibility(expanded ? android.view.View.GONE : android.view.View.VISIBLE);
+            expandIcon.setImageResource(expanded
+                    ? R.drawable.mt_icon_expand_more
+                    : R.drawable.mt_icon_expand_less);
+        });
     }
 
     @Override

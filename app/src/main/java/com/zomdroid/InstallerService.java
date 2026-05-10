@@ -44,13 +44,16 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import java.nio.charset.StandardCharsets;
 
 public class InstallerService extends Service implements TaskProgressListener {
     private static final String LOG_TAG = InstallerService.class.getName();
     private static final String CHANNEL_ID = "com.zomdroid.InstallerService.NOTIFICATION_CHANNEL";
     private static final int NOTIFICATION_ID = 1;
+
+    // Intent action broadcast when service starts
     public static final String ACTION_STARTED = "com.zomdroid.InstallerService.ACTION_STARTED";
+
+    // Intent extras
     public static final String EXTRA_COMMAND = "com.zomdroid.InstallerService.EXTRA_COMMAND";
     public static final String EXTRA_GAME_INSTANCE_NAME = "com.zomdroid.InstallerService.EXTRA_GAME_INSTANCE_NAME";
     public static final String EXTRA_ARCHIVE_URI = "com.zomdroid.InstallerService.EXTRA_ARCHIVE_URI";
@@ -60,6 +63,9 @@ public class InstallerService extends Service implements TaskProgressListener {
     public static final String EXTRA_CONTROLS_URI = "com.zomdroid.InstallerService.EXTRA_CONTROLS_URI";
     public static final String EXTRA_OUTPUT_URI = "com.zomdroid.InstallerService.EXTRA_OUTPUT_URI";
     public static final String EXTRA_DRIVER_URI = "com.zomdroid.InstallerService.EXTRA_DRIVER_URI";
+    // Build version of the target instance ("41" or "42"), used by mod fix to choose install strategy
+    public static final String EXTRA_BUILD_VERSION = "com.zomdroid.InstallerService.EXTRA_BUILD_VERSION";
+    public static final String EXTRA_BETTERFPS_MODE = "com.zomdroid.InstallerService.EXTRA_BETTERFPS_MODE";
 
     private final IBinder binder = new LocalBinder();
     private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -71,7 +77,8 @@ public class InstallerService extends Service implements TaskProgressListener {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "GameInstallerServiceChannel", NotificationManager.IMPORTANCE_LOW);
+        NotificationChannel channel = new NotificationChannel(
+                CHANNEL_ID, "GameInstallerServiceChannel", NotificationManager.IMPORTANCE_LOW);
 
         notificationManager = NotificationManagerCompat.from(this);
         notificationManager.createNotificationChannel(channel);
@@ -705,28 +712,28 @@ public class InstallerService extends Service implements TaskProgressListener {
         File gameDir = new File(gameInstance.getGamePath());
         File pzJar = new File(gameDir, "projectzomboid.jar");
         if (!pzJar.exists()) return; // не 42.13-структура
-    
+
         File soDir = new File(gameDir, "android/arm64-v8a");
-    
+
         maybeDisableLib(soDir, "libLighting64.so");
         maybeDisableLib(soDir, "libPZBullet64.so");
     }
-    
+
     private void maybeDisableLib(File soDir, String libName) {
         File so = new File(soDir, libName);
         if (!so.exists()) return;
-    
+
         File disabled = new File(soDir, libName + ".disabled");
         if (disabled.exists()) {
             //noinspection ResultOfMethodCallIgnored
             so.delete();
             return;
         }
-    
+
         if (!so.renameTo(disabled)) {
             throw new RuntimeException("Failed to rename " + libName + " for 42.13: " + so.getAbsolutePath());
         }
-    
+
         Log.i(LOG_TAG, "42.13 patch: disabled " + libName + " -> " + disabled.getName());
     }
 
@@ -852,29 +859,29 @@ public class InstallerService extends Service implements TaskProgressListener {
         }
     }
 
-     private void doImportCustomDriver(Intent intent) {
+    private void doImportCustomDriver(Intent intent) {
         String taskTitle = getString(R.string.dialog_title_importing_driver);
- 
+
         startForeground(NOTIFICATION_ID, buildNotification(taskTitle));
         this.taskState.postValue(new TaskState(taskTitle, null, -1, 0, false, false));
- 
+
         Uri driverUri = intent.getParcelableExtra(EXTRA_DRIVER_URI);
         if (driverUri == null) {
             finishWithError(taskTitle, "Driver URI is missing");
             return;
         }
- 
+
         executorService.submit(() -> {
             try {
                 String destPath = AppStorage.requireSingleton().getHomePath()
                         + "/" + C.deps.CUSTOM_DRIVER;
                 File destFile = new File(destPath);
- 
+
                 File parent = destFile.getParentFile();
                 if (parent != null && !parent.exists()) {
                     parent.mkdirs();
                 }
- 
+
                 try (InputStream is = getContentResolver().openInputStream(driverUri);
                      OutputStream os = new java.io.FileOutputStream(destFile, false)) {
                     if (is == null) throw new IllegalStateException("openInputStream returned null");
@@ -884,37 +891,37 @@ public class InstallerService extends Service implements TaskProgressListener {
                         os.write(buf, 0, r);
                     }
                 }
- 
+
                 finish(getString(R.string.dialog_title_driver_imported), null);
             } catch (Exception e) {
                 finishWithError(getString(R.string.dialog_title_failed_to_import_driver), e.toString());
             }
         });
     }
- 
+
     private void doExportCustomDriver(Intent intent) {
         String taskTitle = getString(R.string.dialog_title_exporting_driver);
- 
+
         startForeground(NOTIFICATION_ID, buildNotification(taskTitle));
         this.taskState.postValue(new TaskState(taskTitle, null, -1, 0, false, false));
- 
+
         Uri outUri = intent.getParcelableExtra(EXTRA_OUTPUT_URI);
         if (outUri == null) {
             finishWithError(taskTitle, "Output URI is missing");
             return;
         }
- 
+
         executorService.submit(() -> {
             try {
                 String srcPath = AppStorage.requireSingleton().getHomePath()
                         + "/" + C.deps.CUSTOM_DRIVER;
                 File srcFile = new File(srcPath);
- 
+
                 if (!srcFile.exists()) {
                     finishWithError(taskTitle, "Custom driver file not found: " + srcPath);
                     return;
                 }
- 
+
                 try (InputStream is = new java.io.FileInputStream(srcFile);
                      OutputStream os = getContentResolver().openOutputStream(outUri)) {
                     if (os == null) throw new IllegalStateException("openOutputStream returned null");
@@ -924,7 +931,7 @@ public class InstallerService extends Service implements TaskProgressListener {
                         os.write(buf, 0, r);
                     }
                 }
- 
+
                 finish(getString(R.string.dialog_title_driver_exported), null);
             } catch (Exception e) {
                 finishWithError(getString(R.string.dialog_title_failed_to_export_driver), e.toString());

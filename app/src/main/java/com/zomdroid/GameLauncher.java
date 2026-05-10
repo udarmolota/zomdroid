@@ -129,13 +129,15 @@ public class GameLauncher {
 
         jvmArgs.add("-XX:ErrorFile=/dev/stdout"); // print jvm crash report to stdout for now
 
+
         ArrayList<String> args = gameInstance.getArgsAsList();
         if (BuildConfig.DEBUG) {
             //args.add("-debug");
             //args.add("-debuglog=Shader");
-            Log.i("Zomdroid", "JVM ARGS: " + jvmArgs);
-            Log.i("Zomdroid", "GAME ARGS: " + args);
         }
+        Log.i("Zomdroid", "JVM ARGS: " + jvmArgs);
+        Log.i("Zomdroid", "GAME ARGS: " + args);
+
         if (BuildConfig.DEBUG || LauncherPreferences.requireSingleton().isDebug()) {
             args.add("-debug");
         }

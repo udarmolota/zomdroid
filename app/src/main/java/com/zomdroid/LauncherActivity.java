@@ -101,8 +101,10 @@ public class LauncherActivity extends AppCompatActivity {
                 startActivity(chooserIntent);
                 return true;
             } else if (item.getItemId() == R.id.action_open_controls_editor) {
-                Intent intent = new Intent(this, ControlsEditorActivity.class);
-                startActivity(intent);
+                //Intent intent = new Intent(this, ControlsEditorActivity.class);
+                //startActivity(intent);
+                binding.drawerLayout.close();
+                navController.navigate(R.id.action_open_controls_editor_launch);
                 return true;
             } else if (item.getItemId() == R.id.action_open_gamepad_mapper) {
                 // Navigate to gamepad mapper using NavController

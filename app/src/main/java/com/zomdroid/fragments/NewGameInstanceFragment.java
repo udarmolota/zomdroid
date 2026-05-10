@@ -176,6 +176,9 @@ public class NewGameInstanceFragment extends Fragment {
                 // Append GPU hint for Build 42
                 if ("42".equals(preset.buildVersion)) {
                     GpuVendor gpu = detectGpuVendor();
+                    //Toast.makeText(requireContext(),
+                    //    "GPU: " + gpu.name() + " | HW: " + android.os.Build.HARDWARE + " | BOARD: " + android.os.Build.BOARD,
+                    //    Toast.LENGTH_LONG).show();
                     if (gpu == GpuVendor.QUALCOMM) {
                         baseMessage += "\n\n" + getString(R.string.preset_dialog_gpu_hint_qualcomm);
                     } else if (gpu == GpuVendor.MEDIATEK) {

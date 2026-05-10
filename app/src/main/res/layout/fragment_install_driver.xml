@@ -10,6 +10,37 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- Banner -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="140dp"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/install_driver_banner_iv"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:visibility="visible"/>
+
+                <View
+                    android:id="@+id/install_driver_banner_overlay"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/banner_gradient_overlay"
+                    android:visibility="invisible"/>
+
+            </FrameLayout>
+
+        </androidx.cardview.widget.CardView>
+
         <!-- Card 1: Import driver -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"

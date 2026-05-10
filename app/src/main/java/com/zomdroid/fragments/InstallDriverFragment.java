@@ -137,7 +137,8 @@ public class InstallDriverFragment extends Fragment {
         taskProgressDialogBinding.progressDialogOkMb.setOnClickListener(v ->
                 taskProgressDialog.dismiss()
         );
-
+        // Default banner — always show before any early return
+        binding.installDriverBannerIv.setImageResource(R.drawable.banner_default);
         binding.installDriverBrowseIb.setOnClickListener(v ->
                 actionOpenDriverLauncher.launch(new String[]{"application/octet-stream", "*/*"})
         );
