@@ -81,7 +81,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         binding = ActivityGameBinding.inflate(getLayoutInflater());
         // Give focus to game surface to ensure it receives input events
         setContentView(binding.getRoot());
-
+        getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         //binding.getRoot().setOnApplyWindowInsetsListener((v, insets) -> {
         //    boolean imeVisible = insets.isVisible(WindowInsets.Type.ime());
         //    systemKeyboardVisible = imeVisible;
@@ -288,15 +288,19 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     // Called when any physical gamepad is connected: hide the virtual controller UI
     @Override
     public void onGamepadConnected() {
-        isGamepadConnected = true;
-        applyInputOverlay();
+        runOnUiThread(() -> {
+            isGamepadConnected = true;
+            applyInputOverlay();
+        });
     }
 
     // Called when all physical gamepads are disconnected: show the virtual controller UI
     @Override
     public void onGamepadDisconnected() {
-        isGamepadConnected = false;
-        applyInputOverlay();
+        runOnUiThread(() -> {
+            isGamepadConnected = false;
+            applyInputOverlay();
+        });
     }
 
     // Forward every gamepad button event to the native input interface
@@ -406,25 +410,29 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
 
     @Override
     public void onKeyboardConnected() {
-        isKeyboardConnected = true;
-        // 1) Жёстко выключаем IME-режим SurfaceView
-        systemKeyboardVisible = false;
-        if (binding != null && binding.gameSv != null) {
-            binding.gameSv.setAcceptingTextInput(false);
-        }
-        hideSystemKeyboard(); // на всякий случай
-        binding.inputControlsV.setKeyboardConnected(true);
-        reapplyImmersiveMode();
-        applyInputOverlay();
-        //Toast.makeText(this, "onKeyboardConnected()", Toast.LENGTH_SHORT).show();
+        runOnUiThread(() -> {
+            if (binding == null) return;
+            isKeyboardConnected = true;
+            // 1) Жёстко выключаем IME-режим SurfaceView
+            systemKeyboardVisible = false;
+            if (binding.gameSv != null) {
+                binding.gameSv.setAcceptingTextInput(false);
+            }
+            hideSystemKeyboard(); // на всякий случай
+            binding.inputControlsV.setKeyboardConnected(true);
+            reapplyImmersiveMode();
+            applyInputOverlay();
+        });
     }
 
     @Override
     public void onKeyboardDisconnected() {
-        isKeyboardConnected = false;
-        binding.inputControlsV.setKeyboardConnected(false);
-        applyInputOverlay();
-        //Toast.makeText(this, "onKeyboardDisconnected()", Toast.LENGTH_SHORT).show();
+        runOnUiThread(() -> {
+            if (binding == null) return;
+            isKeyboardConnected = false;
+            binding.inputControlsV.setKeyboardConnected(false);
+            applyInputOverlay();
+        });
     }
 
     @Override
