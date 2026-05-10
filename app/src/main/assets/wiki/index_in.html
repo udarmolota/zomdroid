@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wiki</title>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            body {
+                color: #E2E2E9;
+            }
+
+            a {
+                color: #8AB4F8;
+            }
+        }
+
+        details > summary {
+            font-style: italic;
+        }
+
+        p + details,
+        div + details,
+        body > details {
+            margin-top: 1em;
+        }
+
+        .details-content {
+            padding-top: 0.5em;
+        }
+    </style>
+</head>
+<body>
+<ul>
+    <li>
+        <a href="#how-to-get-game-files">Bagaimana cara mendapatkan file game?</a>
+        <ol>
+            <li><a href="#download-game-files">Unduh file game dari sumber resmi</a></li>
+            <li><a href="#add-files-to-archive">Tambahkan file ke arsip .zip</a></li>
+            <li><a href="#copy-archive-to-device">Salin arsip .zip ke perangkat mobile Anda</a></li>
+        </ol>
+    </li>
+    <li>
+        <a href="#native-libraries">Library native (multiplayer Build 41)</a>
+    </li>
+    <li>
+        <a href="#renderers">Renderer dan driver</a>
+    </li>
+    <li>
+        <a href="#known-issues">Masalah yang diketahui</a>
+    </li>
+</ul>
+
+<hr>
+
+<section id="how-to-get-game-files">
+    <h2>Bagaimana cara mendapatkan file game?</h2>
+    <section id="download-game-files">
+        <h3>1. Unduh file game dari sumber resmi</h3>
+        <details>
+            <summary>Panduan untuk DepotDownloader</summary>
+            <div class="details-content">
+                <p>Zomdroid memerlukan file Project Zomboid versi Linux untuk berjalan. Cara termudah untuk mendapatkannya di Windows adalah melalui <b>DepotDownloader</b> — alat yang memungkinkan Anda mengunduh build tertentu langsung dari Steam.</p>
+                <p>Anda harus memiliki Project Zomboid di Steam sebelum mengunduh.</p>
+                <ol>
+                    <li>Unduh <a href="https://github.com/SteamRE/DepotDownloader/releases/tag/DepotDownloader_3.4.0" target="_blank">DepotDownloader</a>.
+                        Untuk Windows, ambil <b>DepotDownloader-windows-x64.zip</b>.</li>
+                    <li>Ekstrak ke mana saja, misalnya: <b>C:\DepotDownloader</b></li>
+                    <li>Buka folder, klik kanan → <b>Buka di Terminal / CMD</b></li>
+                    <li>Jalankan perintah berikut sebagai dasar, ganti <b>NAMAPENGGUNA</b> dan
+                        <b>KATASANDI</b> dengan kredensial Steam Anda:
+                        <br><br>
+                        <i>./DepotDownloader -app 108600 -depot 108603 -manifest NOMERMANIFEST -username NAMAPENGGUNA -password KATASANDI</i>
+                        <br><br>
+                        Perintah lengkap termasuk nomor manifest dan flag <code>-beta</code> opsional
+                        (misalnya <code>-beta unstable</code> atau <code>-beta legacy_42_12</code>) dapat disalin
+                        langsung dari <a href="https://steamdb.info/depot/108603/manifests/" target="_blank">SteamDB</a>
+                        — pilih <b>DepotDownloader</b> dari menu "Copy format" dan klik ikon salin di samping
+                        build yang diinginkan. Autentikasi Steam Mobile mungkin diperlukan.
+                    </li>
+                </ol>
+            </div>
+        </details>
+    </section>
+
+    <section id="add-files-to-archive">
+        <h3>2. Tambahkan file ke arsip .zip</h3>
+        <p>Zomdroid memerlukan arsip .zip yang berisi file game di level teratas — bukan di dalam folder.</p>
+        <details>
+            <summary>Panduan untuk Steam</summary>
+            <div class="details-content">
+                <p>Navigasi ke folder yang berisi file game (folder dengan executable ProjectZomboid64).
+                Di Linux kemungkinan besar berada di <i>~/.local/share/Steam/steamapps/common/ProjectZomboid/projectzomboid</i>.
+                Di Windows atau macOS, perhatikan direktori unduhan depot dari langkah sebelumnya
+                (akan muncul di konsol setelah unduhan selesai). Misalnya di Windows
+                biasanya <i>C:\Program Files
+                (x86)\Steam\steamapps\content\app_108600\depot_108603\projectzomboid</i>. Pilih semua
+                file (Ctrl + A atau Command + A di MacOS) dan tambahkan ke arsip .zip</p>
+            </div>
+        </details>
+    </section>
+    <section id="copy-archive-to-device">
+        <h3>3. Salin arsip .zip ke perangkat mobile Anda</h3>
+        <p>Salin arsip .zip dari langkah sebelumnya ke folder mana saja di perangkat mobile Anda. Anda dapat menggunakan file tersebut nanti untuk membuat instans game baru. Setelah instans game dibuat, Anda dapat menghapus arsip .zip untuk mengosongkan ruang.</p>
+    </section>
+</section>
+<hr>
+
+<section id="native-libraries">
+    <h2>Library native (multiplayer Build 41)</h2>
+
+    <p>
+        Untuk menggunakan multiplayer di <b>Build 41</b>, diperlukan library native tambahan.
+        Library ini didistribusikan secara resmi oleh pengembang Project Zomboid
+        sebagai bagian dari <b>Build 42.12 (versi Linux)</b>.
+    </p>
+
+    <p>
+        ⚠️<b>Penting:</b> file yang diperlukan hanya berada di dalam folder <b>android</b>.
+        Hanya file dari folder ini yang boleh digunakan — file lain bukan library native.
+    </p>
+
+    <p>
+        Hanya <b>dua library native</b> yang diperlukan:
+    </p>
+
+    <ul>
+        <li><code>libRakNet64.so</code></li>
+        <li><code>libZNetNoSteam64.so</code></li>
+    </ul>
+
+    <p>
+        Unduh file-file ini dari distribusi Linux Build 42.12,
+        tempatkan kedua file ke dalam satu arsip <code>.zip</code>,
+        dan unggah arsip ini saat membuat instans game baru.
+    </p>
+
+    <p>
+        Arsip <code>.zip</code> harus berisi dua file <code>.so</code>
+        di level teratas (bukan di dalam folder).
+    </p>
+
+    <p>
+        Anda dapat mengunggah arsip library native bersama dengan file game utama
+        di kolom yang sesuai saat membuat instans game baru.
+    </p>
+</section>
+<hr>
+
+<section id="renderers">
+    <h2>Renderer dan driver</h2>
+
+    <p>
+        Zomdroid menggunakan renderer untuk menerjemahkan grafis desktop Project Zomboid
+        ke grafis yang kompatibel dengan perangkat Android.
+    </p>
+
+    <p>
+        Launcher menyediakan dua solusi rendering:
+    </p>
+
+    <ul>
+        <li><b>GL4ES</b></li>
+        <li><b>ZINK</b> (<code>ZINK_ZFA</code> / <code>ZINK_OSMESA</code>)</li>
+    </ul>
+
+    <h3>GL4ES</h3>
+    <p>
+        GL4ES adalah renderer paling stabil untuk <b>Build 41</b>.
+        Namun, di <b>Build 42</b> sering menghasilkan artefak grafis,
+        karena tidak dapat sepenuhnya menerjemahkan pipeline rendering game yang diperbarui.
+    </p>
+
+    <h3>ZINK</h3>
+    <p>
+        ZINK memberikan hasil terbaik dengan <b>Build 42</b>
+        dan biasanya menghilangkan artefak grafis yang terlihat dengan GL4ES.
+    </p>
+
+    <p>
+        ZINK menawarkan beberapa driver Vulkan:
+    </p>
+
+    <ul>
+        <li><b>Driver Vulkan Sistem</b></li>
+        <li><b>Freedreno</b></li>
+        <li><b>Turnip</b></li>
+    </ul>
+    <p>
+        Semua driver Freedreno dan Turnip yang tercantum di atas adalah build dari driver
+        Vulkan Mesa open-source yang sama untuk GPU Adreno. <b>Turnip</b> adalah nama resmi
+        komponen Vulkan dalam stack driver Mesa Freedreno — nama-nama tersebut kadang
+        digunakan secara bergantian. Build yang berbeda dioptimalkan untuk generasi Snapdragon
+        yang berbeda, itulah mengapa launcher menawarkan beberapa opsi driver.
+    </p>
+    <p>
+        ZINK terutama bekerja pada <b>perangkat Snapdragon (GPU Adreno)</b>. Pada MediaTek Dimensity,
+        ZINK mungkin bekerja melalui driver grafis ANGLE, namun mengaktifkan ANGLE pada perangkat
+        Dimensity sering kali tidak mudah — jarang berhasil hanya melalui pengaturan pengembang
+        dan mungkin memerlukan alat pihak ketiga. Pada MediaTek Helio, ZINK tidak didukung,
+        tetapi beberapa perangkat Helio mungkin dapat menjalankan versi Build 42 yang lebih awal
+        dan tidak terlalu berat (seperti 42.6) melalui GL4ES — belum ada solusi yang andal,
+        tetapi ini mungkin berubah di masa depan.
+        Untuk prosesor lain (Exynos, Kirin, dll.), informasi yang tersedia terbatas —
+        ZINK sering tidak bekerja atau mungkin crash.
+    </p>
+
+    <p>
+        Konfigurasi yang direkomendasikan untuk <b>Build 41</b> adalah <b>GL4ES</b>.
+        Untuk <b>Build 42</b>, konfigurasi yang direkomendasikan adalah <b>ZINK + driver Freedreno</b>.
+        Driver Freedreno hanya didukung pada perangkat Snapdragon dengan GPU Adreno.
+        Versi driver yang berbeda menargetkan generasi hardware yang berbeda:
+    </p>
+
+    <ul>
+        <li><b>Freedreno</b> — stabil, direkomendasikan untuk Adreno 6xx dan 7xx (Snapdragon hingga 7 Gen 1)</li>
+        <li><b>Freedreno 8xx</b> — eksperimental, untuk Adreno 8xx (Snapdragon 8 Gen 3 / Gen 4 / Gen 5 / Elite)</li>
+        <li><b>Freedreno 830/840</b> — eksperimental, khusus untuk Adreno 830/840 (Snapdragon 8 Elite / Elite 2, misalnya seri Galaxy S25/S26)</li>
+    </ul>
+</section>
+<hr>
+<section id="known-issues">
+    <h2>Masalah yang diketahui</h2>
+
+    <h3>Build 42.12+ — crash saat pembuatan dunia</h3>
+    <p>
+        Mulai sekitar <b>Build 42.12</b>, game mungkin crash saat
+        pembuatan dunia — khususnya saat memuat ke dalam game setelah
+        pembuatan karakter. Ini tampaknya merupakan masalah di sisi game yang tidak terkait
+        dengan perangkat atau driver, karena telah diamati pada berbagai perangkat dan konfigurasi.
+    </p>
+    <p>
+        <b>Ini bukan kegagalan permanen.</b> Jika game crash pada tahap ini,
+        cukup restart Zomdroid dan coba lagi. Sebagian besar pengguna membutuhkan <b>2–4 percobaan</b>
+        sebelum dunia berhasil dimuat untuk pertama kalinya. Setelah dunia dibuat,
+        pemuatan selanjutnya pada simpanan yang sama biasanya stabil.
+    </p>
+
+    <h3>Kompatibilitas mod grafis</h3>
+    <p>
+        Beberapa mod grafis — seperti retekstur pakaian, rambut, atau kendaraan — mungkin tidak
+        ditampilkan dengan benar atau mungkin tidak berfungsi sama sekali. Ini adalah keterbatasan
+        yang diketahui dari lapisan terjemahan grafis yang digunakan untuk menjalankan game di Android,
+        dan tidak spesifik pada perangkat atau driver tertentu.
+    </p>
+
+    <h3>GUI menghilang di dekat kendaraan yang dibongkar</h3>
+    <p>
+        UI game mungkin menghilang jika ada kendaraan di dekatnya dengan <b>3 atau lebih roda
+        yang dilepas</b>. Penyebabnya adalah masalah rendering yang dipicu oleh kondisi kendaraan.
+        <b>Solusi:</b> hindari melepas lebih dari 2 roda dari satu kendaraan.
+        Jika UI sudah menghilang, menjauh dari kendaraan atau memuat ulang
+        simpanan seharusnya memulihkannya.
+    </p>
+</section>
+</body>
+</html>
