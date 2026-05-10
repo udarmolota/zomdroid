@@ -160,7 +160,7 @@
     <string name="dialog_title_failed_to_install_saves">Failed to import saves</string>
     <string name="dialog_title_saves_installed">Saves imported</string>
 
-    <string name="install_mod_zip_warning">ZIP must contain mod.info at the top level.</string>
+    <string name="install_mod_zip_warning">Some mods are better installed from the Optimization menu.</string>
 
     <string name="install_mod_zip_help_title">Mod archive structure</string>
 
@@ -264,7 +264,7 @@
 
     <!-- JVM args dialog -->
     <string name="jvm_args_dialog_title">JVM arguments</string>
-    <string name="jvm_args_dialog_message">Additional JVM arguments, e.g.:\n\n• -Xmx2G - allocate 2Gb of memory\n• -Xms512M - process starts with 1Gb RAM\n• -XX:+UseG1GC - enable G1 garbage collector\n\nIn theory, it should help when there\'s not enough RAM. Some arguments are already set by settings.\nIf you set it incorrectly and the app doesn\'t run, reinstall it or just clear the app cache.</string>
+    <string name="jvm_args_dialog_message">Additional JVM arguments, e.g.:\n\n• -Xmx2G - allocate 2Gb of memory\n• -Xms512M - process starts with 512MB RAM\n• -XX:+UseG1GC - enable G1 garbage collector\n\nIn theory, it should help when there\'s not enough RAM. Some arguments are already set by settings.\nIf you set it incorrectly and the app doesn\'t run, reinstall it or just clear the app cache.</string>
 
     <!-- Custom Driver import/export -->
     <string name="install_driver_menu">Import/Export Custom Driver</string>
@@ -322,9 +322,9 @@
     <string name="preset_dialog_title_b42">Build 42</string>
     <string name="preset_dialog_title_b4212">Build 42.12+</string>
 
-    <string name="preset_dialog_message_b41">Build 41.78 — the most stable version available today. Runs on most devices with 6GB RAM or more.</string>
-    <string name="preset_dialog_message_b42">Build 42 (versions 42.0–42.11). Requires 6GB+ RAM. Runs mainly on Snapdragon, and also on powerful Dimensity devices (with ANGLE enabled).</string>
-    <string name="preset_dialog_message_b4212">Build 42.12 and above. Requires slightly different settings and at least 8GB RAM. Runs mainly on Snapdragon and newer powerful Dimensity devices (with ANGLE enabled).</string>
+    <string name="preset_dialog_message_b41">Build 41.78 — the most stable version available today. Runs on most devices with 4GB RAM or more.</string>
+    <string name="preset_dialog_message_b42">Build 42 (versions 42.0–42.11). Requires 6GB+ RAM. Runs mainly on Snapdragon, and also on powerful Dimensity devices.</string>
+    <string name="preset_dialog_message_b4212">Build 42.12 and above. Requires slightly different settings and at least 8GB RAM. Runs mainly on Snapdragon and newer powerful Dimensity devices.</string>
 
     <!-- Settings groups -->
     <string name="settings_group_rendering">Rendering</string>
@@ -354,7 +354,7 @@
     <string name="new_game_instance_group_preset">Preset</string>
     <string name="new_game_instance_group_files">Files</string>
 
-    <string name="install_mod_group_instance">Instance</string>
+    <string name="install_mod_group_instance">→ Instance</string>
     <string name="install_mod_group_file">Mod file</string>
     <string name="install_controls_group_file">Controls layout</string>
     <string name="install_saves_group_import">Import saves</string>
@@ -381,19 +381,24 @@
     <string name="optimization_jvm_hint">Copy a preset and paste it in Settings → JVM arguments. Choose based on your device RAM.</string>
     <string name="optimization_jvm_4gb_label">4 GB RAM</string>
     <string name="optimization_jvm_6gb_label">6 GB RAM</string>
-    <string name="optimization_jvm_balanced_label">Balanced</string>
-    <string name="optimization_jvm_aggressive_label">Aggressive</string>
+    <string name="optimization_jvm_balanced_label">→ Balanced</string>
+    <string name="optimization_jvm_aggressive_label">→ Aggressive</string>
     <string name="optimization_copy">Copy</string>
     <string name="optimization_open_settings">→ Open Settings</string>
     <string name="optimization_group_betterfps">BetterFPS b41</string>
-    <string name="optimization_betterfps_hint">Reduces the render zone around the player. Steam Workshop ID: 3022543997. Download the mod, choose a variant (start with 90×90), zip the IsoChunkMap.class file and install below.</string>
-    <string name="optimization_betterfps_file_label">IsoChunkMap.class (zipped)</string>
+    <string name="optimization_betterfps_hint">Reduces the render area around the player. \n\nDownload the mod, upload the zip file, and select one of the three most popular modes.</string>
+    <string name="optimization_betterfps_file_label">BetterFPS mod (zipped)</string>
     <string name="optimization_install">Install</string>
     <string name="optimization_betterfps_help_title">How BetterFPS works</string>
-    <string name="optimization_betterfps_help_message">Steam Workshop ID: 3022543997\n\n\"Project Zomboid renders a 190×190 tile zone around the player. This mod reduces the size of this zone and avoids loading unnecessary chunks.\"\n— mod description\n\nVariants:\n• PotatoePC — maximum performance\n• 1080 — balanced\n• 4k — best quality\n• All_Settings — custom zone sizes from 30×30 to 190×190\n\nWe recommend starting with 90×90 — noticeably smaller than the default 190×190, but not too aggressive. You can go lower if needed.\n\nAfter downloading, open the mod folder, pick your variant, zip only the IsoChunkMap.class file and load it here.</string>
+    <string name="optimization_betterfps_help_message">Steam Workshop ID: 3022543997\n\n"Project Zomboid renders a 190×190 tile zone around the player. This mod reduces the size of this zone and avoids loading unnecessary chunks."\n— mod description\n\nVariants:\n• PotatoePC — maximum performance\n• 1080 — balanced\n• 4k — best quality (still lower than the original)\n• All_Settings — custom area sizes from 30×30 to 190×190; must be installed manually\n\nWe recommend starting with PotatoePC. You can go lower manually if needed.</string>
     <string name="optimization_jvm_copied">Copied to clipboard</string>
     <string name="optimization_betterfps_installed">BetterFPS installed successfully</string>
     <string name="optimization_betterfps_installing">Installing BetterFPS…</string>
+    <string name="optimization_betterfps_mode_label">→ Mode</string>
+    <string name="optimization_betterfps_mode_potato">PotatoPC (recommended)</string>
+    <string name="optimization_betterfps_mode_1080p">1080p</string>
+    <string name="optimization_betterfps_mode_4k">4K</string>
+    <string name="optimization_betterfps_error_not_found">IsoChunkMap.class not found for mode: %1$s</string>
 
     <!-- ===== Mods fix ===== -->
     <string name="mod_fix_installing">Installing mod with fix…</string>
@@ -401,7 +406,77 @@
     <string name="mod_fix_error_no_mod_folder">No mod folder found in archive</string>
     <string name="mod_fix_error_not_b42">This mod does not appear to be a Build 42 mod: %1$s</string>
     <string name="mod_fix_group_double_path">Double path fix</string>
-    <string name="mod_fix_double_path_hint">Fix for Build 42 mods with path errors on Android. Known mods: Tsar\'s Common Library (ID: 3402491515), Simple Flashlight on Belt (ID: 3394588830).</string>
+    <string name="mod_fix_double_path_hint">Fix for Build 41/42 mods with path errors on Android. Known mods: Tsar\'s Common Library (ID: 3402491515), Simple Flashlight on Belt (ID: 3394588830).</string>
     <string name="mod_fix_help_title">What is this fix?</string>
-    <string name="mod_fix_help_message">Some Build 42 mods use a folder structure that causes a path conflict on Android due to case sensitivity. The game ends up looking for files in a doubled path and cannot find them.\n\nThis fix installs the mod twice — once with the original folder names, and once with all names in lowercase — so the game finds the files regardless of which path it uses.\n\nKnown affected mods:\n• Tsar\'s Common Library — ID: 3402491515\n• [B42] Simple Flashlight on Belt — ID: 3394588830\n\nTo use: download the mod from Steam Workshop, zip the mod folder as-is and load it here.</string>
+    <string name="mod_fix_help_message">Some mods use a folder structure that causes a path conflict on Android. The game ends up looking for files in a doubled path and cannot find them.\n\nThis fix installs the mod twice — once with the original folder names, and once with all names in lowercase — so the game finds the files regardless of which path it uses.\n\nKnown affected mods:\n• Tsar\'s Common Library — ID: 3402491515\n• [B42] Simple Flashlight on Belt — ID: 3394588830\n\nTo use: download the mod and load it here.</string>
+
+    <!-- CPU/GPU autodetect -->
+    <string name="preset_dialog_gpu_hint_qualcomm">\u2705 Snapdragon detected. ZINK_ZFA renderer has been set automatically. We recommend selecting a Freedreno/Turnip driver in the app Settings for best results.</string>
+    <string name="preset_dialog_gpu_hint_mediatek">\u2705 MediaTek detected. ZINK_ZFA renderer has been set, but ZINK support on Mali GPUs varies. If the game doesn\'t start, try to activate ANGLE built-in graphical driver in the Developer options.</string>
+
+    <!-- Manual mods installation -->
+    <string name="install_mod_manual_group">Manual installation</string>
+    <string name="install_mod_manual_hint">Copy mod folder to the mods folder inside the Zomboid folder. Create the mods folder if it doesn\'t exist (lowercase "mods"). Mod folder must not contain any extra wrapper folders.</string>
+    <string name="install_mod_open_folder">Open mods folder</string>
+    <string name="install_mod_manual_help_title">Manual installation</string>
+    <string name="install_mod_manual_help_message">
+        \u2705 Correct structure:\n\n
+        ModName/\n
+        \u00A0\u00A0mod.info\n
+        \u00A0\u00A0media/\n
+        \u00A0\u00A0scripts/\n\n
+        \u274C Incorrect — extra wrapper folder:\n\n
+        Downloads/\n
+        \u00A0\u00A0ModName/\n
+        \u00A0\u00A0\u00A0\u00A0mod.info
+    </string>
+
+    <!-- ===== SMART IMPORT strings ===== -->
+    <string name="install_mod_smart_group">Smart Import</string>
+    <string name="install_mod_smart_hint">Automatically finds the mod folder inside the ZIP, even if wrapped in extra folders (e.g. from Skymods). Applies fixes for mods with scripts or models.</string>
+    <string name="install_mod_smart_help_title">Smart Import</string>
+    <string name="install_mod_smart_help_message">Smart Import extracts the correct mod folder from any ZIP structure.\n\nIt detects the mod root by looking for mod.info, media/ or common/ folders — no matter how many wrapper folders surround it.\n\nFor mods with scripts/ or models_X/ folders, a lowercase copy is also installed automatically to fix Android path issues.</string>
+    <string name="install_mod_smart_install">Import</string>
+    <string name="install_mod_smart_title">Smart import…</string>
+    <string name="install_mod_smart_done">Mod imported successfully</string>
+    <string name="install_mod_smart_no_root">Could not find a mod folder in this ZIP. Make sure the archive contains mod.info, media/ or common/.</string>
+    <string name="extracting">Extracting…</string>
+
+    <!-- ===== CONTROLS EDITOR LAUNCH strings ===== -->
+    <string name="controls_editor_bg_group">Background Image (optional)</string>
+    <string name="controls_editor_bg_hint">Load a screenshot from the game to use as the editor background. Makes it easier to position buttons exactly where you want them.</string>
+    <string name="controls_editor_bg_clear">Remove background</string>
+    <string name="controls_editor_bg_saved">Background image saved</string>
+    <string name="controls_editor_bg_cleared">Background removed</string>
+    <string name="controls_editor_bg_error">Failed to save background: %1$s</string>
+    <string name="controls_editor_open_group">Editor</string>
+    <string name="controls_editor_open_hint">Open the controls editor to drag, resize and configure on-screen buttons.</string>
+    <string name="controls_editor_open_btn">Open editor</string>
+
+    <!-- ===== ETO + collapsible strings ===== -->
+    <string name="optimization_group_eto">Every Texture Optimized</string>
+    <string name="optimization_eto_hint">Installs optimized textures for better performance. \n⚠️ Can be installed as a regular mod via the in-game mod manager, but for low-end devices with 4GB RAM, a one-time texture replacement is highly recommended. \n\nSelect your game instance — the correct texture version (B41 or B42) will be applied automatically.</string>
+    <string name="optimization_eto_help_title">Every Texture Optimized</string>
+    <string name="optimization_eto_help_message">Steam Workshop ID: 3119788162 [B42] and ID: 2812026801 [B41]\n\nDownload the mod ZIP from Steam Workshop or Skymods.\n\nSelect your game instance and the ZIP file, then tap Install. The launcher will automatically choose the correct texture folder for your build version and copy the files into the game\'s media/textures directory, replacing the original ones.\n\nThe original textures folder will be renamed to textures.bak. To roll back the mod, delete the new textures folder and rename textures.bak back to textures.</string>
+    <string name="optimization_eto_installing">Installing textures…</string>
+    <string name="optimization_eto_installed">Textures installed successfully</string>
+    <string name="optimization_eto_error_no_textures">Could not find a textures folder in this ZIP.</string>
+
+    <!-- ===== ZombieBuddy + ZBBetterFPS strings ===== -->
+    <string name="optimization_group_zombiebuddy">ZombieBuddy</string>
+    <string name="optimization_zombiebuddy_hint">A framework mod. \n⚠️ Mods using ZombieBuddy can be incompatible with other mods. If issues occur, try adjusting the load order or switching mod versions.\n\nTo disable: turn off the switch here AND disable the mod in-game, then restart.</string>
+    <string name="optimization_zombiebuddy_enabled">Enable ZombieBuddy agent</string>
+    <string name="optimization_zombiebuddy_help_title">ZombieBuddy</string>
+    <string name="optimization_zombiebuddy_help_message">A framework that enables advanced Java mods for Project Zomboid. \n\nDownload ZombieBuddy from Steam, Workshop ID: 3619862853, upload the ZIP here and tap Install.</string>
+    <string name="optimization_zombiebuddy_installing">Installing ZombieBuddy…</string>
+    <string name="optimization_zombiebuddy_installed">ZombieBuddy installed</string>
+     
+    <string name="optimization_group_zbbetterfps">ZBBetterFPS</string>
+    <string name="optimization_zbbetterfps_hint">Optimizing mod. All options are disabled by default. Enable them in Mod Options after installing the mod.\n\nThis mod is modified for Zomdroid for compatibility with Android.\n\n⚠️ ZBBetterFPS and BetterFPS are not compatible, use only one of them.</string>
+    <string name="optimization_zbbetterfps_enabled">Enable ZBBetterFPS</string>
+    <string name="optimization_zbbetterfps_help_title">ZBBetterFPS</string>
+    <string name="optimization_zbbetterfps_help_message">A comprehensive performance overhaul for Project Zomboid that optimizes rendering, game logic, and CPU usage. Author: Zed.\n\nRequires ZombieBuddy (+ModOptions on B41) to be installed and enabled.\n⚠️ Mods using ZombieBuddy can be incompatible with other mods. If issues occur, try adjusting the load order or switching mod versions. \n\nDownload ZBBetterFPS from Steam Workshop or Skymods, ID: 3622986450, upload the ZIP here and tap Install.</string>
+    <string name="optimization_zbbetterfps_installing">Installing ZBBetterFPS…</string>
+    <string name="optimization_zbbetterfps_installed">ZBBetterFPS installed</string>
+    <string name="optimization_zbbetterfps_gl4es_warning">⚠️ ZBBetterFPS only works with ZINK renderer. For GL4ES, use the regular BetterFPS mod instead.</string>
 </resources>
