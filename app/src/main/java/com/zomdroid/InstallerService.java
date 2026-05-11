@@ -979,7 +979,7 @@ public class InstallerService extends Service implements TaskProgressListener {
         });
     }
 
-    private static final String[] BETTERFPS_MODE_IDS = {"PotatoePC", "1080p", "4K"};
+    private static final String[] BETTERFPS_MODE_IDS = {"PotatoePC", "1080p", "4k"};
 
     private void doInstallBetterFps(Intent intent) {
         String taskTitle = getString(R.string.optimization_betterfps_installing);
