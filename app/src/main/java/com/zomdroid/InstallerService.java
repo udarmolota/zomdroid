@@ -979,77 +979,96 @@ public class InstallerService extends Service implements TaskProgressListener {
         });
     }
 
+    private static final String[] BETTERFPS_MODE_IDS = {"PotatoePC", "1080p", "4K"};
+
     private void doInstallBetterFps(Intent intent) {
         String taskTitle = getString(R.string.optimization_betterfps_installing);
-
+    
         startForeground(NOTIFICATION_ID, buildNotification(taskTitle));
         this.taskState.postValue(new TaskState(taskTitle, null, -1, 0, false, false));
-
+    
         String gameInstanceName = intent.getStringExtra(EXTRA_GAME_INSTANCE_NAME);
-        if (gameInstanceName == null) {
-            finishWithError(taskTitle, "Game instance name is missing");
-            return;
-        }
+        if (gameInstanceName == null) { finishWithError(taskTitle, "Game instance name is missing"); return; }
+    
         GameInstance gameInstance = GameInstanceManager.requireSingleton().getInstanceByName(gameInstanceName);
-        if (gameInstance == null) {
-            finishWithError(taskTitle, "Game instance not found: " + gameInstanceName);
-            return;
-        }
-
+        if (gameInstance == null) { finishWithError(taskTitle, "Game instance not found: " + gameInstanceName); return; }
+    
         Uri archiveUri = intent.getParcelableExtra(EXTRA_ARCHIVE_URI);
-        if (archiveUri == null) {
-            finishWithError(taskTitle, "Archive URI is missing");
-            return;
-        }
-
+        if (archiveUri == null) { finishWithError(taskTitle, "Archive URI is missing"); return; }
+    
+        String mode = intent.getStringExtra(EXTRA_BETTERFPS_MODE);
+        if (mode == null) mode = BETTERFPS_MODE_IDS[0];
+        final String selectedMode = mode;
+    
         executorService.submit(() -> {
+            File tmpDir = new File(getCacheDir(), "betterfps_tmp_" + System.currentTimeMillis());
             try {
-                String targetDir = gameInstance.getGamePath() + "/zombie/iso";
-                String targetFile = targetDir + "/IsoChunkMap.class";
-                String backupFile = targetFile + ".original";
-
-                // Найти IsoChunkMap.class в ZIP
-                byte[] classBytes = null;
+                tmpDir.mkdirs();
+    
+                // Распаковать ZIP во временную папку
                 try (InputStream is = getContentResolver().openInputStream(archiveUri);
                      ZipInputStream zis = new ZipInputStream(is)) {
                     ZipEntry entry;
                     while ((entry = zis.getNextEntry()) != null) {
-                        String name = entry.getName();
-                        if (name.endsWith("IsoChunkMap.class")) {
-                            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-                            byte[] buf = new byte[64 * 1024];
-                            int r;
-                            while ((r = zis.read(buf)) != -1) baos.write(buf, 0, r);
-                            classBytes = baos.toByteArray();
-                            break;
+                        File outFile = new File(tmpDir, entry.getName());
+                        if (entry.isDirectory()) {
+                            outFile.mkdirs();
+                        } else {
+                            outFile.getParentFile().mkdirs();
+                            try (FileOutputStream fos = new FileOutputStream(outFile)) {
+                                byte[] buf = new byte[8192];
+                                int len;
+                                while ((len = zis.read(buf)) > 0) fos.write(buf, 0, len);
+                            }
                         }
                         zis.closeEntry();
                     }
                 }
-
-                if (classBytes == null) {
-                    finishWithError(taskTitle, "IsoChunkMap.class not found in archive");
+    
+                // Найти IsoChunkMap.class для выбранного режима
+                File classFile = findBetterFpsClass(tmpDir, selectedMode);
+                if (classFile == null) {
+                    finishWithError(taskTitle,
+                            getString(R.string.optimization_betterfps_error_not_found, selectedMode));
                     return;
                 }
-
-                // Переименовать оригинал если ещё не бэкапнут
-                File original = new File(targetFile);
-                File backup = new File(backupFile);
-                if (original.exists() && !backup.exists()) {
-                    original.renameTo(backup);
-                }
-
-                // Записать новый файл
+                Log.d("BetterFPS", "Found class for mode=" + selectedMode + ": " + classFile.getAbsolutePath());
+    
+                // Бэкап оригинала
+                String targetDir = gameInstance.getGamePath() + "/zombie/iso";
+                File targetFile = new File(targetDir, "IsoChunkMap.class");
+                File backupFile = new File(targetDir, "IsoChunkMap.class.original");
                 new File(targetDir).mkdirs();
-                try (FileOutputStream fos = new FileOutputStream(targetFile)) {
-                    fos.write(classBytes);
+    
+                if (targetFile.exists() && !backupFile.exists()) {
+                    copyFile(targetFile, backupFile);
                 }
-
+    
+                copyFile(classFile, targetFile);
                 finish(getString(R.string.optimization_betterfps_installed), null);
+    
             } catch (Exception e) {
                 finishWithError(taskTitle, e.toString());
+            } finally {
+                try { FileUtils.deleteDirectory(tmpDir); } catch (Exception ignored) {}
             }
         });
+    }
+    
+    private File findBetterFpsClass(File dir, String mode) {
+        File[] files = dir.listFiles();
+        if (files == null) return null;
+        for (File f : files) {
+            if (f.isDirectory()) {
+                File found = findBetterFpsClass(f, mode);
+                if (found != null) return found;
+            } else if (f.getName().equals("IsoChunkMap.class")) {
+                if (f.getAbsolutePath().toLowerCase().contains(mode.toLowerCase())) {
+                    return f;
+                }
+            }
+        }
+        return null;
     }
 
     // ================================================
