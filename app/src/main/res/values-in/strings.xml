@@ -518,4 +518,35 @@
     <string name="native_libs_installed">Library native terinstal</string>
 
     <string name="control_element_opacity_all">Ke semua</string>
+
+    <!-- Steam downloader -->
+    <string name="steam_dl_menu">Unduh dari Steam</string>
+    <string name="steam_dl_tab_game">Game</string>
+    <string name="steam_dl_tab_mods">Mod</string>
+    <string name="steam_dl_login_group">Login Steam</string>
+    <string name="steam_dl_login_note">Login kamu dikirim ke Steam (sama seperti DepotDownloader) dan TIDAK disimpan — tidak ada data atau kata sandi yang disimpan. Setujui masuk di aplikasi Steam Mobile, atau masukkan kode Steam Guard saat diminta.</string>
+    <string name="steam_dl_slow_warning">⚠️ Pengunduhan bisa lambat.</string>
+    <string name="steam_dl_build_42">Build 42</string>
+    <string name="steam_dl_build_41">Build 41</string>
+    <string name="steam_dl_manifest_hint_41">id manifest Build 41 (wajib)</string>
+    <string name="steam_dl_build41_needs_manifest">Build 41: masukkan id manifest-nya.</string>
+    <string name="steam_dl_cancel">Batalkan unduhan</string>
+    <string name="steam_dl_cancel_confirm">Batalkan unduhan? File yang sudah diunduh disimpan untuk dilanjutkan nanti.</string>
+    <string name="steam_dl_username">Nama pengguna Steam</string>
+    <string name="steam_dl_password">Kata sandi Steam</string>
+    <string name="steam_dl_version_note">Mengunduh versi Linux Project Zomboid ke Downloads/zomdroid — tanpa Termux, tanpa PC. Build 41 ~6–7 GB dan Build 42 ~10–11 GB (belum dikompres), jadi butuh waktu lama; kalau terputus, mulai lagi build yang sama dan akan dilanjutkan. Biarkan manifest kosong untuk versi terbaru, atau tempel id manifest untuk mengunci versi.</string>
+    <string name="steam_dl_manifest_hint">id manifest (kosong = terbaru)</string>
+    <string name="steam_dl_download_game">Unduh game</string>
+    <string name="steam_dl_mods_note">Unduh mod Workshop berdasarkan ID (angka di URL Workshop: …/sharedfiles/filedetails/?id=ANGKA). Tidak perlu login Steam. Beberapa ID dipisah spasi. Masing-masing disimpan sebagai .zip di Downloads/zomdroid.</string>
+    <string name="steam_dl_mods_hint">ID Workshop (dipisah spasi)</string>
+    <string name="steam_dl_download_mods">Unduh mod</string>
+    <string name="steam_dl_required">Wajib</string>
+    <string name="steam_dl_mods_empty">Masukkan ID Workshop (angka dari URL)</string>
+    <string name="steam_dl_storage_title">Perlu akses penyimpanan</string>
+    <string name="steam_dl_storage_message">Game dan mod disimpan ke folder publik Downloads/zomdroid agar bisa dilihat, dibagikan, dan diimpor. Berikan \"Akses ke semua file\" untuk Zomdroid, lalu ketuk Unduh lagi.</string>
+    <string name="steam_dl_grant">Izinkan</string>
+    <string name="steam_dl_guard_title">Masukkan kode Steam Guard</string>
+    <string name="steam_dl_guard_retry">Kode salah — coba lagi</string>
+    <string name="steam_dl_guard_hint">Kode Steam Guard</string>
+    <string name="steam_dl_guard_email">Kode dikirim ke %1$s</string>
 </resources>

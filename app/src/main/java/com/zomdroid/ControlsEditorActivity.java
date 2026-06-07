@@ -19,7 +19,13 @@ import android.widget.Toast;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -36,6 +42,7 @@ public class ControlsEditorActivity extends AppCompatActivity {
     public static final String EXTRA_INSTANCE_NAME = "com.zomdroid.ControlsEditorActivity.EXTRA_INSTANCE_NAME";
     private ActivityControlsEditorBinding binding;
     private TextWatcher controlElementTextWatcher = null;
+    private ActivityResultLauncher<String> pickIconLauncher;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -49,6 +56,10 @@ public class ControlsEditorActivity extends AppCompatActivity {
         if (instanceName != null) {
             binding.inputControlsV.setInstanceName(instanceName);
         }
+
+        pickIconLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+            if (uri != null) onIconPicked(uri);
+        });
 
         getWindow().setDecorFitsSystemWindows(false);
         final WindowInsetsController controller = getWindow().getInsetsController();
@@ -142,9 +153,11 @@ public class ControlsEditorActivity extends AppCompatActivity {
                     binding.inputControlsV.invalidate();
                 });
 
-                // Sensitivity — only for TOUCHPAD and STICK_MOUSE
+                // Sensitivity — only for TOUCHPAD, STICK_MOUSE and SCROLL_BAR
                 boolean hasSensitivity = (element.getType() == AbstractControlElement.Type.TOUCHPAD
-                        || element.getType() == AbstractControlElement.Type.STICK_MOUSE);
+                        || element.getType() == AbstractControlElement.Type.STICK_MOUSE
+                        || element.getType() == AbstractControlElement.Type.SCROLL_BAR
+                        || element.getType() == AbstractControlElement.Type.RADIAL_MENU);
 
                 if (hasSensitivity) {
                     final float currentSens;
@@ -152,6 +165,10 @@ public class ControlsEditorActivity extends AppCompatActivity {
                         currentSens = ((com.zomdroid.input.TouchpadControlElement) element).getSensitivity();
                     } else if (element instanceof com.zomdroid.input.MouseStickControlElement) {
                         currentSens = ((com.zomdroid.input.MouseStickControlElement) element).getSensitivity();
+                    } else if (element instanceof com.zomdroid.input.ScrollBarControlElement) {
+                        currentSens = ((com.zomdroid.input.ScrollBarControlElement) element).getSensitivity();
+                    } else if (element instanceof com.zomdroid.input.RadialMenuControlElement) {
+                        currentSens = ((com.zomdroid.input.RadialMenuControlElement) element).getSensitivity();
                     } else {
                         currentSens = ControlElementDescription.DEFAULT_SENSITIVITY;
                     }
@@ -174,50 +191,10 @@ public class ControlsEditorActivity extends AppCompatActivity {
                                 ((com.zomdroid.input.TouchpadControlElement) element).setSensitivity(s);
                             } else if (element instanceof com.zomdroid.input.MouseStickControlElement) {
                                 ((com.zomdroid.input.MouseStickControlElement) element).setSensitivity(s);
-                            }
-                        }
-                        @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-                        @Override public void onStopTrackingTouch(SeekBar seekBar) {}
-                    });
-                } else {
-                    binding.elementSensitivityTv.setVisibility(View.GONE);
-                    binding.elementSensitivityPercentTv.setVisibility(View.GONE);
-                    binding.elementSensitivitySb.setVisibility(View.GONE);
-                }
-
-                // Sensitivity — only for TOUCHPAD and STICK_MOUSE
-                boolean hasSensitivity = (element.getType() == AbstractControlElement.Type.TOUCHPAD
-                        || element.getType() == AbstractControlElement.Type.STICK_MOUSE);
-
-                if (hasSensitivity) {
-                    // Get current sensitivity from whichever element type it is
-                    final float currentSens;
-                    if (element instanceof com.zomdroid.input.TouchpadControlElement) {
-                        currentSens = ((com.zomdroid.input.TouchpadControlElement) element).getSensitivity();
-                    } else if (element instanceof com.zomdroid.input.MouseStickControlElement) {
-                        currentSens = ((com.zomdroid.input.MouseStickControlElement) element).getSensitivity();
-                    } else {
-                        currentSens = ControlElementDescription.DEFAULT_SENSITIVITY;
-                    }
-
-                    int sensProgress = Math.round(currentSens * 100);
-                    binding.elementSensitivityTv.setVisibility(View.VISIBLE);
-                    binding.elementSensitivityPercentTv.setVisibility(View.VISIBLE);
-                    binding.elementSensitivityPercentTv.setText(
-                            getResources().getString(R.string.percentage_format, sensProgress));
-                    binding.elementSensitivitySb.setVisibility(View.VISIBLE);
-                    binding.elementSensitivitySb.setOnSeekBarChangeListener(null);
-                    binding.elementSensitivitySb.setProgress(sensProgress);
-                    binding.elementSensitivitySb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                        @Override
-                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                            binding.elementSensitivityPercentTv.setText(
-                                    getResources().getString(R.string.percentage_format, progress));
-                            float s = progress / 100f;
-                            if (element instanceof com.zomdroid.input.TouchpadControlElement) {
-                                ((com.zomdroid.input.TouchpadControlElement) element).setSensitivity(s);
-                            } else if (element instanceof com.zomdroid.input.MouseStickControlElement) {
-                                ((com.zomdroid.input.MouseStickControlElement) element).setSensitivity(s);
+                            } else if (element instanceof com.zomdroid.input.ScrollBarControlElement) {
+                                ((com.zomdroid.input.ScrollBarControlElement) element).setSensitivity(s);
+                            } else if (element instanceof com.zomdroid.input.RadialMenuControlElement) {
+                                ((com.zomdroid.input.RadialMenuControlElement) element).setSensitivity(s);
                             }
                         }
                         @Override public void onStartTrackingTouch(SeekBar seekBar) {}
@@ -268,6 +245,8 @@ public class ControlsEditorActivity extends AppCompatActivity {
                     case BUTTON_CIRCLE:
                     case BUTTON_RECT: {
                         binding.elementToggleTextRowLl.setVisibility(View.VISIBLE);
+                        binding.elementTextTv.setVisibility(View.VISIBLE);
+                        binding.elementTogglingTv.setVisibility(View.VISIBLE);
                         binding.elementToggleTextFieldsLl.setVisibility(View.VISIBLE);
                         binding.elementTogglingCb.setVisibility(View.VISIBLE);
                         binding.elementTextEt.setVisibility(View.VISIBLE);
@@ -285,8 +264,11 @@ public class ControlsEditorActivity extends AppCompatActivity {
                         binding.elementTextEt.setText(element.getText());
                         binding.elementTextEt.addTextChangedListener(controlElementTextWatcher);
 
-                        binding.elementIconTv.setVisibility(View.VISIBLE);
-                        binding.elementIconS.setVisibility(View.VISIBLE);
+                        // The built-in Back/Start icon picker only makes sense for buttons bound
+                        // to those gamepad buttons; hide it otherwise (use Custom icon instead).
+                        boolean showBuiltinIcon = hasStartSelectBinding(element);
+                        binding.elementIconTv.setVisibility(showBuiltinIcon ? View.VISIBLE : View.GONE);
+                        binding.elementIconS.setVisibility(showBuiltinIcon ? View.VISIBLE : View.GONE);
 
                         ArrayAdapter<ControlElementDescription.Icon> adapterIcon = new ArrayAdapter<>(ControlsEditorActivity.this,
                                 R.layout.spinner_item,
@@ -305,12 +287,98 @@ public class ControlsEditorActivity extends AppCompatActivity {
                             });
                         });
 
+                        // Style — only for buttons
+                        binding.elementStyleTv.setVisibility(View.VISIBLE);
+                        binding.elementStyleS.setVisibility(View.VISIBLE);
+                        ArrayAdapter<ControlElementDescription.Style> adapterStyle = new ArrayAdapter<>(ControlsEditorActivity.this,
+                                R.layout.spinner_item,
+                                ControlElementDescription.Style.values());
+                        binding.elementStyleS.setAdapter(adapterStyle);
+                        binding.elementStyleS.setOnItemSelectedListener(null);
+                        if (element instanceof com.zomdroid.input.ButtonControlElement) {
+                            binding.elementStyleS.setSelection(adapterStyle.getPosition(
+                                    ((com.zomdroid.input.ButtonControlElement) element).getStyle()));
+                        }
+                        binding.elementStyleS.post(() -> {
+                            binding.elementStyleS.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                @Override
+                                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                                    if (element instanceof com.zomdroid.input.ButtonControlElement) {
+                                        ((com.zomdroid.input.ButtonControlElement) element).setStyle(
+                                                (ControlElementDescription.Style) parent.getSelectedItem());
+                                        binding.inputControlsV.invalidate();
+                                    }
+                                }
+                                @Override
+                                public void onNothingSelected(AdapterView<?> parent) {}
+                            });
+                        });
+
+                        // Custom image icon (load your own picture)
+                        binding.elementCustomIconB.setVisibility(View.VISIBLE);
+                        binding.elementIconNoTintCb.setVisibility(View.VISIBLE);
+                        binding.elementIconNoTintCb.setOnCheckedChangeListener(null);
+                        if (element instanceof com.zomdroid.input.ButtonControlElement) {
+                            binding.elementIconNoTintCb.setChecked(
+                                    ((com.zomdroid.input.ButtonControlElement) element).isNoTint());
+                        }
+                        binding.elementCustomIconB.setOnClickListener(v -> pickIconLauncher.launch("image/*"));
+                        binding.elementIconNoTintCb.setOnCheckedChangeListener((b, isChecked) -> {
+                            if (element instanceof com.zomdroid.input.ButtonControlElement) {
+                                ((com.zomdroid.input.ButtonControlElement) element).setNoTint(isChecked);
+                            }
+                        });
+
                         binding.elementBindingsAddIb.setOnClickListener(v -> {
                             GLFWBinding newBinding = GLFWBinding.valuesForType(element.getInputType())[0];
                             element.addBinding(newBinding);
                             addElementBindingField(element, element.getInputType(), newBinding,
                                     element.getBindings().length - 1);
                         });
+                        break;
+                    }
+                    case RADIAL_MENU: {
+                        // Center label (re-uses the button text field, but without the toggle
+                        // checkbox); 4 sector bindings are shown via the directional UI in applyInputType().
+                        binding.elementToggleTextRowLl.setVisibility(View.VISIBLE);
+                        binding.elementTextTv.setVisibility(View.VISIBLE);
+                        binding.elementTogglingTv.setVisibility(View.GONE);
+                        binding.elementToggleTextFieldsLl.setVisibility(View.VISIBLE);
+                        binding.elementTogglingCb.setVisibility(View.GONE);
+                        binding.elementIconTv.setVisibility(View.GONE);
+                        binding.elementIconS.setVisibility(View.GONE);
+                        binding.elementStyleTv.setVisibility(View.GONE);
+                        binding.elementStyleS.setVisibility(View.GONE);
+
+                        // Custom center image (same as round buttons).
+                        binding.elementCustomIconB.setVisibility(View.VISIBLE);
+                        binding.elementIconNoTintCb.setVisibility(View.VISIBLE);
+                        binding.elementIconNoTintCb.setOnCheckedChangeListener(null);
+                        if (element instanceof com.zomdroid.input.RadialMenuControlElement) {
+                            binding.elementIconNoTintCb.setChecked(
+                                    ((com.zomdroid.input.RadialMenuControlElement) element).isNoTint());
+                        }
+                        binding.elementCustomIconB.setOnClickListener(v -> pickIconLauncher.launch("image/*"));
+                        binding.elementIconNoTintCb.setOnCheckedChangeListener((b, isChecked) -> {
+                            if (element instanceof com.zomdroid.input.RadialMenuControlElement) {
+                                ((com.zomdroid.input.RadialMenuControlElement) element).setNoTint(isChecked);
+                            }
+                        });
+
+                        binding.elementTextEt.setVisibility(View.VISIBLE);
+                        binding.elementTextEt.removeTextChangedListener(controlElementTextWatcher);
+                        controlElementTextWatcher = new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                            @Override
+                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                element.setText(s.toString());
+                            }
+                            @Override
+                            public void afterTextChanged(Editable s) {}
+                        };
+                        binding.elementTextEt.setText(element.getText());
+                        binding.elementTextEt.addTextChangedListener(controlElementTextWatcher);
                         break;
                     }
                     case DPAD:
@@ -324,6 +392,10 @@ public class ControlsEditorActivity extends AppCompatActivity {
                         binding.elementTextEt.setVisibility(View.GONE);
                         binding.elementIconTv.setVisibility(View.GONE);
                         binding.elementIconS.setVisibility(View.GONE);
+                        binding.elementStyleTv.setVisibility(View.GONE);
+                        binding.elementStyleS.setVisibility(View.GONE);
+                        binding.elementCustomIconB.setVisibility(View.GONE);
+                        binding.elementIconNoTintCb.setVisibility(View.GONE);
                         break;
                     }
                     case DPAD_UP:
@@ -337,6 +409,10 @@ public class ControlsEditorActivity extends AppCompatActivity {
                         binding.elementTextEt.setVisibility(View.GONE);
                         binding.elementIconTv.setVisibility(View.GONE);
                         binding.elementIconS.setVisibility(View.GONE);
+                        binding.elementStyleTv.setVisibility(View.GONE);
+                        binding.elementStyleS.setVisibility(View.GONE);
+                        binding.elementCustomIconB.setVisibility(View.GONE);
+                        binding.elementIconNoTintCb.setVisibility(View.GONE);
                         break;
                     }
                 }
@@ -407,6 +483,12 @@ public class ControlsEditorActivity extends AppCompatActivity {
 
     private void applyInputType(@NonNull AbstractControlElement element,
                                 @NonNull AbstractControlElement.InputType inputType) {
+        // RADIAL_MENU has 4 programmable sector bindings (Left/Up/Right/Down) for both
+        // MNK and GAMEPAD — re-use the directional-bindings UI.
+        if (element.getType() == AbstractControlElement.Type.RADIAL_MENU) {
+            applyRadialMenuBindings(element, inputType);
+            return;
+        }
         switch (inputType) {
             case MNK: {
                 if (element.getType() == AbstractControlElement.Type.BUTTON_CIRCLE
@@ -609,6 +691,60 @@ public class ControlsEditorActivity extends AppCompatActivity {
         }
     }
 
+    private void applyRadialMenuBindings(@NonNull AbstractControlElement element,
+                                         @NonNull AbstractControlElement.InputType inputType) {
+        binding.elementBindingsTv.setVisibility(View.GONE);
+        binding.elementBindingsAddIb.setVisibility(View.GONE);
+        binding.elementBindingsContainerLl.removeAllViews();
+        binding.elementTogglingCb.setVisibility(View.GONE);
+        binding.elementStickBindingTv.setVisibility(View.GONE);
+        binding.elementStickBindingS.setVisibility(View.GONE);
+
+        final com.zomdroid.input.RadialMenuControlElement radial =
+                (element instanceof com.zomdroid.input.RadialMenuControlElement)
+                        ? (com.zomdroid.input.RadialMenuControlElement) element : null;
+
+        GLFWBinding[] options = GLFWBinding.valuesForType(inputType);
+
+        // sector 0 = Left, 1 = Up, 2 = Right, 3 = Down
+        setupRadialSectorSpinner(binding.elementBindingLeftS, options, element.getBindingLeft(),
+                b -> { element.setBindingLeft(b); if (radial != null) radial.setSectorLabel(0, shortBindingLabel(b)); });
+        setupRadialSectorSpinner(binding.elementBindingUpS, options, element.getBindingUp(),
+                b -> { element.setBindingUp(b); if (radial != null) radial.setSectorLabel(1, shortBindingLabel(b)); });
+        setupRadialSectorSpinner(binding.elementBindingRightS, options, element.getBindingRight(),
+                b -> { element.setBindingRight(b); if (radial != null) radial.setSectorLabel(2, shortBindingLabel(b)); });
+        setupRadialSectorSpinner(binding.elementBindingDownS, options, element.getBindingDown(),
+                b -> { element.setBindingDown(b); if (radial != null) radial.setSectorLabel(3, shortBindingLabel(b)); });
+
+        binding.elementDirectionalBindingsCl.setVisibility(View.VISIBLE);
+    }
+
+    private void setupRadialSectorSpinner(android.widget.Spinner spinner, GLFWBinding[] options,
+                                          GLFWBinding current,
+                                          java.util.function.Consumer<GLFWBinding> onPick) {
+        ArrayAdapter<GLFWBinding> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, options);
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(null);
+        int pos = adapter.getPosition(current);
+        spinner.setSelection(pos >= 0 ? pos : 0, false);
+        spinner.post(() -> spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                onPick.accept((GLFWBinding) parent.getSelectedItem());
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        }));
+    }
+
+    /** Short human label from a binding name, e.g. KEY_A→A, GAMEPAD_BUTTON_X→X, MOUSE_WHEEL_UP→UP. */
+    private static String shortBindingLabel(GLFWBinding b) {
+        if (b == null) return "";
+        String n = b.name();
+        int us = n.lastIndexOf('_');
+        return (us >= 0 && us < n.length() - 1) ? n.substring(us + 1) : n;
+    }
+
     private void addElementBindingField(@NonNull AbstractControlElement element,
                                         @NonNull AbstractControlElement.InputType inputType,
                                         @NonNull GLFWBinding binding, int bindingIndex) {
@@ -636,6 +772,68 @@ public class ControlsEditorActivity extends AppCompatActivity {
         });
 
         this.binding.elementBindingsContainerLl.addView(fieldBinding.getRoot());
+    }
+
+    private boolean hasStartSelectBinding(@NonNull AbstractControlElement el) {
+        for (GLFWBinding b : el.getBindings()) {
+            if (b == GLFWBinding.GAMEPAD_BUTTON_BACK
+                    || b == GLFWBinding.GAMEPAD_BUTTON_START
+                    || b == GLFWBinding.GAMEPAD_BUTTON_GUIDE) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void onIconPicked(Uri uri) {
+        AbstractControlElement el = binding.inputControlsV.getSelectedElement();
+        boolean isButton = el instanceof com.zomdroid.input.ButtonControlElement;
+        boolean isRadial = el instanceof com.zomdroid.input.RadialMenuControlElement;
+        if (!isButton && !isRadial) {
+            Toast.makeText(this, R.string.control_element_custom_icon_select_button, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        File dir = binding.inputControlsV.getControlsIconsDir();
+        if (dir == null) {
+            Toast.makeText(this, R.string.control_element_custom_icon_failed, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!dir.exists()) dir.mkdirs();
+        try {
+            // Decode bounds first to downscale large images (cap ~256px).
+            BitmapFactory.Options bounds = new BitmapFactory.Options();
+            bounds.inJustDecodeBounds = true;
+            try (InputStream is = getContentResolver().openInputStream(uri)) {
+                BitmapFactory.decodeStream(is, null, bounds);
+            }
+            int sample = 1;
+            final int max = 256;
+            while (bounds.outWidth / sample > max || bounds.outHeight / sample > max) sample *= 2;
+            BitmapFactory.Options opts = new BitmapFactory.Options();
+            opts.inSampleSize = sample;
+            Bitmap bmp;
+            try (InputStream is = getContentResolver().openInputStream(uri)) {
+                bmp = BitmapFactory.decodeStream(is, null, opts);
+            }
+            if (bmp == null) {
+                Toast.makeText(this, R.string.control_element_custom_icon_failed, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            String fileName = "icon_" + System.currentTimeMillis() + ".png";
+            File out = new File(dir, fileName);
+            try (FileOutputStream fos = new FileOutputStream(out)) {
+                bmp.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            }
+            boolean noTint = binding.elementIconNoTintCb.isChecked();
+            if (isButton) {
+                ((com.zomdroid.input.ButtonControlElement) el).setCustomIcon(fileName, noTint);
+            } else {
+                ((com.zomdroid.input.RadialMenuControlElement) el).setCustomIcon(fileName, noTint);
+            }
+            binding.inputControlsV.invalidate();
+        } catch (Exception e) {
+            Toast.makeText(this, R.string.control_element_custom_icon_failed, Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

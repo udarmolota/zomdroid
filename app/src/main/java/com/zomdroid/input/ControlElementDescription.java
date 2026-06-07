@@ -18,6 +18,12 @@ public class ControlElementDescription {
         }
     }
 
+    public enum Style {
+        OUTLINE,
+        FILLED,
+        GLASS
+    }
+
     public final float centerXRelative;
     public final float centerYRelative;
     public final float scale;
@@ -30,8 +36,14 @@ public class ControlElementDescription {
     public final Icon icon;
     public final boolean isToggle;
     public final float sensitivity;
+    public final Style style;
+    /** Filename of a user-supplied icon image stored in the instance's controls/icons folder; null = use built-in {@link #icon}. */
+    public final String iconFile;
+    /** When true a custom iconFile is drawn with its original colors (not tinted by the button color). */
+    public final boolean noTint;
 
     public static final float DEFAULT_SENSITIVITY = 2.0f;
+    public static final Style DEFAULT_STYLE = Style.OUTLINE;
     public static final float MIN_SENSITIVITY = 0.25f;
     public static final float MAX_SENSITIVITY = 8.0f;
 
@@ -48,6 +60,25 @@ public class ControlElementDescription {
                                      String text, int color, int alpha,
                                      AbstractControlElement.InputType inputType, @NonNull Icon icon,
                                      boolean isToggle, float sensitivity) {
+        this(centerXRelative, centerYRelative, scale, type, bindings, text, color, alpha,
+                inputType, icon, isToggle, sensitivity, DEFAULT_STYLE);
+    }
+
+    public ControlElementDescription(float centerXRelative, float centerYRelative, float scale,
+                                     @NonNull AbstractControlElement.Type type, @NonNull GLFWBinding[] bindings,
+                                     String text, int color, int alpha,
+                                     AbstractControlElement.InputType inputType, @NonNull Icon icon,
+                                     boolean isToggle, float sensitivity, Style style) {
+        this(centerXRelative, centerYRelative, scale, type, bindings, text, color, alpha,
+                inputType, icon, isToggle, sensitivity, style, null, false);
+    }
+
+    public ControlElementDescription(float centerXRelative, float centerYRelative, float scale,
+                                     @NonNull AbstractControlElement.Type type, @NonNull GLFWBinding[] bindings,
+                                     String text, int color, int alpha,
+                                     AbstractControlElement.InputType inputType, @NonNull Icon icon,
+                                     boolean isToggle, float sensitivity, Style style,
+                                     String iconFile, boolean noTint) {
         this.centerXRelative = centerXRelative;
         this.centerYRelative = centerYRelative;
         this.scale = scale;
@@ -60,6 +91,9 @@ public class ControlElementDescription {
         this.icon = icon;
         this.isToggle = isToggle;
         this.sensitivity = sensitivity;
+        this.style = (style != null) ? style : DEFAULT_STYLE;
+        this.iconFile = iconFile;
+        this.noTint = noTint;
         validate();
     }
 
@@ -125,6 +159,20 @@ public class ControlElementDescription {
                         null, Color.LTGRAY, 128,
                         AbstractControlElement.InputType.MNK,
                         Icon.NO_ICON, false);
+            case SCROLL_BAR:
+                return new ControlElementDescription(
+                        0.92f, 0.5f, 1.0f, type,
+                        new GLFWBinding[0],
+                        null, Color.LTGRAY, 150,
+                        AbstractControlElement.InputType.MNK,
+                        Icon.NO_ICON, false, DEFAULT_SENSITIVITY);
+            case RADIAL_MENU:
+                return new ControlElementDescription(
+                        0.5f, 0.5f, 1.0f, type,
+                        new GLFWBinding[0],
+                        "ZOOM", Color.LTGRAY, 200,
+                        AbstractControlElement.InputType.GAMEPAD,
+                        Icon.NO_ICON, false, DEFAULT_SENSITIVITY);
             default:
                 throw new IllegalArgumentException("Unrecognized type " + type.name());
         }

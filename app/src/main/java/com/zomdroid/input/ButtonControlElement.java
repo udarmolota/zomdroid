@@ -1,8 +1,12 @@
 package com.zomdroid.input;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
+import java.io.File;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
@@ -25,6 +29,8 @@ public class ButtonControlElement extends AbstractControlElement {
     private final ButtonControlDrawable drawable;
     private int pointerId = -1;
     private boolean isToggledOn = false;
+    // Attention-color indicator shown while a toggle button is switched ON.
+    private static final int TOGGLE_ON_COLOR = android.graphics.Color.parseColor("#FFA726");
 
     public ButtonControlElement(InputControlsView parentView, ControlElementDescription elementDescription) {
         super(parentView, elementDescription);
@@ -37,6 +43,16 @@ public class ButtonControlElement extends AbstractControlElement {
         if (inputType == null || inputType == this.inputType) return;
         clearBindings();
         this.inputType = inputType;
+    }
+
+    // Light haptic tick on press, only when the user enabled it (default off).
+    private void maybeHaptic() {
+        com.zomdroid.LauncherPreferences p = com.zomdroid.LauncherPreferences.getSingleton();
+        if (p != null && p.isVibrateOnTouch()) {
+            this.parentView.performHapticFeedback(
+                    android.view.HapticFeedbackConstants.VIRTUAL_KEY,
+                    android.view.HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+        }
     }
 
     private void dispatchEvent(boolean isPressed) {
@@ -91,6 +107,7 @@ public class ButtonControlElement extends AbstractControlElement {
                 float y = e.getY(actionIndex);
                 if (!this.drawable.isPointOver(x, y)) return false;
                 this.pointerId = pointerId;
+                maybeHaptic();
 
                 if (getToggle()) {
                     if (isToggledOn) {
@@ -104,6 +121,7 @@ public class ButtonControlElement extends AbstractControlElement {
                     this.dispatchEvent(true);
                 }
 
+                this.parentView.invalidate();
                 return true;
             }
             case MotionEvent.ACTION_UP:
@@ -118,6 +136,10 @@ public class ButtonControlElement extends AbstractControlElement {
                 if (this.pointerId != -1) {
                     this.pointerId = -1;
                     this.dispatchEvent(false);
+                    // A system touch-cancel must also clear the toggle ON state, otherwise the
+                    // orange ON indicator stays lit even though the key was released.
+                    isToggledOn = false;
+                    this.parentView.invalidate();
                     return true;
                 }
                 return false;
@@ -208,6 +230,37 @@ public class ButtonControlElement extends AbstractControlElement {
         return this.drawable.icon;
     }
 
+    public void setStyle(ControlElementDescription.Style style) {
+        this.drawable.setStyle(style);
+        this.parentView.invalidate();
+    }
+
+    public ControlElementDescription.Style getStyle() {
+        return this.drawable.getStyle();
+    }
+
+    public void setCustomIcon(String fileName, boolean noTint) {
+        this.drawable.setCustomIcon(fileName, noTint);
+        this.parentView.invalidate();
+    }
+
+    public String getIconFile() {
+        return this.drawable.iconFile;
+    }
+
+    public boolean isNoTint() {
+        return this.drawable.noTint;
+    }
+
+    public void setNoTint(boolean noTint) {
+        if (this.drawable.iconFile != null) {
+            this.drawable.setCustomIcon(this.drawable.iconFile, noTint);
+        } else {
+            this.drawable.noTint = noTint;
+        }
+        this.parentView.invalidate();
+    }
+
     @Override
     public void addBinding(GLFWBinding binding) {
         this.bindings.add(binding);
@@ -233,7 +286,11 @@ public class ButtonControlElement extends AbstractControlElement {
                 this.drawable.alpha,
                 this.inputType,
                 this.drawable.icon,
-                this.isToggle);
+                this.isToggle,
+                ControlElementDescription.DEFAULT_SENSITIVITY,
+                this.drawable.style,
+                this.drawable.iconFile,
+                this.drawable.noTint);
     }
 
     public class ButtonControlDrawable {
@@ -263,6 +320,9 @@ public class ButtonControlElement extends AbstractControlElement {
         private final ShapeDrawable shapeDrawable = new ShapeDrawable();
         private ControlElementDescription.Icon icon;
         private Drawable iconDrawable;
+        private ControlElementDescription.Style style;
+        private String iconFile;      // user image filename in controls/icons, or null
+        private boolean noTint;       // keep custom image original colors when true
 
         public ButtonControlDrawable(InputControlsView parent, ControlElementDescription description) {
             this.type = description.type;
@@ -271,6 +331,7 @@ public class ButtonControlElement extends AbstractControlElement {
             setAlpha(description.alpha);
 
             this.colorFilter = null;
+            this.style = (description.style != null) ? description.style : ControlElementDescription.DEFAULT_STYLE;
 
             switch (description.type) {
                 case BUTTON_CIRCLE:
@@ -294,16 +355,58 @@ public class ButtonControlElement extends AbstractControlElement {
             setTextSizeToFit();
 
             setIcon(description.icon);
+            if (description.iconFile != null && !description.iconFile.isEmpty()) {
+                setCustomIcon(description.iconFile, description.noTint);
+            }
         }
 
         public void draw(@NonNull Canvas canvas) {
             // --- Outline pass (black, a bit thicker) ---
             Paint p = this.shapeDrawable.getPaint();
 
-            int oldColor = p.getColor();
-            int oldAlpha = p.getAlpha();
+            // Capture the base state from the drawable's own fields, NOT from the paint:
+            // the paint is mutated across passes (and the toggle-ON contour leaves it orange),
+            // so reading p.getColor() here would leak the ON color into the next frame and keep
+            // the contour permanently highlighted.
+            int oldColor = this.color;
+            int oldAlpha = this.alpha;
             float oldStroke = p.getStrokeWidth();
-            ColorFilter oldFilter = p.getColorFilter();
+            ColorFilter oldFilter = this.colorFilter;
+
+            // --- Fill pass (for FILLED / GLASS styles) ---
+            if (this.style == ControlElementDescription.Style.FILLED
+                    || this.style == ControlElementDescription.Style.GLASS) {
+                Paint.Style oldPaintStyle = p.getStyle();
+                p.setStyle(Paint.Style.FILL);
+                p.setColor(oldColor);
+                p.setAlpha(this.style == ControlElementDescription.Style.GLASS
+                        ? Math.round(oldAlpha / 3f) : oldAlpha);
+                p.setColorFilter(oldFilter);
+                this.shapeDrawable.draw(canvas);
+                // restore for the outline/normal stroke passes below
+                p.setStyle(oldPaintStyle);
+                p.setColor(oldColor);
+                p.setAlpha(oldAlpha);
+                p.setColorFilter(oldFilter);
+            }
+
+            boolean toggledOn = getToggle() && ButtonControlElement.this.isToggledOn && !parentView.isEditMode;
+
+            // --- Toggle-ON FILL: only for filled styles. OUTLINE buttons get an orange contour below
+            //     (so the ON indicator matches the button's drawing style). ---
+            if (toggledOn && (this.style == ControlElementDescription.Style.FILLED
+                    || this.style == ControlElementDescription.Style.GLASS)) {
+                Paint.Style onStyle = p.getStyle();
+                p.setStyle(Paint.Style.FILL);
+                p.setColor(TOGGLE_ON_COLOR);
+                p.setAlpha(200);
+                p.setColorFilter(null);
+                this.shapeDrawable.draw(canvas);
+                p.setStyle(onStyle);
+                p.setColor(oldColor);
+                p.setAlpha(oldAlpha);
+                p.setColorFilter(oldFilter);
+            }
 
             p.setColor(android.graphics.Color.rgb(40, 40, 40));
             //p.setAlpha(OUTLINE_ALPHA);
@@ -312,22 +415,36 @@ public class ButtonControlElement extends AbstractControlElement {
             p.setColorFilter(null);
             this.shapeDrawable.draw(canvas);
 
-            // --- Normal pass (your current style/color/alpha) ---
+            // --- Normal pass (contour). When toggled ON, draw the contour in the attention
+            //     color and a bit thicker — this is the ON indicator for OUTLINE style. ---
+            p.setColor(toggledOn ? TOGGLE_ON_COLOR : oldColor);
+            p.setAlpha(oldAlpha);
+            p.setStrokeWidth(toggledOn ? oldStroke * 1.7f : oldStroke);
+            p.setColorFilter(toggledOn ? null : oldFilter);
+            this.shapeDrawable.draw(canvas);
+            // Restore the paint to the base state so nothing leaks into the next frame.
+            p.setStrokeWidth(oldStroke);
             p.setColor(oldColor);
             p.setAlpha(oldAlpha);
-            p.setStrokeWidth(oldStroke);
             p.setColorFilter(oldFilter);
-            this.shapeDrawable.draw(canvas);
 
             if (this.iconDrawable != null) {
-                this.iconDrawable.draw(canvas);
+                if (toggledOn) {
+                    // Tint the inner image/letter with the ON color too (not just the contour).
+                    this.iconDrawable.setColorFilter(new android.graphics.PorterDuffColorFilter(
+                            TOGGLE_ON_COLOR, android.graphics.PorterDuff.Mode.SRC_ATOP));
+                    this.iconDrawable.draw(canvas);
+                    this.iconDrawable.setColorFilter(this.colorFilter); // restore
+                } else {
+                    this.iconDrawable.draw(canvas);
+                }
             } else if (this.text != null) {
                 float o = TEXT_OUTLINE_PX * parentView.pixelScale;
 
-                // сохраняем параметры
-                int oldTextColor = this.textPaint.getColor();
-                int oldTextAlpha = this.textPaint.getAlpha();
-                ColorFilter oldTextFilter = this.textPaint.getColorFilter();
+                // сохраняем параметры (берём из полей, а не из «загрязнённой» краски — см. выше)
+                int oldTextColor = this.color;
+                int oldTextAlpha = this.alpha;
+                ColorFilter oldTextFilter = this.colorFilter;
 
                 // outline pass: чёрный без фильтра
                 //this.textPaint.setColor(android.graphics.Color.BLACK);
@@ -341,10 +458,10 @@ public class ButtonControlElement extends AbstractControlElement {
                 canvas.drawText(this.text, this.centerX, this.textY - o, this.textPaint);
                 canvas.drawText(this.text, this.centerX, this.textY + o, this.textPaint);
 
-                // normal pass: вернуть как было
-                this.textPaint.setColor(oldTextColor);
+                // normal pass: вернуть как было (но при включённом тогле — оранжевым, как контур)
+                this.textPaint.setColor(toggledOn ? TOGGLE_ON_COLOR : oldTextColor);
                 this.textPaint.setAlpha(oldTextAlpha);
-                this.textPaint.setColorFilter(oldTextFilter);
+                this.textPaint.setColorFilter(toggledOn ? null : oldTextFilter);
                 canvas.drawText(this.text, this.centerX, this.textY, this.textPaint);
             }
         }
@@ -357,8 +474,14 @@ public class ButtonControlElement extends AbstractControlElement {
             this.color = color;
             this.shapeDrawable.getPaint().setColor(this.color);
             this.textPaint.setColor(this.color);
-            if (this.iconDrawable != null)
+            if (this.iconDrawable != null && shouldTintIcon())
                 iconDrawable.setTint(this.color);
+        }
+
+        private boolean shouldTintIcon() {
+            // Built-in icons are always tinted by the button color; custom images
+            // are tinted unless the user asked to keep their original colors.
+            return this.iconFile == null || !this.noTint;
         }
 
         public void setAlpha(int alpha) {
@@ -375,6 +498,14 @@ public class ButtonControlElement extends AbstractControlElement {
             this.textPaint.setColorFilter(this.colorFilter);
             if (this.iconDrawable != null)
                 this.iconDrawable.setColorFilter(this.colorFilter);
+        }
+
+        public void setStyle(ControlElementDescription.Style style) {
+            this.style = (style != null) ? style : ControlElementDescription.DEFAULT_STYLE;
+        }
+
+        public ControlElementDescription.Style getStyle() {
+            return this.style;
         }
 
         public void setScale(float scale) {
@@ -400,6 +531,8 @@ public class ButtonControlElement extends AbstractControlElement {
 
         public void setIcon(@NonNull ControlElementDescription.Icon icon) {
             this.icon = icon;
+            // Choosing a built-in icon clears any custom image.
+            this.iconFile = null;
             if (this.icon == ControlElementDescription.Icon.NO_ICON) {
                 this.iconDrawable = null;
             } else {
@@ -414,6 +547,36 @@ public class ButtonControlElement extends AbstractControlElement {
                     updateIconDrawable();
                 }
             }
+        }
+
+        // Load a user-supplied image from controls/icons/<fileName> as the button icon.
+        // Falls back to the built-in icon if the file is missing/undecodable.
+        public void setCustomIcon(String fileName, boolean noTint) {
+            this.noTint = noTint;
+            if (fileName == null || fileName.isEmpty()) {
+                this.iconFile = null;
+                setIcon(this.icon);
+                return;
+            }
+            File dir = parentView.getControlsIconsDir();
+            File f = (dir != null) ? new File(dir, fileName) : null;
+            Bitmap bmp = (f != null && f.isFile()) ? BitmapFactory.decodeFile(f.getAbsolutePath()) : null;
+            if (bmp == null) {
+                this.iconFile = null;
+                setIcon(this.icon);
+                return;
+            }
+            this.iconFile = fileName;
+            BitmapDrawable bd = new BitmapDrawable(parentView.getResources(), bmp);
+            if (shouldTintIcon()) {
+                bd.setTint(this.color);
+            } else {
+                bd.setTintList(null);
+            }
+            bd.setAlpha(this.alpha);
+            bd.setColorFilter(this.colorFilter);
+            this.iconDrawable = bd;
+            updateIconDrawable();
         }
 
         private void updateDimensions() {
@@ -465,7 +628,7 @@ public class ButtonControlElement extends AbstractControlElement {
 
         private void updateIconDrawable() {
             if (this.iconDrawable == null) return;
-            RectF bounds = getContentBounds();
+            RectF bounds = getIconContentBounds();
 
             float iconAspect = (float) this.iconDrawable.getIntrinsicWidth() / this.iconDrawable.getIntrinsicHeight();
             float boundsAspect = bounds.width() / bounds.height();
@@ -498,6 +661,30 @@ public class ButtonControlElement extends AbstractControlElement {
                 contentW = this.width * contentScale / (float) Math.sqrt(2);
                 contentH = this.width * contentScale / (float) Math.sqrt(2);
             }
+            bounds.set((this.width - contentW) / 2,
+                    (this.height - contentH) / 2,
+                    this.width - (this.width - contentW) / 2,
+                    this.height - (this.height - contentH) / 2);
+            bounds.offset(this.x, this.y);
+            return bounds;
+        }
+
+        // Content area for the icon. Custom images get a larger area so they nearly fill the
+        // button (built-in icons keep the smaller, padded area that suits their internal margins).
+        private RectF getIconContentBounds() {
+            if (this.iconFile == null) {
+                return getContentBounds();
+            }
+            final float contentScale = 0.92f;
+            float contentW, contentH;
+            if (this.type == Type.BUTTON_RECT) {
+                contentW = this.width * contentScale;
+                contentH = this.height * contentScale;
+            } else { // BUTTON_CIRCLE — span more of the diameter than the inscribed-square fit
+                contentW = this.width * contentScale;
+                contentH = this.height * contentScale;
+            }
+            RectF bounds = new RectF();
             bounds.set((this.width - contentW) / 2,
                     (this.height - contentH) / 2,
                     this.width - (this.width - contentW) / 2,

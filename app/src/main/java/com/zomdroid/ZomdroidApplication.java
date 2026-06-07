@@ -12,6 +12,8 @@ import androidx.annotation.NonNull;
 
 import com.zomdroid.game.GameInstanceManager;
 
+import java.security.Security;
+
 public class ZomdroidApplication extends Application {
     private static final String LOG_TAG = "ZomdroidApplication";
     @SuppressLint("StaticFieldLeak") // we have activity lifecycle tracking to avoid leaks
@@ -21,6 +23,7 @@ public class ZomdroidApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        installFullBouncyCastle();
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
             @Override
             public void onActivityCreated(@NonNull Activity activity, Bundle savedInstanceState) {
@@ -72,6 +75,27 @@ public class ZomdroidApplication extends Application {
             prefs.edit().putLong(C.shprefs.keys.LAUNCHER_VERSION, currentVersion)
                     .putBoolean(C.shprefs.keys.ARE_DEPENDENCIES_INSTALLED, false)
                     .apply();
+        }
+    }
+
+    /**
+     * Replace Android's built-in, STRIPPED-DOWN "BC" security provider with the full
+     * bcprov-jdk18on one (same name "BC") so JavaSteam's depot code can do
+     * {@code MessageDigest.getInstance("SHA-1", "BC")} when saving depot manifests.
+     *
+     * Android ships a trimmed BouncyCastle as provider "BC" that lacks SHA-1 MessageDigest;
+     * {@code Security.addProvider} is otherwise a no-op because a provider named "BC" already
+     * exists. We remove the system one and append the full provider under the same name. Appending
+     * keeps it LOWEST priority so it never overrides Conscrypt/AndroidOpenSSL for default lookups —
+     * it only answers when code explicitly asks for provider "BC".
+     */
+    private static void installFullBouncyCastle() {
+        try {
+            Security.removeProvider("BC");
+            Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+            Log.i(LOG_TAG, "Installed full BouncyCastle as provider BC");
+        } catch (Throwable t) {
+            Log.e(LOG_TAG, "Failed to install full BouncyCastle provider", t);
         }
     }
 

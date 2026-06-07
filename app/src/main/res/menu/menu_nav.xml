@@ -53,6 +53,14 @@
             app:showAsAction="never"/>
     </group>
 
+    <group android:id="@+id/group_steam" android:checkableBehavior="none">
+        <item
+            android:id="@+id/action_download_steam"
+            android:title="@string/steam_dl_menu"
+            android:icon="@drawable/ic_steam"
+            app:showAsAction="never"/>
+    </group>
+
     <group android:id="@+id/group_mods" android:checkableBehavior="none">
         <item
             android:id="@+id/action_open_install_mod"
@@ -69,27 +77,7 @@
             app:showAsAction="never"/>
     </group>
 
-    <group android:id="@+id/group_about" android:checkableBehavior="none">
-        <item
-            android:id="@+id/action_open_wiki_fragment"
-            android:title="@string/fragment_label_wiki"
-            android:icon="@drawable/mt_icon_menu_book"
-            app:showAsAction="never"/>
-        <item
-            android:id="@+id/action_donate"
-            android:title="@string/nav_menu_donate"
-            android:icon="@drawable/mt_icon_heart"
-            app:showAsAction="never"/>
-        <item
-            android:id="@+id/action_reddit"
-            android:title="@string/nav_menu_reddit"
-            android:icon="@drawable/ic_reddit"
-            app:showAsAction="never"/>
-        <item
-            android:id="@+id/action_version"
-            android:title="@string/nav_menu_version"
-            android:icon="@drawable/ic_github"
-            app:showAsAction="never"/>
-    </group>
+    <!-- Wiki / Donate / Reddit / Version moved to the bottom icon row in activity_launcher.xml -->
+
 
 </menu>

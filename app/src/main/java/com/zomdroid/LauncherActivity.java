@@ -77,6 +77,14 @@ public class LauncherActivity extends AppCompatActivity {
             }
         });
 
+        // Pad the drawer's bottom by the system bar height so the bottom icon row + line aren't
+        // hidden behind the navigation bar / gesture area.
+        binding.drawerContainer.setOnApplyWindowInsetsListener((v, windowInsets) -> {
+            Insets insets = windowInsets.getInsets(WindowInsets.Type.systemBars());
+            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), insets.bottom);
+            return windowInsets;
+        });
+
         setSupportActionBar(binding.appbar);
 
         appBarConfiguration = new AppBarConfiguration.Builder(
@@ -104,34 +112,6 @@ public class LauncherActivity extends AppCompatActivity {
                 binding.drawerLayout.close();
                 navController.navigate(R.id.action_open_gamepad_mapper);
                 return true;
-            } else if (item.getItemId() == R.id.action_donate) {
-                final SpannableString s = new SpannableString(getString(R.string.donate_message));
-                Linkify.addLinks(s, Linkify.WEB_URLS);
-                AlertDialog dialog = new MaterialAlertDialogBuilder(this)
-                        .setTitle(R.string.dialog_title_donate)
-                        .setMessage(s)
-                        .setPositiveButton(getString(R.string.dialog_button_ok), null)
-                        .create();
-                dialog.show();
-                TextView messageView = dialog.findViewById(android.R.id.message);
-                if (messageView != null) {
-                    messageView.setMovementMethod(LinkMovementMethod.getInstance());
-                }
-                return true;
-            } else if (item.getItemId() == R.id.action_reddit) {
-                final SpannableString s = new SpannableString(getString(R.string.reddit_message));
-                Linkify.addLinks(s, Linkify.WEB_URLS);
-                AlertDialog dialog = new MaterialAlertDialogBuilder(this)
-                        .setTitle(R.string.reddit_dialog_title)
-                        .setMessage(s)
-                        .setPositiveButton(getString(R.string.dialog_button_ok), null)
-                        .create();
-                dialog.show();
-                TextView messageView = dialog.findViewById(android.R.id.message);
-                if (messageView != null) {
-                    messageView.setMovementMethod(LinkMovementMethod.getInstance());
-                }
-                return true;            
             } else if (item.getItemId() == R.id.action_open_install_mod) {
                 // Navigate to Mod installation
                 binding.drawerLayout.close();
@@ -141,9 +121,6 @@ public class LauncherActivity extends AppCompatActivity {
                 binding.drawerLayout.close();
                 navController.navigate(R.id.action_install_controls);
                 return true;
-            } else if (item.getItemId() == R.id.action_version) {
-                checkForUpdate();
-                return true;
             } else if (item.getItemId() == R.id.action_open_optimization) {
                 binding.drawerLayout.close();
                 navController.navigate(R.id.action_open_optimization);
@@ -152,6 +129,10 @@ public class LauncherActivity extends AppCompatActivity {
                 binding.drawerLayout.close();
                 navController.navigate(R.id.action_install_native_libs);
                 return true;
+            } else if (item.getItemId() == R.id.action_download_steam) {
+                binding.drawerLayout.close();
+                navController.navigate(R.id.action_download_steam);
+                return true;
         }
 
         binding.drawerLayout.close();
@@ -159,6 +140,41 @@ public class LauncherActivity extends AppCompatActivity {
             return NavigationUI.onNavDestinationSelected(item, navController)
                     || super.onOptionsItemSelected(item);
         });
+
+        // Bottom icon row (Wiki / Donate / Reddit / Version) — icons only, pinned to drawer bottom.
+        binding.navBottomWiki.setOnClickListener(v -> {
+            binding.drawerLayout.close();
+            navController.navigate(R.id.action_open_wiki_fragment);
+        });
+        binding.navBottomDonate.setOnClickListener(v -> showDonateDialog());
+        binding.navBottomReddit.setOnClickListener(v -> showRedditDialog());
+        binding.navBottomVersion.setOnClickListener(v -> checkForUpdate());
+    }
+
+    private void showDonateDialog() {
+        final SpannableString s = new SpannableString(getString(R.string.donate_message));
+        Linkify.addLinks(s, Linkify.WEB_URLS);
+        AlertDialog dialog = new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.dialog_title_donate)
+                .setMessage(s)
+                .setPositiveButton(getString(R.string.dialog_button_ok), null)
+                .create();
+        dialog.show();
+        TextView messageView = dialog.findViewById(android.R.id.message);
+        if (messageView != null) messageView.setMovementMethod(LinkMovementMethod.getInstance());
+    }
+
+    private void showRedditDialog() {
+        final SpannableString s = new SpannableString(getString(R.string.reddit_message));
+        Linkify.addLinks(s, Linkify.WEB_URLS);
+        AlertDialog dialog = new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.reddit_dialog_title)
+                .setMessage(s)
+                .setPositiveButton(getString(R.string.dialog_button_ok), null)
+                .create();
+        dialog.show();
+        TextView messageView = dialog.findViewById(android.R.id.message);
+        if (messageView != null) messageView.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
     @Override

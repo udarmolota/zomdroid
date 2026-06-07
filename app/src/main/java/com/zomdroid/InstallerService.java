@@ -540,6 +540,7 @@ public class InstallerService extends Service implements TaskProgressListener {
                 if (!controlsDir.exists()) controlsDir.mkdirs();
 
                 File outFile = new File(controlsDir, "controls.json");
+                File iconsDir = new File(controlsDir, "icons");
                 boolean found = false;
 
                 try (InputStream is = getContentResolver().openInputStream(controlsArchiveUri)) {
@@ -548,35 +549,41 @@ public class InstallerService extends Service implements TaskProgressListener {
                         ZipEntry e;
                         byte[] buf = new byte[64 * 1024];
 
+                        // Process every entry (do NOT stop at controls.json): we also extract the
+                        // icons/ folder so user-supplied button/radial images travel with the layout.
                         while ((e = zis.getNextEntry()) != null) {
                             if (e.isDirectory()) continue;
 
                             String name = e.getName();
+                            if (name == null) continue;
+                            String lower = name.toLowerCase();
+
                             // Accept both "controls.json" and "something/controls.json"
-                            if (name != null && name.toLowerCase().endsWith("controls.json")) {
-                                java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-                                int r;
-                                while ((r = zis.read(buf)) != -1) {
-                                    baos.write(buf, 0, r);
-                                }
-
-                                byte[] jsonBytes = baos.toByteArray();
-
-                                // Write to file
+                            if (lower.endsWith("controls.json")) {
                                 try (OutputStream os = new FileOutputStream(outFile, false)) {
-                                    os.write(jsonBytes);
+                                    int r;
+                                    while ((r = zis.read(buf)) != -1) {
+                                        os.write(buf, 0, r);
+                                    }
                                     os.flush();
                                 }
-
-                                // Also update SharedPreferences so controls apply immediately
-                                /*String json = new String(jsonBytes, java.nio.charset.StandardCharsets.UTF_8);
-                                getSharedPreferences(C.shprefs.NAME, MODE_PRIVATE)
-                                        .edit()
-                                        .putString(C.shprefs.keys.INPUT_CONTROLS, json)
-                                        .apply();
-                                */
                                 found = true;
-                                break;
+                            } else if (lower.contains("icons/")) {
+                                // Custom button/radial image. Use only the file name (no directory
+                                // components) to guard against zip-slip path traversal.
+                                String norm = name.replace('\\', '/');
+                                String base = norm.substring(norm.lastIndexOf('/') + 1);
+                                if (!base.isEmpty() && !base.contains("..")) {
+                                    if (!iconsDir.exists()) iconsDir.mkdirs();
+                                    File iconOut = new File(iconsDir, base);
+                                    try (OutputStream os = new FileOutputStream(iconOut, false)) {
+                                        int r;
+                                        while ((r = zis.read(buf)) != -1) {
+                                            os.write(buf, 0, r);
+                                        }
+                                        os.flush();
+                                    }
+                                }
                             }
                         }
                     }
