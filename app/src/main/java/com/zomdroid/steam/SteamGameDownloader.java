@@ -148,6 +148,9 @@ public class SteamGameDownloader implements Runnable, Cancellable {
             steamClient.connect();
             while (running) manager.runWaitCallbacks(1000L);
             Log.i(TAG, "Download loop ended");
+            // Safety net: never leave the UI stuck in "downloading" if the loop ended without
+            // a terminal result.
+            if (!finished) done("Stopped before finishing — please try again.");
         } catch (Throwable t) {
             if (running) {   // a real crash, not our cancel/stop
                 Log.e(TAG, "SteamGameDownloader crashed", t);
@@ -200,6 +203,7 @@ public class SteamGameDownloader implements Runnable, Cancellable {
             connectAttempts++;
             progress("Connection dropped — retrying (" + connectAttempts + "/" + MAX_CONNECT_ATTEMPTS + ")...");
             try { Thread.sleep(2000L); } catch (InterruptedException ignored) {}
+            if (!running) return;   // cancelled while waiting to reconnect
             steamClient.connect();
             return;
         }

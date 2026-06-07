@@ -112,6 +112,9 @@ public class SteamModDownloader implements Runnable, Cancellable {
     private CallbackManager manager;
     private SteamUser steamUser;
     private volatile boolean running;
+    private volatile boolean started;       // anonymous logon succeeded → real work began
+    private int connectAttempts = 0;
+    private static final int MAX_CONNECT_ATTEMPTS = 5;
     private volatile String lastTitle;
     private volatile Thread workerThread;   // the thread running downloadAll()
     private volatile boolean finished;      // ensure done() fires once
@@ -151,12 +154,17 @@ public class SteamModDownloader implements Runnable, Cancellable {
             steamClient.connect();
             while (running) manager.runWaitCallbacks(1000L);
             Log.i(TAG, "Anon downloader loop ended");
+            // Safety net: if the loop ended without any terminal result (e.g. disconnect before
+            // logon), still fire done() so the UI leaves the "downloading" state and the
+            // keep-alive service is stopped — otherwise the screen looks frozen.
+            if (!finished) done("Stopped before finishing — please try again.");
         } catch (Throwable t) {
             if (running) {
                 Log.e(TAG, "SteamModDownloader crashed", t);
                 done("crash: " + t);
             } else {
                 Log.i(TAG, "Callback loop stopped: " + t);
+                if (!finished) done("Stopped.");
             }
         }
     }
@@ -167,7 +175,23 @@ public class SteamModDownloader implements Runnable, Cancellable {
     }
 
     private void onDisconnected(DisconnectedCallback cb) {
-        if (running) progress("Disconnected.");
+        if (!running) return;
+        // Steam often drops the first connect attempt before logon — retry a few times before
+        // giving up, otherwise a transient drop kills the whole download.
+        if (!started && connectAttempts < MAX_CONNECT_ATTEMPTS) {
+            connectAttempts++;
+            progress("Connection dropped — retrying (" + connectAttempts + "/" + MAX_CONNECT_ATTEMPTS + ")...");
+            try { Thread.sleep(2000L); } catch (InterruptedException ignored) {}
+            if (!running) return;   // cancelled while waiting to reconnect
+            steamClient.connect();
+            return;
+        }
+        if (!started) {
+            done("Could not connect to Steam after " + connectAttempts
+                    + " attempts. Check your connection and try again.");
+        } else {
+            progress("Disconnected.");
+        }
         running = false;
     }
 
@@ -177,6 +201,7 @@ public class SteamModDownloader implements Runnable, Cancellable {
             running = false;
             return;
         }
+        started = true;
         workerThread = new Thread(this::downloadAll, "zd-anon-mod-dl");
         workerThread.start();
     }
