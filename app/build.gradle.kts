@@ -38,8 +38,8 @@ android {
         applicationId = "com.zomdroid"
         minSdk = 30
         targetSdk = 35
-        versionCode = 145
-        versionName = "1.4.5"
+        versionCode = 146
+        versionName = "1.4.6"
 
         // JavaSteam + protobuf + kotlin stack push past the 64K method limit.
         multiDexEnabled = true
