@@ -548,4 +548,22 @@
     <string name="steam_dl_guard_retry">Неверный код — попробуйте снова</string>
     <string name="steam_dl_guard_hint">Код Steam Guard</string>
     <string name="steam_dl_guard_email">Код отправлен на %1$s</string>
+
+    <!-- Appearance / controls / detection -->
+    <string name="settings_group_appearance">Оформление</string>
+    <string name="settings_theme">Тема лаунчера</string>
+    <string name="control_element_style">Стиль</string>
+    <string name="control_element_custom_icon">Своя иконка…</string>
+    <string name="control_element_custom_icon_failed">Не удалось загрузить изображение</string>
+    <string name="control_element_custom_icon_select_button">Сначала выберите кнопку</string>
+    <string name="control_element_icon_no_tint">Сохранить исходные цвета</string>
+    <string name="vibrate_on_touch_switch_label">Вибрация при нажатии</string>
+    <string name="new_game_instance_analyzing">Анализ файла игры, подождите…</string>
+    <string name="new_game_instance_detect_failed">Не удалось прочитать ZIP игры. Убедитесь, что это корректный архив Project Zomboid, и попробуйте снова.</string>
+
+    <!-- NG_GL4ES renderer offer dialog -->
+    <string name="ng_offer_title">Экспериментальный рендерер</string>
+    <string name="ng_offer_message">На вашем устройстве не GPU Qualcomm Adreno.\n\nНастроить экспериментальный рендерер NG_GL4ES? На некоторых видеочипах не-Adreno (Mali на MediaTek, Exynos или Tensor и подобных) он лучше запускает Build 42.\n\n• Включить NG_GL4ES — попробовать экспериментальный рендерер.\n• Оставить ZINK — стабильный вариант по умолчанию (рекомендуется, и лучше при использовании ANGLE).\n\nЭто можно изменить в любой момент в Настройках.</string>
+    <string name="ng_offer_use_ng">Включить NG_GL4ES</string>
+    <string name="ng_offer_use_zink">Оставить ZINK</string>
 </resources>

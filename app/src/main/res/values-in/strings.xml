@@ -549,4 +549,22 @@
     <string name="steam_dl_guard_retry">Kode salah — coba lagi</string>
     <string name="steam_dl_guard_hint">Kode Steam Guard</string>
     <string name="steam_dl_guard_email">Kode dikirim ke %1$s</string>
+
+    <!-- Appearance / controls / detection -->
+    <string name="settings_group_appearance">Tampilan</string>
+    <string name="settings_theme">Tema launcher</string>
+    <string name="control_element_style">Gaya</string>
+    <string name="control_element_custom_icon">Ikon kustom…</string>
+    <string name="control_element_custom_icon_failed">Tidak dapat memuat gambar</string>
+    <string name="control_element_custom_icon_select_button">Pilih tombol terlebih dahulu</string>
+    <string name="control_element_icon_no_tint">Pertahankan warna asli</string>
+    <string name="vibrate_on_touch_switch_label">Getar saat menekan tombol</string>
+    <string name="new_game_instance_analyzing">Menganalisis file game, harap tunggu…</string>
+    <string name="new_game_instance_detect_failed">Tidak dapat membaca ZIP game. Pastikan itu arsip Project Zomboid yang valid dan coba lagi.</string>
+
+    <!-- NG_GL4ES renderer offer dialog -->
+    <string name="ng_offer_title">Renderer eksperimental</string>
+    <string name="ng_offer_message">Perangkat Anda tidak menggunakan GPU Qualcomm Adreno.\n\nIngin menyiapkan renderer eksperimental NG_GL4ES? Pada sebagian GPU non-Adreno (Mali di MediaTek, Exynos atau Tensor, dan sejenisnya) ia menjalankan Build 42 lebih baik.\n\n• Gunakan NG_GL4ES — coba renderer eksperimental.\n• Gunakan ZINK — pertahankan default yang stabil (disarankan, dan terbaik jika Anda memakai ANGLE).\n\nAnda dapat mengubahnya kapan saja di Pengaturan.</string>
+    <string name="ng_offer_use_ng">Gunakan NG_GL4ES</string>
+    <string name="ng_offer_use_zink">Gunakan ZINK</string>
 </resources>
