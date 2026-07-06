@@ -10,8 +10,7 @@ on:
         type: choice
         options:
         - master
-        - patch145
-        - patch144
+        - patch146
         
 jobs:
   build:
