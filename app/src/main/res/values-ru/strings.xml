@@ -563,7 +563,7 @@
 
     <!-- NG_GL4ES renderer offer dialog -->
     <string name="ng_offer_title">Экспериментальный рендерер</string>
-    <string name="ng_offer_message">На вашем устройстве не GPU Qualcomm Adreno.\n\nНастроить экспериментальный рендерер NG_GL4ES? На некоторых видеочипах не-Adreno (Mali на MediaTek, Exynos или Tensor и подобных) он лучше запускает Build 42.\n\n• Включить NG_GL4ES — попробовать экспериментальный рендерер.\n• Оставить ZINK — стабильный вариант по умолчанию (рекомендуется, и лучше при использовании ANGLE).\n\nЭто можно изменить в любой момент в Настройках.</string>
+    <string name="ng_offer_message">Настроить экспериментальный рендерер NG_GL4ES? На некоторых видеочипах не-Adreno (Mali на MediaTek, Exynos или Tensor и подобных) он лучше запускает Build 42.\n\n• Включить NG_GL4ES — попробовать экспериментальный рендерер.\n• Оставить ZINK — оставить стандартный рендерер. На устройствах MediaTek ZINK работает только через ANGLE.\n\nЭто можно изменить в любой момент в Настройках.</string>
     <string name="ng_offer_use_ng">Включить NG_GL4ES</string>
     <string name="ng_offer_use_zink">Оставить ZINK</string>
 </resources>

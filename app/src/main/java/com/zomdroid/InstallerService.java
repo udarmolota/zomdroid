@@ -69,6 +69,8 @@ public class InstallerService extends Service implements TaskProgressListener {
     // Build version of the target instance ("41" or "42"), used by mod fix to choose install strategy
     public static final String EXTRA_BUILD_VERSION = "com.zomdroid.InstallerService.EXTRA_BUILD_VERSION";
     public static final String EXTRA_BETTERFPS_MODE = "com.zomdroid.InstallerService.EXTRA_BETTERFPS_MODE";
+    public static final String EXTRA_INSTALL_PRESET_NAME = "com.zomdroid.InstallerService.EXTRA_INSTALL_PRESET_NAME";
+    public static final String EXTRA_GPU_VENDOR = "com.zomdroid.InstallerService.EXTRA_GPU_VENDOR";
 
     private final IBinder binder = new LocalBinder();
     private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -77,6 +79,9 @@ public class InstallerService extends Service implements TaskProgressListener {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private long lastProgressUpdateMs;
     private final MutableLiveData<TaskState> taskState = new MutableLiveData<>();
+    private Task currentTask;
+    private String currentInstallPresetName;
+    private String currentGpuVendor;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -86,10 +91,14 @@ public class InstallerService extends Service implements TaskProgressListener {
         notificationManager = NotificationManagerCompat.from(this);
         notificationManager.createNotificationChannel(channel);
 
+        Task task = Task.values()[intent.getIntExtra(EXTRA_COMMAND, 0)];
+        currentTask = task;
+        currentInstallPresetName = intent.getStringExtra(EXTRA_INSTALL_PRESET_NAME);
+        currentGpuVendor = intent.getStringExtra(EXTRA_GPU_VENDOR);
+
         Intent serviceStartedBroadcast = new Intent(ACTION_STARTED);
         LocalBroadcastManager.getInstance(this).sendBroadcast(serviceStartedBroadcast);
 
-        Task task = Task.values()[intent.getIntExtra(EXTRA_COMMAND, 0)];
         switch (task) {
             case CREATE_GAME_INSTANCE:
                 doCreateGameInstance(intent);
@@ -2327,6 +2336,18 @@ public class InstallerService extends Service implements TaskProgressListener {
 
     public LiveData<TaskState> getTaskState() {
         return taskState;
+    }
+
+    public Task getCurrentTask() {
+        return currentTask;
+    }
+
+    public String getCurrentInstallPresetName() {
+        return currentInstallPresetName;
+    }
+
+    public String getCurrentGpuVendor() {
+        return currentGpuVendor;
     }
 
     public class LocalBinder extends Binder {

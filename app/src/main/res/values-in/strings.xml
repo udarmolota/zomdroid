@@ -564,7 +564,7 @@
 
     <!-- NG_GL4ES renderer offer dialog -->
     <string name="ng_offer_title">Renderer eksperimental</string>
-    <string name="ng_offer_message">Perangkat Anda tidak menggunakan GPU Qualcomm Adreno.\n\nIngin menyiapkan renderer eksperimental NG_GL4ES? Pada sebagian GPU non-Adreno (Mali di MediaTek, Exynos atau Tensor, dan sejenisnya) ia menjalankan Build 42 lebih baik.\n\n• Gunakan NG_GL4ES — coba renderer eksperimental.\n• Gunakan ZINK — pertahankan default yang stabil (disarankan, dan terbaik jika Anda memakai ANGLE).\n\nAnda dapat mengubahnya kapan saja di Pengaturan.</string>
+    <string name="ng_offer_message">Ingin menyiapkan renderer eksperimental NG_GL4ES? Pada sebagian GPU non-Adreno (Mali di MediaTek, Exynos atau Tensor, dan sejenisnya) ia menjalankan Build 42 lebih baik.\n\n• Gunakan NG_GL4ES — coba renderer eksperimental.\n• Gunakan ZINK — pertahankan renderer default. Pada perangkat MediaTek, ZINK hanya berfungsi melalui ANGLE.\n\nAnda dapat mengubahnya kapan saja di Pengaturan.</string>
     <string name="ng_offer_use_ng">Gunakan NG_GL4ES</string>
     <string name="ng_offer_use_zink">Gunakan ZINK</string>
 </resources>

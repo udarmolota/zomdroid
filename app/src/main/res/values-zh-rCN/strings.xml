@@ -557,7 +557,7 @@
 
     <!-- NG_GL4ES renderer offer dialog -->
     <string name="ng_offer_title">实验性渲染器</string>
-    <string name="ng_offer_message">您的设备未使用高通 Adreno GPU。\n\n是否设置实验性渲染器 NG_GL4ES？在部分非 Adreno GPU（联发科、Exynos 或 Tensor 上的 Mali 等）上，它运行 Build 42 的效果更好。\n\n• 使用 NG_GL4ES — 尝试实验性渲染器。\n• 使用 ZINK — 保持稳定的默认选项（推荐，若使用 ANGLE 则更佳）。\n\n您可以随时在设置中更改。</string>
+    <string name="ng_offer_message">是否设置实验性渲染器 NG_GL4ES？在部分非 Adreno GPU（联发科、Exynos 或 Tensor 上的 Mali 等）上，它运行 Build 42 的效果更好。\n\n• 使用 NG_GL4ES — 尝试实验性渲染器。\n• 使用 ZINK — 保留默认渲染器。在联发科设备上，ZINK 仅能通过 ANGLE 工作。\n\n您可以随时在设置中更改。</string>
     <string name="ng_offer_use_ng">使用 NG_GL4ES</string>
     <string name="ng_offer_use_zink">使用 ZINK</string>
 </resources>

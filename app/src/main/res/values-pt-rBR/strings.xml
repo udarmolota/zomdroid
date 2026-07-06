@@ -563,7 +563,7 @@
 
     <!-- NG_GL4ES renderer offer dialog -->
     <string name="ng_offer_title">Renderizador experimental</string>
-    <string name="ng_offer_message">Seu dispositivo não usa uma GPU Qualcomm Adreno.\n\nDeseja configurar o renderizador experimental NG_GL4ES? Em algumas GPUs não-Adreno (Mali em MediaTek, Exynos ou Tensor, e similares) ele roda o Build 42 melhor.\n\n• Usar NG_GL4ES — testar o renderizador experimental.\n• Usar ZINK — manter o padrão estável (recomendado, e melhor se você usa ANGLE).\n\nVocê pode alterar isso a qualquer momento nas Configurações.</string>
+    <string name="ng_offer_message">Deseja configurar o renderizador experimental NG_GL4ES? Em algumas GPUs não-Adreno (Mali em MediaTek, Exynos ou Tensor, e similares) ele roda o Build 42 melhor.\n\n• Usar NG_GL4ES — testar o renderizador experimental.\n• Usar ZINK — manter o renderizador padrão. Em dispositivos MediaTek, o ZINK funciona somente por meio do ANGLE.\n\nVocê pode alterar isso a qualquer momento nas Configurações.</string>
     <string name="ng_offer_use_ng">Usar NG_GL4ES</string>
     <string name="ng_offer_use_zink">Usar ZINK</string>
 </resources>

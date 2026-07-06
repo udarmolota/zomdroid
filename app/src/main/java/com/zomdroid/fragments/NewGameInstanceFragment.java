@@ -29,7 +29,6 @@ import com.zomdroid.game.GameInstance;
 import com.zomdroid.game.InstallationPreset;
 import com.zomdroid.game.GameInstanceManager;
 import com.zomdroid.game.PresetManager;
-import com.zomdroid.LauncherPreferences;
 
 import java.nio.file.FileSystemException;
 import java.util.ArrayList;
@@ -205,40 +204,15 @@ public class NewGameInstanceFragment extends Fragment {
         });
     }
 
-    // Picks the renderer for the new instance, then hands off to finishInstall. Must run on UI thread.
+    // Records the detected preset/GPU for post-install setup, then starts installation.
     private void startInstall(String name, InstallationPreset selectedPreset) {
-        // Build 42 renderer choice. On any non-Adreno GPU (Mali across MediaTek/Exynos/Tensor,
-        // and unknowns) offer the experimental NG_GL4ES; Cancel keeps the stable ZINK default
-        // (best for ANGLE users too). Confirmed-Qualcomm/Adreno stays on ZINK automatically.
-        // Build 41 keeps the current renderer.
-        if ("42".equals(selectedPreset.buildVersion)) {
-            // NG_GL4ES currently supports Build 42 only up to ~42.12. The "Build 42" preset
-            // (42.6–42.11) is safe to offer it on; "Build 42.12+" spans versions NG can't yet
-            // handle, so that preset always gets ZINK.
-            boolean ngSupported = "Build 42".equals(selectedPreset.name);
-            if (ngSupported && detectGpuVendor() != GpuVendor.QUALCOMM) {
-                new androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                        .setTitle(R.string.ng_offer_title)
-                        .setMessage(R.string.ng_offer_message)
-                        .setCancelable(false)
-                        .setPositiveButton(R.string.ng_offer_use_ng, (d, w) -> {
-                            LauncherPreferences.requireSingleton().setRenderer(LauncherPreferences.Renderer.NG_GL4ES);
-                            finishInstall(name, selectedPreset);
-                        })
-                        .setNegativeButton(R.string.ng_offer_use_zink, (d, w) -> {
-                            LauncherPreferences.requireSingleton().setRenderer(LauncherPreferences.Renderer.ZINK_ZFA);
-                            finishInstall(name, selectedPreset);
-                        })
-                        .show();
-                return;
-            }
-            LauncherPreferences.requireSingleton().setRenderer(LauncherPreferences.Renderer.ZINK_ZFA);
-        }
-        finishInstall(name, selectedPreset);
+        boolean isBuild42 = "42".equals(selectedPreset.buildVersion);
+        GpuVendor gpu = isBuild42 ? detectGpuVendor() : GpuVendor.UNKNOWN;
+        finishInstall(name, selectedPreset, gpu);
     }
 
     // Builds the GameInstance and starts the installer service. Must run on the UI thread.
-    private void finishInstall(String name, InstallationPreset selectedPreset) {
+    private void finishInstall(String name, InstallationPreset selectedPreset, GpuVendor gpu) {
         if (!isAdded() || binding == null) return;
 
         GameInstance gameInstance;
@@ -254,6 +228,8 @@ public class NewGameInstanceFragment extends Fragment {
         installerIntent.putExtra(InstallerService.EXTRA_COMMAND, InstallerService.Task.CREATE_GAME_INSTANCE.ordinal());
         installerIntent.putExtra(InstallerService.EXTRA_GAME_INSTANCE_NAME, gameInstance.getName());
         installerIntent.putExtra(InstallerService.EXTRA_ARCHIVE_URI, gameFilesZipUri);
+        installerIntent.putExtra(InstallerService.EXTRA_INSTALL_PRESET_NAME, selectedPreset.name);
+        installerIntent.putExtra(InstallerService.EXTRA_GPU_VENDOR, gpu.name());
         if (nativeLibsZipUri != null) {
             installerIntent.putExtra(InstallerService.EXTRA_NATIVE_LIBS_URI, nativeLibsZipUri);
         }
