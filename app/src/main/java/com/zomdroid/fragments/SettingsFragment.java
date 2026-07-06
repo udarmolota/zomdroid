@@ -12,6 +12,7 @@ import android.widget.SeekBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
@@ -199,6 +200,26 @@ public class SettingsFragment extends Fragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 LauncherPreferences.AudioAPI audioAPI = (LauncherPreferences.AudioAPI) parent.getSelectedItem();
                 LauncherPreferences.requireSingleton().setAudioAPI(audioAPI);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+        // Theme
+        ArrayAdapter<LauncherPreferences.ThemeMode> themeAdapter = new ArrayAdapter<>(
+            requireContext(),
+            R.layout.spinner_item,
+            LauncherPreferences.ThemeMode.values());
+        themeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        binding.settingsThemeS.setAdapter(themeAdapter);
+        binding.settingsThemeS.setSelection(themeAdapter.getPosition(LauncherPreferences.requireSingleton().getThemeMode()));
+        binding.settingsThemeS.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                LauncherPreferences.ThemeMode mode = (LauncherPreferences.ThemeMode) parent.getSelectedItem();
+                LauncherPreferences.requireSingleton().setThemeMode(mode);
+                AppCompatDelegate.setDefaultNightMode(mode.nightMode);
             }
 
             @Override

@@ -15,8 +15,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class CrashHandler {
-    private static final String LAST_LOG_FILE_NAME = "lastlog.txt";
-    private static final String LOG_FILE_NAME = "log.txt";
+    public static final String LAST_LOG_FILE_NAME = "lastlog.txt";
+    public static final String LOG_FILE_NAME = "log.txt";
 
     public static void init() {
         File logFile = new File(AppStorage.requireSingleton().getHomePath() + "/" + LOG_FILE_NAME);
@@ -27,12 +27,24 @@ public class CrashHandler {
             if (!logFile.renameTo(lastLogFile))
                 logFile.delete();
         }
+
+        try (BufferedWriter header = new BufferedWriter(new FileWriter(logFile, false))) {
+            header.write("Device  : " + android.os.Build.MANUFACTURER + " " + android.os.Build.MODEL);
+            header.newLine();
+            header.write("Android : " + android.os.Build.VERSION.RELEASE + " (API " + android.os.Build.VERSION.SDK_INT + ")");
+            header.newLine();
+            header.write("---");
+            header.newLine();
+        } catch (IOException ignore) {}
+
         Thread readerThread = new Thread(() -> {
 
             Process logcatProcess;
             try {
                 Runtime.getRuntime().exec("logcat -c"); // clear logcat buffer
-                logcatProcess = Runtime.getRuntime().exec("logcat -v time *:I *:I");
+                // main = our app/game output; crash = debuggerd tombstones; system = lmkd/am_kill
+                // (SIGKILL cause). crash/system may be empty without READ_LOGS but cost nothing to try.
+                logcatProcess = Runtime.getRuntime().exec("logcat -b main,crash,system -v time *:I");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

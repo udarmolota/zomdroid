@@ -57,12 +57,18 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
       // Check on start if a kb is already connected
       boolean anyKeyboard = false;
       for (int id : inputManager.getInputDeviceIds()) {
-        InputDevice dev = inputManager.getInputDevice(id);
-        if (dev != null && isPhysicalKeyboard(dev)) {
-          DevKey dk = new DevKey(dev);
-          goodKeyboards.add(dk);
-          idToKey.put(id, dk);
-          //anyKeyboard = true;
+        // Guard per-device: a transient/virtual device (e.g. one a screen recorder spins up)
+        // can throw while being queried. Skip it instead of crashing the whole scan.
+        try {
+          InputDevice dev = inputManager.getInputDevice(id);
+          if (dev != null && isPhysicalKeyboard(dev)) {
+            DevKey dk = new DevKey(dev);
+            goodKeyboards.add(dk);
+            idToKey.put(id, dk);
+            //anyKeyboard = true;
+          }
+        } catch (Throwable t) {
+          Log.w(LOG_TAG, "register(): scan failed for device " + id, t);
         }
       }
       //if (anyKeyboard)
@@ -121,6 +127,9 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
 
   @Override
   public void onInputDeviceAdded(int deviceId) {
+    // InputManager dispatches this on the main thread; an uncaught throw here (e.g. a screen
+    // recorder adding a transient virtual device) would crash the whole app. Never let it.
+    try {
       //Toast.makeText(context, "onInputDeviceAdded", Toast.LENGTH_SHORT).show();
       InputDevice d = inputManager.getInputDevice(deviceId);
       if (d == null) return;
@@ -134,10 +143,14 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
         //if (wasEmpty) listener.onKeyboardConnected();
         notifyIfStateChanged();
       }
+    } catch (Throwable t) {
+      Log.w(LOG_TAG, "onInputDeviceAdded failed", t);
+    }
   }
 
   @Override
   public void onInputDeviceRemoved(int deviceId) {
+    try {
       DevKey dk = idToKey.remove(deviceId);
       if (dk != null) {
         goodKeyboards.remove(dk);
@@ -147,9 +160,13 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
       //Toast.makeText(context, "onInputDeviceRemoved", Toast.LENGTH_SHORT).show();
 
       notifyIfStateChanged();
+    } catch (Throwable t) {
+      Log.w(LOG_TAG, "onInputDeviceRemoved failed", t);
+    }
     }
     @Override
     public void onInputDeviceChanged(int deviceId) {
+      try {
       //.makeText(context, "onInputDeviceChanged", Toast.LENGTH_SHORT).show();
       InputDevice d = inputManager.getInputDevice(deviceId);
       if (d == null) {
@@ -185,6 +202,9 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
             }
         }
         notifyIfStateChanged();
+      } catch (Throwable t) {
+        Log.w(LOG_TAG, "onInputDeviceChanged failed", t);
+      }
     }
 
     // True if InputDevice is a physical keyboard
@@ -203,7 +223,8 @@ public class KeyboardManager implements InputManager.InputDeviceListener {
       if (type != InputDevice.KEYBOARD_TYPE_ALPHABETIC && type != InputDevice.KEYBOARD_TYPE_NON_ALPHABETIC) return false;
 
       //  Quick name-based filter (exclude mouse, touchpads, gamepads)
-      String name = device.getName().toLowerCase();
+      String rawName = device.getName();                 // can be null on odd/virtual devices
+      String name = (rawName != null) ? rawName.toLowerCase() : "";
       //Toast.makeText(context, "isPhysicalKeyboard name "+name, Toast.LENGTH_SHORT).show();
       if (name.contains("mouse") || name.contains("touch") || name.contains("touchpad") ||
         name.contains("remote") || name.contains("gamepad") || name.contains("controller"))

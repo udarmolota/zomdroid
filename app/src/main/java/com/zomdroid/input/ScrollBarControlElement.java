@@ -134,10 +134,11 @@ public class ScrollBarControlElement extends AbstractControlElement {
 
 
     static class ScrollBarDrawable {
+        // Slim, tall, capsule-shaped bar — visual style suggested by user Willing-Run-8987.
         private static final float STROKE_WIDTH_DP = 3f;
-        private static final float CORNER_RADIUS_DP = 12f;
-        private static final float BASE_WIDTH  = 130.f;
-        private static final float BASE_HEIGHT = 300.f;
+        private static final float CORNER_RADIUS_DP = 30f;
+        private static final float BASE_WIDTH  = 50.f;
+        private static final float BASE_HEIGHT = 350.f;
 
         int color;
         int alpha;
@@ -239,11 +240,17 @@ public class ScrollBarControlElement extends AbstractControlElement {
             rimPaint.setStrokeWidth(STROKE_WIDTH_DP * parentView.pixelScale);
             canvas.drawRoundRect(rect, cr, cr, rimPaint);
 
+            // Grip = 3 short horizontal ridges stacked in the centre. The slim capsule is too
+            // narrow for a single full-width line. Capsule + grip suggested by user Willing-Run-8987.
             linePaint.setColor(feedbackColor);
             linePaint.setAlpha(alpha);
             linePaint.setStrokeWidth(4f * parentView.pixelScale);
-            canvas.drawLine(rect.left + 25f * parentView.pixelScale * scale, centerY,
-                    rect.right - 25f * parentView.pixelScale * scale, centerY, linePaint);
+            float ridgeHalf = width * 0.22f;
+            float ridgeGap = 9f * parentView.pixelScale * scale;
+            for (int i = -1; i <= 1; i++) {
+                float ly = centerY + i * ridgeGap;
+                canvas.drawLine(centerX - ridgeHalf, ly, centerX + ridgeHalf, ly, linePaint);
+            }
         }
     }
 }

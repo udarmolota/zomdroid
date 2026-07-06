@@ -21,6 +21,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.zomdroid.AppStorage;
+import com.zomdroid.CrashHandler;
 import com.zomdroid.InstallerService;
 import com.zomdroid.R;
 import com.zomdroid.databinding.FragmentExportLogBinding;
@@ -38,7 +40,7 @@ import java.util.Locale;
 public class ExportLogFragment extends Fragment {
 
     private static final String LOG_TAG = ExportLogFragment.class.getName();
-    private static final String TXT_MIME = "text/plain";
+    private static final String ZIP_MIME = "application/zip";
 
     private FragmentExportLogBinding binding;
     private TaskProgressDialogBinding taskProgressDialogBinding;
@@ -83,7 +85,7 @@ public class ExportLogFragment extends Fragment {
     }
 
     private final ActivityResultLauncher<String> actionCreateLogLauncher =
-            registerForActivityResult(new ActivityResultContracts.CreateDocument(TXT_MIME), outUri -> {
+            registerForActivityResult(new ActivityResultContracts.CreateDocument(ZIP_MIME), outUri -> {
                 if (outUri == null) return;
 
                 GameInstance selectedInstance = getSelectedInstanceOrNull();
@@ -198,9 +200,10 @@ public class ExportLogFragment extends Fragment {
             GameInstance selectedInstance = getSelectedInstanceOrNull();
             if (selectedInstance == null) return;
 
-            // Проверяем наличие console.txt до открытия диалога сохранения
-            File logFile = new File(selectedInstance.getHomePath() + "/Zomboid/console.txt");
-            if (!logFile.exists()) {
+            File consoleFile = new File(selectedInstance.getHomePath() + "/Zomboid/console.txt");
+            File launcherLog = new File(AppStorage.requireSingleton().getHomePath() + "/" + CrashHandler.LOG_FILE_NAME);
+            File lastLauncherLog = new File(AppStorage.requireSingleton().getHomePath() + "/" + CrashHandler.LAST_LOG_FILE_NAME);
+            if (!consoleFile.exists() && !launcherLog.exists() && !lastLauncherLog.exists()) {
                 Toast.makeText(requireContext(),
                         getString(R.string.export_log_not_found),
                         Toast.LENGTH_LONG).show();
@@ -208,7 +211,7 @@ public class ExportLogFragment extends Fragment {
             }
 
             String ts = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.US).format(new Date());
-            String defaultName = "console_" + ts + ".txt";
+            String defaultName = "zomdroid_log_" + ts + ".zip";
             actionCreateLogLauncher.launch(defaultName);
         });
     }

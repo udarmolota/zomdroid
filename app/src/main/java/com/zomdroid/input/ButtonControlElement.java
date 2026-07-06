@@ -675,15 +675,14 @@ public class ButtonControlElement extends AbstractControlElement {
             if (this.iconFile == null) {
                 return getContentBounds();
             }
-            final float contentScale = 0.92f;
-            float contentW, contentH;
-            if (this.type == Type.BUTTON_RECT) {
-                contentW = this.width * contentScale;
-                contentH = this.height * contentScale;
-            } else { // BUTTON_CIRCLE — span more of the diameter than the inscribed-square fit
-                contentW = this.width * contentScale;
-                contentH = this.height * contentScale;
-            }
+            // Shape-aware icon box — fix suggested by user Willing-Run-8987: a rectangle can hold
+            // a near-full image, but on a circle the icon box must stay inside the round outline —
+            // a 0.92*diameter square pokes its corners past the circle. ~0.70 inscribes a full
+            // square in the circle. (Imported images are alpha-trimmed on import, so this box maps
+            // directly to the visible content.)
+            final float contentScale = (this.type == Type.BUTTON_RECT) ? 0.92f : 0.70f;
+            float contentW = this.width * contentScale;
+            float contentH = this.height * contentScale;
             RectF bounds = new RectF();
             bounds.set((this.width - contentW) / 2,
                     (this.height - contentH) / 2,

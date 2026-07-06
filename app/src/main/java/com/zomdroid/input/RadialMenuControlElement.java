@@ -159,7 +159,10 @@ public class RadialMenuControlElement extends AbstractControlElement {
     private void updateIconBounds() {
         if (iconDrawable == null) return;
         float cx = drawable.centerX, cy = drawable.centerY, r = drawable.radius;
-        float box = r * 2f * 0.92f; // ~fills the circle, same as round buttons
+        // Inscribe a full square in the circle so the image corners don't poke past the round
+        // outline (~0.70 of the diameter). Imported images are alpha-trimmed, so this maps to
+        // the visible content directly.
+        float box = r * 2f * 0.70f;
         float iw = iconDrawable.getIntrinsicWidth(), ih = iconDrawable.getIntrinsicHeight();
         float aspect = (ih == 0) ? 1f : iw / ih;
         float w, h;
