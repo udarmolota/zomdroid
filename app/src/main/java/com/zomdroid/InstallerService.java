@@ -284,11 +284,17 @@ public class InstallerService extends Service implements TaskProgressListener {
 
     // -------------------- INSTALL DEPENDENCIES --------------------
 
+    // Called on every app launch (see LauncherFragment#updateDependencies), not just the first
+    // one, so an APK update whose bundled libs.tar.xz/jre/jars changed can pick that up without
+    // a full app reinstall. To keep that cheap and silent on the common case (nothing changed),
+    // we CRC-check all bundles up front and only show the install notification/dialog and touch
+    // disk for the ones that actually differ.
     private void doInstallDependencies(Intent intent) {
         String taskTitle = getString(R.string.dialog_title_installing_dependencies);
 
+        // startForeground() must be called promptly regardless of whether anything turns out to
+        // have changed — Android requires it soon after startForegroundService().
         startForeground(NOTIFICATION_ID, buildNotification(taskTitle));
-        this.taskState.postValue(new TaskState(taskTitle, null, -1, 0, false, false));
 
         executorService.submit(() -> {
             SharedPreferences prefs = getSharedPreferences(C.shprefs.NAME, MODE_PRIVATE);
@@ -300,14 +306,42 @@ public class InstallerService extends Service implements TaskProgressListener {
             HashMap<String, Long> oldBundlesHashesMap = gson.fromJson(bundlesJson, mapType);
             HashMap<String, Long> newBundlesHashesMap = new HashMap<>();
 
-            // --- JRE 21 ---
-            Long jre21HashOld = oldBundlesHashesMap.get(C.assets.BUNDLES_JRE21);
+            // --- Pass 1: CRC32 every bundle against its last-installed hash. Quiet and cheap —
+            // reads the (already-compressed) asset bytes straight out of the APK, no extraction.
+            boolean jre21Changed, jre25Changed, libsChanged, jarsChanged;
             try {
                 Long jre21HashNew = FileUtils.generateCRC32ForAsset(this, C.assets.BUNDLES_JRE21);
                 newBundlesHashesMap.put(C.assets.BUNDLES_JRE21, jre21HashNew);
+                jre21Changed = !jre21HashNew.equals(oldBundlesHashesMap.get(C.assets.BUNDLES_JRE21));
 
-                // Reinstall only if the bundle changed (CRC mismatch) or not installed yet
-                if (jre21HashOld == null || !jre21HashOld.equals(jre21HashNew)) {
+                Long jre25HashNew = FileUtils.generateCRC32ForAsset(this, C.assets.BUNDLES_JRE25);
+                newBundlesHashesMap.put(C.assets.BUNDLES_JRE25, jre25HashNew);
+                jre25Changed = !jre25HashNew.equals(oldBundlesHashesMap.get(C.assets.BUNDLES_JRE25));
+
+                Long libsHashNew = FileUtils.generateCRC32ForAsset(this, C.assets.BUNDLES_LIBS);
+                newBundlesHashesMap.put(C.assets.BUNDLES_LIBS, libsHashNew);
+                libsChanged = !libsHashNew.equals(oldBundlesHashesMap.get(C.assets.BUNDLES_LIBS));
+
+                Long jarsHashNew = FileUtils.generateCRC32ForAsset(this, C.assets.BUNDLES_JARS);
+                newBundlesHashesMap.put(C.assets.BUNDLES_JARS, jarsHashNew);
+                jarsChanged = !jarsHashNew.equals(oldBundlesHashesMap.get(C.assets.BUNDLES_JARS));
+            } catch (IOException e) {
+                finishWithError(getString(R.string.dialog_title_failed_to_install_dependencies), e.toString());
+                return;
+            }
+
+            boolean anyChanged = jre21Changed || jre25Changed || libsChanged || jarsChanged;
+            if (!anyChanged) {
+                // Nothing to do — never posted an "in progress" state, so no dialog ever showed.
+                finish(null, null);
+                return;
+            }
+
+            // --- Pass 2: only now announce the install, and only extract what changed ---
+            this.taskState.postValue(new TaskState(taskTitle, null, -1, 0, false, false));
+
+            if (jre21Changed) {
+                try {
                     String jre21Path = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.JRE_21;
                     File jre21Dir = new File(jre21Path);
                     if (jre21Dir.exists()) FileUtils.deleteDirectory(jre21Dir);
@@ -315,20 +349,14 @@ public class InstallerService extends Service implements TaskProgressListener {
                     InputStream jreBundleInStream = getAssets().open(C.assets.BUNDLES_JRE21);
                     FileUtils.extractTarXzToDisk(jreBundleInStream, jre21Path, this, 0);
                     jreBundleInStream.close();
+                } catch (IOException e) {
+                    finishWithError(getString(R.string.dialog_title_failed_to_install_dependencies), e.toString());
+                    return;
                 }
-            } catch (IOException e) {
-                finishWithError(getString(R.string.dialog_title_failed_to_install_dependencies), e.toString());
-                return;
             }
 
-            // --- JRE 25 ---
-            Long jre25HashOld = oldBundlesHashesMap.get(C.assets.BUNDLES_JRE25);
-            try {
-                Long jre25HashNew = FileUtils.generateCRC32ForAsset(this, C.assets.BUNDLES_JRE25);
-                newBundlesHashesMap.put(C.assets.BUNDLES_JRE25, jre25HashNew);
-
-                // Reinstall only if the bundle changed (CRC mismatch) or not installed yet
-                if (jre25HashOld == null || !jre25HashOld.equals(jre25HashNew)) {
+            if (jre25Changed) {
+                try {
                     String jre25Path = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.JRE_25;
                     File jre25Dir = new File(jre25Path);
                     if (jre25Dir.exists()) FileUtils.deleteDirectory(jre25Dir);
@@ -336,48 +364,38 @@ public class InstallerService extends Service implements TaskProgressListener {
                     InputStream jreBundleInStream = getAssets().open(C.assets.BUNDLES_JRE25);
                     FileUtils.extractTarXzToDisk(jreBundleInStream, jre25Path, this, 0);
                     jreBundleInStream.close();
+                } catch (IOException e) {
+                    finishWithError(getString(R.string.dialog_title_failed_to_install_dependencies), e.toString());
+                    return;
                 }
-            } catch (IOException e) {
-                finishWithError(getString(R.string.dialog_title_failed_to_install_dependencies), e.toString());
-                return;
             }
 
-            // --- LIBS ---
-            Long libsHashOld = oldBundlesHashesMap.get(C.assets.BUNDLES_LIBS);
-            try {
-                Long libsHashNew = FileUtils.generateCRC32ForAsset(this, C.assets.BUNDLES_LIBS);
-                newBundlesHashesMap.put(C.assets.BUNDLES_LIBS, libsHashNew);
-
-                if (libsHashOld == null || !libsHashOld.equals(libsHashNew)) {
+            if (libsChanged) {
+                try {
                     String libsPath = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.LIBS;
                     File libsDir = new File(libsPath);
                     if (libsDir.exists()) FileUtils.deleteDirectory(libsDir);
 
                     InputStream libsBundleInStream = getAssets().open(C.assets.BUNDLES_LIBS);
                     FileUtils.extractTarXzToDisk(libsBundleInStream, libsPath, this, 0);
+                } catch (IOException e) {
+                    finishWithError(getString(R.string.dialog_title_failed_to_install_dependencies), e.toString());
+                    return;
                 }
-            } catch (IOException e) {
-                finishWithError(getString(R.string.dialog_title_failed_to_install_dependencies), e.toString());
-                return;
             }
 
-            // --- JARS ---
-            Long jarsHashOld = oldBundlesHashesMap.get(C.assets.BUNDLES_JARS);
-            try {
-                Long jarsHashNew = FileUtils.generateCRC32ForAsset(this, C.assets.BUNDLES_JARS);
-                newBundlesHashesMap.put(C.assets.BUNDLES_JARS, jarsHashNew);
-
-                if (jarsHashOld == null || !jarsHashOld.equals(jarsHashNew)) {
+            if (jarsChanged) {
+                try {
                     String jarsPath = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.JARS;
                     File jarsDir = new File(jarsPath);
                     if (jarsDir.exists()) FileUtils.deleteDirectory(jarsDir);
 
                     InputStream jarsBundleInStream = getAssets().open(C.assets.BUNDLES_JARS);
                     FileUtils.extractTarToDisk(jarsBundleInStream, jarsPath, this, 0);
+                } catch (IOException e) {
+                    finishWithError(getString(R.string.dialog_title_failed_to_install_dependencies), e.toString());
+                    return;
                 }
-            } catch (IOException e) {
-                finishWithError(getString(R.string.dialog_title_failed_to_install_dependencies), e.toString());
-                return;
             }
 
             bundlesJson = gson.toJson(newBundlesHashesMap);

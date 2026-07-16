@@ -461,13 +461,15 @@ public class LauncherFragment extends Fragment {
     }
 
     private void updateDependencies() {
-        boolean areDependenciesInstalled = requireContext().getSharedPreferences(C.shprefs.NAME, MODE_PRIVATE)
-                .getBoolean(C.shprefs.keys.ARE_DEPENDENCIES_INSTALLED, false);
-        if (!areDependenciesInstalled) {
-            Intent installerIntent = new Intent(requireContext(), InstallerService.class);
-            installerIntent.putExtra(InstallerService.EXTRA_COMMAND, InstallerService.Task.INSTALL_DEPENDENCIES.ordinal());
-            requireContext().startForegroundService(installerIntent);
-        }
+        // Always run: doInstallDependencies() CRC32-checks each bundle (JRE21/JRE25/libs/jars)
+        // against what's on disk and only re-extracts the ones that changed, silently no-op'ing
+        // (no notification/dialog) when nothing did. That's what lets an APK update carrying a
+        // changed libs.tar.xz take effect on next launch, without requiring a full app reinstall
+        // (a reinstall wipes app data, which is what used to reset ARE_DEPENDENCIES_INSTALLED
+        // and force a re-check — now unnecessary).
+        Intent installerIntent = new Intent(requireContext(), InstallerService.class);
+        installerIntent.putExtra(InstallerService.EXTRA_COMMAND, InstallerService.Task.INSTALL_DEPENDENCIES.ordinal());
+        requireContext().startForegroundService(installerIntent);
     }
 
     private void bindInstallerService() {
