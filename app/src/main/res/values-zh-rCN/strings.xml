@@ -86,7 +86,7 @@
     <string name="game_instance_manage_storage">管理存储</string>
     <string name="game_instance_delete">删除</string>
 
-    <string name="donate_message">喜欢这个应用并想支持我们吗？\n\n现由 ko-fi.com/udarmolota 维护和开发，\n由 ko-fi.com/liamelui 创建。\n\n其他贡献者：\nshimux0, Wakort, LeHiepDuy, deadgamer182, Liko。</string>
+    <string name="donate_message">喜欢这个应用并想支持我们吗？\n\n现由 ko-fi.com/udarmolota 维护和开发，\n由 ko-fi.com/liamelui 创建。\n\n其他贡献者：\nshimux0, Wakort, LeHiepDuy, deadgamer182, Liko, Willing-Run-8987。</string>
 
     <string name="app_aborted">应用遇到意外问题，必须关闭。</string>
     <string name="share_logs">分享日志文件</string>
@@ -511,4 +511,35 @@
     <string name="native_libs_installed">本机库已安装</string>
 
     <string name="control_element_opacity_all">全部</string>
+
+    <!-- Steam downloader -->
+    <string name="steam_dl_menu">从 Steam 下载</string>
+    <string name="steam_dl_tab_game">游戏</string>
+    <string name="steam_dl_tab_mods">模组</string>
+    <string name="steam_dl_login_group">Steam 登录</string>
+    <string name="steam_dl_login_note">你的登录信息会发送给 Steam（与 DepotDownloader 相同方式），不会被保存——不存储任何数据或密码。请在 Steam 手机版中确认登录，或在提示时输入 Steam 令牌（Steam Guard）验证码。</string>
+    <string name="steam_dl_slow_warning">⚠️ 下载可能很慢。</string>
+    <string name="steam_dl_build_42">Build 42</string>
+    <string name="steam_dl_build_41">Build 41</string>
+    <string name="steam_dl_manifest_hint_41">Build 41 清单 id（必填）</string>
+    <string name="steam_dl_build41_needs_manifest">Build 41：请输入其清单 id。</string>
+    <string name="steam_dl_cancel">取消下载</string>
+    <string name="steam_dl_cancel_confirm">取消下载？已下载的文件会保留，以便稍后续传。</string>
+    <string name="steam_dl_username">Steam 用户名</string>
+    <string name="steam_dl_password">Steam 密码</string>
+    <string name="steam_dl_version_note">将 Project Zomboid 的 Linux 版本下载到 Downloads/zomdroid——无需 Termux，无需电脑。Build 41 约 6–7 GB，Build 42 约 10–11 GB（未压缩），所以会很久；如果中断，重新下载同一版本即可断点续传。清单留空下载最新版本，或粘贴清单 id 锁定某个版本。</string>
+    <string name="steam_dl_manifest_hint">清单 id（留空 = 最新）</string>
+    <string name="steam_dl_download_game">下载游戏</string>
+    <string name="steam_dl_mods_note">按 ID 下载创意工坊模组（创意工坊 URL 中的数字：…/sharedfiles/filedetails/?id=数字）。无需 Steam 登录。多个 ID 用空格分隔。每个保存为 Downloads/zomdroid 中的 .zip。</string>
+    <string name="steam_dl_mods_hint">创意工坊 ID（用空格分隔）</string>
+    <string name="steam_dl_download_mods">下载模组</string>
+    <string name="steam_dl_required">必填</string>
+    <string name="steam_dl_mods_empty">请输入创意工坊 ID（URL 中的数字）</string>
+    <string name="steam_dl_storage_title">需要存储访问权限</string>
+    <string name="steam_dl_storage_message">游戏和模组会保存到公共的 Downloads/zomdroid 文件夹，方便查看、分享和导入。请授予 Zomdroid「所有文件访问权限」，然后再次点击下载。</string>
+    <string name="steam_dl_grant">授予</string>
+    <string name="steam_dl_guard_title">输入 Steam 令牌验证码</string>
+    <string name="steam_dl_guard_retry">验证码错误 — 请重试</string>
+    <string name="steam_dl_guard_hint">Steam 令牌验证码</string>
+    <string name="steam_dl_guard_email">验证码已发送至 %1$s</string>
 </resources>

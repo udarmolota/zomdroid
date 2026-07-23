@@ -54,6 +54,10 @@ public abstract class AbstractControlElement {
                 return new MouseStickControlElement(parentView, description);
             case TOUCHPAD:
                 return new TouchpadControlElement(parentView, description);
+            case SCROLL_BAR:
+                return new ScrollBarControlElement(parentView, description);
+            case RADIAL_MENU:
+                return new RadialMenuControlElement(parentView, description);
             default:
                 throw new IllegalArgumentException("Unrecognized type " + description.type);
         }
@@ -270,7 +274,9 @@ public abstract class AbstractControlElement {
         DPAD_LEFT,
         BUTTON_RECT,
         BUTTON_CIRCLE,
-        TOUCHPAD
+        TOUCHPAD,
+        SCROLL_BAR,
+        RADIAL_MENU
     }
 
     public enum InputType {

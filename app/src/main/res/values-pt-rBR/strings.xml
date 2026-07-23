@@ -86,7 +86,7 @@
     <string name="game_instance_manage_storage">Gerenciar armazenamento</string>
     <string name="game_instance_delete">Excluir</string>
 
-    <string name="donate_message">Gostando do app e quer nos apoiar? \n\nAgora mantido e desenvolvido por ko-fi.com/udarmolota, \ncriado por ko-fi.com/liamelui. \n\nColaboradores: \nshimux0, Wakort, LeHiepDuy, deadgamer182, Liko.</string>
+    <string name="donate_message">Gostando do app e quer nos apoiar? \n\nAgora mantido e desenvolvido por ko-fi.com/udarmolota, \ncriado por ko-fi.com/liamelui. \n\nColaboradores: \nshimux0, Wakort, LeHiepDuy, deadgamer182, Liko, Willing-Run-8987.</string>
 
     <string name="app_aborted">O aplicativo encontrou um problema inesperado e foi encerrado</string>
     <string name="share_logs">Compartilhar arquivo de log</string>
@@ -517,4 +517,35 @@
     <string name="native_libs_installed">Bibliotecas nativas instaladas</string>
 
     <string name="control_element_opacity_all">Para todos</string>
+
+    <!-- Steam downloader -->
+    <string name="steam_dl_menu">Baixar da Steam</string>
+    <string name="steam_dl_tab_game">Jogo</string>
+    <string name="steam_dl_tab_mods">Mods</string>
+    <string name="steam_dl_login_group">Login da Steam</string>
+    <string name="steam_dl_login_note">Seu login é enviado à Steam (do mesmo modo que o DepotDownloader) e NÃO é armazenado — nenhum dado ou senha é salvo. Aprove o acesso no app Steam Mobile, ou digite o código do Steam Guard quando solicitado.</string>
+    <string name="steam_dl_slow_warning">⚠️ O download pode ser lento.</string>
+    <string name="steam_dl_build_42">Build 42</string>
+    <string name="steam_dl_build_41">Build 41</string>
+    <string name="steam_dl_manifest_hint_41">id do manifesto do Build 41 (obrigatório)</string>
+    <string name="steam_dl_build41_needs_manifest">Build 41: digite o id do manifesto.</string>
+    <string name="steam_dl_cancel">Cancelar download</string>
+    <string name="steam_dl_cancel_confirm">Cancelar o download? Os arquivos já baixados são mantidos para continuar depois.</string>
+    <string name="steam_dl_username">Usuário da Steam</string>
+    <string name="steam_dl_password">Senha da Steam</string>
+    <string name="steam_dl_version_note">Baixa a versão Linux do Project Zomboid em Downloads/zomdroid — sem Termux, sem PC. O Build 41 tem ~6–7 GB e o Build 42 ~10–11 GB descompactado, então demora bastante; se for interrompido, inicie o mesmo build de novo e ele continua de onde parou. Deixe o manifesto em branco para a última versão, ou cole um id de manifesto para fixar uma versão.</string>
+    <string name="steam_dl_manifest_hint">id do manifesto (vazio = última)</string>
+    <string name="steam_dl_download_game">Baixar jogo</string>
+    <string name="steam_dl_mods_note">Baixe mods da Workshop por ID (o número na URL: …/sharedfiles/filedetails/?id=NÚMERO). Sem login na Steam. Vários IDs separados por espaço. Cada um é salvo como .zip em Downloads/zomdroid.</string>
+    <string name="steam_dl_mods_hint">IDs da Workshop (separados por espaço)</string>
+    <string name="steam_dl_download_mods">Baixar mods</string>
+    <string name="steam_dl_required">Obrigatório</string>
+    <string name="steam_dl_mods_empty">Digite um ID da Workshop (o número da URL)</string>
+    <string name="steam_dl_storage_title">Acesso ao armazenamento necessário</string>
+    <string name="steam_dl_storage_message">O jogo e os mods são salvos na pasta pública Downloads/zomdroid para você ver, compartilhar e importar. Conceda \"Acesso a todos os arquivos\" ao Zomdroid e toque em Baixar novamente.</string>
+    <string name="steam_dl_grant">Conceder</string>
+    <string name="steam_dl_guard_title">Digite o código do Steam Guard</string>
+    <string name="steam_dl_guard_retry">Código incorreto — tente novamente</string>
+    <string name="steam_dl_guard_hint">Código do Steam Guard</string>
+    <string name="steam_dl_guard_email">Código enviado para %1$s</string>
 </resources>

@@ -81,11 +81,47 @@
     <string name="control_element_input_type">Input type</string>
     <string name="control_element_stick_binding">Stick Binding</string>
     <string name="control_element_icon">Icon</string>
+    <string name="control_element_style">Style</string>
+    <string name="control_element_custom_icon">Custom icon…</string>
+    <string name="control_element_icon_no_tint">Keep original colors</string>
+    <string name="control_element_custom_icon_select_button">Select a button first</string>
+    <string name="control_element_custom_icon_failed">Could not load image</string>
+
+    <!-- Steam downloader -->
+    <string name="steam_dl_menu">Download from Steam</string>
+    <string name="steam_dl_tab_game">Game</string>
+    <string name="steam_dl_tab_mods">Mods</string>
+    <string name="steam_dl_login_group">Steam login</string>
+    <string name="steam_dl_login_note">Your login is sent to Steam (the same way DepotDownloader works) and is NOT stored — no data or password is saved. Approve the sign-in in your Steam Mobile app, or enter the Steam Guard code when asked.</string>
+    <string name="steam_dl_slow_warning">⚠️ Downloading can be slow.</string>
+    <string name="steam_dl_build_42">Build 42</string>
+    <string name="steam_dl_build_41">Build 41</string>
+    <string name="steam_dl_manifest_hint_41">Build 41 manifest id (required)</string>
+    <string name="steam_dl_build41_needs_manifest">Build 41: enter its manifest id.</string>
+    <string name="steam_dl_cancel">Cancel download</string>
+    <string name="steam_dl_cancel_confirm">Cancel the download? Files already downloaded are kept for resuming later.</string>
+    <string name="steam_dl_username">Steam username</string>
+    <string name="steam_dl_password">Steam password</string>
+    <string name="steam_dl_version_note">Downloads the Linux build of Project Zomboid into Downloads/zomdroid — no Termux, no PC. Build 41 is ~6–7 GB and Build 42 ~10–11 GB unpacked, so it takes a long time; if interrupted, just start the same build again and it resumes. Leave the manifest blank for the latest build, or paste a manifest id to pin a version.</string>
+    <string name="steam_dl_manifest_hint">Manifest id (blank = latest)</string>
+    <string name="steam_dl_download_game">Download game</string>
+    <string name="steam_dl_mods_note">Download Workshop mods by ID (the number in the workshop URL: …/sharedfiles/filedetails/?id=NUMBER). No Steam login needed. Several IDs can be space-separated. Each is saved as a .zip in Downloads/zomdroid.</string>
+    <string name="steam_dl_mods_hint">Workshop IDs (space-separated)</string>
+    <string name="steam_dl_download_mods">Download mods</string>
+    <string name="steam_dl_required">Required</string>
+    <string name="steam_dl_mods_empty">Enter a Workshop ID (the number from the URL)</string>
+    <string name="steam_dl_storage_title">Storage access needed</string>
+    <string name="steam_dl_storage_message">The game and mods are saved into the public Downloads/zomdroid folder so you can see, share and import them. Please grant \"All files access\" to Zomdroid, then tap Download again.</string>
+    <string name="steam_dl_grant">Grant</string>
+    <string name="steam_dl_guard_title">Enter Steam Guard code</string>
+    <string name="steam_dl_guard_retry">Code incorrect — try again</string>
+    <string name="steam_dl_guard_hint">Steam Guard code</string>
+    <string name="steam_dl_guard_email">Code emailed to %1$s</string>
 
     <string name="game_instance_manage_storage">Manage storage</string>
     <string name="game_instance_delete">Delete</string>
 
-    <string name="donate_message">Enjoying the app and want to support us? \n\nMaintained and Developed by: ko-fi.com/udarmolota, \ncreator: ko-fi.com/liamelui.  \n\nContributors: \nshimux0, Wakort, LeHiepDuy, deadgamer182, Liko.</string>
+    <string name="donate_message">Enjoying the app and want to support us? \n\nMaintained and Developed by: ko-fi.com/udarmolota, \ncreator: ko-fi.com/liamelui.  \n\nContributors: \nshimux0, Wakort, LeHiepDuy, deadgamer182, Liko, Willing-Run-8987.</string>
 
     <string name="app_aborted">The app ran into an unexpected issue and had to close</string>
     <string name="share_logs">Share log file</string>
@@ -137,6 +173,7 @@
     <!-- Onscreen controls -->
     <string name="touch_controls_description">Touch control mode disables gamepad support and enables on-screen buttons only.</string>
     <string name="touch_controls_switch_label">Enable on-screen touch controls</string>
+    <string name="vibrate_on_touch_switch_label">Vibrate on button press</string>
     <string name="touch_controls_enabled_toast">Touch controls enabled</string>
     <string name="touch_controls_disabled_toast">Touch controls disabled</string>
     <string name="fragment_label_touch_controls">Touch Controls</string>

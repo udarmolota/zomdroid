@@ -250,6 +250,10 @@ public class SettingsFragment extends Fragment {
                 Toast.LENGTH_SHORT).show();
         });
 
+        binding.vibrateOnTouchSwitch.setChecked(LauncherPreferences.requireSingleton().isVibrateOnTouch());
+        binding.vibrateOnTouchSwitch.setOnCheckedChangeListener((buttonView, isChecked) ->
+                LauncherPreferences.requireSingleton().setVibrateOnTouch(isChecked));
+
         binding.settingsJargsInfo.setOnClickListener(v -> {
             new androidx.appcompat.app.AlertDialog.Builder(requireContext())
                     .setTitle(getString(R.string.jvm_args_dialog_title))

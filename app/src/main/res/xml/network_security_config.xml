@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!--
+      Steam content CDN edge nodes are sometimes served over plain HTTP. Depot chunks are
+      AES-encrypted and hash-verified by Steam regardless of transport, so permitting cleartext
+      for these specific CDN domains is safe; everything else stays HTTPS-only.
+    -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">steamcontent.com</domain>
+        <domain includeSubdomains="true">steampipe.steamcontent.com</domain>
+        <domain includeSubdomains="true">steamstatic.com</domain>
+        <domain includeSubdomains="true">akamaihd.net</domain>
+        <domain includeSubdomains="true">akamaized.net</domain>
+    </domain-config>
+</network-security-config>

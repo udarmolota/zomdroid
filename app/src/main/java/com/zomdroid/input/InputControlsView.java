@@ -37,6 +37,7 @@ public class InputControlsView extends View {
     private static final String LOG_TAG = InputControlsView.class.getName();
     private ArrayList<AbstractControlElement> controlElements = new ArrayList<>();
     boolean isEditMode = false;
+    boolean showPressFeedback = true;
     AbstractControlElement selectedElement;
     AbstractControlElement pointerOverElement;
     public float pixelScale = 1.f;
@@ -461,6 +462,16 @@ public class InputControlsView extends View {
         File cfgFile = new File(inst, "game/controls/controls.json");
         Log.d(LOG_TAG, "Controls config path: " + cfgFile.getAbsolutePath());
         return cfgFile;
+    }
+
+    /** Folder where user-supplied control icons live: &lt;instance&gt;/game/controls/icons. */
+    @Nullable
+    public File getControlsIconsDir() {
+        File cfg = getControlsConfigFileInGameDir();
+        if (cfg == null) return null;
+        File parent = cfg.getParentFile();
+        if (parent == null) return null;
+        return new File(parent, "icons");
     }
 
     public void replaceControlsFromJson(@Nullable String json, boolean persist) {

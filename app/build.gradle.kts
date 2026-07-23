@@ -38,13 +38,24 @@ android {
         applicationId = "com.zomdroid"
         minSdk = 30
         targetSdk = 35
-        versionCode = 144
-        versionName = "1.4.4"
+        versionCode = 145
+        versionName = "1.4.5"
+
+        // JavaSteam + protobuf + kotlin stack push past the 64K method limit.
+        multiDexEnabled = true
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
             abiFilters.add("arm64-v8a")
+        }
+
+        externalNativeBuild {
+            cmake {
+                // Align native .so segments to 16 KB pages (Android 15+ requirement).
+                // NDK r27 doesn't enable this by default; the flag adds -Wl,-z,max-page-size=16384.
+                arguments += "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
+            }
         }
     }
 
@@ -89,6 +100,18 @@ android {
         jniLibs {
             useLegacyPackaging = true
         }
+        resources {
+            // JavaSteam / protobuf / bouncycastle / kotlin bring duplicate metadata files.
+            excludes += setOf(
+                "META-INF/DEPENDENCIES",
+                "META-INF/INDEX.LIST",
+                "META-INF/*.SF",
+                "META-INF/*.DSA",
+                "META-INF/*.RSA",
+                "META-INF/{AL2.0,LGPL2.1}",
+                "**/*.proto"
+            )
+        }
     }
   ndkVersion = "27.3.13750724"
 }
@@ -105,6 +128,14 @@ dependencies {
     implementation(libs.commons.compress)
     implementation(libs.xz)
     implementation(libs.legacy.support.v4)
+
+    // --- In-app Steam downloader (ported from RimDroid, MIT). JavaSteam = SteamKit2 port. ---
+    implementation("in.dragonbra:javasteam:1.8.0")
+    implementation("in.dragonbra:javasteam-depotdownloader:1.8.0")
+    implementation("org.bouncycastle:bcprov-jdk18on:1.83")     // crypto provider JavaSteam needs
+    implementation("com.google.protobuf:protobuf-java:4.31.1") // must match JavaSteam's protobuf
+    implementation("com.github.luben:zstd-jni:1.5.7-6@aar")    // zstd depot-chunk decompression (arm64 .so)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

@@ -54,6 +54,16 @@ public class DpadControlElement extends AbstractControlElement {
     }
 
 
+    // Light haptic tick on press, only when the user enabled "Vibrate on button press" (default off).
+    private void maybeHaptic() {
+        com.zomdroid.LauncherPreferences p = com.zomdroid.LauncherPreferences.getSingleton();
+        if (p != null && p.isVibrateOnTouch()) {
+            this.parentView.performHapticFeedback(
+                    android.view.HapticFeedbackConstants.VIRTUAL_KEY,
+                    android.view.HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+        }
+    }
+
     private void dispatchEvent(float x, float y, boolean isPress) {
         int state = 0;
         if (isPress) {
@@ -91,6 +101,7 @@ public class DpadControlElement extends AbstractControlElement {
           float y = e.getY(actionIndex);
           if (!this.drawable.isPointOver(x, y)) return false;
           this.pointerId = pid;
+          maybeHaptic();
           this.dispatchEvent(x, y, true);
           return true;
         }

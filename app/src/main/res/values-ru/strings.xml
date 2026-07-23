@@ -86,7 +86,7 @@
     <string name="game_instance_manage_storage">Управление хранилищем</string>
     <string name="game_instance_delete">Удалить</string>
 
-    <string name="donate_message">Нравится приложение и хотите поддержать нас? \n\nРазвитие и поддержка: ko-fi.com/udarmolota, автор: ko-fi.com/liamelui. \n\nДругие участники: \nshimux0, Wakort, LeHiepDuy, deadgamer182, Liko.</string>
+    <string name="donate_message">Нравится приложение и хотите поддержать нас? \n\nРазвитие и поддержка: ko-fi.com/udarmolota, автор: ko-fi.com/liamelui. \n\nДругие участники: \nshimux0, Wakort, LeHiepDuy, deadgamer182, Liko, Willing-Run-8987.</string>
 
     <string name="app_aborted">Приложение столкнулось с непредвиденной проблемой и было закрыто</string>
     <string name="share_logs">Поделиться файлом логов</string>
@@ -517,4 +517,35 @@
     <string name="native_libs_installed">Нативные библиотеки установлены</string>
 
     <string name="control_element_opacity_all">На все</string>
+
+    <!-- Steam downloader -->
+    <string name="steam_dl_menu">Скачать из Steam</string>
+    <string name="steam_dl_tab_game">Игра</string>
+    <string name="steam_dl_tab_mods">Моды</string>
+    <string name="steam_dl_login_group">Вход в Steam</string>
+    <string name="steam_dl_login_note">Логин отправляется в Steam (так же, как это делает DepotDownloader) и НЕ сохраняется — никакие данные и пароль не хранятся. Подтвердите вход в приложении Steam Mobile или введите код Steam Guard, когда попросят.</string>
+    <string name="steam_dl_slow_warning">⚠️ Скачивание может быть медленным.</string>
+    <string name="steam_dl_build_42">Build 42</string>
+    <string name="steam_dl_build_41">Build 41</string>
+    <string name="steam_dl_manifest_hint_41">id манифеста Build 41 (обязательно)</string>
+    <string name="steam_dl_build41_needs_manifest">Build 41: введите id манифеста.</string>
+    <string name="steam_dl_cancel">Отменить скачивание</string>
+    <string name="steam_dl_cancel_confirm">Отменить скачивание? Уже скачанные файлы сохранятся для докачки позже.</string>
+    <string name="steam_dl_username">Логин Steam</string>
+    <string name="steam_dl_password">Пароль Steam</string>
+    <string name="steam_dl_version_note">Загружает Linux-сборку Project Zomboid в Downloads/zomdroid — без Termux и без ПК. Build 41 весит ~6–7 ГБ, Build 42 ~10–11 ГБ без архива, поэтому качается долго; если прервётся — просто запусти ту же версию снова, и закачка продолжится (докачка). Оставь манифест пустым для последней сборки или вставь id манифеста, чтобы зафиксировать версию.</string>
+    <string name="steam_dl_manifest_hint">id манифеста (пусто = последняя)</string>
+    <string name="steam_dl_download_game">Скачать игру</string>
+    <string name="steam_dl_mods_note">Скачивание модов Мастерской по ID (число в URL: …/sharedfiles/filedetails/?id=ЧИСЛО). Логин Steam не нужен. Несколько ID — через пробел. Каждый сохраняется в .zip в Downloads/zomdroid.</string>
+    <string name="steam_dl_mods_hint">ID модов (через пробел)</string>
+    <string name="steam_dl_download_mods">Скачать моды</string>
+    <string name="steam_dl_required">Обязательно</string>
+    <string name="steam_dl_mods_empty">Введите ID мода (число из URL)</string>
+    <string name="steam_dl_storage_title">Нужен доступ к файлам</string>
+    <string name="steam_dl_storage_message">Игра и моды сохраняются в публичную папку Downloads/zomdroid, чтобы их можно было видеть, передавать и импортировать. Дайте Zomdroid «Доступ ко всем файлам» и нажмите «Скачать» снова.</string>
+    <string name="steam_dl_grant">Разрешить</string>
+    <string name="steam_dl_guard_title">Введите код Steam Guard</string>
+    <string name="steam_dl_guard_retry">Неверный код — попробуйте снова</string>
+    <string name="steam_dl_guard_hint">Код Steam Guard</string>
+    <string name="steam_dl_guard_email">Код отправлен на %1$s</string>
 </resources>

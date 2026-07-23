@@ -20,7 +20,7 @@
             android:id="@id/action_open_gamepad_mapper"
             app:destination="@id/gamepad_mapper_fragment"/>
         <action
-            android:id="@id/action_open_wiki_fragment"
+            android:id="@+id/action_open_wiki_fragment"
             app:destination="@id/wiki_fragment"/>
         <action
             android:id="@+id/action_open_install_mod"
@@ -49,6 +49,9 @@
         <action
             android:id="@+id/action_install_native_libs"
             app:destination="@id/install_native_libs_fragment" />
+        <action
+            android:id="@+id/action_download_steam"
+            app:destination="@id/steam_download_fragment" />
     </fragment>
 
     <fragment
@@ -125,5 +128,10 @@
         android:id="@+id/install_native_libs_fragment"
         android:name="com.zomdroid.fragments.InstallNativeLibsFragment"
         android:label="@string/native_libs_menu" />
+
+    <fragment
+        android:id="@+id/steam_download_fragment"
+        android:name="com.zomdroid.fragments.SteamDownloadFragment"
+        android:label="@string/steam_dl_menu" />
 
 </navigation>
