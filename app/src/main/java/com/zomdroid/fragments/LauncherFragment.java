@@ -48,6 +48,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.zomdroid.C;
 import com.zomdroid.GameActivity;
 import com.zomdroid.InstallerService;
+import com.zomdroid.LauncherPreferences;
 import com.zomdroid.R;
 
 import com.zomdroid.databinding.FragmentLauncherBinding;
@@ -63,13 +64,15 @@ public class LauncherFragment extends Fragment {
     private TaskProgressDialogBinding taskProgressDialogBinding;
     private BroadcastReceiver taskProgressReceiver;
     private AlertDialog taskProgressDialog;
+    private InstallerService installerService;
     private boolean isInstallerServiceBound;
+    private boolean postInstallDialogShown;
 
     private final ServiceConnection installerServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
             InstallerService.LocalBinder binder = (InstallerService.LocalBinder) service;
-            InstallerService installerService = binder.getService();
+            installerService = binder.getService();
             isInstallerServiceBound = true;
 
             handleTaskState(installerService.getTaskState().getValue());
@@ -87,16 +90,27 @@ public class LauncherFragment extends Fragment {
             if (state == null)
                 return;
             if (state.isFinished) {
+                InstallerService.Task finishedTask = installerService.getCurrentTask();
+                String presetName = installerService.getCurrentInstallPresetName();
+                String gpuVendor = installerService.getCurrentGpuVendor();
                 adapter.notifyDataSetChanged();
                 taskProgressDialog.dismiss();
                 unbindInstallerService();
                 requireContext().stopService(new Intent(requireContext(), InstallerService.class));
+                if (finishedTask == InstallerService.Task.CREATE_GAME_INSTANCE
+                        && !postInstallDialogShown) {
+                    postInstallDialogShown = true;
+                    showPostInstallSetupDialog(presetName, gpuVendor);
+                }
             } else if (state.isFinishedWithError) {
                 adapter.notifyDataSetChanged();
                 showTaskFinishedDialog(state.title, state.message);
                 unbindInstallerService();
                 requireContext().stopService(new Intent(requireContext(), InstallerService.class));
             } else {
+                if (installerService.getCurrentTask() == InstallerService.Task.CREATE_GAME_INSTANCE) {
+                    postInstallDialogShown = false;
+                }
                 showTaskProgressDialog(state.title, state.message, state.progress, state.progressMax);
             }
         }
@@ -298,6 +312,7 @@ public class LauncherFragment extends Fragment {
                 String action = intent.getAction();
                 if (action == null) return;
                 if (action.equals(InstallerService.ACTION_STARTED)) {
+                    postInstallDialogShown = false;
                     bindInstallerService();
                 }
             }
@@ -385,6 +400,64 @@ public class LauncherFragment extends Fragment {
         taskProgressDialogBinding.progressDialogOkMb.setVisibility(View.VISIBLE);
 
         taskProgressDialog.show();
+    }
+
+    private void showPostInstallSetupDialog(String presetName, String gpuVendor) {
+        if (presetName == null) return;
+
+        // Offer NG_GL4ES only for non-Qualcomm pre-42.12 Build 42 installs.
+        if ("Build 42".equals(presetName) && !"QUALCOMM".equals(gpuVendor)) {
+            new MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.ng_offer_title)
+                    .setMessage(R.string.ng_offer_message)
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.ng_offer_use_ng, (dialog, which) ->
+                            LauncherPreferences.requireSingleton().setRenderer(
+                                    LauncherPreferences.Renderer.NG_GL4ES))
+                    .setNegativeButton(R.string.ng_offer_use_zink, (dialog, which) ->
+                            LauncherPreferences.requireSingleton().setRenderer(
+                                    LauncherPreferences.Renderer.ZINK_ZFA))
+                    .show();
+            return;
+        }
+
+        int titleRes;
+        String message;
+        boolean isBuild42;
+        if ("Build 42.12+".equals(presetName)) {
+            titleRes = R.string.preset_dialog_title_b4212;
+            message = getString(R.string.preset_dialog_message_b4212);
+            isBuild42 = true;
+        } else if ("Build 42".equals(presetName)) {
+            titleRes = R.string.preset_dialog_title_b42;
+            message = getString(R.string.preset_dialog_message_b42);
+            isBuild42 = true;
+        } else {
+            titleRes = R.string.preset_dialog_title_b41;
+            message = getString(R.string.preset_dialog_message_b41);
+            isBuild42 = false;
+        }
+
+        if (isBuild42) {
+            if ("QUALCOMM".equals(gpuVendor)) {
+                message += "\n\n" + getString(R.string.preset_dialog_gpu_hint_qualcomm);
+            } else if ("MEDIATEK".equals(gpuVendor)) {
+                message += "\n\n" + getString(R.string.preset_dialog_gpu_hint_mediatek);
+            }
+        }
+
+        final boolean useZink = isBuild42;
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle(titleRes)
+                .setMessage(message)
+                .setCancelable(false)
+                .setPositiveButton(R.string.dialog_button_ok, (dialog, which) -> {
+                    if (useZink) {
+                        LauncherPreferences.requireSingleton().setRenderer(
+                                LauncherPreferences.Renderer.ZINK_ZFA);
+                    }
+                })
+                .show();
     }
 
     private void updateDependencies() {

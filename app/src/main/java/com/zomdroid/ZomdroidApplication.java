@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import com.zomdroid.game.GameInstanceManager;
 
@@ -103,6 +104,8 @@ public class ZomdroidApplication extends Application {
         inited = true;
         GameInstanceManager.init(this);
         LauncherPreferences.init(this);
+        AppCompatDelegate.setDefaultNightMode(
+                LauncherPreferences.requireSingleton().getThemeMode().nightMode);
         CrashHandler.init();
         updateLauncherVersion();
     }

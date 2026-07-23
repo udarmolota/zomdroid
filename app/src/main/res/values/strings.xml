@@ -368,6 +368,8 @@
 
     <!-- Settings groups -->
     <string name="settings_group_rendering">Rendering</string>
+    <string name="settings_group_appearance">Appearance</string>
+    <string name="settings_theme">Launcher theme</string>
     <string name="settings_group_advanced">Advanced</string>
     <string name="settings_group_controls">Controls</string>
     <string name="settings_group_audio">Audio</string>
@@ -412,6 +414,12 @@
     <string name="new_game_instance_select_preset">Select preset…</string>
     <string name="new_game_instance_no_preset_selected">Please select a preset. It must match your game build: Build 41 has one preset, Build 42 is split into two — choose carefully.</string>
     <string name="new_game_instance_no_preset_title">Select preset</string>
+    <string name="new_game_instance_detect_failed">Could not read the game ZIP. Make sure it is a valid Project Zomboid archive and try again.</string>
+    <string name="new_game_instance_analyzing">Analyzing the game file, please wait…</string>
+    <string name="ng_offer_title">Experimental renderer</string>
+    <string name="ng_offer_message">Would you like to set up the experimental NG_GL4ES renderer? On some non-Adreno GPUs (Mali on MediaTek, Exynos or Tensor, and similar) it runs Build 42 better.\n\n• Use NG_GL4ES — try the experimental renderer.\n• Use ZINK — keep the default renderer. On MediaTek devices, ZINK works only through ANGLE.\n\nYou can change this any time in Settings.</string>
+    <string name="ng_offer_use_ng">Use NG_GL4ES</string>
+    <string name="ng_offer_use_zink">Use ZINK</string>
 
     <string name="nav_menu_optimization">Optimization</string>
     <string name="nav_menu_mod_fixes">Mod Fixes</string>

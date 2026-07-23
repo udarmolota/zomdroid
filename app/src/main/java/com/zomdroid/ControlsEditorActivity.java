@@ -785,6 +785,36 @@ public class ControlsEditorActivity extends AppCompatActivity {
         return false;
     }
 
+    /**
+     * Crops fully/near-transparent borders off an imported icon so its visible content maps
+     * directly to the on-screen box. Returns the original bitmap if it has no trimmable border
+     * (fully opaque to the edges) or is entirely transparent.
+     */
+    private static Bitmap trimTransparentBorder(Bitmap src) {
+        if (src == null) return null;
+        int w = src.getWidth(), h = src.getHeight();
+        if (w <= 0 || h <= 0) return src;
+        int[] px = new int[w * h];
+        src.getPixels(px, 0, w, 0, 0, w, h);
+        final int ALPHA_MIN = 8; // treat alpha <= 8 as transparent
+        int minX = w, minY = h, maxX = -1, maxY = -1;
+        for (int y = 0; y < h; y++) {
+            int row = y * w;
+            for (int x = 0; x < w; x++) {
+                int a = (px[row + x] >>> 24) & 0xff;
+                if (a > ALPHA_MIN) {
+                    if (x < minX) minX = x;
+                    if (x > maxX) maxX = x;
+                    if (y < minY) minY = y;
+                    if (y > maxY) maxY = y;
+                }
+            }
+        }
+        if (maxX < minX || maxY < minY) return src;               // fully transparent — leave as-is
+        if (minX == 0 && minY == 0 && maxX == w - 1 && maxY == h - 1) return src; // nothing to trim
+        return Bitmap.createBitmap(src, minX, minY, maxX - minX + 1, maxY - minY + 1);
+    }
+
     private void onIconPicked(Uri uri) {
         AbstractControlElement el = binding.inputControlsV.getSelectedElement();
         boolean isButton = el instanceof com.zomdroid.input.ButtonControlElement;
@@ -819,6 +849,10 @@ public class ControlsEditorActivity extends AppCompatActivity {
                 Toast.makeText(this, R.string.control_element_custom_icon_failed, Toast.LENGTH_SHORT).show();
                 return;
             }
+            // Trim transparent borders so the visible content fills the button regardless of how
+            // much padding the source PNG had (otherwise a padded image looks tiny, an edge-to-edge
+            // one looks oversized for the same on-screen box).
+            bmp = trimTransparentBorder(bmp);
             String fileName = "icon_" + System.currentTimeMillis() + ".png";
             File out = new File(dir, fileName);
             try (FileOutputStream fos = new FileOutputStream(out)) {

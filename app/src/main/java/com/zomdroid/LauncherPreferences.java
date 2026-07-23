@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import com.google.gson.Gson;
 
@@ -153,7 +154,7 @@ public class LauncherPreferences {
     public enum Renderer {
         ZINK_ZFA("libzfa.so"),
         ZINK_OSMESA("libOSMesa.so"),
-        //NG_GL4ES("libholy_gl4es.so"),
+        NG_GL4ES("libng_gl4es.so"),
         GL4ES("libgl4es.so");
 
         final String libName;
@@ -183,6 +184,23 @@ public class LauncherPreferences {
         AAUDIO,
         OPENSL
     }
+
+    public enum ThemeMode {
+        SYSTEM(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM, "System default"),
+        LIGHT(AppCompatDelegate.MODE_NIGHT_NO, "Light"),
+        DARK(AppCompatDelegate.MODE_NIGHT_YES, "Dark");
+
+        public final int nightMode;
+        private final String label;
+        ThemeMode(int nightMode, String label) { this.nightMode = nightMode; this.label = label; }
+
+        @Override public String toString() { return label; }
+    }
+
+    private ThemeMode themeMode = ThemeMode.SYSTEM;
+
+    public ThemeMode getThemeMode() { return themeMode != null ? themeMode : ThemeMode.SYSTEM; }
+    public void setThemeMode(ThemeMode mode) { themeMode = mode; saveToPreferences(); }
 
     private boolean touchControlsEnabled = false;
 

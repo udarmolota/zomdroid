@@ -149,9 +149,14 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         // Check on start if a gamepad is already connected
         int[] deviceIds = inputManager.getInputDeviceIds();
         for (int id : deviceIds) {
-            InputDevice dev = inputManager.getInputDevice(id);
-            if (dev != null && isGamepadDevice(dev)) {
-                connectedGamepadIds.add(id);
+            // Guard per-device: a transient/virtual device can throw while being queried.
+            try {
+                InputDevice dev = inputManager.getInputDevice(id);
+                if (dev != null && isGamepadDevice(dev)) {
+                    connectedGamepadIds.add(id);
+                }
+            } catch (Throwable t) {
+                Log.w("GamepadManager", "register(): scan failed for device " + id, t);
             }
         }
         if (!connectedGamepadIds.isEmpty()) {
@@ -187,37 +192,51 @@ public class GamepadManager implements InputManager.InputDeviceListener {
 
     @Override
     public void onInputDeviceAdded(int deviceId) {
-        InputDevice dev = inputManager.getInputDevice(deviceId);
-        if (dev != null && isGamepadDevice(dev)) {
-            boolean wasEmpty = connectedGamepadIds.isEmpty();
-            connectedGamepadIds.add(deviceId);
-            if (wasEmpty) listener.onGamepadConnected();
+        // Dispatched on the main thread; never let a throw (e.g. a screen recorder's transient
+        // virtual device) escape and crash the app.
+        try {
+            InputDevice dev = inputManager.getInputDevice(deviceId);
+            if (dev != null && isGamepadDevice(dev)) {
+                boolean wasEmpty = connectedGamepadIds.isEmpty();
+                connectedGamepadIds.add(deviceId);
+                if (wasEmpty) listener.onGamepadConnected();
+            }
+        } catch (Throwable t) {
+            Log.w("GamepadManager", "onInputDeviceAdded failed", t);
         }
     }
 
     @Override
     public void onInputDeviceRemoved(int deviceId) {
-        connectedGamepadIds.remove(deviceId);
-        if (connectedGamepadIds.isEmpty()) {
-            listener.onGamepadDisconnected();
+        try {
+            connectedGamepadIds.remove(deviceId);
+            if (connectedGamepadIds.isEmpty()) {
+                listener.onGamepadDisconnected();
+            }
+        } catch (Throwable t) {
+            Log.w("GamepadManager", "onInputDeviceRemoved failed", t);
         }
     }
 
     @Override
     public void onInputDeviceChanged(int deviceId) {
-        InputDevice dev = inputManager.getInputDevice(deviceId);
-        if (dev == null) {
-            connectedGamepadIds.remove(deviceId);
-            if (connectedGamepadIds.isEmpty()) listener.onGamepadDisconnected();
-            return;
-        }
-        if (isGamepadDevice(dev)) {
-            boolean wasEmpty = connectedGamepadIds.isEmpty();
-            connectedGamepadIds.add(deviceId);
-            if (wasEmpty) listener.onGamepadConnected();
-        } else {
-            connectedGamepadIds.remove(deviceId);
-            if (connectedGamepadIds.isEmpty()) listener.onGamepadDisconnected();
+        try {
+            InputDevice dev = inputManager.getInputDevice(deviceId);
+            if (dev == null) {
+                connectedGamepadIds.remove(deviceId);
+                if (connectedGamepadIds.isEmpty()) listener.onGamepadDisconnected();
+                return;
+            }
+            if (isGamepadDevice(dev)) {
+                boolean wasEmpty = connectedGamepadIds.isEmpty();
+                connectedGamepadIds.add(deviceId);
+                if (wasEmpty) listener.onGamepadConnected();
+            } else {
+                connectedGamepadIds.remove(deviceId);
+                if (connectedGamepadIds.isEmpty()) listener.onGamepadDisconnected();
+            }
+        } catch (Throwable t) {
+            Log.w("GamepadManager", "onInputDeviceChanged failed", t);
         }
     }
 

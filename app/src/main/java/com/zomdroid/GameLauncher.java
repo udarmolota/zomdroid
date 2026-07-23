@@ -49,14 +49,9 @@ public class GameLauncher {
                 String vulkanDriverName = LauncherPreferences.requireSingleton().getVulkanDriver().libName;
                 if (vulkanDriverName != null) {
                     Os.setenv("ZOMDROID_VULKAN_DRIVER_NAME", vulkanDriverName, false);
-                    //if (LauncherPreferences.VulkanDriver.FREEDRENO_8XX_Expr.libName.equals(vulkanDriverName)) {
-                    //    Os.setenv("TU_DEBUG", "noconform", false);
-                    //}
-                    // UBWC workaround for OEM Android 16 glitches
-                    //Os.setenv("FD_DEV_FEATURES", "enable_tp_ubwc_flag_hint=1", false);
                 }
                 break;
-            /*case NG_GL4ES: {
+            case NG_GL4ES: {
                 //Os.setenv("LIBGL_ES", "3", true);
                 //Os.setenv("LIBGL_GL", "21", true); // если нужен OpenGL 2.1 для движка
                 //Os.setenv("LIBGL_NOBANNER", "0", true);
@@ -70,14 +65,25 @@ public class GameLauncher {
                 // the old converter that doesn't understand modern GLSL
                 //Os.setenv("LIBGL_VGPU_FORCE", "1", true);
                 //Os.setenv("LIBGL_VGPU_PRECISION", "1", true);
-                Os.setenv("ZOMDROID_GLES_MAJOR", "3", false);
-                Os.setenv("ZOMDROID_GLES_MINOR", "0", false);
-                Os.setenv("LIBGL_ES", "3", false);
+                // The DECISIVE knob is the real EGL context version, not the GL version the game
+                // sees. On a true ES3 context Mali runs NG's internal ES3 paths, which
+                // deterministically kill box64/physics at Bullet.init; a 2.1 context yields Mali's
+                // ES2 profile and clean ES2 paths (proven playable). So: Qualcomm/Adreno -> ES3.2
+                // context, everyone else -> ES2.1 context. We own the context; the lib (RC13+) owns
+                // the badge and picks it from the actual context — do NOT set LIBGL_GL here, it
+                // would override the lib's decision. override=false keeps manual env overrides.
+                boolean isQualcomm = isQualcommGpu();
+                Os.setenv("ZOMDROID_GLES_MAJOR", isQualcomm ? "3" : "2", false);
+                Os.setenv("ZOMDROID_GLES_MINOR", isQualcomm ? "2" : "1", false);
+                Os.setenv("LIBGL_ES", "2", false);
                 Os.setenv("LIBGL_MIPMAP", "1", false);
                 Os.setenv("LIBGL_LOGSHADERERROR", "1", false);
                 Os.setenv("LIBGL_VGPU_DUMP", "1", false);
+                // DEBUG: red-clear bisection — disabled now that swap/context are
+                // confirmed alive; uncomment to mask frames again if needed.
+                //Os.setenv("ZOMDROID_DEBUG_RED_CLEAR", "1", false);
                 break;
-            }*/
+            }
             default: {
                 Os.setenv("ZOMDROID_GLES_MAJOR", "2", false);
                 Os.setenv("ZOMDROID_GLES_MINOR", "1", false);
@@ -91,11 +97,6 @@ public class GameLauncher {
             //for debugging GL calls, only supported on GL ES 3.2+ with GL_KHR_debug extension present
             Os.setenv("LIBGL_STACKTRACE","1", false);
             Os.setenv("LIBGL_LOGSHADERERROR","1", false);
-                /*Os.setenv("ZOMDROID_DEBUG_GL", "1", false);
-                Os.setenv("ZOMDROID_DEBUG_GL", "1", false);
-                Os.setenv("LIBGL_GLES", "libGLESv3.so", false);
-                Os.setenv("ZOMDROID_GLES_MAJOR", "3", true);
-                Os.setenv("ZOMDROID_GLES_MINOR", "2", true);*/
         }
         initZomdroidWindow();
         InputNativeInterface.sendJoystickConnected();
@@ -146,6 +147,10 @@ public class GameLauncher {
             args.add("-debug");
         }
 
+        if (LauncherPreferences.requireSingleton().getRenderer() == LauncherPreferences.Renderer.NG_GL4ES) {
+            args.add("-debuglog=Shader");
+        }
+
         //String javaHomePath = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.JRE;
         String home = AppStorage.requireSingleton().getHomePath();
 
@@ -192,13 +197,36 @@ public class GameLauncher {
     }
 
     private static boolean isLegacyRendererNeedingJre21(LauncherPreferences.Renderer r) {
-        //boolean result = (r == LauncherPreferences.Renderer.GL4ES) || (r == LauncherPreferences.Renderer.NG_GL4ES);
-        boolean result = (r == LauncherPreferences.Renderer.GL4ES);
+        boolean result = (r == LauncherPreferences.Renderer.GL4ES) || (r == LauncherPreferences.Renderer.NG_GL4ES);
 
         if (BuildConfig.DEBUG) {
             Log.i("Zomdroid", "isLegacyRendererNeedingJre21: " + result + ", Renderer: " + r.name());
         }
         return result;
+    }
+
+    // Positive-ID Qualcomm/Adreno only (they tolerate the ES3 EGL context). Everything else —
+    // MediaTek/Mali, and any unknown, to stay safe — returns false so NG gets the ES2 context.
+    // Same GPU split RC13 uses on the lib side; sourced from Android-level info that the GL
+    // stack can't hide (GL_RENDERER comes back '<unknown>' through box64/Krypton).
+    private static boolean isQualcommGpu() {
+        try (java.io.BufferedReader r = new java.io.BufferedReader(new java.io.FileReader("/proc/cpuinfo"))) {
+            String line;
+            while ((line = r.readLine()) != null) {
+                String l = line.toLowerCase();
+                if (l.contains("qualcomm") || l.contains("snapdragon")) return true;
+                if (l.contains("mediatek") || l.contains("dimensity") || l.contains("helio")) return false;
+            }
+        } catch (Exception ignored) {}
+
+        String[] fields = { android.os.Build.HARDWARE, android.os.Build.BOARD,
+                            android.os.Build.SOC_MODEL, android.os.Build.SOC_MANUFACTURER };
+        for (String f : fields) {
+            if (f == null) continue;
+            String l = f.toLowerCase();
+            if (l.contains("qcom") || l.contains("qualcomm") || l.contains("snapdragon")) return true;
+        }
+        return false;
     }
 
     public static native int initZomdroidWindow();

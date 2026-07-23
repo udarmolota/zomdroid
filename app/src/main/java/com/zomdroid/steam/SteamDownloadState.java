@@ -113,9 +113,24 @@ public final class SteamDownloadState
 
     @Override
     public CompletableFuture<String> requestSteamGuardCode(boolean previousWrong, String email) {
-        View v = this.view;
-        if (v != null) return v.requestSteamGuardCode(previousWrong, email);
-        return CompletableFuture.completedFuture("");
+        // JavaSteam calls this on a background coroutine worker. The fragment builds an
+        // AlertDialog/EditText, which MUST happen on the main thread (otherwise Android throws
+        // "Can't create handler inside thread ... that has not called Looper.prepare()").
+        final CompletableFuture<String> result = new CompletableFuture<>();
+        main.post(() -> {
+            View v = this.view;
+            if (v == null) { result.complete(""); return; }
+            try {
+                CompletableFuture<String> f = v.requestSteamGuardCode(previousWrong, email);
+                f.whenComplete((code, err) -> {
+                    if (err != null) result.completeExceptionally(err);
+                    else result.complete(code != null ? code : "");
+                });
+            } catch (Throwable t) {
+                result.completeExceptionally(t);
+            }
+        });
+        return result;
     }
 
     private static boolean isError(String m) {

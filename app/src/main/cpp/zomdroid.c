@@ -14,6 +14,11 @@
 #include <bits/stdatomic.h>
 #include <sys/sysinfo.h>
 #include <asm-generic/fcntl.h>
+#include <stdio.h>
+#include <signal.h>
+#include <ucontext.h>
+#include <fcntl.h>
+#include <unwind.h>
 #include "logger.h"
 
 #define LOG_TAG "zomdroid-main"
@@ -51,10 +56,16 @@ static long get_mem_available_mb() {
     return (memAvailableKb > 0) ? (memAvailableKb / 1024) : -1;
 }
 
+// Absolute path to a persistent file that mirrors the game's native stdout/stderr
+// (box64 SHOWSEGV/SHOWBT reports, NG [NGG] probes, etc). Unlike logcat it survives the
+// crash and app restarts, so diagnostic output always reaches the Bug Report zip.
+static char g_native_log_path[1024] = {0};
+
 __attribute__((noreturn))
 static void monitor_stdio_and_memory() {
     int pipefd[2];
     char buffer[8192];
+    int native_logfd = -1;
 
     if (pipe(pipefd) == -1) {
         LOGE("Failed to create pipe for monitoring stdio");
@@ -70,12 +81,16 @@ static void monitor_stdio_and_memory() {
 
     fcntl(pipefd[0], F_SETFL, O_NONBLOCK);
 
+    if (g_native_log_path[0])
+        native_logfd = open(g_native_log_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+
     time_t last_mem_check = 0;
     time_t last_mem_log = 0;
 
     while (1) {
         ssize_t i = read(pipefd[0], buffer, sizeof(buffer) - 1);
         if (i > 0) {
+            if (native_logfd >= 0) (void)write(native_logfd, buffer, (size_t)i); // persist raw before strtok
             buffer[i] = '\0';
             // splitting output into individual lines makes it easier for logcat to process and avoids truncation
             char* saveptr;
@@ -316,10 +331,122 @@ static int load_linker_hook() {
     return 0;
 }
 
+// ---------------------------------------------------------------------------
+// Native crash handler.
+// The JVM only reports SIGSEGV; box64 clears its own handlers; SIGBUS/SIGILL/
+// SIGFPE otherwise go to SIG_DFL and kill the process silently (no hs_err, no
+// backtrace) — which is exactly what we saw on the Dimensity NG_GL4ES crash.
+// This handler catches those, resolves the fault PC / address to a .so name +
+// offset via dladdr, and writes crash.txt into the game dir (bundled by the
+// log export). Then it re-raises so the process still dies as before.
+// ---------------------------------------------------------------------------
+static char g_crash_path[1024] = {0};
+static char g_crash_altstack[64 * 1024];
+
+static void cw_str(int fd, const char* s) {
+    if (!s) return;
+    size_t n = 0; while (s[n]) n++;
+    (void)write(fd, s, n);
+}
+
+static void cw_hex(int fd, unsigned long v) {
+    char buf[18];
+    buf[0] = '0'; buf[1] = 'x';
+    for (int i = 0; i < 16; i++) {
+        int nyb = (int)((v >> ((15 - i) * 4)) & 0xf);
+        buf[2 + i] = (char)(nyb < 10 ? ('0' + nyb) : ('a' + nyb - 10));
+    }
+    (void)write(fd, buf, 18);
+}
+
+static void cw_addr(int fd, const char* label, void* addr) {
+    cw_str(fd, label);
+    cw_hex(fd, (unsigned long)addr);
+    Dl_info info;
+    if (addr && dladdr(addr, &info) && info.dli_fname) {
+        cw_str(fd, "  ");
+        cw_str(fd, info.dli_fname);
+        cw_str(fd, "+");
+        cw_hex(fd, (unsigned long)addr - (unsigned long)info.dli_fbase);
+        if (info.dli_sname) { cw_str(fd, " ("); cw_str(fd, info.dli_sname); cw_str(fd, ")"); }
+    }
+    cw_str(fd, "\n");
+}
+
+typedef struct { int fd; int count; int max; } cw_bt_ctx;
+
+static _Unwind_Reason_Code cw_bt_cb(struct _Unwind_Context* ctx, void* arg) {
+    cw_bt_ctx* b = (cw_bt_ctx*)arg;
+    if (b->count >= b->max) return _URC_END_OF_STACK;
+    void* pc = (void*)_Unwind_GetIP(ctx);
+    if (pc) {
+        cw_str(b->fd, "  #");
+        cw_hex(b->fd, (unsigned long)b->count);
+        cw_addr(b->fd, " ", pc);
+    }
+    b->count++;
+    return _URC_NO_REASON;
+}
+
+static void zomdroid_crash_handler(int sig, siginfo_t* si, void* uctx) {
+    int fd = open(g_crash_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (fd >= 0) {
+        cw_str(fd, "=== ZOMDROID NATIVE CRASH ===\n");
+        cw_str(fd, "signal: ");
+        cw_str(fd, sig == SIGSEGV ? "SIGSEGV" :
+                   sig == SIGBUS  ? "SIGBUS"  :
+                   sig == SIGILL  ? "SIGILL"  :
+                   sig == SIGFPE  ? "SIGFPE"  : "OTHER");
+        cw_str(fd, "\n");
+        cw_addr(fd, "fault_addr: ", si ? si->si_addr : (void*)0);
+        if (uctx) {
+            ucontext_t* uc = (ucontext_t*)uctx;
+            cw_addr(fd, "pc:         ", (void*)uc->uc_mcontext.pc);
+        }
+        cw_str(fd, "backtrace:\n");
+        cw_bt_ctx b = { fd, 0, 32 };
+        _Unwind_Backtrace(cw_bt_cb, &b);
+        cw_str(fd, "=== END ===\n");
+        close(fd);
+    }
+    // restore default disposition and re-raise so the process dies as before
+    signal(sig, SIG_DFL);
+    raise(sig);
+}
+
+static void install_crash_handler(const char* game_dir_path) {
+    snprintf(g_crash_path, sizeof(g_crash_path), "%s/crash.txt", game_dir_path);
+    // Drop any stale dump from a previous run so an old crash isn't exported as fresh.
+    unlink(g_crash_path);
+
+    stack_t ss = {0};
+    ss.ss_sp = g_crash_altstack;
+    ss.ss_size = sizeof(g_crash_altstack);
+    ss.ss_flags = 0;
+    sigaltstack(&ss, NULL);
+
+    struct sigaction sa = {0};
+    sa.sa_sigaction = zomdroid_crash_handler;
+    sa.sa_flags = SA_SIGINFO | SA_ONSTACK;
+    sigemptyset(&sa.sa_mask);
+    // NOTE: SIGSEGV is deliberately NOT taken here — it is left to Android's debuggerd
+    // (see the signal loop above) so a full tombstone is produced. We only back up the
+    // signals that would otherwise die silently.
+    sigaction(SIGBUS,  &sa, NULL);
+    sigaction(SIGILL,  &sa, NULL);
+    sigaction(SIGFPE,  &sa, NULL);
+
+    LOGI("crash handler installed (SIGBUS/SIGILL/SIGFPE) -> %s ; SIGSEGV left to debuggerd", g_crash_path);
+}
+
 void zomdroid_start_game(const char* game_dir_path, const char* library_dir_path, int jvm_argc,
                          const char** jvm_argv, const char* main_class_name, int argc, const char** argv) {
 
     signal(SIGABRT, handle_abort);
+
+    // Persist native stdout/stderr to <game>/native.log so box64/NG diagnostic output
+    // survives crashes and restarts and reaches the exported Bug Report.
+    snprintf(g_native_log_path, sizeof(g_native_log_path), "%s/native.log", game_dir_path);
 
     pthread_t logging_thread;
     if (pthread_create(&logging_thread, NULL, (void *(*)(void *)) &monitor_stdio_and_memory, NULL) != 0) {
@@ -343,14 +470,21 @@ void zomdroid_start_game(const char* game_dir_path, const char* library_dir_path
         return;
     }
 
-    // we handle abort, jvm handles segfault, clear other handlers possibly set by box64
+    // We keep our SIGABRT dialog; clear other handlers possibly set by box64.
+    // DIAG: leave SIGSEGV at its DEFAULT disposition (do NOT set SIG_IGN). Previously
+    // SIG_IGN swallowed every real fault the JVM chained down (UseSignalChaining=true),
+    // so driver-thread crashes died silently. With SIG_DFL, Android's debuggerd writes a
+    // full tombstone (lib + offset + all-thread backtrace) to logcat -> lastlog.txt.
     struct sigaction sa = { 0 };
     for(int sig = SIGHUP; sig < NSIG; sig++) {
-        if(sig == SIGSEGV) sa.sa_handler = SIG_IGN;
-        else if(sig == SIGABRT) continue;
-        else sa.sa_handler = SIG_DFL;
+        if(sig == SIGABRT) continue;
+        sa.sa_handler = SIG_DFL;   // includes SIGSEGV -> default -> debuggerd tombstone
         sigaction(sig, &sa, NULL);
     }
+
+    // Backup catcher for the signals debuggerd-vs-JVM don't cover here: SIGBUS/SIGILL/SIGFPE
+    // -> crash.txt. SIGSEGV is intentionally left to debuggerd (see above).
+    install_crash_handler(game_dir_path);
 
     create_jvm_and_launch_main(jvm_argc, jvm_argv, main_class_name, argc, argv);
 }

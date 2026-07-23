@@ -542,4 +542,22 @@
     <string name="steam_dl_guard_retry">验证码错误 — 请重试</string>
     <string name="steam_dl_guard_hint">Steam 令牌验证码</string>
     <string name="steam_dl_guard_email">验证码已发送至 %1$s</string>
+
+    <!-- Appearance / controls / detection -->
+    <string name="settings_group_appearance">外观</string>
+    <string name="settings_theme">启动器主题</string>
+    <string name="control_element_style">样式</string>
+    <string name="control_element_custom_icon">自定义图标…</string>
+    <string name="control_element_custom_icon_failed">无法加载图片</string>
+    <string name="control_element_custom_icon_select_button">请先选择一个按钮</string>
+    <string name="control_element_icon_no_tint">保留原始颜色</string>
+    <string name="vibrate_on_touch_switch_label">按下按钮时振动</string>
+    <string name="new_game_instance_analyzing">正在分析游戏文件，请稍候…</string>
+    <string name="new_game_instance_detect_failed">无法读取游戏 ZIP。请确认它是有效的 Project Zomboid 压缩包后重试。</string>
+
+    <!-- NG_GL4ES renderer offer dialog -->
+    <string name="ng_offer_title">实验性渲染器</string>
+    <string name="ng_offer_message">是否设置实验性渲染器 NG_GL4ES？在部分非 Adreno GPU（联发科、Exynos 或 Tensor 上的 Mali 等）上，它运行 Build 42 的效果更好。\n\n• 使用 NG_GL4ES — 尝试实验性渲染器。\n• 使用 ZINK — 保留默认渲染器。在联发科设备上，ZINK 仅能通过 ANGLE 工作。\n\n您可以随时在设置中更改。</string>
+    <string name="ng_offer_use_ng">使用 NG_GL4ES</string>
+    <string name="ng_offer_use_zink">使用 ZINK</string>
 </resources>

@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -40,10 +41,12 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 public class InstallerService extends Service implements TaskProgressListener {
     private static final String LOG_TAG = InstallerService.class.getName();
@@ -66,6 +69,8 @@ public class InstallerService extends Service implements TaskProgressListener {
     // Build version of the target instance ("41" or "42"), used by mod fix to choose install strategy
     public static final String EXTRA_BUILD_VERSION = "com.zomdroid.InstallerService.EXTRA_BUILD_VERSION";
     public static final String EXTRA_BETTERFPS_MODE = "com.zomdroid.InstallerService.EXTRA_BETTERFPS_MODE";
+    public static final String EXTRA_INSTALL_PRESET_NAME = "com.zomdroid.InstallerService.EXTRA_INSTALL_PRESET_NAME";
+    public static final String EXTRA_GPU_VENDOR = "com.zomdroid.InstallerService.EXTRA_GPU_VENDOR";
 
     private final IBinder binder = new LocalBinder();
     private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -74,6 +79,9 @@ public class InstallerService extends Service implements TaskProgressListener {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private long lastProgressUpdateMs;
     private final MutableLiveData<TaskState> taskState = new MutableLiveData<>();
+    private Task currentTask;
+    private String currentInstallPresetName;
+    private String currentGpuVendor;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -83,10 +91,14 @@ public class InstallerService extends Service implements TaskProgressListener {
         notificationManager = NotificationManagerCompat.from(this);
         notificationManager.createNotificationChannel(channel);
 
+        Task task = Task.values()[intent.getIntExtra(EXTRA_COMMAND, 0)];
+        currentTask = task;
+        currentInstallPresetName = intent.getStringExtra(EXTRA_INSTALL_PRESET_NAME);
+        currentGpuVendor = intent.getStringExtra(EXTRA_GPU_VENDOR);
+
         Intent serviceStartedBroadcast = new Intent(ACTION_STARTED);
         LocalBroadcastManager.getInstance(this).sendBroadcast(serviceStartedBroadcast);
 
-        Task task = Task.values()[intent.getIntExtra(EXTRA_COMMAND, 0)];
         switch (task) {
             case CREATE_GAME_INSTANCE:
                 doCreateGameInstance(intent);
@@ -184,6 +196,10 @@ public class InstallerService extends Service implements TaskProgressListener {
         executorService.submit(() -> {
             try {
                 installGameFromZip(gameInstance, gameFilesArchiveUri);
+                // Users often zip the game inside one or more wrapper folders. Drill down to the
+                // real game root (folder holding ProjectZomboid64/projectzomboid.jar/zombie) and
+                // lift it up to gamePath, so nothing downstream cares about the extra nesting.
+                flattenGameRootIfWrapped(new File(gameInstance.getGamePath()));
                 // 42.13+: extract projectzomboid.jar if present
                 extractProjectZomboidJarSimple(gameInstance);
 
@@ -218,6 +234,8 @@ public class InstallerService extends Service implements TaskProgressListener {
                 maybeDisableLibFor42(gameInstance);
                 // 42.15/42.17: patch printSpecs() crash
                 maybePatchPrintSpecsFor4215(gameInstance);
+                // B42: patch ShaderUnit to enable combineShaderSources (required for NG_GL4ES)
+                maybePatchShaderUnitCombine(gameInstance);
 
             } catch (Exception e) {
                 finishWithError(getString(R.string.dialog_title_failed_to_create_instance), e.toString());
@@ -421,21 +439,9 @@ public class InstallerService extends Service implements TaskProgressListener {
                         );
                     }
 
-                    // 2) Detect mod folders at top level
-                    File[] top = listDirs(tempDir);
+                    // 2) Find all mod roots using smart recursive detection (handles any wrapper depth)
                     java.util.List<File> mods = new java.util.ArrayList<>();
-
-                    for (File d : top) {
-                        if (isModFolder(d)) mods.add(d);
-                    }
-
-                    // If none found and there's exactly one wrapper dir, scan one level deeper
-                    if (mods.isEmpty() && top.length == 1) {
-                        File[] inner = listDirs(top[0]);
-                        for (File d : inner) {
-                            if (isModFolder(d)) mods.add(d);
-                        }
-                    }
+                    collectModRoots(tempDir, mods);
 
                     if (mods.isEmpty()) {
                         throw new IllegalArgumentException("No valid mods found in ZIP (mod.info missing).");
@@ -781,19 +787,55 @@ public class InstallerService extends Service implements TaskProgressListener {
 
         executorService.submit(() -> {
             try {
-                File logFile = new File(gi.getHomePath() + "/Zomboid/console.txt");
-                if (!logFile.exists()) {
-                    finishWithError(taskTitle, "console.txt not found: " + logFile.getAbsolutePath());
+                File consoleFile = new File(gi.getHomePath() + "/Zomboid/console.txt");
+                File launcherLog = new File(AppStorage.requireSingleton().getHomePath() + "/" + CrashHandler.LOG_FILE_NAME);
+                // Crash session's logcat lives in lastlog.txt: after a native game crash the process
+                // dies and the app restarts, which rotates log.txt -> lastlog.txt.
+                File lastLauncherLog = new File(AppStorage.requireSingleton().getHomePath() + "/" + CrashHandler.LAST_LOG_FILE_NAME);
+                // Native crash handler dump (SIGSEGV/SIGBUS/SIGILL/SIGFPE) written into the game dir.
+                File crashFile = new File(gi.getGamePath() + "/crash.txt");
+                // Persistent mirror of native stdout/stderr (box64 SEGV/BT reports, NG probes) —
+                // survives crashes/restarts, unlike the rotating logcat.
+                File nativeLog = new File(gi.getGamePath() + "/native.log");
+                // NG_GL4ES shader diagnostics: full source + driver log of shaders that failed to
+                // compile/link (up to 10 programs) + GL trace. Written by libng_gl4es into files/.
+                File failedShaders = new File(AppStorage.requireSingleton().getHomePath() + "/failed_shaders.txt");
+                File glTrace = new File(AppStorage.requireSingleton().getHomePath() + "/gl_trace.txt");
+
+                if (!consoleFile.exists() && !launcherLog.exists() && !lastLauncherLog.exists()) {
+                    finishWithError(taskTitle, "No log files found");
                     return;
                 }
 
-                try (InputStream is = new java.io.FileInputStream(logFile);
-                     OutputStream os = getContentResolver().openOutputStream(outUri)) {
+                try (OutputStream os = getContentResolver().openOutputStream(outUri)) {
                     if (os == null) throw new IllegalStateException("openOutputStream returned null");
-                    byte[] buf = new byte[64 * 1024];
-                    int r;
-                    while ((r = is.read(buf)) != -1) {
-                        os.write(buf, 0, r);
+
+                    try (ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(os, 256 * 1024))) {
+                        // report.txt — device / build metadata
+                        LauncherPreferences prefs = LauncherPreferences.requireSingleton();
+                        LauncherPreferences.VulkanDriver driver = prefs.getVulkanDriver();
+                        String driverStr = driver.libName != null
+                                ? driver.name() + " (" + driver.libName + ")"
+                                : "system default";
+
+                        zos.putNextEntry(new ZipEntry("report.txt"));
+                        writeLogUtf8(zos, "=== Zomdroid Bug Report ===\n");
+                        writeLogUtf8(zos, "Device   : " + Build.MANUFACTURER + " " + Build.MODEL + "\n");
+                        writeLogUtf8(zos, "Android  : " + Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")\n");
+                        writeLogUtf8(zos, "Zomdroid : " + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")\n");
+                        writeLogUtf8(zos, "Renderer : " + prefs.getRenderer().name() + "\n");
+                        writeLogUtf8(zos, "Driver   : " + driverStr + "\n");
+                        writeLogUtf8(zos, "===========================\n");
+                        zos.closeEntry();
+
+                        // Original log files, verbatim — each kept whole in its own entry
+                        addFileToZip(zos, crashFile, "crash.txt");
+                        addFileToZip(zos, nativeLog, "native.log");
+                        addFileToZip(zos, failedShaders, "failed_shaders.txt");
+                        addFileToZip(zos, glTrace, "gl_trace.txt");
+                        addFileToZip(zos, consoleFile, "console.txt");
+                        addFileToZip(zos, launcherLog, "log.txt");
+                        addFileToZip(zos, lastLauncherLog, "lastlog.txt");
                     }
                 }
 
@@ -802,6 +844,32 @@ public class InstallerService extends Service implements TaskProgressListener {
                 finishWithError(getString(R.string.dialog_title_failed_to_export_log), e.toString());
             }
         });
+    }
+
+    // Adds a file to the zip under entryName. No-op if the file is missing.
+    private static void addFileToZip(ZipOutputStream zos, File file, String entryName) throws IOException {
+        if (file == null || !file.exists()) return;
+        zos.putNextEntry(new ZipEntry(entryName));
+        try (InputStream is = new FileInputStream(file)) {
+            byte[] buf = new byte[64 * 1024];
+            int r;
+            while ((r = is.read(buf)) != -1) zos.write(buf, 0, r);
+        }
+        zos.closeEntry();
+    }
+
+    private static void writeLogUtf8(OutputStream os, String s) throws IOException {
+        os.write(s.getBytes("UTF-8"));
+    }
+
+    private static void appendFileToStream(OutputStream os, File file) throws IOException {
+        try (InputStream is = new FileInputStream(file)) {
+            byte[] buf = new byte[64 * 1024];
+            int r;
+            while ((r = is.read(buf)) != -1) {
+                os.write(buf, 0, r);
+            }
+        }
     }
 
     // -------------------- INSTALL BETTERFPS --------------------
@@ -1255,6 +1323,76 @@ public class InstallerService extends Service implements TaskProgressListener {
         Log.i(LOG_TAG, "42.13 patch: disabled " + libName + " -> " + disabled.getName());
     }
 
+    private static final String SHADER_UNIT_MD5_42_6_18 = "8b36f1c4da133a71c2e85d537b9f3524";
+    private static final String SHADER_UNIT_MD5_42_19   = "9cca5f09be807c6364afb1b3cfe50f02";
+
+    // B42.6–42.18: patch ShaderUnit to enable combineShaderSources (required for NG_GL4ES;
+    // GLES forbids multi-unit linking, patched class uses PZ's own combineShaderSources mode).
+    // Safe on ZINK — combineShaderSources is valid for any GL. Versions before 42.6 not tested.
+    private void maybePatchShaderUnitCombine(GameInstance gameInstance) {
+        if (!"42".equals(gameInstance.getBuildVersion())) return;
+
+        File target = new File(gameInstance.getGamePath(),
+                "zombie/core/opengl/ShaderUnit.class");
+        if (!target.exists()) return;
+
+        File bak = new File(target.getParentFile(), "ShaderUnit.class.bak");
+        if (bak.exists()) return; // already patched
+
+        String md5;
+        try {
+            md5 = md5Hex(target);
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "ShaderUnit patch: failed to compute MD5", e);
+            return;
+        }
+
+        String patchAsset;
+        if (SHADER_UNIT_MD5_42_6_18.equals(md5)) {
+            patchAsset = "patches/ShaderUnit.class.42.8-42.12.patched";
+        } else if (SHADER_UNIT_MD5_42_19.equals(md5)) {
+            patchAsset = "patches/ShaderUnit.class.42.19.patched";
+        } else {
+            Log.w(LOG_TAG, "ShaderUnit patch: unknown MD5=" + md5 + ", skipping");
+            return;
+        }
+
+        if (!target.renameTo(bak)) {
+            Log.e(LOG_TAG, "ShaderUnit patch: failed to save original as .bak");
+            return;
+        }
+
+        try (InputStream src = getAssets().open(patchAsset);
+             FileOutputStream out = new FileOutputStream(target)) {
+            byte[] buf = new byte[4096];
+            int n;
+            while ((n = src.read(buf)) != -1) out.write(buf, 0, n);
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "ShaderUnit patch: failed to apply " + patchAsset, e);
+            bak.renameTo(target);
+            return;
+        }
+
+        Log.i(LOG_TAG, "ShaderUnit combineShaderSources patch applied: " + patchAsset);
+    }
+
+    private static String md5Hex(File file) throws IOException {
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
+            try (InputStream is = new FileInputStream(file)) {
+                byte[] buf = new byte[8192];
+                int r;
+                while ((r = is.read(buf)) != -1) md.update(buf, 0, r);
+            }
+            byte[] digest = md.digest();
+            StringBuilder sb = new StringBuilder(32);
+            for (byte b : digest) sb.append(String.format("%02x", b));
+            return sb.toString();
+        } catch (java.security.NoSuchAlgorithmException e) {
+            throw new IOException("MD5 not available", e);
+        }
+    }
+
     // 42.15/42.17: patch printSpecs() crash on Android
     private void maybePatchPrintSpecsFor4215(GameInstance gameInstance) {
         File oshiDir = new File(gameInstance.getGamePath(), "oshi");
@@ -1328,6 +1466,62 @@ public class InstallerService extends Service implements TaskProgressListener {
         try (InputStream inputStream = contentResolver.openInputStream(zipUri)) {
             long fileSize = FileUtils.queryFileSize(contentResolver, zipUri);
             FileUtils.extractZipToDisk(inputStream, gameInstance.getGamePath(), this, fileSize);
+        }
+    }
+
+    // -------------------- GAME ROOT DRILL / UNWRAP --------------------
+    // Files/dirs that mark the real Project Zomboid install root, across all builds:
+    // desktop launcher script + its manifest, the 42.12+ fat jar, and the classes dir.
+    private static final String[] GAME_ROOT_MARKERS = {
+            "ProjectZomboid64.json", "ProjectZomboid64", "projectzomboid.jar", "zombie"
+    };
+
+    // True if dir DIRECTLY contains any PZ root marker.
+    private boolean isGameRoot(File dir) {
+        if (dir == null || !dir.isDirectory()) return false;
+        File[] files = dir.listFiles();
+        if (files == null) return false;
+        for (File f : files) {
+            for (String marker : GAME_ROOT_MARKERS) {
+                if (f.getName().equalsIgnoreCase(marker)) return true;
+            }
+        }
+        return false;
+    }
+
+    // Recursively locate the game root (this dir or a descendant). null if none found.
+    private File findGameRoot(File dir) {
+        if (isGameRoot(dir)) return dir;
+        File[] children = dir.listFiles(File::isDirectory);
+        if (children == null) return null;
+        for (File child : children) {
+            File found = findGameRoot(child);
+            if (found != null) return found;
+        }
+        return null;
+    }
+
+    // If the extracted game sits inside one or more wrapper folders, lift the real root up so
+    // its contents live directly under gameDir. No-op if already flat or no PZ root is found.
+    private void flattenGameRootIfWrapped(File gameDir) throws IOException {
+        if (isGameRoot(gameDir)) return; // already flat
+        File root = findGameRoot(gameDir);
+        if (root == null || root.equals(gameDir)) return; // nothing PZ-like nested; launch check will report
+
+        Log.i(LOG_TAG, "Game root nested at " + root + " — flattening into " + gameDir);
+
+        File tmp = new File(gameDir.getParentFile(), gameDir.getName() + "__pzroot_tmp");
+        if (tmp.exists()) FileUtils.deleteDirectory(tmp);
+
+        // Move the nested root out of the wrapper tree (rename on same fs, copy as fallback)...
+        if (!root.renameTo(tmp)) {
+            copyDirectory(root, tmp);
+        }
+        // ...drop the leftover wrapper folders, then reinstate the root as gameDir.
+        FileUtils.deleteDirectory(gameDir);
+        if (!tmp.renameTo(gameDir)) {
+            copyDirectory(tmp, gameDir);
+            FileUtils.deleteDirectory(tmp);
         }
     }
 
@@ -2142,6 +2336,18 @@ public class InstallerService extends Service implements TaskProgressListener {
 
     public LiveData<TaskState> getTaskState() {
         return taskState;
+    }
+
+    public Task getCurrentTask() {
+        return currentTask;
+    }
+
+    public String getCurrentInstallPresetName() {
+        return currentInstallPresetName;
+    }
+
+    public String getCurrentGpuVendor() {
+        return currentGpuVendor;
     }
 
     public class LocalBinder extends Binder {
