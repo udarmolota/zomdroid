@@ -368,11 +368,9 @@
 
     <!-- Optimization page -->
     <string name="optimization_group_jvm">JVM 参数</string>
-    <string name="optimization_jvm_hint">复制预设并粘贴到设置 → JVM 参数中。根据设备内存选择。</string>
-    <string name="optimization_jvm_4gb_label">4 GB 内存</string>
-    <string name="optimization_jvm_6gb_label">6 GB 内存</string>
-    <string name="optimization_jvm_balanced_label">→ 平衡</string>
-    <string name="optimization_jvm_aggressive_label">→ 激进</string>
+    <string name="optimization_jvm_hint">复制预设并粘贴到设置 → JVM 参数中。所有设备通用同一预设 — 请勿调大数值：更大的堆内存会导致卡死和闪退。</string>
+    <string name="optimization_jvm_recommended_label">→ 推荐（所有设备）</string>
+    <string name="optimization_jvm_4gb_note">⚠️ 在 4 GB 内存的设备上游戏可以运行，但并不理想：不建议玩 Build 42 — 请玩 Build 41 并使用下方的优化模组（BetterFPS、Every Texture Optimized）。它们比 JVM 设置有效得多。</string>
     <string name="optimization_copy">复制</string>
     <string name="optimization_open_settings">→ 打开设置</string>
     <string name="optimization_group_betterfps">BetterFPS b41</string>

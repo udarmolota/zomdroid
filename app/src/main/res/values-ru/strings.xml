@@ -374,11 +374,9 @@
 
     <!-- Optimization page -->
     <string name="optimization_group_jvm">Аргументы JVM</string>
-    <string name="optimization_jvm_hint">Скопируйте пресет и вставьте в Настройки → Аргументы JVM. Выберите по объёму RAM вашего устройства.</string>
-    <string name="optimization_jvm_4gb_label">4 ГБ RAM</string>
-    <string name="optimization_jvm_6gb_label">6 ГБ RAM</string>
-    <string name="optimization_jvm_balanced_label">→ Баланс</string>
-    <string name="optimization_jvm_aggressive_label">→ Агрессивный</string>
+    <string name="optimization_jvm_hint">Скопируйте пресет и вставьте в Настройки → Аргументы JVM. Один пресет для всех устройств — не увеличивайте числа: больший heap приводит к зависаниям и вылетам.</string>
+    <string name="optimization_jvm_recommended_label">→ Рекомендуется (все устройства)</string>
+    <string name="optimization_jvm_4gb_note">⚠️ На устройствах с 4 ГБ ОЗУ игра будет работать, но не идеально: Build 42 там не рекомендуется — играйте в Build 41 и используйте моды оптимизации ниже (BetterFPS, Every Texture Optimized). Они дают куда больше, чем настройки JVM.</string>
     <string name="optimization_copy">Копировать</string>
     <string name="optimization_open_settings">→ Открыть Настройки</string>
     <string name="optimization_group_betterfps">BetterFPS b41</string>

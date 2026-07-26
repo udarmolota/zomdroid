@@ -375,11 +375,9 @@
 
     <!-- Optimization page -->
     <string name="optimization_group_jvm">Argumen JVM</string>
-    <string name="optimization_jvm_hint">Salin preset dan tempel di Pengaturan → Argumen JVM. Pilih berdasarkan RAM perangkat Anda.</string>
-    <string name="optimization_jvm_4gb_label">4 GB RAM</string>
-    <string name="optimization_jvm_6gb_label">6 GB RAM</string>
-    <string name="optimization_jvm_balanced_label">→ Seimbang</string>
-    <string name="optimization_jvm_aggressive_label">→ Agresif</string>
+    <string name="optimization_jvm_hint">Salin preset dan tempel di Pengaturan → Argumen JVM. Satu preset untuk semua perangkat — jangan menaikkan angkanya: heap yang lebih besar menyebabkan macet dan crash.</string>
+    <string name="optimization_jvm_recommended_label">→ Disarankan (semua perangkat)</string>
+    <string name="optimization_jvm_4gb_note">⚠️ Pada perangkat 4 GB RAM game tetap berjalan, tetapi tidak sempurna: Build 42 tidak disarankan — mainkan Build 41 dan gunakan mod optimasi di bawah (BetterFPS, Every Texture Optimized). Itu jauh lebih membantu daripada pengaturan JVM.</string>
     <string name="optimization_copy">Salin</string>
     <string name="optimization_open_settings">→ Buka Pengaturan</string>
     <string name="optimization_group_betterfps">BetterFPS b41</string>

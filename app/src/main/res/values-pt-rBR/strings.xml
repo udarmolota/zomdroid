@@ -374,11 +374,9 @@
 
     <!-- Optimization page -->
     <string name="optimization_group_jvm">Argumentos JVM</string>
-    <string name="optimization_jvm_hint">Copie um preset e cole em Configurações → Argumentos JVM. Escolha de acordo com a RAM do seu dispositivo.</string>
-    <string name="optimization_jvm_4gb_label">4 GB RAM</string>
-    <string name="optimization_jvm_6gb_label">6 GB RAM</string>
-    <string name="optimization_jvm_balanced_label">→ Balanceado</string>
-    <string name="optimization_jvm_aggressive_label">→ Agressivo</string>
+    <string name="optimization_jvm_hint">Copie o preset e cole em Configurações → Argumentos JVM. Um único preset para todos os dispositivos — não aumente os números: heaps maiores causam travamentos e crashes.</string>
+    <string name="optimization_jvm_recommended_label">→ Recomendado (todos os dispositivos)</string>
+    <string name="optimization_jvm_4gb_note">⚠️ Em dispositivos com 4 GB de RAM o jogo funciona, mas não perfeitamente: o Build 42 não é recomendado — jogue o Build 41 e use os mods de otimização abaixo (BetterFPS, Every Texture Optimized). Eles ajudam muito mais que as configurações da JVM.</string>
     <string name="optimization_copy">Copiar</string>
     <string name="optimization_open_settings">→ Abrir Configurações</string>
     <string name="optimization_group_betterfps">BetterFPS b41</string>

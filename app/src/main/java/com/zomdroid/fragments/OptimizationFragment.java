@@ -168,20 +168,14 @@ public class OptimizationFragment extends Fragment {
         taskProgressDialogBinding.progressDialogOkMb.setOnClickListener(v ->
                 taskProgressDialog.dismiss());
 
-        // JVM Copy buttons
-        binding.optimizationJvm4gBalancedCopyBtn.setOnClickListener(v ->
-                copyToClipboard(binding.optimizationJvm4gBalancedTv.getText().toString()));
-        binding.optimizationJvm4gAggressiveCopyBtn.setOnClickListener(v ->
-                copyToClipboard(binding.optimizationJvm4gAggressiveTv.getText().toString()));
-        binding.optimizationJvm6gBalancedCopyBtn.setOnClickListener(v ->
-                copyToClipboard(binding.optimizationJvm6gBalancedTv.getText().toString()));
-        binding.optimizationJvm6gAggressiveCopyBtn.setOnClickListener(v ->
-                copyToClipboard(binding.optimizationJvm6gAggressiveTv.getText().toString()));
+        // JVM Copy button — a single field-proven preset for every device. The old 4/6 GB
+        // Balanced/Aggressive matrix was removed: every crash report we got came from the
+        // >=3GB-heap presets, and 2048M is the only configuration with a clean track record.
+        binding.optimizationJvmRecommendedCopyBtn.setOnClickListener(v ->
+                copyToClipboard(binding.optimizationJvmRecommendedTv.getText().toString()));
 
         // Open Settings link
         binding.optimizationOpenSettingsTv.setOnClickListener(v ->
-                Navigation.findNavController(v).navigate(R.id.settings_fragment));
-        binding.optimizationOpenSettingsTv2.setOnClickListener(v ->
                 Navigation.findNavController(v).navigate(R.id.settings_fragment));
 
         // BetterFPS help
@@ -455,14 +449,6 @@ public class OptimizationFragment extends Fragment {
         });
 
         // ===== Collapsible sections =====
-        setupCollapsible(
-                binding.optimizationJvm4gbHeader,
-                binding.optimizationJvm4gbContent,
-                binding.optimizationJvm4gbExpandIv);
-        setupCollapsible(
-                binding.optimizationJvm6gbHeader,
-                binding.optimizationJvm6gbContent,
-                binding.optimizationJvm6gbExpandIv);
         setupCollapsible(
                 binding.optimizationBetterfpsHeader,
                 binding.optimizationBetterfpsContent,
