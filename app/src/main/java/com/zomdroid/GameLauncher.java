@@ -16,6 +16,12 @@ import java.util.ArrayList;
 public class GameLauncher {
     public static void launch(GameInstance gameInstance) throws ErrnoException {
 
+        // B42: make sure ShaderUnit.class carries the combineShaderSources patch (needed by
+        // NG_GL4ES). Normally done at instance creation; doing it here too picks up instances
+        // created by older launcher versions whose md5-table didn't know their game version.
+        // Self-quenching: once the .bak exists this is a single stat call.
+        com.zomdroid.patch.ShaderUnitPatchApplier.applyIfNeeded(gameInstance);
+
 /*        // for debug
         Os.setenv("MESA_DEBUG", "1", false);
         Os.setenv("MESA_LOG_LEVEL", "debug", false);
@@ -197,7 +203,9 @@ public class GameLauncher {
     }
 
     private static boolean isLegacyRendererNeedingJre21(LauncherPreferences.Renderer r) {
-        boolean result = (r == LauncherPreferences.Renderer.GL4ES) || (r == LauncherPreferences.Renderer.NG_GL4ES);
+        // NG_GL4ES dropped from this list on purpose: it is being tested against JRE25 (Java 25),
+        // which is also what Build 42.12+ requires. Only stock GL4ES stays pinned to JRE21.
+        boolean result = (r == LauncherPreferences.Renderer.GL4ES);
 
         if (BuildConfig.DEBUG) {
             Log.i("Zomdroid", "isLegacyRendererNeedingJre21: " + result + ", Renderer: " + r.name());
