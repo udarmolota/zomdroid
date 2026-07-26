@@ -419,7 +419,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
                 buf[i++] = 'C';
                 break;
             case 'L': // reference to object
-                (*sig)++;
+                sig++; // advance past 'L'; (*sig)++ would mutate the signature char in place
                 while(*sig != ';') {
                     if (*sig == '\0') {
                         LOGE("Encountered end of string before ;");
@@ -514,7 +514,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
             *return_type = 'C';
             break;
         case 'L': // reference to object
-            (*sig)++;
+            sig++; // advance past 'L'; (*sig)++ would mutate the signature char in place
             while(*sig != ';') {
                 if (*sig == '\0') {
                     LOGE("Encountered end of string before ;");
