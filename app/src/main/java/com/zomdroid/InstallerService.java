@@ -1341,57 +1341,16 @@ public class InstallerService extends Service implements TaskProgressListener {
         Log.i(LOG_TAG, "42.13 patch: disabled " + libName + " -> " + disabled.getName());
     }
 
-    private static final String SHADER_UNIT_MD5_42_6_18 = "8b36f1c4da133a71c2e85d537b9f3524";
-    private static final String SHADER_UNIT_MD5_42_19   = "9cca5f09be807c6364afb1b3cfe50f02";
 
-    // B42.6–42.18: patch ShaderUnit to enable combineShaderSources (required for NG_GL4ES;
+    // B42: patch ShaderUnit to enable combineShaderSources (required for NG_GL4ES;
     // GLES forbids multi-unit linking, patched class uses PZ's own combineShaderSources mode).
-    // Safe on ZINK — combineShaderSources is valid for any GL. Versions before 42.6 not tested.
+    // Safe on ZINK — combineShaderSources is valid for any GL.
+    //
+    // The universal ShaderUnitPatcher finds the flag field BY NAME in the constant pool, so it
+    // works on every game version — no md5 table, no pre-made replacement files. Also invoked
+    // at game launch (GameLauncher) to cover instances created by older launcher versions.
     private void maybePatchShaderUnitCombine(GameInstance gameInstance) {
-        if (!"42".equals(gameInstance.getBuildVersion())) return;
-
-        File target = new File(gameInstance.getGamePath(),
-                "zombie/core/opengl/ShaderUnit.class");
-        if (!target.exists()) return;
-
-        File bak = new File(target.getParentFile(), "ShaderUnit.class.bak");
-        if (bak.exists()) return; // already patched
-
-        String md5;
-        try {
-            md5 = md5Hex(target);
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "ShaderUnit patch: failed to compute MD5", e);
-            return;
-        }
-
-        String patchAsset;
-        if (SHADER_UNIT_MD5_42_6_18.equals(md5)) {
-            patchAsset = "patches/ShaderUnit.class.42.8-42.12.patched";
-        } else if (SHADER_UNIT_MD5_42_19.equals(md5)) {
-            patchAsset = "patches/ShaderUnit.class.42.19.patched";
-        } else {
-            Log.w(LOG_TAG, "ShaderUnit patch: unknown MD5=" + md5 + ", skipping");
-            return;
-        }
-
-        if (!target.renameTo(bak)) {
-            Log.e(LOG_TAG, "ShaderUnit patch: failed to save original as .bak");
-            return;
-        }
-
-        try (InputStream src = getAssets().open(patchAsset);
-             FileOutputStream out = new FileOutputStream(target)) {
-            byte[] buf = new byte[4096];
-            int n;
-            while ((n = src.read(buf)) != -1) out.write(buf, 0, n);
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "ShaderUnit patch: failed to apply " + patchAsset, e);
-            bak.renameTo(target);
-            return;
-        }
-
-        Log.i(LOG_TAG, "ShaderUnit combineShaderSources patch applied: " + patchAsset);
+        com.zomdroid.patch.ShaderUnitPatchApplier.applyIfNeeded(gameInstance);
     }
 
     private static String md5Hex(File file) throws IOException {
