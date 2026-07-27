@@ -1,10 +1,14 @@
 package com.zomdroid.input;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.CornerPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -12,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 
+import java.io.File;
 import java.util.Arrays;
 
 public class DpadControlElement extends AbstractControlElement {
@@ -242,7 +247,32 @@ public class DpadControlElement extends AbstractControlElement {
                 this.type,
                 this.bindings.toArray(new GLFWBinding[0]), null, this.drawable.color,
                 this.drawable.alpha,
-                this.inputType, ControlElementDescription.Icon.NO_ICON, false);
+                this.inputType, ControlElementDescription.Icon.NO_ICON, false,
+                ControlElementDescription.DEFAULT_SENSITIVITY, ControlElementDescription.DEFAULT_STYLE,
+                this.drawable.iconFile, this.drawable.noTint);
+    }
+
+    /** Replace the drawn cross with a user-supplied image from controls/icons (null clears it). */
+    public void setCustomIcon(String fileName, boolean noTint) {
+        this.drawable.setCustomIcon(fileName, noTint);
+        this.parentView.invalidate();
+    }
+
+    public String getIconFile() {
+        return this.drawable.iconFile;
+    }
+
+    public boolean isNoTint() {
+        return this.drawable.noTint;
+    }
+
+    public void setNoTint(boolean noTint) {
+        if (this.drawable.iconFile != null) {
+            this.drawable.setCustomIcon(this.drawable.iconFile, noTint);
+        } else {
+            this.drawable.noTint = noTint;
+        }
+        this.parentView.invalidate();
     }
 
     public class DpadControlDrawable {
@@ -259,6 +289,10 @@ public class DpadControlElement extends AbstractControlElement {
         private float y;
         private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final Path path = new Path();
+        private String iconFile;        // user image filename in controls/icons, or null for the drawn cross
+        private boolean noTint;         // keep the custom image's original colors when true
+        private Drawable iconDrawable;  // decoded custom image, drawn instead of the cross
+        private ColorFilter colorFilter;
 
         public DpadControlDrawable(InputControlsView parentView, ControlElementDescription description) {
             setColor(description.color);
@@ -269,6 +303,50 @@ public class DpadControlElement extends AbstractControlElement {
                     description.centerYRelative * parentView.getHeight());
 
             this.paint.setStyle(Paint.Style.STROKE);
+
+            if (description.iconFile != null && !description.iconFile.isEmpty()) {
+                setCustomIcon(description.iconFile, description.noTint);
+            } else {
+                this.noTint = description.noTint;
+            }
+        }
+
+        // Load a user-supplied image from controls/icons/<fileName> to draw in place of the cross.
+        // Falls back to the drawn cross if the file is missing/undecodable.
+        public void setCustomIcon(String fileName, boolean noTint) {
+            this.noTint = noTint;
+            if (fileName == null || fileName.isEmpty()) {
+                this.iconFile = null;
+                this.iconDrawable = null;
+                return;
+            }
+            File dir = parentView.getControlsIconsDir();
+            File f = (dir != null) ? new File(dir, fileName) : null;
+            Bitmap bmp = (f != null && f.isFile()) ? BitmapFactory.decodeFile(f.getAbsolutePath()) : null;
+            if (bmp == null) {
+                this.iconFile = null;
+                this.iconDrawable = null;
+                return;
+            }
+            this.iconFile = fileName;
+            BitmapDrawable bd = new BitmapDrawable(parentView.getResources(), bmp);
+            if (this.noTint) {
+                bd.setTintList(null);
+            } else {
+                bd.setTint(this.color);
+            }
+            bd.setAlpha(this.alpha);
+            bd.setColorFilter(this.colorFilter);
+            this.iconDrawable = bd;
+            updateIconBounds();
+        }
+
+        // The image fills the d-pad's square footprint, so a cross-shaped picture lines up with
+        // the touch areas it replaces.
+        private void updateIconBounds() {
+            if (this.iconDrawable == null) return;
+            this.iconDrawable.setBounds(Math.round(this.x), Math.round(this.y),
+                    Math.round(this.x + this.size), Math.round(this.y + this.size));
         }
 
         private void calculatePath() {
@@ -307,6 +385,12 @@ public class DpadControlElement extends AbstractControlElement {
         }
 
         public void draw(@NonNull Canvas canvas) {
+            // A custom image replaces the drawn cross entirely.
+            if (this.iconDrawable != null) {
+                this.iconDrawable.draw(canvas);
+                return;
+            }
+
             // Outline
             int oldColor = this.paint.getColor();
             int oldAlpha = this.paint.getAlpha();
@@ -329,11 +413,13 @@ public class DpadControlElement extends AbstractControlElement {
         public void setColor(int color) {
             this.color = color;
             this.paint.setColor(this.color);
+            if (this.iconDrawable != null && !this.noTint) this.iconDrawable.setTint(this.color);
         }
 
         public void setAlpha(int alpha) {
             this.alpha = alpha;
             this.paint.setAlpha(this.alpha);
+            if (this.iconDrawable != null) this.iconDrawable.setAlpha(this.alpha);
         }
 
         public void setScale(float scale) {
@@ -352,10 +438,13 @@ public class DpadControlElement extends AbstractControlElement {
             this.x = this.centerX - this.size / 2;
             this.y = this.centerY - this.size / 2;
             calculatePath();
+            updateIconBounds();
         }
 
         public void setColorFilter(@Nullable ColorFilter colorFilter) {
+            this.colorFilter = colorFilter;
             this.paint.setColorFilter(colorFilter);
+            if (this.iconDrawable != null) this.iconDrawable.setColorFilter(colorFilter);
         }
 
         public boolean isPointOver(float x, float y) {

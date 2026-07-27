@@ -382,10 +382,10 @@ public class ControlsEditorActivity extends AppCompatActivity {
                         break;
                     }
                     case DPAD:
-                    case STICK:
-                    case STICK_WASD:
-                    case STICK_MOUSE:
-                    case TOUCHPAD: {
+                    case DPAD_UP:
+                    case DPAD_RIGHT:
+                    case DPAD_DOWN:
+                    case DPAD_LEFT: {
                         binding.elementToggleTextRowLl.setVisibility(View.GONE);
                         binding.elementToggleTextFieldsLl.setVisibility(View.GONE);
                         binding.elementTogglingCb.setVisibility(View.GONE);
@@ -394,14 +394,33 @@ public class ControlsEditorActivity extends AppCompatActivity {
                         binding.elementIconS.setVisibility(View.GONE);
                         binding.elementStyleTv.setVisibility(View.GONE);
                         binding.elementStyleS.setVisibility(View.GONE);
-                        binding.elementCustomIconB.setVisibility(View.GONE);
-                        binding.elementIconNoTintCb.setVisibility(View.GONE);
+
+                        // Custom image: replaces the drawn cross (composite DPAD) or the arrow
+                        // (split DPAD_*, which are ButtonControlElements and already supported it).
+                        binding.elementCustomIconB.setVisibility(View.VISIBLE);
+                        binding.elementIconNoTintCb.setVisibility(View.VISIBLE);
+                        binding.elementIconNoTintCb.setOnCheckedChangeListener(null);
+                        if (element instanceof com.zomdroid.input.DpadControlElement) {
+                            binding.elementIconNoTintCb.setChecked(
+                                    ((com.zomdroid.input.DpadControlElement) element).isNoTint());
+                        } else if (element instanceof com.zomdroid.input.ButtonControlElement) {
+                            binding.elementIconNoTintCb.setChecked(
+                                    ((com.zomdroid.input.ButtonControlElement) element).isNoTint());
+                        }
+                        binding.elementCustomIconB.setOnClickListener(v -> pickIconLauncher.launch("image/*"));
+                        binding.elementIconNoTintCb.setOnCheckedChangeListener((b, isChecked) -> {
+                            if (element instanceof com.zomdroid.input.DpadControlElement) {
+                                ((com.zomdroid.input.DpadControlElement) element).setNoTint(isChecked);
+                            } else if (element instanceof com.zomdroid.input.ButtonControlElement) {
+                                ((com.zomdroid.input.ButtonControlElement) element).setNoTint(isChecked);
+                            }
+                        });
                         break;
                     }
-                    case DPAD_UP:
-                    case DPAD_RIGHT:
-                    case DPAD_DOWN:
-                    case DPAD_LEFT:
+                    case STICK:
+                    case STICK_WASD:
+                    case STICK_MOUSE:
+                    case TOUCHPAD:
                     default: {
                         binding.elementToggleTextRowLl.setVisibility(View.GONE);
                         binding.elementToggleTextFieldsLl.setVisibility(View.GONE);
@@ -819,7 +838,8 @@ public class ControlsEditorActivity extends AppCompatActivity {
         AbstractControlElement el = binding.inputControlsV.getSelectedElement();
         boolean isButton = el instanceof com.zomdroid.input.ButtonControlElement;
         boolean isRadial = el instanceof com.zomdroid.input.RadialMenuControlElement;
-        if (!isButton && !isRadial) {
+        boolean isDpad = el instanceof com.zomdroid.input.DpadControlElement;
+        if (!isButton && !isRadial && !isDpad) {
             Toast.makeText(this, R.string.control_element_custom_icon_select_button, Toast.LENGTH_SHORT).show();
             return;
         }
@@ -861,6 +881,8 @@ public class ControlsEditorActivity extends AppCompatActivity {
             boolean noTint = binding.elementIconNoTintCb.isChecked();
             if (isButton) {
                 ((com.zomdroid.input.ButtonControlElement) el).setCustomIcon(fileName, noTint);
+            } else if (isDpad) {
+                ((com.zomdroid.input.DpadControlElement) el).setCustomIcon(fileName, noTint);
             } else {
                 ((com.zomdroid.input.RadialMenuControlElement) el).setCustomIcon(fileName, noTint);
             }
