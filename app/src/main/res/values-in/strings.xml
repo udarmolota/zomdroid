@@ -310,6 +310,14 @@
     <string name="version_check_error">Could not check for updates\nCurrent version: %1$s</string>
     <string name="nav_menu_version">Periksa pembaruan</string>
 
+    <!-- Bug report -->
+    <string name="nav_bug_report">Laporkan bug</string>
+    <string name="bug_report_preparing">Menyiapkan laporan bug…</string>
+    <string name="bug_report_email" translatable="false">210478@mail.ru</string>
+    <string name="bug_report_subject" translatable="false">ZOMDROID REPORT %1$s</string>
+    <string name="bug_report_body">Halo, saya punya laporan bug baru.\n\nDeskripsi: \n\n\n---\n%1$s</string>
+    <string name="bug_report_no_mail">Tidak ada aplikasi email yang ditemukan di perangkat ini.</string>
+
     <!-- New instance -->
     <string name="native_libs_dialog_title">Library native (opsional)</string>
     <string name="native_libs_dialog_message">Library native adalah file dari build 42.12. Ini terutama terdiri dari dua file:\n\n🌐 libRakNet64.so\n🌐 libZNetNoSteam64.so\n\nFile-file ini diperlukan untuk dukungan multiplayer pada build 41.78. Anda dapat membaca lebih lanjut tentangnya di Wiki.</string>
@@ -375,8 +383,9 @@
 
     <!-- Optimization page -->
     <string name="optimization_group_jvm">Argumen JVM</string>
-    <string name="optimization_jvm_hint">Salin preset dan tempel di Pengaturan → Argumen JVM. Satu preset untuk semua perangkat — jangan menaikkan angkanya: heap yang lebih besar menyebabkan macet dan crash.</string>
-    <string name="optimization_jvm_recommended_label">→ Disarankan (semua perangkat)</string>
+    <string name="optimization_jvm_hint">Pendekatan baru: batas heap Java yang disarankan kini diatur secara default saat membuat instance — tidak perlu menyalin apa pun. Lihat, ubah, atau kembalikan di Pengaturan → Lanjutan → Argumen JVM. Naikkan angkanya dengan risiko Anda sendiri.</string>
+    <string name="settings_jvm_args_reset">Kembalikan bawaan</string>
+    <string name="optimization_jvm_recommended_label">→ Bawaan saat ini:</string>
     <string name="optimization_jvm_4gb_note">⚠️ Pada perangkat 4 GB RAM game tetap berjalan, tetapi tidak sempurna: Build 42 tidak disarankan — mainkan Build 41 dan gunakan mod optimasi di bawah (BetterFPS, Every Texture Optimized). Itu jauh lebih membantu daripada pengaturan JVM.</string>
     <string name="optimization_copy">Salin</string>
     <string name="optimization_open_settings">→ Buka Pengaturan</string>
@@ -386,7 +395,6 @@
     <string name="optimization_install">Instal</string>
     <string name="optimization_betterfps_help_title">Cara kerja BetterFPS</string>
     <string name="optimization_betterfps_help_message">Steam Workshop ID: 3022543997\n\n"Project Zomboid merender area 190×190 tile di sekitar pemain. Mod ini mengurangi ukuran area tersebut dan menghindari pemuatan chunk yang tidak diperlukan."\n— deskripsi mod\n\nVarian:\n• PotatoePC — performa maksimal\n• 1080 — seimbang\n• 4k — kualitas terbaik (masih lebih rendah dibandingkan aslinya)\n• All_Settings — ukuran area kustom dari 30×30 hingga 190×190; harus diinstal secara manual\n\nKami merekomendasikan mulai dengan PotatoePC. Jika perlu, Anda dapat memilih pengaturan yang lebih rendah secara manual.</string>
-    <string name="optimization_jvm_copied">Disalin ke clipboard</string>
     <string name="optimization_betterfps_installed">BetterFPS berhasil diinstal</string>
     <string name="optimization_betterfps_installing">Menginstal BetterFPS…</string>
     <string name="optimization_betterfps_mode_label">→ Mode</string>

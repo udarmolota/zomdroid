@@ -237,12 +237,23 @@
                         android:id="@+id/settings_jargs_et"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
+                        android:layout_marginBottom="4dp"
                         android:hint=" -Xms2G -Xmx3G -Xmn1G"
                         android:textSize="11sp"
                         android:inputType="textMultiLine|textNoSuggestions"
                         android:lines="2"
                         android:maxLines="3"/>
+
+                    <Button
+                        android:id="@+id/settings_jargs_reset_btn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginBottom="8dp"
+                        android:minWidth="0dp"
+                        android:text="@string/settings_jvm_args_reset"
+                        android:textSize="11sp"
+                        style="@style/Widget.Material3.Button.TonalButton"/>
 
                     <LinearLayout
                         android:layout_width="match_parent"

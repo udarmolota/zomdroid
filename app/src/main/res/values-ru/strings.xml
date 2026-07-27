@@ -309,6 +309,14 @@
     <string name="version_check_error">Не удалось проверить обновления\nТекущая версия: %1$s</string>
     <string name="nav_menu_version">Проверить обновления</string>
 
+    <!-- Bug report -->
+    <string name="nav_bug_report">Сообщить об ошибке</string>
+    <string name="bug_report_preparing">Подготовка отчёта об ошибке…</string>
+    <string name="bug_report_email" translatable="false">210478@mail.ru</string>
+    <string name="bug_report_subject" translatable="false">ZOMDROID REPORT %1$s</string>
+    <string name="bug_report_body">Здравствуйте, у меня новый отчёт об ошибке.\n\nОписание: \n\n\n---\n%1$s</string>
+    <string name="bug_report_no_mail">На этом устройстве не найдено почтовое приложение.</string>
+
     <!-- New instance -->
     <string name="native_libs_dialog_title">Нативные библиотеки (необязательно)</string>
     <string name="native_libs_dialog_message">Нативные библиотеки — это файлы от билда 42.12. В основном это два файла:\n\n🌐 libRakNet64.so\n🌐 libZNetNoSteam64.so\n\nОни необходимы для поддержки мультиплеера в билде 41.78. Подробнее можно прочитать в Вики.</string>
@@ -374,8 +382,9 @@
 
     <!-- Optimization page -->
     <string name="optimization_group_jvm">Аргументы JVM</string>
-    <string name="optimization_jvm_hint">Скопируйте пресет и вставьте в Настройки → Аргументы JVM. Один пресет для всех устройств — не увеличивайте числа: больший heap приводит к зависаниям и вылетам.</string>
-    <string name="optimization_jvm_recommended_label">→ Рекомендуется (все устройства)</string>
+    <string name="optimization_jvm_hint">Мы изменили подход: рекомендуемое ограничение Java heap теперь ставится по умолчанию при создании инстанса — копировать ничего не нужно. Посмотреть, изменить или сбросить его можно в Настройки → Дополнительно → Аргументы JVM. Поднимайте числа на свой страх и риск.</string>
+    <string name="settings_jvm_args_reset">Сбросить по умолчанию</string>
+    <string name="optimization_jvm_recommended_label">→ Сейчас по умолчанию:</string>
     <string name="optimization_jvm_4gb_note">⚠️ На устройствах с 4 ГБ ОЗУ игра будет работать, но не идеально: Build 42 там не рекомендуется — играйте в Build 41 и используйте моды оптимизации ниже (BetterFPS, Every Texture Optimized). Они дают куда больше, чем настройки JVM.</string>
     <string name="optimization_copy">Копировать</string>
     <string name="optimization_open_settings">→ Открыть Настройки</string>
@@ -385,7 +394,6 @@
     <string name="optimization_install">Установить</string>
     <string name="optimization_betterfps_help_title">Как работает BetterFPS</string>
     <string name="optimization_betterfps_help_message">Steam Workshop ID: 3022543997\n\n"Project Zomboid рендерит область 190×190 тайлов вокруг игрока. Этот мод уменьшает размер этой области и не загружает лишние чанки."\n— описание мода\n\nВарианты:\n• PotatoePC — максимальная производительность\n• 1080 — сбалансированный вариант\n• 4k — лучшее качество (всё равно ниже, чем в оригинале)\n• All_Settings — пользовательские размеры области от 30×30 до 190×190; нужно устанавливать вручную\n\nРекомендуем начать с PotatoePC. При необходимости можно вручную выбрать ещё меньший вариант.</string>
-    <string name="optimization_jvm_copied">Скопировано в буфер</string>
     <string name="optimization_betterfps_installed">BetterFPS успешно установлен</string>
     <string name="optimization_betterfps_installing">Установка BetterFPS…</string>
     <string name="optimization_betterfps_mode_label">→ Режим</string>

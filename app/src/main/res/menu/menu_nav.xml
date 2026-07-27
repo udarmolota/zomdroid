@@ -47,6 +47,11 @@
             android:icon="@drawable/ic_log_file"
             app:showAsAction="never"/>
         <item
+            android:id="@+id/action_bug_report"
+            android:title="@string/nav_bug_report"
+            android:icon="@drawable/ic_bug_report"
+            app:showAsAction="never"/>
+        <item
             android:id="@+id/action_game_settings"
             android:title="@string/game_settings_menu"
             android:icon="@drawable/mt_icon_settings"

@@ -55,7 +55,8 @@
                             android:textSize="11sp"
                             android:textColor="?android:attr/textColorSecondary"/>
 
-                        <!-- Single recommended preset (proven in the field; no more 4/6 GB split) -->
+                        <!-- What is currently seeded by default (single source of truth:
+                             LauncherPreferences.DEFAULT_JVM_ARGS, set from the fragment) -->
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -65,33 +66,14 @@
                             android:textStyle="bold"
                             android:layout_marginBottom="4dp"/>
 
-                        <LinearLayout
+                        <TextView
+                            android:id="@+id/optimization_jvm_recommended_tv"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:layout_marginBottom="10dp">
-
-                            <TextView
-                                android:id="@+id/optimization_jvm_recommended_tv"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="-Xms512M -Xmx2048M"
-                                android:textSize="11sp"
-                                android:fontFamily="monospace"
-                                android:textColor="?android:attr/textColorSecondary"/>
-
-                            <Button
-                                android:id="@+id/optimization_jvm_recommended_copy_btn"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:minWidth="0dp"
-                                android:text="@string/optimization_copy"
-                                android:textSize="11sp"
-                                style="@style/Widget.Material3.Button.TonalButton"/>
-
-                        </LinearLayout>
+                            android:layout_marginBottom="10dp"
+                            android:textSize="11sp"
+                            android:fontFamily="monospace"
+                            android:textColor="?android:attr/textColorSecondary"/>
 
                         <TextView
                             android:layout_width="match_parent"

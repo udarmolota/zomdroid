@@ -805,56 +805,14 @@ public class InstallerService extends Service implements TaskProgressListener {
 
         executorService.submit(() -> {
             try {
-                File consoleFile = new File(gi.getHomePath() + "/Zomboid/console.txt");
-                File launcherLog = new File(AppStorage.requireSingleton().getHomePath() + "/" + CrashHandler.LOG_FILE_NAME);
-                // Crash session's logcat lives in lastlog.txt: after a native game crash the process
-                // dies and the app restarts, which rotates log.txt -> lastlog.txt.
-                File lastLauncherLog = new File(AppStorage.requireSingleton().getHomePath() + "/" + CrashHandler.LAST_LOG_FILE_NAME);
-                // Native crash handler dump (SIGSEGV/SIGBUS/SIGILL/SIGFPE) written into the game dir.
-                File crashFile = new File(gi.getGamePath() + "/crash.txt");
-                // Persistent mirror of native stdout/stderr (box64 SEGV/BT reports, NG probes) —
-                // survives crashes/restarts, unlike the rotating logcat.
-                File nativeLog = new File(gi.getGamePath() + "/native.log");
-                // NG_GL4ES shader diagnostics: full source + driver log of shaders that failed to
-                // compile/link (up to 10 programs) + GL trace. Written by libng_gl4es into files/.
-                File failedShaders = new File(AppStorage.requireSingleton().getHomePath() + "/failed_shaders.txt");
-                File glTrace = new File(AppStorage.requireSingleton().getHomePath() + "/gl_trace.txt");
-
-                if (!consoleFile.exists() && !launcherLog.exists() && !lastLauncherLog.exists()) {
+                if (!hasAnyLogFiles(gi)) {
                     finishWithError(taskTitle, "No log files found");
                     return;
                 }
 
                 try (OutputStream os = getContentResolver().openOutputStream(outUri)) {
                     if (os == null) throw new IllegalStateException("openOutputStream returned null");
-
-                    try (ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(os, 256 * 1024))) {
-                        // report.txt — device / build metadata
-                        LauncherPreferences prefs = LauncherPreferences.requireSingleton();
-                        LauncherPreferences.VulkanDriver driver = prefs.getVulkanDriver();
-                        String driverStr = driver.libName != null
-                                ? driver.name() + " (" + driver.libName + ")"
-                                : "system default";
-
-                        zos.putNextEntry(new ZipEntry("report.txt"));
-                        writeLogUtf8(zos, "=== Zomdroid Bug Report ===\n");
-                        writeLogUtf8(zos, "Device   : " + Build.MANUFACTURER + " " + Build.MODEL + "\n");
-                        writeLogUtf8(zos, "Android  : " + Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")\n");
-                        writeLogUtf8(zos, "Zomdroid : " + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")\n");
-                        writeLogUtf8(zos, "Renderer : " + prefs.getRenderer().name() + "\n");
-                        writeLogUtf8(zos, "Driver   : " + driverStr + "\n");
-                        writeLogUtf8(zos, "===========================\n");
-                        zos.closeEntry();
-
-                        // Original log files, verbatim — each kept whole in its own entry
-                        addFileToZip(zos, crashFile, "crash.txt");
-                        addFileToZip(zos, nativeLog, "native.log");
-                        addFileToZip(zos, failedShaders, "failed_shaders.txt");
-                        addFileToZip(zos, glTrace, "gl_trace.txt");
-                        addFileToZip(zos, consoleFile, "console.txt");
-                        addFileToZip(zos, launcherLog, "log.txt");
-                        addFileToZip(zos, lastLauncherLog, "lastlog.txt");
-                    }
+                    writeLogReportZip(gi, os);
                 }
 
                 finish(getString(R.string.dialog_title_log_exported), null);
@@ -862,6 +820,61 @@ public class InstallerService extends Service implements TaskProgressListener {
                 finishWithError(getString(R.string.dialog_title_failed_to_export_log), e.toString());
             }
         });
+    }
+
+    private static boolean hasAnyLogFiles(GameInstance gi) {
+        File consoleFile = new File(gi.getHomePath() + "/Zomboid/console.txt");
+        File launcherLog = new File(AppStorage.requireSingleton().getHomePath() + "/" + CrashHandler.LOG_FILE_NAME);
+        File lastLauncherLog = new File(AppStorage.requireSingleton().getHomePath() + "/" + CrashHandler.LAST_LOG_FILE_NAME);
+        return consoleFile.exists() || launcherLog.exists() || lastLauncherLog.exists();
+    }
+
+    // Builds the same diagnostic zip (report.txt + crash/native/shader/console/launcher logs) used
+    // by both "Export logs" (SAF-picked destination) and the "Report a bug" email attachment, so
+    // there is one definition of what a Zomdroid bug report contains. Caller owns/closes `os`.
+    public static void writeLogReportZip(GameInstance gi, OutputStream os) throws IOException {
+        File consoleFile = new File(gi.getHomePath() + "/Zomboid/console.txt");
+        File launcherLog = new File(AppStorage.requireSingleton().getHomePath() + "/" + CrashHandler.LOG_FILE_NAME);
+        // Crash session's logcat lives in lastlog.txt: after a native game crash the process
+        // dies and the app restarts, which rotates log.txt -> lastlog.txt.
+        File lastLauncherLog = new File(AppStorage.requireSingleton().getHomePath() + "/" + CrashHandler.LAST_LOG_FILE_NAME);
+        // Native crash handler dump (SIGSEGV/SIGBUS/SIGILL/SIGFPE) written into the game dir.
+        File crashFile = new File(gi.getGamePath() + "/crash.txt");
+        // Persistent mirror of native stdout/stderr (box64 SEGV/BT reports, NG probes) —
+        // survives crashes/restarts, unlike the rotating logcat.
+        File nativeLog = new File(gi.getGamePath() + "/native.log");
+        // NG_GL4ES shader diagnostics: full source + driver log of shaders that failed to
+        // compile/link (up to 10 programs) + GL trace. Written by libng_gl4es into files/.
+        File failedShaders = new File(AppStorage.requireSingleton().getHomePath() + "/failed_shaders.txt");
+        File glTrace = new File(AppStorage.requireSingleton().getHomePath() + "/gl_trace.txt");
+
+        try (ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(os, 256 * 1024))) {
+            // report.txt — device / build metadata
+            LauncherPreferences prefs = LauncherPreferences.requireSingleton();
+            LauncherPreferences.VulkanDriver driver = prefs.getVulkanDriver();
+            String driverStr = driver.libName != null
+                    ? driver.name() + " (" + driver.libName + ")"
+                    : "system default";
+
+            zos.putNextEntry(new ZipEntry("report.txt"));
+            writeLogUtf8(zos, "=== Zomdroid Bug Report ===\n");
+            writeLogUtf8(zos, "Device   : " + Build.MANUFACTURER + " " + Build.MODEL + "\n");
+            writeLogUtf8(zos, "Android  : " + Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")\n");
+            writeLogUtf8(zos, "Zomdroid : " + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")\n");
+            writeLogUtf8(zos, "Renderer : " + prefs.getRenderer().name() + "\n");
+            writeLogUtf8(zos, "Driver   : " + driverStr + "\n");
+            writeLogUtf8(zos, "===========================\n");
+            zos.closeEntry();
+
+            // Original log files, verbatim — each kept whole in its own entry
+            addFileToZip(zos, crashFile, "crash.txt");
+            addFileToZip(zos, nativeLog, "native.log");
+            addFileToZip(zos, failedShaders, "failed_shaders.txt");
+            addFileToZip(zos, glTrace, "gl_trace.txt");
+            addFileToZip(zos, consoleFile, "console.txt");
+            addFileToZip(zos, launcherLog, "log.txt");
+            addFileToZip(zos, lastLauncherLog, "lastlog.txt");
+        }
     }
 
     // Adds a file to the zip under entryName. No-op if the file is missing.

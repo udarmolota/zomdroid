@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Insets;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.text.Html;
@@ -15,6 +16,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowInsets;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -29,6 +31,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.zomdroid.databinding.ActivityLauncherBinding;
+import com.zomdroid.game.GameInstance;
 import com.zomdroid.game.GameInstanceManager;
 import com.zomdroid.input.AbstractControlElement;
 import com.zomdroid.input.ControlElementDescription;
@@ -37,7 +40,10 @@ import com.zomdroid.input.GamepadManager;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -133,6 +139,10 @@ public class LauncherActivity extends AppCompatActivity {
                 binding.drawerLayout.close();
                 navController.navigate(R.id.action_download_steam);
                 return true;
+            } else if (item.getItemId() == R.id.action_bug_report) {
+                binding.drawerLayout.close();
+                sendBugReport();
+                return true;
         }
 
         binding.drawerLayout.close();
@@ -149,6 +159,10 @@ public class LauncherActivity extends AppCompatActivity {
         binding.navBottomDonate.setOnClickListener(v -> showDonateDialog());
         binding.navBottomReddit.setOnClickListener(v -> showRedditDialog());
         binding.navBottomVersion.setOnClickListener(v -> checkForUpdate());
+
+        // Silent, at-most-once-a-day check so the GitHub icon can badge a newer release without
+        // the user having to tap it. A manual tap still runs checkForUpdate() and shows a dialog.
+        maybeDailyUpdateCheck();
     }
 
     private void showDonateDialog() {
@@ -186,31 +200,162 @@ public class LauncherActivity extends AppCompatActivity {
     private void checkForUpdate() {
         new Thread(() -> {
             try {
-                URL url = new URL("https://api.github.com/repos/udarmolota/zomdroid/releases/latest");
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestProperty("Accept", "application/vnd.github+json");
-                conn.setConnectTimeout(5000);
-                conn.setReadTimeout(5000);
-
-                StringBuilder sb = new StringBuilder();
-                try (BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(conn.getInputStream()))) {
-                    String line;
-                    while ((line = reader.readLine()) != null) sb.append(line);
-                }
-
-                JSONObject json = new JSONObject(sb.toString());
+                JSONObject json = fetchLatestRelease();
                 String latestTag = json.getString("tag_name"); // "v1.4.1"
                 String releaseUrl = json.getString("html_url");
                 String latest = latestTag.startsWith("v") ? latestTag.substring(1) : latestTag;
                 String current = BuildConfig.VERSION_NAME;
 
-                runOnUiThread(() -> showVersionDialog(current, latest, releaseUrl));
+                // Keep the daily-check badge state in sync with whatever the manual check just saw.
+                LauncherPreferences.requireSingleton().setLatestSeenTag(latestTag);
+
+                runOnUiThread(() -> { showVersionDialog(current, latest, releaseUrl); refreshUpdateBadge(); });
 
             } catch (Exception e) {
                 runOnUiThread(() -> showVersionDialog(BuildConfig.VERSION_NAME, null, null));
             }
         }).start();
+    }
+
+    private static JSONObject fetchLatestRelease() throws Exception {
+        URL url = new URL("https://api.github.com/repos/udarmolota/zomdroid/releases/latest");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestProperty("Accept", "application/vnd.github+json");
+        conn.setConnectTimeout(5000);
+        conn.setReadTimeout(5000);
+
+        StringBuilder sb = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(conn.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) sb.append(line);
+        }
+        return new JSONObject(sb.toString());
+    }
+
+    // ---- Update badge (GitHub icon), checked at most once a day --------------
+
+    /** True only if the seen GitHub tag is STRICTLY NEWER than the installed version. A plain
+     *  "differs" check would falsely badge dev builds that run ahead of the public release. */
+    private boolean updateAvailable() {
+        String tag = LauncherPreferences.requireSingleton().getLatestSeenTag();
+        if (tag == null || tag.trim().isEmpty()) return false;
+        return compareVersions(tag.replaceFirst("^[vV]", ""), BuildConfig.VERSION_NAME) > 0;
+    }
+
+    /** Compare dotted version strings numerically ("1.4.10" > "1.4.3"). >0 if a is newer than b. */
+    private static int compareVersions(String a, String b) {
+        String[] pa = a.split("[.\\-+ ]"), pb = b.split("[.\\-+ ]");
+        int n = Math.max(pa.length, pb.length);
+        for (int i = 0; i < n; i++) {
+            int x = i < pa.length ? parseIntSafe(pa[i]) : 0;
+            int y = i < pb.length ? parseIntSafe(pb[i]) : 0;
+            if (x != y) return Integer.compare(x, y);
+        }
+        return 0;
+    }
+
+    private static int parseIntSafe(String s) {
+        try { return Integer.parseInt(s.trim()); } catch (Exception e) { return 0; }
+    }
+
+    private void refreshUpdateBadge() {
+        View dot = findViewById(R.id.update_badge);
+        if (dot != null) dot.setVisibility(updateAvailable() ? View.VISIBLE : View.GONE);
+    }
+
+    /**
+     * Once per day, on launcher start, ask GitHub for the latest release and remember it so the
+     * drawer can badge the GitHub icon. The attempt DAY is recorded before the network call, so a
+     * phone with no internet still tries at most once a day. The stored tag is compared against the
+     * live installed version in {@link #updateAvailable()}, so the badge clears itself after an update.
+     */
+    private void maybeDailyUpdateCheck() {
+        refreshUpdateBadge(); // reflect whatever we already know, every start
+        LauncherPreferences lp = LauncherPreferences.requireSingleton();
+        String today = new java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.US)
+                .format(new java.util.Date());
+        if (today.equals(lp.getUpdateCheckDay())) return; // already tried today
+        lp.setUpdateCheckDay(today);                       // count the attempt now (even if it fails)
+
+        new Thread(() -> {
+            try {
+                String tag = fetchLatestRelease().getString("tag_name");
+                lp.setLatestSeenTag(tag);
+                runOnUiThread(this::refreshUpdateBadge);
+            } catch (Exception ignored) {
+                // offline/failed — try again tomorrow
+            }
+        }, "zd-daily-update-check").start();
+    }
+
+    // ---- Bug report -------------------------------------------------------------
+
+    /**
+     * Open the user's email app pre-filled with a bug report — with the same log bundle that
+     * "Export logs" produces attached, so a report arrives diagnosable. Building the zip can touch
+     * multi-MB console.txt/native.log, so it runs off the UI thread; the email intent fires once
+     * it's ready. If there's no instance (nothing to log) it falls back to a text-only mailto.
+     */
+    private void sendBugReport() {
+        final String date = new java.text.SimpleDateFormat("ddMMyyyy", java.util.Locale.US)
+                .format(new java.util.Date());
+        final String device = "Device: " + Build.MANUFACTURER + " " + Build.MODEL
+                + "\nAndroid: " + Build.VERSION.RELEASE
+                + "\nZomdroid: " + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")";
+
+        java.util.List<GameInstance> instances = GameInstanceManager.requireSingleton().getInstances();
+        GameInstance instance = instances.isEmpty() ? null : instances.get(0);
+        if (instance == null) { startBugReportEmail(date, device, null); return; }
+
+        Toast.makeText(this, R.string.bug_report_preparing, Toast.LENGTH_SHORT).show();
+        new Thread(() -> {
+            Uri attach = null;
+            try {
+                File dir = new File(getCacheDir(), "reports");
+                if (dir.isDirectory() || dir.mkdirs()) {
+                    File zip = new File(dir, "zomdroid_report.zip");
+                    try (OutputStream out = new FileOutputStream(zip)) {
+                        InstallerService.writeLogReportZip(instance, out);
+                    }
+                    if (zip.length() > 0)
+                        attach = androidx.core.content.FileProvider.getUriForFile(
+                                this, "com.zomdroid.fileprovider", zip);
+                }
+            } catch (Throwable t) { attach = null; } // no logs → still send the text report
+            final Uri fAttach = attach;
+            runOnUiThread(() -> startBugReportEmail(date, device, fAttach));
+        }).start();
+    }
+
+    private void startBugReportEmail(String date, String device, Uri attachment) {
+        String[] to = { getString(R.string.bug_report_email) };
+        String subject = getString(R.string.bug_report_subject, date);
+        String body = getString(R.string.bug_report_body, device);
+        Intent i;
+        if (attachment != null) {
+            // ACTION_SEND carries an attachment (mailto/SENDTO can't). A chooser lets the user pick
+            // their mail app; to/subject/body/zip are all prefilled.
+            i = new Intent(Intent.ACTION_SEND);
+            i.setType("application/zip");
+            i.putExtra(Intent.EXTRA_EMAIL, to);
+            i.putExtra(Intent.EXTRA_SUBJECT, subject);
+            i.putExtra(Intent.EXTRA_TEXT, body);
+            i.putExtra(Intent.EXTRA_STREAM, attachment);
+            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            try { startActivity(Intent.createChooser(i, getString(R.string.nav_bug_report))); return; }
+            catch (android.content.ActivityNotFoundException ignored) { /* fall through to mailto */ }
+        }
+        // No attachment (or no app took the SEND) → plain mailto, text only.
+        i = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"));
+        i.putExtra(Intent.EXTRA_EMAIL, to);
+        i.putExtra(Intent.EXTRA_SUBJECT, subject);
+        i.putExtra(Intent.EXTRA_TEXT, body);
+        try {
+            startActivity(i);
+        } catch (android.content.ActivityNotFoundException e) {
+            Toast.makeText(this, R.string.bug_report_no_mail, Toast.LENGTH_LONG).show();
+        }
     }
 
     private void showVersionDialog(String current, String latest, String releaseUrl) {

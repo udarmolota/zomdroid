@@ -18,12 +18,26 @@ public class LauncherPreferences {
     transient private SharedPreferences sharedPreferences;
     transient private Gson gson;
 
+    // The one field-proven heap configuration (all clean tester runs, incl. NG_GL4ES on 42.19,
+    // used exactly this). Seeded into the JVM-args field once, at instance creation — visible
+    // and fully editable/deletable by the user; also the value the Reset button restores.
+    public static final String DEFAULT_JVM_ARGS = "-Xms512M -Xmx2048M";
+
     private float renderScale = 0.65f;
     private Renderer renderer = Renderer.GL4ES;
     private VulkanDriver vulkanDriver = VulkanDriver.SYSTEM_DEFAULT;
     private boolean isDebug = false;
     private AudioAPI audioAPI = AudioAPI.AAUDIO;
     private String jvmArgs = "";
+    // One-shot guard for the seeding above: once true, the field belongs to the user —
+    // a deliberate delete stays deleted, custom values are never overridden.
+    private boolean jvmArgsDefaultApplied = false;
+
+    // GitHub-release update check: the raw tag_name last seen (e.g. "v1.4.7"), and the day
+    // (yyyyMMdd) the daily background check last ran — so a phone with no internet retries at
+    // most once a day instead of on every launch.
+    private String latestSeenTag = "";
+    private String updateCheckDay = "";
 
     private static final String KEY_TOUCH_CONTROLS = "touch_controls_enabled";
 
@@ -133,6 +147,33 @@ public class LauncherPreferences {
 
     public String getJvmArgs() {
         return jvmArgs;
+    }
+
+    public boolean isJvmArgsDefaultApplied() {
+        return jvmArgsDefaultApplied;
+    }
+
+    public String getLatestSeenTag() {
+        return latestSeenTag;
+    }
+
+    public void setLatestSeenTag(String tag) {
+        this.latestSeenTag = tag != null ? tag : "";
+        saveToPreferences();
+    }
+
+    public String getUpdateCheckDay() {
+        return updateCheckDay;
+    }
+
+    public void setUpdateCheckDay(String day) {
+        this.updateCheckDay = day != null ? day : "";
+        saveToPreferences();
+    }
+
+    public void setJvmArgsDefaultApplied(boolean applied) {
+        this.jvmArgsDefaultApplied = applied;
+        saveToPreferences();
     }
 
     public void setJvmArgs(String jvmArgs) {

@@ -168,11 +168,10 @@ public class OptimizationFragment extends Fragment {
         taskProgressDialogBinding.progressDialogOkMb.setOnClickListener(v ->
                 taskProgressDialog.dismiss());
 
-        // JVM Copy button — a single field-proven preset for every device. The old 4/6 GB
-        // Balanced/Aggressive matrix was removed: every crash report we got came from the
-        // >=3GB-heap presets, and 2048M is the only configuration with a clean track record.
-        binding.optimizationJvmRecommendedCopyBtn.setOnClickListener(v ->
-                copyToClipboard(binding.optimizationJvmRecommendedTv.getText().toString()));
+        // Show what is currently seeded by default at instance creation (single source of
+        // truth — same constant the seeding and the Settings reset button use). Info-only:
+        // nothing to copy, the value is already applied; changing it lives in Settings.
+        binding.optimizationJvmRecommendedTv.setText(LauncherPreferences.DEFAULT_JVM_ARGS);
 
         // Open Settings link
         binding.optimizationOpenSettingsTv.setOnClickListener(v ->
@@ -545,15 +544,6 @@ public class OptimizationFragment extends Fragment {
         });
     }
 
-    private void copyToClipboard(String text) {
-        ClipboardManager clipboard = (ClipboardManager) requireContext()
-                .getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText("jvm_args", text);
-        clipboard.setPrimaryClip(clip);
-        Toast.makeText(requireContext(),
-                R.string.optimization_jvm_copied,
-                Toast.LENGTH_SHORT).show();
-    }
 
     @Override
     public void onDestroyView() {

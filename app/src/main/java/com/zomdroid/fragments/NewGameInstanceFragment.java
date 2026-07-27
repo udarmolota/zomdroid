@@ -23,6 +23,7 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
 import com.zomdroid.InstallerService;
+import com.zomdroid.LauncherPreferences;
 import com.zomdroid.R;
 import com.zomdroid.databinding.FragmentNewGameInstanceBinding;
 import com.zomdroid.game.GameInstance;
@@ -214,6 +215,17 @@ public class NewGameInstanceFragment extends Fragment {
     // Builds the GameInstance and starts the installer service. Must run on the UI thread.
     private void finishInstall(String name, InstallationPreset selectedPreset, GpuVendor gpu) {
         if (!isAdded() || binding == null) return;
+
+        // Seed the recommended JVM args (visible in Settings → JVM arguments) the first time an
+        // instance is created. One-shot: if the user later edits or deletes them, or already had
+        // custom args, nothing is ever overridden — the Reset button in Settings restores them.
+        LauncherPreferences lp = LauncherPreferences.requireSingleton();
+        if (!lp.isJvmArgsDefaultApplied()) {
+            String cur = lp.getJvmArgs();
+            if (cur == null || cur.trim().isEmpty())
+                lp.setJvmArgs(LauncherPreferences.DEFAULT_JVM_ARGS);
+            lp.setJvmArgsDefaultApplied(true);
+        }
 
         GameInstance gameInstance;
         try {

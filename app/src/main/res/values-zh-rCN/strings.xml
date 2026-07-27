@@ -303,6 +303,14 @@
     <string name="version_check_error">无法检查更新\n当前版本：%1$s</string>
     <string name="nav_menu_version">检查更新</string>
 
+    <!-- Bug report -->
+    <string name="nav_bug_report">报告错误</string>
+    <string name="bug_report_preparing">正在准备错误报告…</string>
+    <string name="bug_report_email" translatable="false">210478@mail.ru</string>
+    <string name="bug_report_subject" translatable="false">ZOMDROID REPORT %1$s</string>
+    <string name="bug_report_body">您好，我有一个新的错误报告。\n\n描述：\n\n\n---\n%1$s</string>
+    <string name="bug_report_no_mail">此设备上未找到邮件应用。</string>
+
     <!-- New instance -->
     <string name="native_libs_dialog_title">原生库（可选）</string>
     <string name="native_libs_dialog_message">原生库是来自42.12版本的文件，主要包含两个文件：\n\n🌐 libRakNet64.so\n🌐 libZNetNoSteam64.so\n\n这些文件是41.78版本多人游戏支持所必需的。详情请查阅Wiki。</string>
@@ -368,8 +376,9 @@
 
     <!-- Optimization page -->
     <string name="optimization_group_jvm">JVM 参数</string>
-    <string name="optimization_jvm_hint">复制预设并粘贴到设置 → JVM 参数中。所有设备通用同一预设 — 请勿调大数值：更大的堆内存会导致卡死和闪退。</string>
-    <string name="optimization_jvm_recommended_label">→ 推荐（所有设备）</string>
+    <string name="optimization_jvm_hint">方式已更新：推荐的 Java 堆内存限制现在会在创建实例时默认设置 — 无需复制。可在设置 → 高级 → JVM 参数中查看、修改或恢复。调大数值风险自负。</string>
+    <string name="settings_jvm_args_reset">恢复默认</string>
+    <string name="optimization_jvm_recommended_label">→ 当前默认值：</string>
     <string name="optimization_jvm_4gb_note">⚠️ 在 4 GB 内存的设备上游戏可以运行，但并不理想：不建议玩 Build 42 — 请玩 Build 41 并使用下方的优化模组（BetterFPS、Every Texture Optimized）。它们比 JVM 设置有效得多。</string>
     <string name="optimization_copy">复制</string>
     <string name="optimization_open_settings">→ 打开设置</string>
@@ -379,7 +388,6 @@
     <string name="optimization_install">安装</string>
     <string name="optimization_betterfps_help_title">BetterFPS 原理</string>
     <string name="optimization_betterfps_help_message">Steam Workshop ID：3022543997\n\n“Project Zomboid 会渲染玩家周围 190×190 格的区域。这个模组会缩小该区域的大小，并避免加载不必要的区块。”\n— 模组说明\n\n选项：\n• PotatoePC — 最高性能\n• 1080 — 平衡模式\n• 4k — 最佳画质（仍然低于原版）\n• All_Settings — 可自定义区域大小，从 30×30 到 190×190；必须手动安装\n\n建议从 PotatoePC 开始。如有需要，可以手动选择更低的设置。</string>
-    <string name="optimization_jvm_copied">已复制到剪贴板</string>
     <string name="optimization_betterfps_installed">BetterFPS 安装成功</string>
     <string name="optimization_betterfps_installing">正在安装 BetterFPS…</string>
     <string name="optimization_betterfps_mode_label">模式</string>

@@ -241,6 +241,10 @@ public class SettingsFragment extends Fragment {
             }
         });
 
+        // Restore the recommended JVM args; the TextWatcher above persists the change.
+        binding.settingsJargsResetBtn.setOnClickListener(v ->
+                binding.settingsJargsEt.setText(LauncherPreferences.DEFAULT_JVM_ARGS));
+
         // Enviroment variables
         binding.settingsEnvVarsEt.setText(LauncherPreferences.requireSingleton().getEnvVars());
 

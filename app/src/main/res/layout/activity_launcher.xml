@@ -96,16 +96,32 @@
                 android:tint="?attr/colorOnSurfaceVariant"
                 android:contentDescription="@string/nav_menu_reddit"/>
 
-            <ImageButton
-                android:id="@+id/nav_bottom_version"
-                style="@style/AppTheme.ImageButton"
+            <FrameLayout
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:layout_marginStart="7dp"
-                android:scaleType="centerInside"
-                android:src="@drawable/ic_github"
-                android:tint="?attr/colorOnSurfaceVariant"
-                android:contentDescription="@string/nav_menu_version"/>
+                android:layout_marginStart="7dp">
+
+                <ImageButton
+                    android:id="@+id/nav_bottom_version"
+                    style="@style/AppTheme.ImageButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_github"
+                    android:tint="?attr/colorOnSurfaceVariant"
+                    android:contentDescription="@string/nav_menu_version"/>
+
+                <!-- "update available" dot; shown by refreshUpdateBadge() when GitHub has a newer release -->
+                <View
+                    android:id="@+id/update_badge"
+                    android:layout_width="9dp"
+                    android:layout_height="9dp"
+                    android:layout_gravity="top|end"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/update_badge_dot"
+                    android:visibility="gone"/>
+            </FrameLayout>
         </LinearLayout>
 
         <View

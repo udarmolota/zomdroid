@@ -353,6 +353,14 @@
     <string name="version_check_error">Could not check for updates\nCurrent version: %1$s</string>
     <string name="nav_menu_version">Check for updates</string>
 
+    <!-- Bug report -->
+    <string name="nav_bug_report">Report a bug</string>
+    <string name="bug_report_preparing">Preparing bug report…</string>
+    <string name="bug_report_email" translatable="false">210478@mail.ru</string>
+    <string name="bug_report_subject" translatable="false">ZOMDROID REPORT %1$s</string>
+    <string name="bug_report_body">Hi, I have a new bug report.\n\nDescription: \n\n\n---\n%1$s</string>
+    <string name="bug_report_no_mail">No email app found on this device.</string>
+
     <!-- New instance -->
     <string name="native_libs_dialog_title">Native libraries (optional)</string>
     <string name="native_libs_dialog_message">Native libraries are files from build 42.12. These are mainly two files:\n\n🌐 libRakNet64.so\n🌐 libZNetNoSteam64.so\n\nThey are required for multiplayer support on build 41.78. You can read more about them on the Wiki.</string>
@@ -426,8 +434,9 @@
 
     <!-- Optimization page -->
     <string name="optimization_group_jvm">JVM arguments</string>
-    <string name="optimization_jvm_hint">Copy the preset and paste it in Settings → JVM arguments. One preset fits all devices — do not raise the numbers: larger heaps cause freezes and crashes.</string>
-    <string name="optimization_jvm_recommended_label">→ Recommended (all devices)</string>
+    <string name="optimization_jvm_hint">New approach: the recommended Java heap limit is now set by default when you create an instance — nothing to copy. You can view, change or reset it in Settings → Advanced → JVM arguments. Raise the numbers at your own risk.</string>
+    <string name="settings_jvm_args_reset">Reset to default</string>
+    <string name="optimization_jvm_recommended_label">→ Current default:</string>
     <string name="optimization_jvm_4gb_note">⚠️ On 4 GB devices the game will run, but not perfectly: Build 42 is not recommended there — play Build 41 and use the optimization mods below (BetterFPS, Every Texture Optimized). They help far more than JVM settings.</string>
     <string name="optimization_copy">Copy</string>
     <string name="optimization_open_settings">→ Open Settings</string>
@@ -437,7 +446,6 @@
     <string name="optimization_install">Install</string>
     <string name="optimization_betterfps_help_title">How BetterFPS works</string>
     <string name="optimization_betterfps_help_message">Steam Workshop ID: 3022543997\n\n"Project Zomboid renders a 190×190 tile zone around the player. This mod reduces the size of this zone and avoids loading unnecessary chunks."\n— mod description\n\nVariants:\n• PotatoePC — maximum performance\n• 1080 — balanced\n• 4k — best quality (still lower than the original)\n• All_Settings — custom area sizes from 30×30 to 190×190; must be installed manually\n\nWe recommend starting with PotatoePC. You can go lower manually if needed.</string>
-    <string name="optimization_jvm_copied">Copied to clipboard</string>
     <string name="optimization_betterfps_installed">BetterFPS installed successfully</string>
     <string name="optimization_betterfps_installing">Installing BetterFPS…</string>
     <string name="optimization_betterfps_mode_label">→ Mode</string>

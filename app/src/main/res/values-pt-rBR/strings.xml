@@ -309,6 +309,14 @@
     <string name="version_check_error">Não foi possível verificar atualizações\nVersão atual: %1$s</string>
     <string name="nav_menu_version">Verificar atualizações</string>
 
+    <!-- Bug report -->
+    <string name="nav_bug_report">Reportar um bug</string>
+    <string name="bug_report_preparing">Preparando relatório de bug…</string>
+    <string name="bug_report_email" translatable="false">210478@mail.ru</string>
+    <string name="bug_report_subject" translatable="false">ZOMDROID REPORT %1$s</string>
+    <string name="bug_report_body">Olá, tenho um novo relatório de bug.\n\nDescrição: \n\n\n---\n%1$s</string>
+    <string name="bug_report_no_mail">Nenhum aplicativo de e-mail encontrado neste dispositivo.</string>
+
     <!-- New instance -->
     <string name="native_libs_dialog_title">Bibliotecas nativas (opcional)</string>
     <string name="native_libs_dialog_message">As bibliotecas nativas são arquivos do build 42.12. Principalmente dois arquivos:\n\n🌐 libRakNet64.so\n🌐 libZNetNoSteam64.so\n\nSão necessárias para suporte multiplayer no build 41.78. Leia mais na Wiki.</string>
@@ -374,8 +382,9 @@
 
     <!-- Optimization page -->
     <string name="optimization_group_jvm">Argumentos JVM</string>
-    <string name="optimization_jvm_hint">Copie o preset e cole em Configurações → Argumentos JVM. Um único preset para todos os dispositivos — não aumente os números: heaps maiores causam travamentos e crashes.</string>
-    <string name="optimization_jvm_recommended_label">→ Recomendado (todos os dispositivos)</string>
+    <string name="optimization_jvm_hint">Mudamos a abordagem: o limite recomendado de heap Java agora é definido por padrão ao criar uma instância — nada a copiar. Veja, altere ou restaure em Configurações → Avançado → Argumentos JVM. Aumente os números por sua conta e risco.</string>
+    <string name="settings_jvm_args_reset">Restaurar padrão</string>
+    <string name="optimization_jvm_recommended_label">→ Padrão atual:</string>
     <string name="optimization_jvm_4gb_note">⚠️ Em dispositivos com 4 GB de RAM o jogo funciona, mas não perfeitamente: o Build 42 não é recomendado — jogue o Build 41 e use os mods de otimização abaixo (BetterFPS, Every Texture Optimized). Eles ajudam muito mais que as configurações da JVM.</string>
     <string name="optimization_copy">Copiar</string>
     <string name="optimization_open_settings">→ Abrir Configurações</string>
@@ -385,7 +394,6 @@
     <string name="optimization_install">Instalar</string>
     <string name="optimization_betterfps_help_title">Como o BetterFPS funciona</string>
     <string name="optimization_betterfps_help_message">Steam Workshop ID: 3022543997\n\n"O Project Zomboid renderiza uma área de 190×190 tiles ao redor do jogador. Este mod reduz o tamanho dessa área e evita carregar chunks desnecessários."\n— descrição do mod\n\nVariantes:\n• PotatoePC — desempenho máximo\n• 1080 — equilibrado\n• 4k — melhor qualidade (ainda menor que o original)\n• All_Settings — tamanhos personalizados de área de 30×30 a 190×190; deve ser instalado manualmente\n\nRecomendamos começar com PotatoePC. Se necessário, você pode escolher manualmente uma opção ainda menor.</string>
-    <string name="optimization_jvm_copied">Copiado para a área de transferência</string>
     <string name="optimization_betterfps_installed">BetterFPS instalado com sucesso</string>
     <string name="optimization_betterfps_installing">Instalando BetterFPS…</string>
     <string name="optimization_betterfps_mode_label">Modo</string>
