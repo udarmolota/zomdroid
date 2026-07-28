@@ -38,25 +38,42 @@ public class CrashHandler {
         } catch (IOException ignore) {}
 
         Thread readerThread = new Thread(() -> {
-
-            Process logcatProcess;
             try {
                 Runtime.getRuntime().exec("logcat -c"); // clear logcat buffer
-                // main = our app/game output; crash = debuggerd tombstones; system = lmkd/am_kill
-                // (SIGKILL cause). crash/system may be empty without READ_LOGS but cost nothing to try.
-                logcatProcess = Runtime.getRuntime().exec("logcat -b main,crash,system -v time *:I");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(logcatProcess.getInputStream()));
-                 BufferedWriter writer = new BufferedWriter(new FileWriter(logFile, true))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    writer.write(line);
-                    writer.newLine();
-                    writer.flush();
+            } catch (IOException ignore) {}
+
+            // Do NOT name buffers explicitly. "-b main,crash,system" asks for crash/system, which
+            // hold other apps' records and need READ_LOGS: permissive ROMs tolerate it, strict ones
+            // (seen on vivo/Funtouch) dump whatever main had and then EXIT — the reader hits
+            // end-of-stream a second after start and the app logs nothing for the rest of the
+            // session, which is exactly how a crash report arrives with no evidence in it.
+            // Plain logcat uses the default buffer set (main/system/crash) and silently skips the
+            // ones it may not read. The fallback covers any other reason the process dies early.
+            String[] commands = { "logcat -v time *:I", "logcat -b main -v time *:I" };
+
+            for (int attempt = 0; attempt < commands.length; attempt++) {
+                Process logcatProcess;
+                try {
+                    logcatProcess = Runtime.getRuntime().exec(commands[attempt]);
+                } catch (IOException e) {
+                    continue; // try the next form
                 }
-            } catch (IOException ignore) {
+                long linesRead = 0;
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(logcatProcess.getInputStream()));
+                     BufferedWriter writer = new BufferedWriter(new FileWriter(logFile, true))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        writer.write(line);
+                        writer.newLine();
+                        writer.flush();
+                        linesRead++;
+                    }
+                } catch (IOException ignore) {
+                }
+                // Reaching here means logcat ended. It is meant to stream until the process dies,
+                // so an early exit means this form was rejected — retry with the narrower one.
+                // If it streamed a lot before ending, the ROM killed it; retrying gains nothing.
+                if (linesRead > 200) break;
             }
         });
         readerThread.start();
