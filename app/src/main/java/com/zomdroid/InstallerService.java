@@ -69,6 +69,7 @@ public class InstallerService extends Service implements TaskProgressListener {
     // Build version of the target instance ("41" or "42"), used by mod fix to choose install strategy
     public static final String EXTRA_BUILD_VERSION = "com.zomdroid.InstallerService.EXTRA_BUILD_VERSION";
     public static final String EXTRA_BETTERFPS_MODE = "com.zomdroid.InstallerService.EXTRA_BETTERFPS_MODE";
+    public static final String EXTRA_RLZ_LEVEL = "com.zomdroid.InstallerService.EXTRA_RLZ_LEVEL";
     public static final String EXTRA_INSTALL_PRESET_NAME = "com.zomdroid.InstallerService.EXTRA_INSTALL_PRESET_NAME";
     public static final String EXTRA_GPU_VENDOR = "com.zomdroid.InstallerService.EXTRA_GPU_VENDOR";
 
@@ -135,6 +136,9 @@ public class InstallerService extends Service implements TaskProgressListener {
                 break;
             case INSTALL_BETTERFPS:
                 doInstallBetterFps(intent);
+                break;
+            case INSTALL_RENDER_LESS_ZOMBIE:
+                doInstallRenderLessZombie(intent);
                 break;
             case INSTALL_MOD_WITH_FIX:
                 doInstallModWithFix(intent);
@@ -1000,6 +1004,115 @@ public class InstallerService extends Service implements TaskProgressListener {
                     return f;
                 }
             }
+        }
+        return null;
+    }
+
+    // -------------------- INSTALL RENDER LESS ZOMBIE (B41) --------------------
+    //
+    // "(Reduce Lag) RenderLessZombie" (Workshop 2970823607) ships patched zombie/iso classes in
+    // media/<level>/zombie/iso/, one folder per zombie-count level (1/25/50/75/100/150). Unlike
+    // BetterFPS this is a whole SET of files (IsoWorld.class + its inner classes), so every file
+    // of the chosen level is copied and every original it replaces is kept as <name>.bak.
+
+    private void doInstallRenderLessZombie(Intent intent) {
+        String taskTitle = getString(R.string.optimization_rlz_installing);
+        startForeground(NOTIFICATION_ID, buildNotification(taskTitle));
+        this.taskState.postValue(new TaskState(taskTitle, null, -1, 0, false, false));
+
+        String gameInstanceName = intent.getStringExtra(EXTRA_GAME_INSTANCE_NAME);
+        if (gameInstanceName == null) { finishWithError(taskTitle, "Game instance name is missing"); return; }
+
+        GameInstance gameInstance = GameInstanceManager.requireSingleton().getInstanceByName(gameInstanceName);
+        if (gameInstance == null) { finishWithError(taskTitle, "Game instance not found: " + gameInstanceName); return; }
+
+        Uri archiveUri = intent.getParcelableExtra(EXTRA_ARCHIVE_URI);
+        if (archiveUri == null) { finishWithError(taskTitle, "Archive URI is missing"); return; }
+
+        String level = intent.getStringExtra(EXTRA_RLZ_LEVEL);
+        if (level == null || level.isEmpty()) level = "50";
+        final String selectedLevel = level;
+
+        executorService.submit(() -> {
+            File tmpDir = new File(getCacheDir(), "rlz_tmp_" + System.currentTimeMillis());
+            try {
+                tmpDir.mkdirs();
+
+                try (InputStream is = getContentResolver().openInputStream(archiveUri);
+                     ZipInputStream zis = new ZipInputStream(is)) {
+                    ZipEntry entry;
+                    while ((entry = zis.getNextEntry()) != null) {
+                        File outFile = new File(tmpDir, entry.getName());
+                        if (entry.isDirectory()) {
+                            outFile.mkdirs();
+                        } else {
+                            outFile.getParentFile().mkdirs();
+                            try (FileOutputStream fos = new FileOutputStream(outFile)) {
+                                byte[] buf = new byte[8192];
+                                int len;
+                                while ((len = zis.read(buf)) > 0) fos.write(buf, 0, len);
+                            }
+                        }
+                        zis.closeEntry();
+                    }
+                }
+
+                File srcDir = findRenderLessZombieLevelDir(tmpDir, selectedLevel);
+                if (srcDir == null) {
+                    finishWithError(taskTitle,
+                            getString(R.string.optimization_rlz_error_not_found, selectedLevel));
+                    return;
+                }
+                File[] srcFiles = srcDir.listFiles(File::isFile);
+                if (srcFiles == null || srcFiles.length == 0) {
+                    finishWithError(taskTitle,
+                            getString(R.string.optimization_rlz_error_not_found, selectedLevel));
+                    return;
+                }
+                Log.d("RenderLessZombie", "Level " + selectedLevel + " dir: " + srcDir.getAbsolutePath()
+                        + " (" + srcFiles.length + " files)");
+
+                File targetDir = new File(gameInstance.getGamePath(), "zombie/iso");
+                targetDir.mkdirs();
+
+                int copied = 0;
+                for (File src : srcFiles) {
+                    File target = new File(targetDir, src.getName());
+                    File backup = new File(targetDir, src.getName() + ".bak");
+                    // Back up the pristine original only once: re-installing another level must not
+                    // overwrite the backup with already-patched classes.
+                    if (target.exists() && !backup.exists()) {
+                        copyFile(target, backup);
+                        Log.d("RenderLessZombie", "Backup: " + backup.getName());
+                    }
+                    copyFile(src, target);
+                    copied++;
+                }
+                Log.d("RenderLessZombie", "Installed " + copied + " file(s) into " + targetDir);
+
+                finish(getString(R.string.optimization_rlz_installed, selectedLevel), null);
+
+            } catch (Exception e) {
+                finishWithError(taskTitle, e.toString());
+            } finally {
+                try { FileUtils.deleteDirectory(tmpDir); } catch (Exception ignored) {}
+            }
+        });
+    }
+
+    // Locate <any>/media/<level>/zombie/iso inside the extracted mod. The level is matched as a
+    // whole path SEGMENT, never as a substring — "50" must not match the "150" folder.
+    private File findRenderLessZombieLevelDir(File dir, String level) {
+        File[] files = dir.listFiles();
+        if (files == null) return null;
+        for (File f : files) {
+            if (!f.isDirectory()) continue;
+            if (f.getName().equals(level)) {
+                File iso = new File(f, "zombie/iso");
+                if (iso.isDirectory()) return iso;
+            }
+            File found = findRenderLessZombieLevelDir(f, level);
+            if (found != null) return found;
         }
         return null;
     }
@@ -2368,7 +2481,8 @@ public class InstallerService extends Service implements TaskProgressListener {
         INSTALL_ZBBETTERFPS,
         IMPORT_GAME_SETTINGS,
         EXPORT_GAME_SETTINGS,
-        INSTALL_NATIVE_LIBS
+        INSTALL_NATIVE_LIBS,
+        INSTALL_RENDER_LESS_ZOMBIE
     }
 
     public static class TaskState {

@@ -403,6 +403,17 @@
     <string name="optimization_betterfps_mode_4k">4K</string>
     <string name="optimization_betterfps_error_not_found">IsoChunkMap.class tidak ditemukan untuk mode: %1$s</string>
 
+    <!-- Render Less Zombie (B41) -->
+    <string name="optimization_group_rlz">Render Less Zombie b41</string>
+    <string name="optimization_rlz_hint">Merender zombi yang jauh sebagai animasi tekstur datar alih-alih model penuh — sangat membantu saat ada gerombolan di layar.\n\nSteam Workshop ID: 2970823607. Unduh mod-nya, unggah ZIP di sini dan pilih level — yaitu jumlah zombi yang masih digambar sebagai model penuh. Lebih kecil = lebih cepat.</string>
+    <string name="optimization_rlz_level_label">→ Level</string>
+    <string name="optimization_rlz_file_label">Mod RenderLessZombie (arsip zip)</string>
+    <string name="optimization_rlz_installing">Menginstal Render Less Zombie…</string>
+    <string name="optimization_rlz_installed">Render Less Zombie terinstal (level %1$s)</string>
+    <string name="optimization_rlz_error_not_found">Level %1$s tidak ditemukan dalam arsip ini. Pastikan Anda memilih ZIP mod RenderLessZombie.</string>
+    <string name="optimization_rlz_help_title">Cara kerja Render Less Zombie</string>
+    <string name="optimization_rlz_help_message">Steam Workshop ID: 2970823607\n\n"Ketika ada terlalu banyak zombi, mereka akan dirender sebagai animasi tekstur."\n— deskripsi mod\n\nLevel adalah berapa banyak zombi yang masih digambar sebagai model 3D penuh; selebihnya menjadi animasi datar yang ringan. Level yang tersedia: 1, 25, 50, 75, 100, 150 — pembuat mod menyarankan 50. Game aslinya punya batas keras 510.\n\nInstalasi mengganti kelas zombie/iso pada instans yang dipilih; file asli disimpan di sebelahnya dengan akhiran .bak, jadi Anda bisa mengembalikannya secara manual.\n\nHanya untuk Build 41.</string>
+
     <!-- ===== Mods fix ===== -->
     <string name="mod_fix_installing">Menginstal mod dengan perbaikan…</string>
     <string name="mod_fix_installed">Mod berhasil diinstal</string>

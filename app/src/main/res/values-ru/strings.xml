@@ -402,6 +402,17 @@
     <string name="optimization_betterfps_mode_4k">4K</string>
     <string name="optimization_betterfps_error_not_found">IsoChunkMap.class не найден для режима: %1$s</string>
 
+    <!-- Render Less Zombie (B41) -->
+    <string name="optimization_group_rlz">Render Less Zombie b41</string>
+    <string name="optimization_rlz_hint">Отрисовывает дальних зомби плоскими текстурными анимациями вместо полных моделей — сильно помогает, когда на экране орда.\n\nSteam Workshop ID: 2970823607. Скачайте мод, загрузите ZIP-файл здесь и выберите уровень — это количество зомби, которые всё ещё рисуются полными моделями. Меньше = быстрее.</string>
+    <string name="optimization_rlz_level_label">→ Уровень</string>
+    <string name="optimization_rlz_file_label">Мод RenderLessZombie (zip-архив)</string>
+    <string name="optimization_rlz_installing">Установка Render Less Zombie…</string>
+    <string name="optimization_rlz_installed">Render Less Zombie установлен (уровень %1$s)</string>
+    <string name="optimization_rlz_error_not_found">Уровень %1$s не найден в этом архиве. Убедитесь, что выбрали ZIP мода RenderLessZombie.</string>
+    <string name="optimization_rlz_help_title">Как работает Render Less Zombie</string>
+    <string name="optimization_rlz_help_message">Steam Workshop ID: 2970823607\n\n«Когда зомби слишком много, они отрисовываются как текстурные анимации.»\n— описание мода\n\nУровень — это сколько зомби по-прежнему рисуются полными 3D-моделями; всё сверх этого превращается в дешёвую плоскую анимацию. Доступные уровни: 1, 25, 50, 75, 100, 150 — автор мода рекомендует 50. В оригинальной игре жёсткий предел 510.\n\nПри установке заменяются классы zombie/iso выбранного инстанса; оригиналы сохраняются рядом с расширением .bak, так что при желании их можно вернуть вручную.\n\nТолько для Build 41.</string>
+
     <!-- ===== Mods fix ===== -->
     <string name="mod_fix_installing">Установка мода с фиксом…</string>
     <string name="mod_fix_installed">Мод успешно установлен</string>

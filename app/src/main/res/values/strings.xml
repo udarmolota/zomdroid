@@ -454,6 +454,17 @@
     <string name="optimization_betterfps_mode_4k">4K</string>
     <string name="optimization_betterfps_error_not_found">IsoChunkMap.class not found for mode: %1$s</string>
 
+    <!-- Render Less Zombie (B41) -->
+    <string name="optimization_group_rlz">Render Less Zombie b41</string>
+    <string name="optimization_rlz_hint">Renders distant zombies as flat texture animations instead of full models, which helps a lot when a horde is on screen.\n\nSteam Workshop ID: 2970823607. Download the mod, upload the ZIP here and pick a level — it is the number of zombies still drawn as full models. Lower = faster.</string>
+    <string name="optimization_rlz_level_label">→ Level</string>
+    <string name="optimization_rlz_file_label">RenderLessZombie mod (zip archive)</string>
+    <string name="optimization_rlz_installing">Installing Render Less Zombie…</string>
+    <string name="optimization_rlz_installed">Render Less Zombie installed (level %1$s)</string>
+    <string name="optimization_rlz_error_not_found">Level %1$s not found in this archive. Make sure you picked the RenderLessZombie mod ZIP.</string>
+    <string name="optimization_rlz_help_title">How Render Less Zombie works</string>
+    <string name="optimization_rlz_help_message">Steam Workshop ID: 2970823607\n\n"When there are too many zombies, they will be rendered as texture animations."\n— mod description\n\nThe level is how many zombies are still drawn as full 3D models; everything beyond that becomes a cheap flat animation. Available levels: 1, 25, 50, 75, 100, 150 — the mod author recommends 50. The vanilla game has a hard limit of 510.\n\nInstalling replaces the zombie/iso classes of the selected instance; the originals are kept next to them as .bak files, so you can restore them by hand if you ever want the stock behaviour.\n\nBuild 41 only.</string>
+
     <!-- ===== Mods fix ===== -->
     <string name="mod_fix_installing">Installing mod with fix…</string>
     <string name="mod_fix_installed">Mod installed successfully</string>

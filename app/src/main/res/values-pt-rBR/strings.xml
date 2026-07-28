@@ -402,6 +402,17 @@
     <string name="optimization_betterfps_mode_4k">4K</string>
     <string name="optimization_betterfps_error_not_found">IsoChunkMap.class não encontrado para o modo: %1$s</string>
 
+    <!-- Render Less Zombie (B41) -->
+    <string name="optimization_group_rlz">Render Less Zombie b41</string>
+    <string name="optimization_rlz_hint">Renderiza zumbis distantes como animações de textura planas em vez de modelos completos, o que ajuda muito quando há uma horda na tela.\n\nSteam Workshop ID: 2970823607. Baixe o mod, envie o ZIP aqui e escolha um nível — é a quantidade de zumbis ainda desenhados como modelos completos. Menor = mais rápido.</string>
+    <string name="optimization_rlz_level_label">→ Nível</string>
+    <string name="optimization_rlz_file_label">Mod RenderLessZombie (arquivo zip)</string>
+    <string name="optimization_rlz_installing">Instalando Render Less Zombie…</string>
+    <string name="optimization_rlz_installed">Render Less Zombie instalado (nível %1$s)</string>
+    <string name="optimization_rlz_error_not_found">Nível %1$s não encontrado neste arquivo. Verifique se você escolheu o ZIP do mod RenderLessZombie.</string>
+    <string name="optimization_rlz_help_title">Como funciona o Render Less Zombie</string>
+    <string name="optimization_rlz_help_message">Steam Workshop ID: 2970823607\n\n"Quando há zumbis demais, eles são renderizados como animações de textura."\n— descrição do mod\n\nO nível é quantos zumbis continuam sendo desenhados como modelos 3D completos; todo o resto vira uma animação plana e barata. Níveis disponíveis: 1, 25, 50, 75, 100, 150 — o autor do mod recomenda 50. O jogo original tem um limite fixo de 510.\n\nA instalação substitui as classes zombie/iso da instância selecionada; os originais são mantidos ao lado com a extensão .bak, então você pode restaurá-los manualmente se quiser.\n\nApenas para o Build 41.</string>
+
     <!-- ===== Mods fix ===== -->
     <string name="mod_fix_installing">Instalando mod com correção…</string>
     <string name="mod_fix_installed">Mod instalado com sucesso</string>

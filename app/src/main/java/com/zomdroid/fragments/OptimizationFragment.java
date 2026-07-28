@@ -50,7 +50,11 @@ public class OptimizationFragment extends Fragment {
     private boolean isInstallerServiceBound = false;
 
     private final String ZIP_MIME = "application/zip";
+    /** Zombie-count levels shipped by RenderLessZombie (media/<level>/); 50 is the author's pick. */
+    private static final String[] RLZ_LEVELS = {"1", "25", "50", "75", "100", "150"};
+    private static final int RLZ_DEFAULT_INDEX = 2; // "50"
     private Uri betterFpsZipUri = null;
+    private Uri rlzZipUri = null;
     private Uri etoZipUri = null;
     private Uri zombiebuddyZipUri = null;
     private Uri zbbetterfpsZipUri = null;
@@ -100,6 +104,20 @@ public class OptimizationFragment extends Fragment {
                 if (Objects.equals(cr.getType(uri), ZIP_MIME)) {
                     betterFpsZipUri = uri;
                     binding.optimizationBetterfpsPathEt.setText(extractFileName(uri));
+                } else {
+                    Toast.makeText(requireContext(),
+                            getString(R.string.game_instance_unsupported_extension),
+                            Toast.LENGTH_SHORT).show();
+                }
+            });
+
+    private final ActivityResultLauncher<String> rlzLauncher =
+            registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+                if (uri == null) return;
+                ContentResolver cr = requireContext().getContentResolver();
+                if (Objects.equals(cr.getType(uri), ZIP_MIME)) {
+                    rlzZipUri = uri;
+                    binding.optimizationRlzPathEt.setText(extractFileName(uri));
                 } else {
                     Toast.makeText(requireContext(),
                             getString(R.string.game_instance_unsupported_extension),
@@ -284,6 +302,63 @@ public class OptimizationFragment extends Fragment {
             bindInstallerService();
         });
 
+        // ===== Render Less Zombie (B41) section =====
+        binding.optimizationRlzHelpIb.setOnClickListener(v ->
+                new MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(R.string.optimization_rlz_help_title)
+                        .setMessage(R.string.optimization_rlz_help_message)
+                        .setPositiveButton(R.string.dialog_button_ok, null)
+                        .show());
+
+        ArrayAdapter<String> rlzInstanceAdapter = new ArrayAdapter<>(
+                requireContext(), R.layout.spinner_item, names);
+        rlzInstanceAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        binding.optimizationRlzInstanceSpinner.setAdapter(rlzInstanceAdapter);
+        if (instances.size() == 1) binding.optimizationRlzInstanceSpinner.setSelection(0);
+        if (instances.isEmpty()) binding.optimizationRlzInstallBtn.setEnabled(false);
+
+        // Zombie-count levels shipped by the mod. 50 is the author's recommendation.
+        ArrayAdapter<String> rlzLevelAdapter = new ArrayAdapter<>(
+                requireContext(), R.layout.spinner_item, RLZ_LEVELS);
+        rlzLevelAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        binding.optimizationRlzLevelSpinner.setAdapter(rlzLevelAdapter);
+        binding.optimizationRlzLevelSpinner.setSelection(RLZ_DEFAULT_INDEX);
+
+        binding.optimizationRlzBrowseIb.setOnClickListener(v -> rlzLauncher.launch(ZIP_MIME));
+
+        binding.optimizationRlzInstallBtn.setOnClickListener(v -> {
+            if (rlzZipUri == null) {
+                Toast.makeText(requireContext(),
+                        R.string.game_instance_no_file_selected, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            int position = binding.optimizationRlzInstanceSpinner.getSelectedItemPosition();
+            int instanceIndex = instances.size() > 1 ? position - 1 : position;
+            if (instanceIndex < 0 || instanceIndex >= instances.size()) {
+                Toast.makeText(requireContext(),
+                        getString(R.string.select_instance), Toast.LENGTH_SHORT).show();
+                return;
+            }
+            GameInstance selectedInstance = instances.get(instanceIndex);
+
+            int levelPos = binding.optimizationRlzLevelSpinner.getSelectedItemPosition();
+            String level = RLZ_LEVELS[Math.max(0, Math.min(levelPos, RLZ_LEVELS.length - 1))];
+
+            Intent installerIntent = new Intent(requireContext(), InstallerService.class);
+            installerIntent.putExtra(InstallerService.EXTRA_COMMAND,
+                    InstallerService.Task.INSTALL_RENDER_LESS_ZOMBIE.ordinal());
+            installerIntent.putExtra(InstallerService.EXTRA_GAME_INSTANCE_NAME,
+                    selectedInstance.getName());
+            installerIntent.putExtra(InstallerService.EXTRA_RLZ_LEVEL, level);
+            installerIntent.putExtra(InstallerService.EXTRA_ARCHIVE_URI, rlzZipUri);
+
+            rlzZipUri = null;
+            binding.optimizationRlzPathEt.setText(getString(R.string.game_instance_no_file_selected));
+
+            requireContext().startForegroundService(installerIntent);
+            bindInstallerService();
+        });
+
         // ===== ZombieBuddy section =====
         SharedPreferences prefs = LauncherPreferences.requireSingleton().getSharedPrefs();
 
@@ -452,6 +527,10 @@ public class OptimizationFragment extends Fragment {
                 binding.optimizationBetterfpsHeader,
                 binding.optimizationBetterfpsContent,
                 binding.optimizationBetterfpsExpandIv);
+        setupCollapsible(
+                binding.optimizationRlzHeader,
+                binding.optimizationRlzContent,
+                binding.optimizationRlzExpandIv);
         setupCollapsible(
                 binding.optimizationEtoHeader,
                 binding.optimizationEtoContent,

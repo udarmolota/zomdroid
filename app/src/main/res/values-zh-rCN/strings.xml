@@ -396,6 +396,17 @@
     <string name="optimization_betterfps_mode_4k">4K</string>
     <string name="optimization_betterfps_error_not_found">未找到模式 %1$s 的 IsoChunkMap.class</string>
 
+    <!-- Render Less Zombie (B41) -->
+    <string name="optimization_group_rlz">Render Less Zombie b41</string>
+    <string name="optimization_rlz_hint">将远处的僵尸渲染为平面贴图动画而非完整模型，在屏幕上出现尸潮时帮助很大。\n\nSteam 创意工坊 ID：2970823607。下载该模组，在此上传 ZIP 文件并选择等级 — 即仍以完整模型绘制的僵尸数量。数值越小越流畅。</string>
+    <string name="optimization_rlz_level_label">→ 等级</string>
+    <string name="optimization_rlz_file_label">RenderLessZombie 模组（zip 压缩包）</string>
+    <string name="optimization_rlz_installing">正在安装 Render Less Zombie…</string>
+    <string name="optimization_rlz_installed">Render Less Zombie 安装完成（等级 %1$s）</string>
+    <string name="optimization_rlz_error_not_found">此压缩包中未找到等级 %1$s。请确认选择的是 RenderLessZombie 模组的 ZIP 文件。</string>
+    <string name="optimization_rlz_help_title">Render Less Zombie 的工作原理</string>
+    <string name="optimization_rlz_help_message">Steam 创意工坊 ID：2970823607\n\n“当僵尸过多时，它们将被渲染为贴图动画。”\n— 模组说明\n\n等级表示仍以完整 3D 模型绘制的僵尸数量；超出的部分会变成开销很低的平面动画。可选等级：1、25、50、75、100、150 — 模组作者推荐 50。原版游戏的硬性上限为 510。\n\n安装会替换所选实例的 zombie/iso 类文件；原始文件会以 .bak 后缀保留在旁边，需要时可手动还原。\n\n仅适用于 Build 41。</string>
+
     <!-- ===== Mods fix ===== -->
     <string name="mod_fix_installing">正在安装修复版模组…</string>
     <string name="mod_fix_installed">模组安装成功</string>
