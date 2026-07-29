@@ -16,6 +16,10 @@ public class C {
         public static final String LIBS_ANDROID_ARM64_v8a = LIBS + "/android-arm64-v8a";
         public static final String LIBS_LWJGL_323 = LIBS_ANDROID_ARM64_v8a + "/lwjgl-3.2.3";
         public static final String LIBS_LWJGL_336 = LIBS_ANDROID_ARM64_v8a + "/lwjgl-3.3.6";
+        // Build 42.20 moved to LWJGL 3.4.1. The natives are ours: LWJGL publishes no Android
+        // target and its linux-arm64 binaries are glibc, so these are cross-compiled for bionic
+        // by build-lwjgl-3.4.1.sh in the zomdroid-dependencies repo.
+        public static final String LIBS_LWJGL_341 = LIBS_ANDROID_ARM64_v8a + "/lwjgl-3.4.1";
         public static final String LIBS_FMOD_20206 = LIBS_ANDROID_ARM64_v8a + "/fmod-2.02.06";
         public static final String LIBS_FMOD_20224 = LIBS_ANDROID_ARM64_v8a + "/fmod-2.02.24";
         public static final String LIBS_FMOD_20309 = LIBS_ANDROID_ARM64_v8a + "/fmod-2.03.09";
