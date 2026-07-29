@@ -373,6 +373,8 @@ public class NewGameInstanceFragment extends Fragment {
             // 3) Read the central directory and scan entry filenames only.
             java.nio.ByteBuffer cd = readAt(ch, cdOffset, (int) cdSize);
             boolean hasImguiJar = false;
+            boolean hasAndroidDir = false;
+            boolean hasBuild4220NativeLayout = false;
             int p = 0;
             int cap = cd.capacity();
             while (p + 46 <= cap) {
@@ -385,10 +387,17 @@ public class NewGameInstanceFragment extends Fragment {
                 byte[] nameBytes = new byte[nameLen];
                 for (int i = 0; i < nameLen; i++) nameBytes[i] = cd.get(nameStart + i);
                 String name = new String(nameBytes, java.nio.charset.StandardCharsets.UTF_8);
-                if (isAndroidDirEntry(name)) return 1; // Build 42.12+
+                if (isBuild4220NativeLayoutEntry(name)) hasBuild4220NativeLayout = true;
+                if (isAndroidDirEntry(name)) hasAndroidDir = true;
                 if (isImguiJar(name)) hasImguiJar = true;
                 p = nameStart + nameLen + extraLen + commentLen;
             }
+            if (hasBuild4220NativeLayout) {
+                android.util.Log.i("PresetDetect",
+                        "Detected Build 42.20+ native layout in ZIP");
+                return 1; // Same runtime preset; InstallerService normalizes the file layout.
+            }
+            if (hasAndroidDir) return 1; // Build 42.12+
             return hasImguiJar ? 0 : 2; // Build 42 : Build 41
         } catch (Exception e) {
             android.util.Log.w("PresetDetect", "central-dir read failed: " + e, e);
@@ -416,6 +425,14 @@ public class NewGameInstanceFragment extends Fragment {
         String n = name.replace('\\', '/');
         return n.equals("android") || n.startsWith("android/")
                 || n.endsWith("/android") || n.contains("/android/");
+    }
+
+    // Matches the Linux Bullet library at any wrapper depth. Unlike a generic natives/ match,
+    // this cannot be confused with an unrelated dependency directory in the archive.
+    private boolean isBuild4220NativeLayoutEntry(String name) {
+        String n = name.replace('\\', '/');
+        return n.equals("natives/libPZBullet64.so")
+                || n.endsWith("/natives/libPZBullet64.so");
     }
 
     private boolean isImguiJar(String name) {

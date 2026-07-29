@@ -21,6 +21,13 @@ public class GameLauncher {
         // created by older launcher versions whose md5-table didn't know their game version.
         // Self-quenching: once the .bak exists this is a single stat call.
         com.zomdroid.patch.ShaderUnitPatchApplier.applyIfNeeded(gameInstance);
+        // Also covers Build 42.20+ instances installed with an older launcher.
+        com.zomdroid.patch.FmodLoadPatchApplier.applyIfNeeded(gameInstance);
+        // Keep ARM64 Lighting and replace only its one missing 42.20 JNI method. Applying this at
+        // launch also repairs already installed instances without reinstalling the game.
+        com.zomdroid.patch.LightingTransmissionPatchApplier.applyIfNeeded(gameInstance);
+        // Select safe native implementations after the class-level patches are known to be ready.
+        com.zomdroid.patch.NativeLibraryWorkarounds.disableIncompleteNativeLibraries(gameInstance);
 
 /*        // for debug
         Os.setenv("MESA_DEBUG", "1", false);

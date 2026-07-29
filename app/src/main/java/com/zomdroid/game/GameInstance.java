@@ -2,6 +2,7 @@ package com.zomdroid.game;
 
 import com.zomdroid.AppStorage;
 import com.zomdroid.BuildConfig;
+import com.zomdroid.C;
 import com.zomdroid.FileUtils;
 
 import java.io.File;
@@ -29,6 +30,10 @@ public class GameInstance {
     private String javaAgentPath;
     private String javaAgentArgs;
     private String presetName;
+    // Set from the archive layout during installation and persisted with the instance. This is
+    // intentionally separate from the broad "Build 42.12+" preset so build-specific workarounds
+    // can be gated at the 42.20 packaging/runtime boundary.
+    private boolean build4220Plus = false;
 
     public GameInstance(String name, InstallationPreset preset) throws FileSystemException {
         this.name = name;
@@ -89,6 +94,12 @@ public class GameInstance {
     public String getJavaLibraryPath() {
         StringJoiner libsJoiner = new StringJoiner(":");
         for (String path : this.libraryPath) {
+            // Build 42.20 embeds LWJGL 3.4.1 Java classes. Keep the broad Build 42.12+ preset
+            // compatible with older releases, but substitute the matching Android core natives
+            // for instances whose 42.20+ layout was detected during installation.
+            if (this.build4220Plus && C.deps.LIBS_LWJGL_336.equals(path)) {
+                path = C.deps.LIBS_LWJGL_341;
+            }
             libsJoiner.add(AppStorage.requireSingleton().getHomePath() + "/" + path);
         }
         return libsJoiner.toString();
@@ -178,5 +189,13 @@ public class GameInstance {
 
     public String getPresetName() {
         return this.presetName;
+    }
+
+    public boolean isBuild4220Plus() {
+        return this.build4220Plus;
+    }
+
+    public void markBuild4220Plus() {
+        this.build4220Plus = true;
     }
 }
