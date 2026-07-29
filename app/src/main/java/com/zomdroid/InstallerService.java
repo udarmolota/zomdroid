@@ -38,6 +38,8 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -204,8 +206,18 @@ public class InstallerService extends Service implements TaskProgressListener {
                 // real game root (folder holding ProjectZomboid64/projectzomboid.jar/zombie) and
                 // lift it up to gamePath, so nothing downstream cares about the extra nesting.
                 flattenGameRootIfWrapped(new File(gameInstance.getGamePath()));
+                // Build 42.20+ moved all Linux libraries under natives/ and the bundled Android
+                // libraries under natives/android/arm64-v8a/. Normalize that layout back to the
+                // structure Zomdroid uses so the existing Java, box64 and linker paths stay valid.
+                normalizeNativeLayoutFor4220(gameInstance);
                 // 42.13+: extract projectzomboid.jar if present
                 extractProjectZomboidJarSimple(gameInstance);
+                // 42.20+ redundantly loads Android FMOD from the HotSpot VM. Zomdroid has
+                // already loaded and initialized it on ART; keep only fmodintegration64 here.
+                com.zomdroid.patch.FmodLoadPatchApplier.applyIfNeeded(gameInstance);
+                // Keep the ARM64 Lighting implementation and replace only the one void JNI method
+                // it omits in 42.20. This runs after projectzomboid.jar has been unpacked.
+                com.zomdroid.patch.LightingTransmissionPatchApplier.applyIfNeeded(gameInstance);
 
                 // Added in 1.3.2 for native game libs
                 File androidDirFromGame = new File(gameInstance.getGamePath() + "/android");
@@ -851,6 +863,15 @@ public class InstallerService extends Service implements TaskProgressListener {
         // compile/link (up to 10 programs) + GL trace. Written by libng_gl4es into files/.
         File failedShaders = new File(AppStorage.requireSingleton().getHomePath() + "/failed_shaders.txt");
         File glTrace = new File(AppStorage.requireSingleton().getHomePath() + "/gl_trace.txt");
+        // PZ's own per-session debug log. It is the ONLY place Java-side link/load failures are
+        // recorded — an UnsatisfiedLinkError for a native game method never reaches console.txt,
+        // which is why a broken game lib could go unnoticed across every report we ever received.
+        // The live session writes straight into Zomboid/Logs/; on the next launch PZ rotates that
+        // file into Logs/logs_<date>/, so after a crash-and-relaunch the interesting one is the
+        // newest file in the newest archive folder. Collect both.
+        File pzLogsDir = new File(gi.getHomePath() + "/Zomboid/Logs");
+        File debugLog = newestDebugLog(pzLogsDir);
+        File prevDebugLog = newestDebugLog(newestLogArchiveDir(pzLogsDir));
 
         try (ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(os, 256 * 1024))) {
             // report.txt — device / build metadata
@@ -878,7 +899,30 @@ public class InstallerService extends Service implements TaskProgressListener {
             addFileToZip(zos, consoleFile, "console.txt");
             addFileToZip(zos, launcherLog, "log.txt");
             addFileToZip(zos, lastLauncherLog, "lastlog.txt");
+            addFileToZip(zos, debugLog, "debuglog.txt");
+            addFileToZip(zos, prevDebugLog, "debuglog_prev.txt");
         }
+    }
+
+    // Newest "<date>_<time>_DebugLog.txt" directly inside `dir`, or null if there is none.
+    private static File newestDebugLog(File dir) {
+        if (dir == null || !dir.isDirectory()) return null;
+        return newestOf(dir.listFiles((d, name) -> name.endsWith("_DebugLog.txt")));
+    }
+
+    // Newest "logs_<date>" folder that PZ rotates finished sessions into, or null.
+    private static File newestLogArchiveDir(File logsDir) {
+        if (logsDir == null || !logsDir.isDirectory()) return null;
+        return newestOf(logsDir.listFiles(f -> f.isDirectory() && f.getName().startsWith("logs_")));
+    }
+
+    private static File newestOf(File[] candidates) {
+        if (candidates == null) return null;
+        File newest = null;
+        for (File f : candidates) {
+            if (newest == null || f.lastModified() > newest.lastModified()) newest = f;
+        }
+        return newest;
     }
 
     // Adds a file to the zip under entryName. No-op if the file is missing.
@@ -1438,6 +1482,76 @@ public class InstallerService extends Service implements TaskProgressListener {
 
     // -------------------- BUILD-SPECIFIC PATCHES --------------------
 
+    // Build 42.20+ layout:
+    //   game/natives/*.so                       (Linux x86_64)
+    //   game/natives/android/arm64-v8a/*.so    (Android arm64)
+    //
+    // Zomdroid's established layout is:
+    //   game/*.so
+    //   game/android/arm64-v8a/*.so
+    //
+    // Detect by structure rather than a textual version so later 42.x builds using the same
+    // packaging are handled automatically. This must run before maybeDisableLibFor42(), whose
+    // native-vs-Linux comparison deliberately expects the established layout.
+    private void normalizeNativeLayoutFor4220(GameInstance gameInstance) throws IOException {
+        File gameDir = new File(gameInstance.getGamePath());
+        File newLinuxDir = new File(gameDir, "natives");
+        File layoutMarker = new File(newLinuxDir, "libPZBullet64.so");
+        if (!layoutMarker.isFile()) return;
+
+        gameInstance.markBuild4220Plus();
+        Log.i(LOG_TAG, "Detected Build 42.20+ native layout; normalizing for Zomdroid");
+
+        File newAndroidDir = new File(newLinuxDir, "android/arm64-v8a");
+        File oldAndroidDir = new File(gameDir, "android/arm64-v8a");
+
+        // Move ARM64 first. moveSharedLibraries() only considers direct children, so the nested
+        // Android files can never be mistaken for Linux x86_64 files.
+        moveSharedLibraries(newAndroidDir, oldAndroidDir);
+        moveSharedLibraries(newLinuxDir, gameDir);
+
+        deleteDirectoryIfEmpty(newAndroidDir);
+        deleteDirectoryIfEmpty(new File(newLinuxDir, "android"));
+        deleteDirectoryIfEmpty(newLinuxDir);
+    }
+
+    private void moveSharedLibraries(File sourceDir, File targetDir) throws IOException {
+        File[] libraries = sourceDir.listFiles(
+                file -> file.isFile() && file.getName().endsWith(".so"));
+        if (libraries == null || libraries.length == 0) return;
+        if (!targetDir.exists() && !targetDir.mkdirs()) {
+            throw new IOException("Failed to create native library directory "
+                    + targetDir.getAbsolutePath());
+        }
+
+        for (File source : libraries) {
+            File target = new File(targetDir, source.getName());
+            try {
+                java.nio.file.Files.move(
+                        source.toPath(),
+                        target.toPath(),
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException moveError) {
+                // Same-filesystem moves are expected for an extracted instance, but retain a
+                // copy/delete fallback for unusual Android storage implementations.
+                copyFile(source, target);
+                if (!source.delete()) {
+                    throw new IOException("Copied but failed to remove "
+                            + source.getAbsolutePath(), moveError);
+                }
+            }
+            Log.i(LOG_TAG, "Normalized native library: " + source.getAbsolutePath()
+                    + " -> " + target.getAbsolutePath());
+        }
+    }
+
+    private void deleteDirectoryIfEmpty(File dir) {
+        File[] children = dir.listFiles();
+        if (children != null && children.length == 0 && !dir.delete()) {
+            Log.w(LOG_TAG, "Failed to remove empty directory " + dir.getAbsolutePath());
+        }
+    }
+
     // 42.13: rename problematic native libs that crash on Android
     private void maybeDisableLibFor42(GameInstance gameInstance) {
         File gameDir = new File(gameInstance.getGamePath());
@@ -1445,8 +1559,60 @@ public class InstallerService extends Service implements TaskProgressListener {
         if (!pzJar.exists()) return; // Not a 42.13+ structure
 
         File soDir = new File(gameDir, "android/arm64-v8a");
-        maybeDisableLib(soDir, "libLighting64.so");
-        maybeDisableLib(soDir, "libPZBullet64.so");
+        // Apply hard runtime findings (including Bullet's complete-looking but broken export).
+        com.zomdroid.patch.NativeLibraryWorkarounds.disableIncompleteNativeLibraries(gameInstance);
+        // The rest are judged on content instead, see below.
+        disableIncompleteNativeLibs(gameInstance, gameDir, soDir);
+    }
+
+    // The Android builds TIS ships in android/arm64-v8a/ occasionally omit a JNI method their own
+    // Linux build exports. 42.19's libPZPopMan64.so has no n_saveCell, so
+    // ZombiePopulationManager.writeCellSnapshot died with UnsatisfiedLinkError, worlds were saved
+    // incomplete, and every later load crashed — with nothing in console.txt to show for it.
+    // dlopen() prefers the native lib, so an incomplete one is strictly worse than none: drop it
+    // and let the x86_64 twin run under box64, which has the method.
+    //
+    // Content-based on purpose: no version numbers and no library names, so a build where TIS ships
+    // a complete library keeps its native speed, and the next library with the same defect is
+    // caught without a code change. Runs once per instance, here at install time — the game launch
+    // path is untouched. Only reached for 42.12+ layouts (the projectzomboid.jar gate above), which
+    // keeps it away from the multiplayer libs added by hand to 41.78 instances.
+    private void disableIncompleteNativeLibs(GameInstance gameInstance, File gameDir, File soDir) {
+        File[] nativeLibs = soDir.listFiles((dir, name) -> name.endsWith(".so"));
+        if (nativeLibs == null) return;
+
+        for (File nativeLib : nativeLibs) {
+            File linuxTwin = new File(gameDir, nativeLib.getName());
+            if (!linuxTwin.exists()) continue; // nothing to compare against
+
+            Set<String> expected = ElfSymbols.readExportedJniSymbols(linuxTwin);
+            Set<String> present = ElfSymbols.readExportedJniSymbols(nativeLib);
+            // null means "could not read" — never disable on a parse failure. An empty expected set
+            // means the library registers its natives some other way and cannot be judged this way.
+            if (expected == null || present == null || expected.isEmpty()) continue;
+
+            Set<String> missing = new TreeSet<>(expected);
+            missing.removeAll(present);
+            if (missing.isEmpty()) continue;
+
+            // Build 42.20's ARM64 Lighting library is safe after its sole missing void method is
+            // replaced in LightingJNI.class. Its x86_64 twin crashes in getVisibleRooms() through
+            // the box64 JNI bridge, so do not select that fallback.
+            if ("libLighting64.so".equals(nativeLib.getName())
+                    && missing.size() == 1
+                    && missing.contains(
+                    com.zomdroid.patch.LightingTransmissionPatcher.MISSING_JNI_SYMBOL)
+                    && com.zomdroid.patch.LightingTransmissionPatchApplier.isApplied(
+                    gameInstance)) {
+                Log.i(LOG_TAG, "Keeping patched ARM64 libLighting64.so");
+                continue;
+            }
+
+            Log.w(LOG_TAG, "Disabling " + nativeLib.getName() + ": the Android build is missing "
+                    + missing.size() + " JNI method(s) exported by the Linux build, first: "
+                    + missing.iterator().next());
+            maybeDisableLib(soDir, nativeLib.getName());
+        }
     }
 
     private void maybeDisableLib(File soDir, String libName) {
