@@ -4,7 +4,6 @@
 #include <android/dlext.h>
 #include <malloc.h>
 #include <unistd.h>
-#include <fcntl.h>
 #include <pthread.h>
 #include "logger.h"
 #include "emulation.h"
@@ -419,7 +418,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
                 buf[i++] = 'C';
                 break;
             case 'L': // reference to object
-                sig++; // advance past 'L'; (*sig)++ would mutate the signature char in place
+                (*sig)++;
                 while(*sig != ';') {
                     if (*sig == '\0') {
                         LOGE("Encountered end of string before ;");
@@ -514,7 +513,7 @@ static int method_signature_to_types(char* sig, char** arg_types, char* return_t
             *return_type = 'C';
             break;
         case 'L': // reference to object
-            sig++; // advance past 'L'; (*sig)++ would mutate the signature char in place
+            (*sig)++;
             while(*sig != ';') {
                 if (*sig == '\0') {
                     LOGE("Encountered end of string before ;");
@@ -651,20 +650,6 @@ static char* method_signature_from_symbol_name(const char* sym) {
 }
 
 
-// True only if `path` is a valid AArch64 (arm64) ELF. Used to reject a mispackaged x86_64
-// library that a user may have dropped into android/arm64-v8a/ (EM_AARCH64=183, EM_X86_64=62).
-static bool is_elf_aarch64(const char* path) {
-    int fd = open(path, O_RDONLY);
-    if (fd < 0) return false;
-    unsigned char hdr[20];
-    ssize_t n = read(fd, hdr, sizeof(hdr));
-    close(fd);
-    if (n < (ssize_t)sizeof(hdr)) return false;
-    if (hdr[0] != 0x7f || hdr[1] != 'E' || hdr[2] != 'L' || hdr[3] != 'F') return false; // ELF magic
-    int e_machine = hdr[18] | (hdr[19] << 8); // e_machine @ offset 0x12 (ELF64, little-endian)
-    return e_machine == 183; // EM_AARCH64
-}
-
 __attribute__((visibility("default"), used))
 void *dlopen(const char* filename, int flags) {
     //LOGE("[linker] dlopen called with filename=%s flags=%d", filename, flags);
@@ -692,35 +677,12 @@ void *dlopen(const char* filename, int flags) {
             snprintf(android_filename, BUF_SIZE, "android/arm64-v8a/%s", base);
 
             if (access(android_filename, F_OK) == 0) {
-                // A native arm64 lib here (copied from a Build 42.12 install) is what enables
-                // multiplayer — the x86_64 Linux libs run under box64 but don't provide it.
-                // Users sometimes drop in the WRONG file (e.g. the x86_64 version) here. dlopen'ing
-                // that would hard-fail the whole game with UnsatisfiedLinkError. So: verify it's
-                // actually an AArch64 ELF, and that the native load succeeds; on any failure fall
-                // back to the box64-emulated x86_64 lib (game runs, just no native MP for this lib).
-                if (is_elf_aarch64(android_filename)) {
-                    void* native_handle = loader_dlopen(android_filename, flags, __builtin_return_address(0));
-                    if (native_handle != NULL) {
-                        jni_libs[i].handle = native_handle;
-                        jni_libs[i].is_emulated = false;
-                        return jni_libs[i].handle;
-                    }
-                    fprintf(stderr, "[linker] WARNING: native %s is present but failed to load "
-                                    "(dlopen returned NULL) - falling back to box64. Native "
-                                    "multiplayer for this library will not work.\n", android_filename);
-                    LOGE("Native %s present but dlopen failed, falling back to box64", android_filename);
-                } else {
-                    fprintf(stderr, "[linker] WARNING: %s was replaced with the WRONG library - it "
-                                    "is NOT an arm64 (AArch64) binary, most likely the x86_64 Linux "
-                                    "version. Falling back to box64; multiplayer will NOT work until "
-                                    "you replace it with the correct arm64 .so from a Build 42.12 "
-                                    "install.\n", android_filename);
-                    LOGE("%s is not an AArch64 ELF (wrong-arch library), falling back to box64", android_filename);
-                }
-                // fall through to box64 emulation below
-            } else {
-                LOGW("[linker] Native Android version of %s not found, loading through box64...", android_filename);
+                //LOGD("[linker] Native Android version of %s is found", android_filename);
+                jni_libs[i].handle = loader_dlopen(android_filename, flags, __builtin_return_address(0));
+                jni_libs[i].is_emulated = false;
+                return jni_libs[i].handle;
             }
+            LOGW("[linker] Native Android version of %s not found, loading through box64...", android_filename);
         }
 
         //elsewise loading in box64

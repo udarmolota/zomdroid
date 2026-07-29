@@ -112,10 +112,7 @@ static void monitor_stdio_and_memory() {
             }
         }
 
-        // Only pause when the pipe is empty. While data keeps arriving (i > 0), loop and keep
-        // draining: a fixed 10ms sleep per read caps drain throughput at ~800KB/s and lets the
-        // 64KB pipe back up, blocking the emulated game threads in write() (frame hitches).
-        if (i <= 0) usleep(10000);
+        usleep(10000);
     }
 }
 
