@@ -244,22 +244,72 @@
                         android:lines="2"
                         android:maxLines="3"/>
 
-                    <Button
-                        android:id="@+id/settings_jargs_reset_btn"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="end"
+                        android:layout_marginBottom="4dp"
+                        android:gravity="end"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/settings_jargs_clear_btn"
+                            style="@style/Widget.Material3.Button.TonalButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
+                            android:minWidth="0dp"
+                            android:text="@string/settings_jvm_args_clear"
+                            android:textSize="11sp"/>
+
+                        <Button
+                            android:id="@+id/settings_jargs_reset_btn"
+                            style="@style/Widget.Material3.Button.TonalButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:minWidth="0dp"
+                            android:text="@string/settings_jvm_args_reset"
+                            android:textSize="11sp"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:minWidth="0dp"
-                        android:text="@string/settings_jvm_args_reset"
-                        android:textSize="11sp"
-                        style="@style/Widget.Material3.Button.TonalButton"/>
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/settings_jvm_args_b42_recommendation"
+                            android:textAppearance="?attr/textAppearanceBodySmall"
+                            android:textSize="11sp"/>
+
+                        <Button
+                            android:id="@+id/settings_jargs_add_softmax_btn"
+                            style="@style/Widget.Material3.Button.TonalButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:minWidth="0dp"
+                            android:text="@string/settings_jvm_args_add"
+                            android:textSize="11sp"/>
+
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="12dp"
+                        android:background="?attr/colorOutlineVariant"/>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginTop="4dp"
                         android:gravity="center_vertical">
 
                         <TextView

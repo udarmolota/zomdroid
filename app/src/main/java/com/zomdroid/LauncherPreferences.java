@@ -18,9 +18,7 @@ public class LauncherPreferences {
     transient private SharedPreferences sharedPreferences;
     transient private Gson gson;
 
-    // The one field-proven heap configuration (all clean tester runs, incl. NG_GL4ES on 42.19,
-    // used exactly this). Seeded into the JVM-args field once, at instance creation — visible
-    // and fully editable/deletable by the user; also the value the Reset button restores.
+    // Seeded once at instance creation and fully editable by the user.
     public static final String DEFAULT_JVM_ARGS = "-Xms512M -Xmx2048M";
 
     private float renderScale = 0.65f;
@@ -72,6 +70,8 @@ public class LauncherPreferences {
         }
         launcherPreferences.sharedPreferences = sharedPreferences;
         launcherPreferences.gson = gson;
+        // One-time migration only for the old launcher-provided default. Custom user values,
+        // including a deliberately empty field, remain untouched.
         singleton = launcherPreferences;
     }
 

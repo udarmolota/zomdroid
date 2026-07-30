@@ -10,7 +10,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 
-/** Applies the Build 42.20 ARM64 Lighting compatibility patch to the unpacked game class. */
+/** Applies the ARM64 Lighting compatibility patch to the unpacked game class. */
 public final class LightingTransmissionPatchApplier {
     private static final String LOG_TAG = LightingTransmissionPatchApplier.class.getName();
     private static final String BACKUP_NAME = "LightingJNI.class.zomdroid-4220.bak";
@@ -18,7 +18,11 @@ public final class LightingTransmissionPatchApplier {
     private LightingTransmissionPatchApplier() {}
 
     public static void applyIfNeeded(GameInstance gameInstance) {
-        if (!gameInstance.isBuild4220Plus()) return;
+        // Any Build 42, not just the 42.20+ layout: 42.19 ships the same ARM64 Lighting library
+        // with the same single missing export (verified by symbol diff on a live 42.19 install).
+        // requiresPatch() below is the real gate — it only fires when the library actually lacks
+        // the method, so builds with a complete Lighting are left untouched.
+        if (!"42".equals(gameInstance.getBuildVersion())) return;
         if (!requiresPatch(gameInstance)) return;
 
         File target = target(gameInstance);
@@ -62,7 +66,7 @@ public final class LightingTransmissionPatchApplier {
             return;
         }
 
-        Log.i(LOG_TAG, "Build 42.20+ Lighting patch applied: "
+        Log.i(LOG_TAG, "Lighting patch applied: "
                 + "squareSetLightTransmission() now uses a Java no-op");
     }
 

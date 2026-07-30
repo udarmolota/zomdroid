@@ -215,6 +215,9 @@ public class InstallerService extends Service implements TaskProgressListener {
                 // 42.20+ redundantly loads Android FMOD from the HotSpot VM. Zomdroid has
                 // already loaded and initialized it on ART; keep only fmodintegration64 here.
                 com.zomdroid.patch.FmodLoadPatchApplier.applyIfNeeded(gameInstance);
+                // Bink has no ARM64 library. Make getVideo() return the already-supported
+                // "unavailable" result instead of throwing and logging every UI frame.
+                com.zomdroid.patch.BinkVideoPatchApplier.applyIfNeeded(gameInstance);
                 // Keep the ARM64 Lighting implementation and replace only the one void JNI method
                 // it omits in 42.20. This runs after projectzomboid.jar has been unpacked.
                 com.zomdroid.patch.LightingTransmissionPatchApplier.applyIfNeeded(gameInstance);

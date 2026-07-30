@@ -434,8 +434,11 @@
 
     <!-- Optimization page -->
     <string name="optimization_group_jvm">JVM arguments</string>
-    <string name="optimization_jvm_hint">New approach: the recommended Java heap limit is now set by default when you create an instance — nothing to copy. You can view, change or reset it in Settings → Advanced → JVM arguments. Raise the numbers at your own risk.</string>
+    <string name="optimization_jvm_hint">Build 42 may benefit from an additional Java heap target. It is not enabled automatically: review and add it manually in Settings → Advanced → JVM arguments.</string>
     <string name="settings_jvm_args_reset">Reset to default</string>
+    <string name="settings_jvm_args_clear">Clear</string>
+    <string name="settings_jvm_args_b42_recommendation">For Build 42, we recommend adding:\n-XX:SoftMaxHeapSize=1536M</string>
+    <string name="settings_jvm_args_add">Add</string>
     <string name="optimization_jvm_recommended_label">→ Current default:</string>
     <string name="optimization_jvm_4gb_note">⚠️ On 4 GB devices the game will run, but not perfectly: Build 42 is not recommended there — play Build 41 and use the optimization mods below (BetterFPS, Every Texture Optimized). They help far more than JVM settings.</string>
     <string name="optimization_copy">Copy</string>

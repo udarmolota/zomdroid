@@ -382,8 +382,11 @@
 
     <!-- Optimization page -->
     <string name="optimization_group_jvm">Argumentos JVM</string>
-    <string name="optimization_jvm_hint">Mudamos a abordagem: o limite recomendado de heap Java agora é definido por padrão ao criar uma instância — nada a copiar. Veja, altere ou restaure em Configurações → Avançado → Argumentos JVM. Aumente os números por sua conta e risco.</string>
+    <string name="optimization_jvm_hint">A Build 42 pode se beneficiar de uma meta adicional para o heap Java. Ela não é ativada automaticamente: revise e adicione manualmente em Configurações → Avançado → Argumentos JVM.</string>
     <string name="settings_jvm_args_reset">Restaurar padrão</string>
+    <string name="settings_jvm_args_clear">Limpar</string>
+    <string name="settings_jvm_args_b42_recommendation">Para a Build 42, recomendamos adicionar:\n-XX:SoftMaxHeapSize=1536M</string>
+    <string name="settings_jvm_args_add">Adicionar</string>
     <string name="optimization_jvm_recommended_label">→ Padrão atual:</string>
     <string name="optimization_jvm_4gb_note">⚠️ Em dispositivos com 4 GB de RAM o jogo funciona, mas não perfeitamente: o Build 42 não é recomendado — jogue o Build 41 e use os mods de otimização abaixo (BetterFPS, Every Texture Optimized). Eles ajudam muito mais que as configurações da JVM.</string>
     <string name="optimization_copy">Copiar</string>

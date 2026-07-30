@@ -23,6 +23,9 @@ public class GameLauncher {
         com.zomdroid.patch.ShaderUnitPatchApplier.applyIfNeeded(gameInstance);
         // Also covers Build 42.20+ instances installed with an older launcher.
         com.zomdroid.patch.FmodLoadPatchApplier.applyIfNeeded(gameInstance);
+        // Bink is only provided for x86_64 and cannot be loaded by the ARM64 HotSpot VM. Avoid a
+        // full NoClassDefFoundError stack trace from UI panels on every rendered frame.
+        com.zomdroid.patch.BinkVideoPatchApplier.applyIfNeeded(gameInstance);
         // Keep ARM64 Lighting and replace only its one missing 42.20 JNI method. Applying this at
         // launch also repairs already installed instances without reinstalling the game.
         com.zomdroid.patch.LightingTransmissionPatchApplier.applyIfNeeded(gameInstance);
@@ -48,8 +51,10 @@ public class GameLauncher {
 
         Os.setenv("LIBGL_MIPMAP", "1", false);
 
-        Os.setenv("BOX64_LOG", "1", false);
-        Os.setenv("BOX64_SHOWBT", "1", false);
+        boolean verboseNativeLogs = BuildConfig.DEBUG
+                || LauncherPreferences.requireSingleton().isDebug();
+        Os.setenv("BOX64_LOG", verboseNativeLogs ? "1" : "0", false);
+        Os.setenv("BOX64_SHOWBT", verboseNativeLogs ? "1" : "0", false);
         Os.setenv("BOX64_LD_LIBRARY_PATH", gameInstance.getLdLibraryPathForEmulation(), false);
 
         Os.setenv("GALLIUM_DRIVER", "zink", false);

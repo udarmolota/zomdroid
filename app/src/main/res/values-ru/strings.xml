@@ -382,8 +382,11 @@
 
     <!-- Optimization page -->
     <string name="optimization_group_jvm">Аргументы JVM</string>
-    <string name="optimization_jvm_hint">Мы изменили подход: рекомендуемое ограничение Java heap теперь ставится по умолчанию при создании инстанса — копировать ничего не нужно. Посмотреть, изменить или сбросить его можно в Настройки → Дополнительно → Аргументы JVM. Поднимайте числа на свой страх и риск.</string>
+    <string name="optimization_jvm_hint">Для Build 42 может быть полезна дополнительная цель Java heap. Она не включается автоматически: просмотрите и добавьте её вручную в Настройки → Дополнительно → Аргументы JVM.</string>
     <string name="settings_jvm_args_reset">Сбросить по умолчанию</string>
+    <string name="settings_jvm_args_clear">Очистить</string>
+    <string name="settings_jvm_args_b42_recommendation">Для Build 42 рекомендуем добавить:\n-XX:SoftMaxHeapSize=1536M</string>
+    <string name="settings_jvm_args_add">Добавить</string>
     <string name="optimization_jvm_recommended_label">→ Сейчас по умолчанию:</string>
     <string name="optimization_jvm_4gb_note">⚠️ На устройствах с 4 ГБ ОЗУ игра будет работать, но не идеально: Build 42 там не рекомендуется — играйте в Build 41 и используйте моды оптимизации ниже (BetterFPS, Every Texture Optimized). Они дают куда больше, чем настройки JVM.</string>
     <string name="optimization_copy">Копировать</string>

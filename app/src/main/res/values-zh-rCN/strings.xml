@@ -376,8 +376,11 @@
 
     <!-- Optimization page -->
     <string name="optimization_group_jvm">JVM 参数</string>
-    <string name="optimization_jvm_hint">方式已更新：推荐的 Java 堆内存限制现在会在创建实例时默认设置 — 无需复制。可在设置 → 高级 → JVM 参数中查看、修改或恢复。调大数值风险自负。</string>
+    <string name="optimization_jvm_hint">Build 42 可能会受益于额外的 Java 堆目标。该选项不会自动启用：请在设置 → 高级 → JVM 参数中查看并手动添加。</string>
     <string name="settings_jvm_args_reset">恢复默认</string>
+    <string name="settings_jvm_args_clear">清空</string>
+    <string name="settings_jvm_args_b42_recommendation">对于 Build 42，建议添加：\n-XX:SoftMaxHeapSize=1536M</string>
+    <string name="settings_jvm_args_add">添加</string>
     <string name="optimization_jvm_recommended_label">→ 当前默认值：</string>
     <string name="optimization_jvm_4gb_note">⚠️ 在 4 GB 内存的设备上游戏可以运行，但并不理想：不建议玩 Build 42 — 请玩 Build 41 并使用下方的优化模组（BetterFPS、Every Texture Optimized）。它们比 JVM 设置有效得多。</string>
     <string name="optimization_copy">复制</string>

@@ -383,8 +383,11 @@
 
     <!-- Optimization page -->
     <string name="optimization_group_jvm">Argumen JVM</string>
-    <string name="optimization_jvm_hint">Pendekatan baru: batas heap Java yang disarankan kini diatur secara default saat membuat instance — tidak perlu menyalin apa pun. Lihat, ubah, atau kembalikan di Pengaturan → Lanjutan → Argumen JVM. Naikkan angkanya dengan risiko Anda sendiri.</string>
+    <string name="optimization_jvm_hint">Build 42 dapat terbantu dengan target heap Java tambahan. Opsi ini tidak diaktifkan secara otomatis: tinjau dan tambahkan secara manual di Pengaturan → Lanjutan → Argumen JVM.</string>
     <string name="settings_jvm_args_reset">Kembalikan bawaan</string>
+    <string name="settings_jvm_args_clear">Hapus</string>
+    <string name="settings_jvm_args_b42_recommendation">Untuk Build 42, kami menyarankan menambahkan:\n-XX:SoftMaxHeapSize=1536M</string>
+    <string name="settings_jvm_args_add">Tambahkan</string>
     <string name="optimization_jvm_recommended_label">→ Bawaan saat ini:</string>
     <string name="optimization_jvm_4gb_note">⚠️ Pada perangkat 4 GB RAM game tetap berjalan, tetapi tidak sempurna: Build 42 tidak disarankan — mainkan Build 41 dan gunakan mod optimasi di bawah (BetterFPS, Every Texture Optimized). Itu jauh lebih membantu daripada pengaturan JVM.</string>
     <string name="optimization_copy">Salin</string>

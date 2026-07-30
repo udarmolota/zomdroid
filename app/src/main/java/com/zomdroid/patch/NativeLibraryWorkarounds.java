@@ -27,8 +27,10 @@ public final class NativeLibraryWorkarounds {
 
         disable(gameInstance, "libPZBullet64.so",
                 "missing Bullet.defineVehicleScript()");
-        if (gameInstance.isBuild4220Plus()
-                && LightingTransmissionPatchApplier.isApplied(gameInstance)) {
+        // Content-gated, not layout-gated: isApplied() proves the stub really is in the class on
+        // disk, and the stub is only ever written where the ARM64 library lacks the method. 42.19
+        // has the same incomplete Lighting as 42.20, so it takes the same route back to native.
+        if (LightingTransmissionPatchApplier.isApplied(gameInstance)) {
             enable(gameInstance, "libLighting64.so",
                     "squareSetLightTransmission() is patched in Java");
         }

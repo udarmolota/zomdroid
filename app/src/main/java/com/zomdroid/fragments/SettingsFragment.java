@@ -22,6 +22,8 @@ import com.zomdroid.databinding.FragmentSettingsBinding;
 import com.zomdroid.input.GamepadManager;
 
 public class SettingsFragment extends Fragment {
+    private static final String BUILD_42_SOFT_MAX_ARG = "-XX:SoftMaxHeapSize=1536M";
+    private static final String SOFT_MAX_OPTION_PREFIX = "-XX:SoftMaxHeapSize=";
     private FragmentSettingsBinding binding;
 
     @Override
@@ -237,13 +239,31 @@ public class SettingsFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                LauncherPreferences.requireSingleton().setJvmArgs(s.toString().trim());
+                String args = s.toString().trim();
+                LauncherPreferences.requireSingleton().setJvmArgs(args);
+                binding.settingsJargsAddSoftmaxBtn.setEnabled(
+                        !containsJvmOption(args, SOFT_MAX_OPTION_PREFIX));
             }
         });
 
         // Restore the recommended JVM args; the TextWatcher above persists the change.
         binding.settingsJargsResetBtn.setOnClickListener(v ->
                 binding.settingsJargsEt.setText(LauncherPreferences.DEFAULT_JVM_ARGS));
+        binding.settingsJargsClearBtn.setOnClickListener(v ->
+                binding.settingsJargsEt.setText(""));
+        binding.settingsJargsAddSoftmaxBtn.setOnClickListener(v -> {
+            String current = binding.settingsJargsEt.getText().toString().trim();
+            if (containsJvmOption(current, SOFT_MAX_OPTION_PREFIX)) return;
+
+            String updated = current.isEmpty()
+                    ? BUILD_42_SOFT_MAX_ARG
+                    : current + " " + BUILD_42_SOFT_MAX_ARG;
+            binding.settingsJargsEt.setText(updated);
+            binding.settingsJargsEt.setSelection(updated.length());
+        });
+        binding.settingsJargsAddSoftmaxBtn.setEnabled(
+                !containsJvmOption(binding.settingsJargsEt.getText().toString(),
+                        SOFT_MAX_OPTION_PREFIX));
 
         // Enviroment variables
         binding.settingsEnvVarsEt.setText(LauncherPreferences.requireSingleton().getEnvVars());
@@ -322,6 +342,14 @@ public class SettingsFragment extends Fragment {
                     ? R.drawable.mt_icon_expand_more
                     : R.drawable.mt_icon_expand_less);
         });
+    }
+
+    private static boolean containsJvmOption(String args, String optionPrefix) {
+        if (args == null || args.trim().isEmpty()) return false;
+        for (String arg : args.trim().split("\\s+")) {
+            if (arg.startsWith(optionPrefix)) return true;
+        }
+        return false;
     }
 
     @Override
