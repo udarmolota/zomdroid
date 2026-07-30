@@ -31,9 +31,10 @@ public class GameLauncher {
         com.zomdroid.patch.LightingTransmissionPatchApplier.applyIfNeeded(gameInstance);
         // Select safe native implementations after the class-level patches are known to be ready.
         com.zomdroid.patch.NativeLibraryWorkarounds.disableIncompleteNativeLibraries(gameInstance);
-        // 42.20's ARM64 PathFind implementation is under test after reports of characters choosing
-        // incorrect interaction routes. Use PZ's own Java fallback without affecting older builds.
-        com.zomdroid.patch.PathfindingWorkaround.forceJavaPathfinderFor4220(gameInstance);
+        // Build 42.12+'s ARM64 PathFind implementation is under test after reports of characters
+        // choosing incorrect interaction routes. Use PZ's own Java fallback without affecting
+        // Build 41 or the older pre-fat-jar Build 42 releases.
+        com.zomdroid.patch.PathfindingWorkaround.forceJavaPathfinderFor4212Plus(gameInstance);
 
 /*        // for debug
         Os.setenv("MESA_DEBUG", "1", false);

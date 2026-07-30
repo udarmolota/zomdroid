@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Selects PZ's Java pathfinder for Build 42.20+ while its bundled ARM64 PathFind library is being
+ * Selects PZ's Java pathfinder for Build 42.12+ while its bundled ARM64 PathFind library is being
  * evaluated. The game already owns this fallback; the option only changes which implementation it
  * initializes.
  */
@@ -25,8 +25,11 @@ public final class PathfindingWorkaround {
 
     private PathfindingWorkaround() {}
 
-    public static void forceJavaPathfinderFor4220(GameInstance gameInstance) {
-        if (!gameInstance.isBuild4220Plus()) return;
+    public static void forceJavaPathfinderFor4212Plus(GameInstance gameInstance) {
+        if (!"42".equals(gameInstance.getBuildVersion())
+                || !new File(gameInstance.getGamePath(), "projectzomboid.jar").isFile()) {
+            return;
+        }
 
         File zomboidDir = new File(gameInstance.getHomePath(), "Zomboid");
         File optionsFile = new File(zomboidDir, "debug-options.ini");
@@ -57,7 +60,7 @@ public final class PathfindingWorkaround {
                 changed = true;
             }
             if (!changed && optionsFile.isFile()) {
-                Log.i(LOG_TAG, "Build 42.20+ Java pathfinder is already selected");
+                Log.i(LOG_TAG, "Build 42.12+ Java pathfinder is already selected");
                 return;
             }
 
@@ -76,9 +79,9 @@ public final class PathfindingWorkaround {
                         StandardCopyOption.REPLACE_EXISTING);
             }
 
-            Log.i(LOG_TAG, "Build 42.20+ pathfinder switched to the game's Java implementation");
+            Log.i(LOG_TAG, "Build 42.12+ pathfinder switched to the game's Java implementation");
         } catch (IOException | RuntimeException e) {
-            Log.e(LOG_TAG, "Failed to select the Build 42.20+ Java pathfinder", e);
+            Log.e(LOG_TAG, "Failed to select the Build 42.12+ Java pathfinder", e);
         }
     }
 }

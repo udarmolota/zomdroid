@@ -557,8 +557,8 @@
     <string name="steam_dl_cancel_confirm">Отменить скачивание? Уже скачанные файлы сохранятся для докачки позже.</string>
     <string name="steam_dl_username">Логин Steam</string>
     <string name="steam_dl_password">Пароль Steam</string>
-    <string name="steam_dl_version_note">Загружает Linux-сборку Project Zomboid в Downloads/zomdroid — без Termux и без ПК. Build 41 весит ~6–7 ГБ, Build 42 ~10–11 ГБ без архива, поэтому качается долго; если прервётся — просто запусти ту же версию снова, и закачка продолжится (докачка). Оставь манифест пустым для последней сборки или вставь id манифеста, чтобы зафиксировать версию.</string>
-    <string name="steam_dl_manifest_hint">id манифеста (пусто = последняя)</string>
+    <string name="steam_dl_version_note">Загружает Linux-сборку Project Zomboid в Downloads/zomdroid — без Termux и без ПК. Build 41 весит ~6–7 ГБ, Build 42 ~10–11 ГБ без архива, поэтому качается долго; если прервётся — просто запусти ту же версию снова, и закачка продолжится (докачка). Оставь поле манифеста пустым для последней сборки. Чтобы зафиксировать более старую версию, найди её на https://steamdb.info/depot/108603/manifests/ и скопируй строку «DepotDownloader» (не «Steam Console») — вставь сюда всю строку целиком, вместе с веткой; переключатель Build 41/42 выше в этом случае игнорируется.</string>
+    <string name="steam_dl_manifest_hint">id манифеста или строка DepotDownloader целиком (пусто = последняя)</string>
     <string name="steam_dl_download_game">Скачать игру</string>
     <string name="steam_dl_mods_note">Скачивание модов Мастерской по ID (число в URL: …/sharedfiles/filedetails/?id=ЧИСЛО). Логин Steam не нужен. Несколько ID — через пробел. Каждый сохраняется в .zip в Downloads/zomdroid.</string>
     <string name="steam_dl_mods_hint">ID модов (через пробел)</string>

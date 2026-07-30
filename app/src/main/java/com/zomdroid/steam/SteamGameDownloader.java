@@ -261,6 +261,18 @@ public class SteamGameDownloader implements Runnable, Cancellable {
                 PICSProductInfo app = cb.getApps().get(PROJECT_ZOMBOID_APP_ID);
                 if (app == null) continue;
                 KeyValue depots = app.getKeyValues().get("depots");
+
+                // Diagnostic only: Valve reshuffles branches without notice (e.g. the 2026-07-29
+                // 42.20 release), and a branch we hardcode against can silently stop covering the
+                // Linux depot. Logging every branch's buildid here means the next reshuffle shows
+                // up in a tester's logcat instead of us guessing from SteamDB history.
+                StringBuilder branchList = new StringBuilder();
+                for (KeyValue b : depots.get("branches").getChildren()) {
+                    if (branchList.length() > 0) branchList.append(", ");
+                    branchList.append(b.getName()).append('=').append(b.get("buildid").asLong(0L));
+                }
+                Log.i(TAG, "Steam branches for Project Zomboid: " + branchList);
+
                 out.buildId = depots.get("branches").get(branch).get("buildid").asLong(0L);
                 for (KeyValue depot : depots.getChildren()) {
                     int depotId;
@@ -268,8 +280,26 @@ public class SteamGameDownloader implements Runnable, Cancellable {
                     catch (NumberFormatException e) { continue; }     // skip "branches" etc.
                     String os = depot.get("config").get("oslist").asString();
                     if (os == null || !os.contains("linux")) continue;
+
+                    // A manually pinned manifest (e.g. an old build id copied from SteamDB, for a
+                    // version no branch currently points at — 42.15 and the like) needs only the
+                    // depot id, found above by OS match alone. It must NOT require this branch to
+                    // have its own manifest override for this depot: that requirement used to make
+                    // a pinned manifest unusable whenever the selected branch itself didn't resolve
+                    // (branch is still passed to the CDN request-code call further down, for
+                    // authorization — just not consulted here to find the manifest gid).
+                    if (manifestId > 0) {
+                        out.depot = depotId;
+                        out.gid = manifestId;
+                        return out;
+                    }
+
                     String gid = depot.get("manifests").get(branch).get("gid").asString();
-                    if (gid == null || gid.isEmpty()) continue;
+                    if (gid == null || gid.isEmpty()) {
+                        Log.i(TAG, "Linux depot " + depotId + " has no manifest override for branch '"
+                                + branch + "'");
+                        continue;
+                    }
                     try {
                         out.depot = depotId;
                         out.gid = Long.parseUnsignedLong(gid);

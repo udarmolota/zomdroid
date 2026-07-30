@@ -551,8 +551,8 @@
     <string name="steam_dl_cancel_confirm">取消下载？已下载的文件会保留，以便稍后续传。</string>
     <string name="steam_dl_username">Steam 用户名</string>
     <string name="steam_dl_password">Steam 密码</string>
-    <string name="steam_dl_version_note">将 Project Zomboid 的 Linux 版本下载到 Downloads/zomdroid——无需 Termux，无需电脑。Build 41 约 6–7 GB，Build 42 约 10–11 GB（未压缩），所以会很久；如果中断，重新下载同一版本即可断点续传。清单留空下载最新版本，或粘贴清单 id 锁定某个版本。</string>
-    <string name="steam_dl_manifest_hint">清单 id（留空 = 最新）</string>
+    <string name="steam_dl_version_note">将 Project Zomboid 的 Linux 版本下载到 Downloads/zomdroid——无需 Termux，无需电脑。Build 41 约 6–7 GB，Build 42 约 10–11 GB（未压缩），所以会很久；如果中断，重新下载同一版本即可断点续传。清单字段留空即下载最新版本。若要锁定旧版本，请在 https://steamdb.info/depot/108603/manifests/ 找到对应行，复制其中的 "DepotDownloader" 格式（不是 "Steam Console"）——将整行粘贴到此处（包含分支信息）；此时上方的 Build 41/42 切换将被忽略。</string>
+    <string name="steam_dl_manifest_hint">清单 id，或完整的 DepotDownloader 行（留空 = 最新版本）</string>
     <string name="steam_dl_download_game">下载游戏</string>
     <string name="steam_dl_mods_note">按 ID 下载创意工坊模组（创意工坊 URL 中的数字：…/sharedfiles/filedetails/?id=数字）。无需 Steam 登录。多个 ID 用空格分隔。每个保存为 Downloads/zomdroid 中的 .zip。</string>
     <string name="steam_dl_mods_hint">创意工坊 ID（用空格分隔）</string>

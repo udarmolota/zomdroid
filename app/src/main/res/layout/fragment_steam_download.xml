@@ -163,7 +163,8 @@
                     android:layout_marginBottom="12dp"
                     android:text="@string/steam_dl_version_note"
                     android:textSize="12sp"
-                    android:textColor="?attr/colorOnSurfaceVariant"/>
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:autoLink="web"/>
 
                 <EditText
                     android:id="@+id/et_dl_manifest"
@@ -171,7 +172,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="12dp"
                     android:hint="@string/steam_dl_manifest_hint"
-                    android:inputType="number"
+                    android:inputType="textNoSuggestions"
                     android:textSize="14sp"/>
 
                 <Button

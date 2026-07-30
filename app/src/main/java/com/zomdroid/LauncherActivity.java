@@ -298,8 +298,11 @@ public class LauncherActivity extends AppCompatActivity {
      * it's ready. If there's no instance (nothing to log) it falls back to a text-only mailto.
      */
     private void sendBugReport() {
-        final String date = new java.text.SimpleDateFormat("ddMMyyyy", java.util.Locale.US)
-                .format(new java.util.Date());
+        final java.util.Date now = new java.util.Date();
+        final String date = new java.text.SimpleDateFormat("ddMMyyyy", java.util.Locale.US).format(now);
+        // Distinct timestamp for the zip name (adds time-of-day) so a tester sending several
+        // reports in one sitting doesn't overwrite the same "zomdroid_report.zip" attachment.
+        final String timestamp = new java.text.SimpleDateFormat("ddMMyyyy_HHmm", java.util.Locale.US).format(now);
         final String device = "Device: " + Build.MANUFACTURER + " " + Build.MODEL
                 + "\nAndroid: " + Build.VERSION.RELEASE
                 + "\nZomdroid: " + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")";
@@ -314,7 +317,7 @@ public class LauncherActivity extends AppCompatActivity {
             try {
                 File dir = new File(getCacheDir(), "reports");
                 if (dir.isDirectory() || dir.mkdirs()) {
-                    File zip = new File(dir, "zomdroid_report.zip");
+                    File zip = new File(dir, "zomdroid_report_" + timestamp + ".zip");
                     try (OutputStream out = new FileOutputStream(zip)) {
                         InstallerService.writeLogReportZip(instance, out);
                     }
