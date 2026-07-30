@@ -261,7 +261,7 @@
 
     <!-- JVM args dialog -->
     <string name="jvm_args_dialog_title">Argumentos JVM</string>
-    <string name="jvm_args_dialog_message">Argumentos JVM adicionais, ex.:\n\n• -Xmx2G — alocar 2GB de memória\n• -Xms512M — processo inicia com 512MB de RAM\n• -XX:+UseG1GC — ativar o coletor de lixo G1\n\nEm teoria, ajuda quando há pouca RAM. Alguns argumentos já são definidos pelas configurações.\nSe configurar incorretamente e o app não iniciar, reinstale-o ou apenas limpe o cache do app.</string>
+    <string name="jvm_args_dialog_message">Argumentos JVM adicionais, ex.:\n\n• -Xmx2G — alocar 2GB de memória\n• -Xms512M — processo inicia com 512MB de RAM\n• -XX:MaxGCPauseMillis=120 — encurtar as pausas do coletor de lixo\n\nEm teoria, ajuda quando há pouca RAM. Alguns argumentos já são definidos pelas configurações.\nSe configurar incorretamente e o app não iniciar, reinstale-o ou apenas limpe o cache do app.</string>
 
     <!-- Custom Driver import/export -->
     <string name="install_driver_menu">Importar/Exportar Driver Personalizado</string>
@@ -382,11 +382,15 @@
 
     <!-- Optimization page -->
     <string name="optimization_group_jvm">Argumentos JVM</string>
-    <string name="optimization_jvm_hint">A Build 42 pode se beneficiar de uma meta adicional para o heap Java. Ela não é ativada automaticamente: revise e adicione manualmente em Configurações → Avançado → Argumentos JVM.</string>
+    <string name="optimization_jvm_hint">Os argumentos padrão apenas ajustam o coletor de lixo e são seguros em qualquer aparelho — o tamanho do heap e a quantidade de threads ficam a cargo da JVM, que os dimensiona para o seu telefone. A Build 42 se beneficia de um conjunto mais forte: aplique com um botão em Configurações → Avançado → Argumentos JVM.</string>
     <string name="settings_jvm_args_reset">Restaurar padrão</string>
     <string name="settings_jvm_args_clear">Limpar</string>
-    <string name="settings_jvm_args_b42_recommendation">Para a Build 42, recomendamos adicionar:\n-XX:SoftMaxHeapSize=1536M</string>
-    <string name="settings_jvm_args_add">Adicionar</string>
+    <string name="settings_jvm_args_b42_recommendation">Recomendado para a Build 42: limita o heap Java e devolve memória ao sistema, deixando espaço para o renderizador. Em alguns casos, o jogo pode não iniciar sem alguns desses parâmetros. Não é para a Build 41 — em aparelhos de 4 GB faz mais mal que bem.</string>
+    <string name="settings_jvm_args_apply">Aplicar</string>
+    <string name="renderer_ng_build42_only_title">NG_GL4ES é só para a Build 42</string>
+    <string name="renderer_ng_build42_only_message">Este renderizador foi feito para a Build 42 e não funciona na Build 41 — o jogo não vai iniciar.\n\nSe você joga a Build 41, escolha ZINK ou GL4ES.\n\nA Build 42 também precisa dos argumentos JVM recomendados: Configurações → Avançado → Argumentos JVM.</string>
+    <string name="new_game_instance_b42_jvm_hint">A Build 42 precisa de argumentos JVM ajustados — há um preset de um botão para eles nas configurações.</string>
+    <string name="new_game_instance_open_settings">Abrir Configurações → Avançado → Argumentos JVM →</string>
     <string name="optimization_jvm_recommended_label">→ Padrão atual:</string>
     <string name="optimization_jvm_4gb_note">⚠️ Em dispositivos com 4 GB de RAM o jogo funciona, mas não perfeitamente: o Build 42 não é recomendado — jogue o Build 41 e use os mods de otimização abaixo (BetterFPS, Every Texture Optimized). Eles ajudam muito mais que as configurações da JVM.</string>
     <string name="optimization_copy">Copiar</string>
@@ -427,7 +431,7 @@
     <string name="mod_fix_help_message">Alguns mods usam uma estrutura de pastas que causa conflito de caminho no Android. O jogo acaba procurando arquivos em um caminho duplicado e não consegue encontrá-los.\n\nEsta correção instala o mod duas vezes — uma com os nomes de pasta originais e outra com todos os nomes em minúsculas — para que o jogo encontre os arquivos independentemente do caminho usado.\n\nMods afetados conhecidos:\n• Tsar\'s Common Library — ID: 3402491515\n• [B42] Simple Flashlight on Belt — ID: 3394588830\n\nComo usar: baixe o mod e carregue aqui.</string>
 
     <!-- CPU/GPU autodetect -->
-    <string name="preset_dialog_gpu_hint_qualcomm">\u2705 Snapdragon detectado. O renderizador ZINK_ZFA foi definido automaticamente. Recomendamos selecionar o driver Freedreno/Turnip nas Configurações do aplicativo para melhores resultados.</string>
+    <string name="preset_dialog_gpu_hint_qualcomm">\u2705 Snapdragon detectado. O renderizador ZINK_ZFA foi definido automaticamente. Recomendamos selecionar o driver Freedreno/Turnip nas Configurações do aplicativo para melhores resultados. O NG_GL4ES também está disponível como renderizador alternativo em Configurações.</string>
     <string name="preset_dialog_gpu_hint_mediatek">\u2705 MediaTek detectado. O renderizador ZINK_ZFA foi definido, mas o suporte ao ZINK em GPUs Mali varia. Se o jogo não iniciar, tente ativar o driver gráfico ANGLE integrado nas Opções do desenvolvedor.</string>
 
     <!-- Manual Mods installation -->

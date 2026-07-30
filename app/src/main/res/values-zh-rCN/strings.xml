@@ -255,7 +255,7 @@
 
     <!-- JVM args dialog -->
     <string name="jvm_args_dialog_title">JVM 参数</string>
-    <string name="jvm_args_dialog_message">额外的 JVM 参数，例如：\n\n• -Xmx2G — 分配 2GB 内存\n• -Xms512M — 进程以 512MB RAM 启动\n• -XX:+UseG1GC — 启用 G1 垃圾回收器\n\n理论上在内存不足时有帮助。部分参数已由设置项自动配置。\n如果设置错误导致应用无法运行，请重新安装或清除应用缓存。</string>
+    <string name="jvm_args_dialog_message">额外的 JVM 参数，例如：\n\n• -Xmx2G — 分配 2GB 内存\n• -Xms512M — 进程以 512MB RAM 启动\n• -XX:MaxGCPauseMillis=120 — 缩短垃圾回收暂停时间\n\n理论上在内存不足时有帮助。部分参数已由设置项自动配置。\n如果设置错误导致应用无法运行，请重新安装或清除应用缓存。</string>
 
     <!-- Custom Driver import/export -->
     <string name="install_driver_menu">导入/导出自定义驱动</string>
@@ -376,11 +376,15 @@
 
     <!-- Optimization page -->
     <string name="optimization_group_jvm">JVM 参数</string>
-    <string name="optimization_jvm_hint">Build 42 可能会受益于额外的 Java 堆目标。该选项不会自动启用：请在设置 → 高级 → JVM 参数中查看并手动添加。</string>
+    <string name="optimization_jvm_hint">默认参数只调整垃圾回收器，在任何设备上都安全——堆大小和线程数交由 JVM 决定，它会按你的手机来调整。Build 42 适合更强的一组参数：在设置 → 高级 → JVM 参数中一键应用。</string>
     <string name="settings_jvm_args_reset">恢复默认</string>
     <string name="settings_jvm_args_clear">清空</string>
-    <string name="settings_jvm_args_b42_recommendation">对于 Build 42，建议添加：\n-XX:SoftMaxHeapSize=1536M</string>
-    <string name="settings_jvm_args_add">添加</string>
+    <string name="settings_jvm_args_b42_recommendation">推荐用于 Build 42：限制 Java 堆并把内存交还系统，为渲染器留出空间。在某些情况下，缺少其中一些参数游戏可能无法启动。不适用于 Build 41——在 4 GB 设备上得不偿失。</string>
+    <string name="settings_jvm_args_apply">应用</string>
+    <string name="renderer_ng_build42_only_title">NG_GL4ES 仅适用于 Build 42</string>
+    <string name="renderer_ng_build42_only_message">该渲染器是为 Build 42 编写的，在 Build 41 上无法工作——游戏不会启动。\n\n如果你玩 Build 41，请选择 ZINK 或 GL4ES。\n\nBuild 42 还需要推荐的 JVM 参数：设置 → 高级 → JVM 参数。</string>
+    <string name="new_game_instance_b42_jvm_hint">Build 42 需要调整过的 JVM 参数——设置里有一键预设。</string>
+    <string name="new_game_instance_open_settings">打开设置 → 高级 → JVM 参数 →</string>
     <string name="optimization_jvm_recommended_label">→ 当前默认值：</string>
     <string name="optimization_jvm_4gb_note">⚠️ 在 4 GB 内存的设备上游戏可以运行，但并不理想：不建议玩 Build 42 — 请玩 Build 41 并使用下方的优化模组（BetterFPS、Every Texture Optimized）。它们比 JVM 设置有效得多。</string>
     <string name="optimization_copy">复制</string>
@@ -421,7 +425,7 @@
     <string name="mod_fix_help_message">部分 mod 使用的文件夹结构会在 Android 上引发路径冲突。游戏会在重复路径中查找文件，从而导致找不到。\n\n此修复会将 mod 安装两次——一次使用原始文件夹名称，一次使用全小写名称——使游戏无论使用哪个路径都能找到文件。\n\n已知受影响的 mod：\n• Tsar\'s Common Library — ID: 3402491515\n• [B42] Simple Flashlight on Belt — ID: 3394588830\n\n使用方法：下载 mod，在此处加载。</string>
 
     <!-- CPU/GPU autodetect -->
-    <string name="preset_dialog_gpu_hint_qualcomm">\u2705 检测到骁龙处理器。ZINK_ZFA 渲染器已自动设置。建议在应用设置中选择 Freedreno/Turnip 驱动以获得最佳效果。</string>
+    <string name="preset_dialog_gpu_hint_qualcomm">\u2705 检测到骁龙处理器。ZINK_ZFA 渲染器已自动设置。建议在应用设置中选择 Freedreno/Turnip 驱动以获得最佳效果。设置中还提供了备用渲染器 NG_GL4ES。</string>
     <string name="preset_dialog_gpu_hint_mediatek">\u2705 检测到联发科处理器。已设置 ZINK_ZFA 渲染器，但 ZINK 在 Mali GPU 上的支持情况不稳定。如果游戏无法启动，请尝试在开发者选项中启用内置 ANGLE 图形驱动。</string>
 
     <!-- Manual mods installation -->

@@ -111,6 +111,12 @@ public class GameInstance {
         jvmArgsList.add("-Djava.io.tmpdir=" + AppStorage.requireSingleton().getCachePath());
 
         jvmArgsList.add("-Djava.library.path=" + getJavaLibraryPath() + ":.");
+        // LWJGL's hash self-check compares the loaded natives' SHA1 against hashes of the OFFICIAL
+        // builds baked into the game's lwjgl jars. Every LWJGL native we ship is self-built for
+        // bionic (the official linux-arm64 ones are glibc and cannot load), so the check can never
+        // pass and only spams "[LWJGL] [ERROR] Incompatible Java and native library versions" into
+        // every session log. Disable it with LWJGL's own switch.
+        jvmArgsList.add("-Dorg.lwjgl.util.NoHashChecks=true");
         if (BuildConfig.DEBUG) {
             jvmArgsList.add("-Dorg.lwjgl.util.Debug=true"); // debug
             jvmArgsList.add("-Dorg.lwjgl.util.DebugLoader=true"); // debug

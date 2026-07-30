@@ -261,7 +261,7 @@
 
     <!-- JVM args dialog -->
     <string name="jvm_args_dialog_title">Argumen JVM</string>
-    <string name="jvm_args_dialog_message">Argumen JVM tambahan, misalnya:\n\n• -Xmx2G - mengalokasikan 2GB memori\n• -Xms512M - proses dimulai dengan 512MB RAM\n• -XX:+UseG1GC - mengaktifkan garbage collector G1\n\nSecara teori, ini dapat membantu jika RAM tidak mencukupi. Beberapa argumen sudah diatur melalui pengaturan.\nJika dikonfigurasi secara tidak tepat dan aplikasi tidak dapat dijalankan, instal ulang aplikasi atau cukup hapus cache aplikasi.</string>
+    <string name="jvm_args_dialog_message">Argumen JVM tambahan, misalnya:\n\n• -Xmx2G - mengalokasikan 2GB memori\n• -Xms512M - proses dimulai dengan 512MB RAM\n• -XX:MaxGCPauseMillis=120 - mempersingkat jeda garbage collector\n\nSecara teori, ini dapat membantu jika RAM tidak mencukupi. Beberapa argumen sudah diatur melalui pengaturan.\nJika dikonfigurasi secara tidak tepat dan aplikasi tidak dapat dijalankan, instal ulang aplikasi atau cukup hapus cache aplikasi.</string>
 
     <!-- Custom Driver import/export -->
     <string name="install_driver_menu">Impor/Ekspor Driver Kustom</string>
@@ -383,11 +383,15 @@
 
     <!-- Optimization page -->
     <string name="optimization_group_jvm">Argumen JVM</string>
-    <string name="optimization_jvm_hint">Build 42 dapat terbantu dengan target heap Java tambahan. Opsi ini tidak diaktifkan secara otomatis: tinjau dan tambahkan secara manual di Pengaturan → Lanjutan → Argumen JVM.</string>
+    <string name="optimization_jvm_hint">Argumen bawaan hanya menyetel pengumpul sampah dan aman di perangkat apa pun — ukuran heap dan jumlah thread diserahkan ke JVM, yang menyesuaikannya dengan ponsel Anda. Build 42 mendapat manfaat dari set yang lebih kuat: terapkan dengan satu tombol di Pengaturan → Lanjutan → Argumen JVM.</string>
     <string name="settings_jvm_args_reset">Kembalikan bawaan</string>
     <string name="settings_jvm_args_clear">Hapus</string>
-    <string name="settings_jvm_args_b42_recommendation">Untuk Build 42, kami menyarankan menambahkan:\n-XX:SoftMaxHeapSize=1536M</string>
-    <string name="settings_jvm_args_add">Tambahkan</string>
+    <string name="settings_jvm_args_b42_recommendation">Disarankan untuk Build 42: membatasi heap Java dan mengembalikan memori ke sistem, sehingga ada ruang untuk renderer. Dalam beberapa kasus, game bisa gagal dimulai tanpa beberapa parameter ini. Bukan untuk Build 41 — pada perangkat 4 GB lebih banyak merugikan daripada membantu.</string>
+    <string name="settings_jvm_args_apply">Terapkan</string>
+    <string name="renderer_ng_build42_only_title">NG_GL4ES hanya untuk Build 42</string>
+    <string name="renderer_ng_build42_only_message">Renderer ini dibuat untuk Build 42 dan tidak bekerja pada Build 41 — gamenya tidak akan berjalan.\n\nJika Anda memainkan Build 41, pilih ZINK atau GL4ES.\n\nBuild 42 juga memerlukan argumen JVM yang disarankan: Pengaturan → Lanjutan → Argumen JVM.</string>
+    <string name="new_game_instance_b42_jvm_hint">Build 42 memerlukan argumen JVM yang disetel — ada preset satu tombol untuk itu di pengaturan.</string>
+    <string name="new_game_instance_open_settings">Buka Pengaturan → Lanjutan → Argumen JVM →</string>
     <string name="optimization_jvm_recommended_label">→ Bawaan saat ini:</string>
     <string name="optimization_jvm_4gb_note">⚠️ Pada perangkat 4 GB RAM game tetap berjalan, tetapi tidak sempurna: Build 42 tidak disarankan — mainkan Build 41 dan gunakan mod optimasi di bawah (BetterFPS, Every Texture Optimized). Itu jauh lebih membantu daripada pengaturan JVM.</string>
     <string name="optimization_copy">Salin</string>
@@ -428,7 +432,7 @@
     <string name="mod_fix_help_message">Beberapa mod menggunakan struktur folder yang menyebabkan konflik path di Android. Akibatnya, game mencari file di path yang terduplikasi dan tidak dapat menemukannya.\n\nPerbaikan ini menginstal mod dua kali — sekali dengan nama folder asli, dan sekali lagi dengan semua nama dalam huruf kecil — sehingga game dapat menemukan file terlepas dari path yang digunakan.\n\nMod yang diketahui terdampak:\n• Tsar\'s Common Library — ID: 3402491515\n• [B42] Simple Flashlight on Belt — ID: 3394588830\n\nCara menggunakan: unduh mod dan muat di sini.</string>
 
     <!-- CPU/GPU autodetect -->
-    <string name="preset_dialog_gpu_hint_qualcomm">\u2705 Snapdragon terdeteksi. Renderer ZINK_ZFA telah diatur secara otomatis. Kami menyarankan memilih driver Freedreno/Turnip di pengaturan aplikasi untuk hasil terbaik.</string>
+    <string name="preset_dialog_gpu_hint_qualcomm">\u2705 Snapdragon terdeteksi. Renderer ZINK_ZFA telah diatur secara otomatis. Kami menyarankan memilih driver Freedreno/Turnip di pengaturan aplikasi untuk hasil terbaik. NG_GL4ES juga tersedia sebagai renderer alternatif di Pengaturan.</string>
     <string name="preset_dialog_gpu_hint_mediatek">\u2705 MediaTek terdeteksi. Renderer ZINK_ZFA telah diatur, tetapi dukungan ZINK pada GPU Mali bervariasi. Jika game tidak dapat dijalankan, coba aktifkan driver grafis bawaan ANGLE di opsi pengembang.</string>
 
     <!-- Manual mods installation -->

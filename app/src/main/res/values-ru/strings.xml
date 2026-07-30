@@ -261,7 +261,7 @@
 
     <!-- JVM args dialog -->
     <string name="jvm_args_dialog_title">Аргументы JVM</string>
-    <string name="jvm_args_dialog_message">Дополнительные аргументы JVM, например:\n\n• -Xmx2G — выделить 2 ГБ памяти\n• -Xms512M — процесс стартует с 512 МБ RAM\n• -XX:+UseG1GC — включить сборщик мусора G1\n\nТеоретически помогает при нехватке RAM. Некоторые аргументы уже заданы настройками.\nЕсли настроено неверно и приложение не запускается — переустановите его или очистите кэш.</string>
+    <string name="jvm_args_dialog_message">Дополнительные аргументы JVM, например:\n\n• -Xmx2G — выделить 2 ГБ памяти\n• -Xms512M — процесс стартует с 512 МБ RAM\n• -XX:MaxGCPauseMillis=120 — сократить паузы сборщика мусора\n\nТеоретически помогает при нехватке RAM. Некоторые аргументы уже заданы настройками.\nЕсли настроено неверно и приложение не запускается — переустановите его или очистите кэш.</string>
 
     <!-- Custom Driver import/export -->
     <string name="install_driver_menu">Импорт/экспорт драйвера</string>
@@ -382,11 +382,15 @@
 
     <!-- Optimization page -->
     <string name="optimization_group_jvm">Аргументы JVM</string>
-    <string name="optimization_jvm_hint">Для Build 42 может быть полезна дополнительная цель Java heap. Она не включается автоматически: просмотрите и добавьте её вручную в Настройки → Дополнительно → Аргументы JVM.</string>
+    <string name="optimization_jvm_hint">Аргументы по умолчанию настраивают только сборщик мусора и безопасны на любом устройстве: размер кучи и число потоков остаются за JVM, она подбирает их под ваш телефон. Для Build 42 есть более сильный набор — он применяется одной кнопкой в Настройки → Дополнительно → Аргументы JVM.</string>
     <string name="settings_jvm_args_reset">Сбросить по умолчанию</string>
     <string name="settings_jvm_args_clear">Очистить</string>
-    <string name="settings_jvm_args_b42_recommendation">Для Build 42 рекомендуем добавить:\n-XX:SoftMaxHeapSize=1536M</string>
-    <string name="settings_jvm_args_add">Добавить</string>
+    <string name="settings_jvm_args_b42_recommendation">Рекомендуется для Build 42: ограничивает кучу Java и возвращает память системе, оставляя место рендереру. В некоторых случаях игра может упасть на старте без некоторых из этих параметров. Не для Build 41 — на устройствах с 4 ГБ вреда больше, чем пользы.</string>
+    <string name="settings_jvm_args_apply">Применить</string>
+    <string name="renderer_ng_build42_only_title">NG_GL4ES — только для Build 42</string>
+    <string name="renderer_ng_build42_only_message">Этот рендерер сделан для Build 42 и на Build 41 не работает — игра не запустится.\n\nЕсли вы играете в Build 41, выберите ZINK или GL4ES.\n\nДля Build 42 нужны ещё и рекомендуемые аргументы JVM: Настройки → Дополнительно → Аргументы JVM.</string>
+    <string name="new_game_instance_b42_jvm_hint">Для Build 42 нужны настроенные аргументы JVM — в настройках для них есть готовый набор в одну кнопку.</string>
+    <string name="new_game_instance_open_settings">Открыть Настройки → Дополнительно → Аргументы JVM →</string>
     <string name="optimization_jvm_recommended_label">→ Сейчас по умолчанию:</string>
     <string name="optimization_jvm_4gb_note">⚠️ На устройствах с 4 ГБ ОЗУ игра будет работать, но не идеально: Build 42 там не рекомендуется — играйте в Build 41 и используйте моды оптимизации ниже (BetterFPS, Every Texture Optimized). Они дают куда больше, чем настройки JVM.</string>
     <string name="optimization_copy">Копировать</string>
@@ -427,7 +431,7 @@
     <string name="mod_fix_help_message">Некоторые моды используют структуру папок, которая вызывает конфликт путей на Android. Игра ищет файлы по двойному пути и не может их найти.\n\nФикс устанавливает мод дважды — один раз с оригинальными именами папок, второй раз со всеми именами в нижнем регистре — чтобы игра находила файлы независимо от того, какой путь использует.\n\nИзвестные проблемные моды:\n• Tsar\'s Common Library — ID: 3402491515\n• [B42] Simple Flashlight on Belt — ID: 3394588830\n\nКак использовать: скачайте мод и загрузите сюда.</string>
 
     <!-- CPU/GPU autodetect -->
-    <string name="preset_dialog_gpu_hint_qualcomm">\u2705 Обнаружен Snapdragon. Рендерер ZINK_ZFA установлен автоматически. Рекомендуем выбрать драйвер Freedreno/Turnip в настройках приложения для лучшего результата.</string>
+    <string name="preset_dialog_gpu_hint_qualcomm">\u2705 Обнаружен Snapdragon. Рендерер ZINK_ZFA установлен автоматически. Рекомендуем выбрать драйвер Freedreno/Turnip в настройках приложения для лучшего результата. В настройках также доступен альтернативный рендерер NG_GL4ES.</string>
     <string name="preset_dialog_gpu_hint_mediatek">\u2705 Обнаружен MediaTek. Рендерер ZINK_ZFA установлен, но поддержка ZINK на Mali-видеочипах нестабильна. Если игра не запускается, попробуйте активировать встроенный графический драйвер ANGLE в настройках разработчика.</string>
 
     <!-- Manual mods installation -->

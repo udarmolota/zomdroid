@@ -17,14 +17,17 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
 import com.zomdroid.LauncherPreferences;
+import androidx.appcompat.app.AlertDialog;
+
 import com.zomdroid.R;
 import com.zomdroid.databinding.FragmentSettingsBinding;
 import com.zomdroid.input.GamepadManager;
 
 public class SettingsFragment extends Fragment {
-    private static final String BUILD_42_SOFT_MAX_ARG = "-XX:SoftMaxHeapSize=1536M";
-    private static final String SOFT_MAX_OPTION_PREFIX = "-XX:SoftMaxHeapSize=";
     private FragmentSettingsBinding binding;
+    // Set once the renderer spinner has delivered its initial restore callback, so the NG_GL4ES
+    // warning fires only for a deliberate change by the user.
+    private boolean rendererSelectionRestored = false;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -48,6 +51,17 @@ public class SettingsFragment extends Fragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 LauncherPreferences.Renderer renderer = (LauncherPreferences.Renderer) parent.getSelectedItem();
                 LauncherPreferences.requireSingleton().setRenderer(renderer);
+                // The spinner fires this once while being restored, before the user touches
+                // anything. Warn only on a real choice, or opening Settings would greet everyone
+                // with a dialog about a renderer they already use.
+                if (rendererSelectionRestored && renderer == LauncherPreferences.Renderer.NG_GL4ES) {
+                    new AlertDialog.Builder(requireContext())
+                            .setTitle(R.string.renderer_ng_build42_only_title)
+                            .setMessage(R.string.renderer_ng_build42_only_message)
+                            .setPositiveButton(android.R.string.ok, null)
+                            .show();
+                }
+                rendererSelectionRestored = true;
                 switch (renderer) {
                     case ZINK_ZFA:
                     case ZINK_OSMESA:
@@ -241,8 +255,7 @@ public class SettingsFragment extends Fragment {
             public void afterTextChanged(Editable s) {
                 String args = s.toString().trim();
                 LauncherPreferences.requireSingleton().setJvmArgs(args);
-                binding.settingsJargsAddSoftmaxBtn.setEnabled(
-                        !containsJvmOption(args, SOFT_MAX_OPTION_PREFIX));
+                binding.settingsJargsApplyB42Btn.setEnabled(!isBuild42SetApplied(args));
             }
         });
 
@@ -251,19 +264,16 @@ public class SettingsFragment extends Fragment {
                 binding.settingsJargsEt.setText(LauncherPreferences.DEFAULT_JVM_ARGS));
         binding.settingsJargsClearBtn.setOnClickListener(v ->
                 binding.settingsJargsEt.setText(""));
-        binding.settingsJargsAddSoftmaxBtn.setOnClickListener(v -> {
-            String current = binding.settingsJargsEt.getText().toString().trim();
-            if (containsJvmOption(current, SOFT_MAX_OPTION_PREFIX)) return;
-
-            String updated = current.isEmpty()
-                    ? BUILD_42_SOFT_MAX_ARG
-                    : current + " " + BUILD_42_SOFT_MAX_ARG;
+        // Replaces the whole field rather than appending: the Build 42 set carries its own -Xmx and
+        // GC thread counts, so appending it to existing args would leave two conflicting -Xmx in
+        // one line — and a log we would then have to untangle.
+        binding.settingsJargsApplyB42Btn.setOnClickListener(v -> {
+            String updated = LauncherPreferences.BUILD_42_JVM_ARGS;
             binding.settingsJargsEt.setText(updated);
             binding.settingsJargsEt.setSelection(updated.length());
         });
-        binding.settingsJargsAddSoftmaxBtn.setEnabled(
-                !containsJvmOption(binding.settingsJargsEt.getText().toString(),
-                        SOFT_MAX_OPTION_PREFIX));
+        binding.settingsJargsApplyB42Btn.setEnabled(
+                !isBuild42SetApplied(binding.settingsJargsEt.getText().toString()));
 
         // Enviroment variables
         binding.settingsEnvVarsEt.setText(LauncherPreferences.requireSingleton().getEnvVars());
@@ -344,12 +354,16 @@ public class SettingsFragment extends Fragment {
         });
     }
 
-    private static boolean containsJvmOption(String args, String optionPrefix) {
-        if (args == null || args.trim().isEmpty()) return false;
-        for (String arg : args.trim().split("\\s+")) {
-            if (arg.startsWith(optionPrefix)) return true;
-        }
-        return false;
+    // True when the field already holds the Build 42 set, so the button can grey itself out.
+    // Whitespace-insensitive but order-sensitive: the button writes one exact string, and a user
+    // who has since rearranged the flags is better served by an enabled button than by a guess.
+    private static boolean isBuild42SetApplied(String args) {
+        if (args == null) return false;
+        return normalizeArgs(args).equals(normalizeArgs(LauncherPreferences.BUILD_42_JVM_ARGS));
+    }
+
+    private static String normalizeArgs(String args) {
+        return args.trim().replaceAll("\\s+", " ");
     }
 
     @Override

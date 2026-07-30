@@ -152,6 +152,11 @@ public class NewGameInstanceFragment extends Fragment {
                     .show();
         });
 
+        // Shortcut to the JVM arguments block, where the Build 42 set is one button away. The
+        // arguments are a global setting, so this works before the instance even exists.
+        binding.newGameInstanceOpenSettingsTv.setOnClickListener(v ->
+                Navigation.findNavController(v).navigate(R.id.settings_fragment));
+
         // Browse button for game ZIP
         binding.newGameInstanceFilesBrowseIb.setOnClickListener(v ->
                 actionOpenDocumentLauncher.launch(ZIP_MIME));
@@ -216,16 +221,10 @@ public class NewGameInstanceFragment extends Fragment {
     private void finishInstall(String name, InstallationPreset selectedPreset, GpuVendor gpu) {
         if (!isAdded() || binding == null) return;
 
-        // Seed the recommended JVM args (visible in Settings → JVM arguments) the first time an
-        // instance is created. One-shot: if the user later edits or deletes them, or already had
-        // custom args, nothing is ever overridden — the Reset button in Settings restores them.
-        LauncherPreferences lp = LauncherPreferences.requireSingleton();
-        if (!lp.isJvmArgsDefaultApplied()) {
-            String cur = lp.getJvmArgs();
-            if (cur == null || cur.trim().isEmpty())
-                lp.setJvmArgs(LauncherPreferences.DEFAULT_JVM_ARGS);
-            lp.setJvmArgsDefaultApplied(true);
-        }
+        // No JVM-args seeding here: LauncherPreferences.DEFAULT_JVM_ARGS is the field's own default
+        // now, so every install starts from it regardless of when instances are created. The Build
+        // 42 set is opt-in through the button in Settings → Advanced, because its capped heap is
+        // wrong for Build 41 on a 4 GB device.
 
         GameInstance gameInstance;
         try {

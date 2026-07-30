@@ -288,13 +288,13 @@
                             android:textSize="11sp"/>
 
                         <Button
-                            android:id="@+id/settings_jargs_add_softmax_btn"
+                            android:id="@+id/settings_jargs_apply_b42_btn"
                             style="@style/Widget.Material3.Button.TonalButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
                             android:minWidth="0dp"
-                            android:text="@string/settings_jvm_args_add"
+                            android:text="@string/settings_jvm_args_apply"
                             android:textSize="11sp"/>
 
                     </LinearLayout>

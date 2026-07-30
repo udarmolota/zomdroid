@@ -304,7 +304,7 @@
 
     <!-- JVM args dialog -->
     <string name="jvm_args_dialog_title">JVM arguments</string>
-    <string name="jvm_args_dialog_message">Additional JVM arguments, e.g.:\n\n• -Xmx2G - allocate 2Gb of memory\n• -Xms512M - process starts with 512MB RAM\n• -XX:+UseG1GC - enable G1 garbage collector\n\nIn theory, it should help when there\'s not enough RAM. Some arguments are already set by settings.\nIf you set it incorrectly and the app doesn\'t run, reinstall it or just clear the app cache.</string>
+    <string name="jvm_args_dialog_message">Additional JVM arguments, e.g.:\n\n• -Xmx2G - allocate 2Gb of memory\n• -Xms512M - process starts with 512MB RAM\n• -XX:MaxGCPauseMillis=120 - target a shorter garbage-collector pause\n\nIn theory, it should help when there\'s not enough RAM. Some arguments are already set by settings.\nIf you set it incorrectly and the app doesn\'t run, reinstall it or just clear the app cache.</string>
 
     <!-- Custom Driver import/export -->
     <string name="install_driver_menu">Import/Export Custom Driver</string>
@@ -434,11 +434,15 @@
 
     <!-- Optimization page -->
     <string name="optimization_group_jvm">JVM arguments</string>
-    <string name="optimization_jvm_hint">Build 42 may benefit from an additional Java heap target. It is not enabled automatically: review and add it manually in Settings → Advanced → JVM arguments.</string>
+    <string name="optimization_jvm_hint">The default arguments tune the garbage collector only, and are safe on any device — heap size and thread counts are left to the JVM, which scales them to your phone. Build 42 benefits from a stronger set: apply it with one button in Settings → Advanced → JVM arguments.</string>
     <string name="settings_jvm_args_reset">Reset to default</string>
     <string name="settings_jvm_args_clear">Clear</string>
-    <string name="settings_jvm_args_b42_recommendation">For Build 42, we recommend adding:\n-XX:SoftMaxHeapSize=1536M</string>
-    <string name="settings_jvm_args_add">Add</string>
+    <string name="settings_jvm_args_b42_recommendation">Recommended for Build 42: caps the Java heap and returns memory to the system, which leaves room for the renderer. In some cases the game may fail to start without some of these parameters. Not for Build 41 — on 4 GB devices it does more harm than good.</string>
+    <string name="settings_jvm_args_apply">Apply</string>
+    <string name="renderer_ng_build42_only_title">NG_GL4ES is for Build 42</string>
+    <string name="renderer_ng_build42_only_message">This renderer was written for Build 42 and does not work on Build 41 — the game will not start.\n\nIf you play Build 41, choose ZINK or GL4ES instead.\n\nBuild 42 also needs the recommended JVM arguments: Settings → Advanced → JVM arguments.</string>
+    <string name="new_game_instance_b42_jvm_hint">Build 42 needs tuned JVM arguments — there is a one-button preset for them in the settings.</string>
+    <string name="new_game_instance_open_settings">Open Settings → Advanced → JVM arguments →</string>
     <string name="optimization_jvm_recommended_label">→ Current default:</string>
     <string name="optimization_jvm_4gb_note">⚠️ On 4 GB devices the game will run, but not perfectly: Build 42 is not recommended there — play Build 41 and use the optimization mods below (BetterFPS, Every Texture Optimized). They help far more than JVM settings.</string>
     <string name="optimization_copy">Copy</string>
@@ -479,7 +483,7 @@
     <string name="mod_fix_help_message">Some mods use a folder structure that causes a path conflict on Android. The game ends up looking for files in a doubled path and cannot find them.\n\nThis fix installs the mod twice — once with the original folder names, and once with all names in lowercase — so the game finds the files regardless of which path it uses.\n\nKnown affected mods:\n• Tsar\'s Common Library — ID: 3402491515\n• [B42] Simple Flashlight on Belt — ID: 3394588830\n\nTo use: download the mod and load it here.</string>
 
     <!-- CPU/GPU autodetect -->
-    <string name="preset_dialog_gpu_hint_qualcomm">\u2705 Snapdragon detected. ZINK_ZFA renderer has been set automatically. We recommend selecting a Freedreno/Turnip driver in the app Settings for best results.</string>
+    <string name="preset_dialog_gpu_hint_qualcomm">\u2705 Snapdragon detected. ZINK_ZFA renderer has been set automatically. We recommend selecting a Freedreno/Turnip driver in the app Settings for best results. NG_GL4ES is also available as an alternative renderer in Settings.</string>
     <string name="preset_dialog_gpu_hint_mediatek">\u2705 MediaTek detected. ZINK_ZFA renderer has been set, but ZINK support on Mali GPUs varies. If the game doesn\'t start, try to activate ANGLE built-in graphical driver in the Developer options.</string>
 
     <!-- Manual mods installation -->

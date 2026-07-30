@@ -18,18 +18,43 @@ public class LauncherPreferences {
     transient private SharedPreferences sharedPreferences;
     transient private Gson gson;
 
-    // Seeded once at instance creation and fully editable by the user.
-    public static final String DEFAULT_JVM_ARGS = "-Xms512M -Xmx2048M";
+    // The default every install starts with, and what the Reset button restores. Deliberately
+    // free of any absolute number: heap size and GC thread counts are left to JVM ergonomics, so
+    // this is correct on a 4 GB phone (~900 MB heap, threads = cores) and on a 12 GB one (~2.7 GB)
+    // alike. Only garbage-collector *behaviour* is set, which does not depend on the device —
+    // and MinHeapFreeRatio/MaxHeapFreeRatio, which hand memory back to the system, matter most
+    // exactly on the weak devices.
+    //
+    // No explicit -XX:+UseG1GC: G1 has been HotSpot's default collector for years, so the flag
+    // was redundant on most devices — and a tester reported the game failing to start with it set
+    // explicitly. G1 reserves address space for the whole max heap up front, which can behave
+    // differently from the JVM's own ergonomic collector choice under an Android app's stricter
+    // memory limits; safer to let the JVM decide.
+    public static final String DEFAULT_JVM_ARGS =
+            "-XX:MaxGCPauseMillis=120 -XX:+UseStringDeduplication"
+                    + " -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20";
+
+    // Field-proven set for Build 42, applied by the button in Settings → Advanced. Adds the
+    // absolute numbers on top of the defaults above: a capped heap (lower than the ergonomic
+    // choice on purpose — it leaves room for box64, the renderer and textures, which is what lets
+    // NG_GL4ES start at all) and GC thread counts that keep two cores free for render and audio.
+    // Validated on a 12 GB / 8-core device with Build 42.20; do not hand it out for Build 41,
+    // where the 2 GB ceiling buys nothing and can push a 4 GB phone into lmkd. No explicit
+    // -XX:+UseG1GC — see DEFAULT_JVM_ARGS above.
+    public static final String BUILD_42_JVM_ARGS =
+            "-Xms512M -Xmx2048M -XX:MaxGCPauseMillis=120 -XX:ParallelGCThreads=6"
+                    + " -XX:ConcGCThreads=2 -XX:+UseStringDeduplication"
+                    + " -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20";
 
     private float renderScale = 0.65f;
     private Renderer renderer = Renderer.GL4ES;
     private VulkanDriver vulkanDriver = VulkanDriver.SYSTEM_DEFAULT;
     private boolean isDebug = false;
     private AudioAPI audioAPI = AudioAPI.AAUDIO;
-    private String jvmArgs = "";
-    // One-shot guard for the seeding above: once true, the field belongs to the user —
-    // a deliberate delete stays deleted, custom values are never overridden.
-    private boolean jvmArgsDefaultApplied = false;
+    // Not seeded at instance creation any more — this IS the default, so it applies to everyone
+    // from the first launch. Users who already have their own value keep it: their stored JSON
+    // overrides this initializer.
+    private String jvmArgs = DEFAULT_JVM_ARGS;
 
     // GitHub-release update check: the raw tag_name last seen (e.g. "v1.4.7"), and the day
     // (yyyyMMdd) the daily background check last ran — so a phone with no internet retries at
@@ -149,10 +174,6 @@ public class LauncherPreferences {
         return jvmArgs;
     }
 
-    public boolean isJvmArgsDefaultApplied() {
-        return jvmArgsDefaultApplied;
-    }
-
     public String getLatestSeenTag() {
         return latestSeenTag;
     }
@@ -171,10 +192,6 @@ public class LauncherPreferences {
         saveToPreferences();
     }
 
-    public void setJvmArgsDefaultApplied(boolean applied) {
-        this.jvmArgsDefaultApplied = applied;
-        saveToPreferences();
-    }
 
     public void setJvmArgs(String jvmArgs) {
         this.jvmArgs = jvmArgs != null ? jvmArgs : "";

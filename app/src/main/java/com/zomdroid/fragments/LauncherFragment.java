@@ -405,8 +405,10 @@ public class LauncherFragment extends Fragment {
     private void showPostInstallSetupDialog(String presetName, String gpuVendor) {
         if (presetName == null) return;
 
-        // Offer NG_GL4ES only for non-Qualcomm pre-42.12 Build 42 installs.
-        if ("Build 42".equals(presetName) && !"QUALCOMM".equals(gpuVendor)) {
+        // Offer NG_GL4ES on every non-Qualcomm Build 42 install. It used to be limited to the
+        // pre-42.12 preset; NG_GL4ES now works across all Build 42 versions, and "Build 42.12+"
+        // is the preset most of those users actually pick.
+        if (presetName.startsWith("Build 42") && !"QUALCOMM".equals(gpuVendor)) {
             new MaterialAlertDialogBuilder(requireContext())
                     .setTitle(R.string.ng_offer_title)
                     .setMessage(R.string.ng_offer_message)
