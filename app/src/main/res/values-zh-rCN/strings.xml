@@ -235,6 +235,8 @@
     </string>
     <string name="controls_export_nothing_to_export">无内容可导出：使用默认按键布局。</string>
     <string name="settings_debug_mode">调试模式 (-debug)</string>
+    <string name="settings_memory_saver">内存节省 (NG_GL4ES)</string>
+    <string name="settings_memory_saver_hint">内存不足时降低纹理细节。有助于避免 8 GB 内存及以下设备的闪退；12 GB 设备无需开启。适用于 Build 42 的 NG_GL4ES 渲染器。</string>
     <string name="select_instance">— 选择游戏实例 —</string>
 
     <!-- Vulkan Driver dialogs -->
@@ -425,7 +427,7 @@
     <string name="mod_fix_help_message">部分 mod 使用的文件夹结构会在 Android 上引发路径冲突。游戏会在重复路径中查找文件，从而导致找不到。\n\n此修复会将 mod 安装两次——一次使用原始文件夹名称，一次使用全小写名称——使游戏无论使用哪个路径都能找到文件。\n\n已知受影响的 mod：\n• Tsar\'s Common Library — ID: 3402491515\n• [B42] Simple Flashlight on Belt — ID: 3394588830\n\n使用方法：下载 mod，在此处加载。</string>
 
     <!-- CPU/GPU autodetect -->
-    <string name="preset_dialog_gpu_hint_qualcomm">\u2705 检测到骁龙处理器。ZINK_ZFA 渲染器已自动设置。建议在应用设置中选择 Freedreno/Turnip 驱动以获得最佳效果。设置中还提供了备用渲染器 NG_GL4ES。</string>
+    <string name="preset_dialog_gpu_hint_qualcomm">\u2705 检测到骁龙 (Adreno) 处理器。对于 Build 42，ZINK 在你的设备上表现最好——已自动选择。为获得最佳效果，请在设置中另选 Freedreno/Turnip 驱动。也可以试试 NG_GL4ES，但它占用的内存明显更多。</string>
     <string name="preset_dialog_gpu_hint_mediatek">\u2705 检测到联发科处理器。已设置 ZINK_ZFA 渲染器，但 ZINK 在 Mali GPU 上的支持情况不稳定。如果游戏无法启动，请尝试在开发者选项中启用内置 ANGLE 图形驱动。</string>
 
     <!-- Manual mods installation -->

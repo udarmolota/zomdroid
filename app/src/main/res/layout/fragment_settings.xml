@@ -351,6 +351,22 @@
                         android:textAppearance="?attr/textAppearanceBodySmall"
                         android:text="@string/settings_debug_mode"/>
 
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/settings_memory_saver_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:text="@string/settings_memory_saver"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/settings_memory_saver_hint"
+                        android:textSize="11sp"
+                        android:textColor="?android:attr/textColorSecondary"/>
+
                 </LinearLayout>
 
             </LinearLayout>

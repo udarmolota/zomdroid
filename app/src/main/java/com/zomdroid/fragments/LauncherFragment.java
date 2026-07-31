@@ -405,9 +405,10 @@ public class LauncherFragment extends Fragment {
     private void showPostInstallSetupDialog(String presetName, String gpuVendor) {
         if (presetName == null) return;
 
-        // Offer NG_GL4ES on every non-Qualcomm Build 42 install. It used to be limited to the
-        // pre-42.12 preset; NG_GL4ES now works across all Build 42 versions, and "Build 42.12+"
-        // is the preset most of those users actually pick.
+        // Non-Qualcomm on any Build 42: offer the choice, because neither renderer is a clear
+        // win there — ZINK needs ANGLE on Mali, NG_GL4ES doesn't but costs more memory. This used
+        // to be limited to the pre-42.12 preset; NG_GL4ES now covers every Build 42 version, and
+        // "Build 42.12+" is the preset most of those users actually pick.
         if (presetName.startsWith("Build 42") && !"QUALCOMM".equals(gpuVendor)) {
             new MaterialAlertDialogBuilder(requireContext())
                     .setTitle(R.string.ng_offer_title)

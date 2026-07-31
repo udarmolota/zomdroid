@@ -241,6 +241,8 @@
     </string>
     <string name="controls_export_nothing_to_export">Нечего экспортировать: используется стандартная раскладка управления.</string>
     <string name="settings_debug_mode">Режим отладки (-debug)</string>
+    <string name="settings_memory_saver">Экономия памяти (NG_GL4ES)</string>
+    <string name="settings_memory_saver_hint">Снижает детализацию текстур, когда памяти становится мало. Помогает избежать вылетов на устройствах с 8 ГБ ОЗУ и меньше; на устройствах с 12 ГБ не нужна. Действует для рендерера NG_GL4ES на Build 42.</string>
     <string name="select_instance">— Выберите экземпляр игры —</string>
 
     <!-- Vulkan Driver dialogs -->
@@ -431,7 +433,7 @@
     <string name="mod_fix_help_message">Некоторые моды используют структуру папок, которая вызывает конфликт путей на Android. Игра ищет файлы по двойному пути и не может их найти.\n\nФикс устанавливает мод дважды — один раз с оригинальными именами папок, второй раз со всеми именами в нижнем регистре — чтобы игра находила файлы независимо от того, какой путь использует.\n\nИзвестные проблемные моды:\n• Tsar\'s Common Library — ID: 3402491515\n• [B42] Simple Flashlight on Belt — ID: 3394588830\n\nКак использовать: скачайте мод и загрузите сюда.</string>
 
     <!-- CPU/GPU autodetect -->
-    <string name="preset_dialog_gpu_hint_qualcomm">\u2705 Обнаружен Snapdragon. Рендерер ZINK_ZFA установлен автоматически. Рекомендуем выбрать драйвер Freedreno/Turnip в настройках приложения для лучшего результата. В настройках также доступен альтернативный рендерер NG_GL4ES.</string>
+    <string name="preset_dialog_gpu_hint_qualcomm">\u2705 Обнаружен Snapdragon (Adreno). Для Build 42 на вашем устройстве лучше всего подходит ZINK — он выбран автоматически. Для лучшего результата выберите также драйвер Freedreno/Turnip в настройках. Можно попробовать и NG_GL4ES, но он потребляет заметно больше памяти.</string>
     <string name="preset_dialog_gpu_hint_mediatek">\u2705 Обнаружен MediaTek. Рендерер ZINK_ZFA установлен, но поддержка ZINK на Mali-видеочипах нестабильна. Если игра не запускается, попробуйте активировать встроенный графический драйвер ANGLE в настройках разработчика.</string>
 
     <!-- Manual mods installation -->

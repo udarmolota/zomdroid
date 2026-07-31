@@ -26,9 +26,11 @@ public class GameLauncher {
         // Bink is only provided for x86_64 and cannot be loaded by the ARM64 HotSpot VM. Avoid a
         // full NoClassDefFoundError stack trace from UI panels on every rendered frame.
         com.zomdroid.patch.BinkVideoPatchApplier.applyIfNeeded(gameInstance);
-        // Keep ARM64 Lighting and replace only its one missing 42.20 JNI method. Applying this at
-        // launch also repairs already installed instances without reinstalling the game.
-        com.zomdroid.patch.LightingTransmissionPatchApplier.applyIfNeeded(gameInstance);
+        // Heal instances a previous launcher version stubbed: put the original LightingJNI.class
+        // back so the emulated Linux Lighting (which really exports squareSetLightTransmission)
+        // gets the native call instead of a leftover Java no-op. Running at launch covers already
+        // installed instances without reinstalling the game.
+        com.zomdroid.patch.LightingTransmissionPatchApplier.restoreOriginalIfStubbed(gameInstance);
         // Select safe native implementations after the class-level patches are known to be ready.
         com.zomdroid.patch.NativeLibraryWorkarounds.disableIncompleteNativeLibraries(gameInstance);
         // Build 42.12+'s ARM64 PathFind implementation is under test after reports of characters
@@ -94,6 +96,13 @@ public class GameLauncher {
                 // context, everyone else -> ES2.1 context. We own the context; the lib (RC13+) owns
                 // the badge and picks it from the actual context — do NOT set LIBGL_GL here, it
                 // would override the lib's decision. override=false keeps manual env overrides.
+                // Memory saver (Settings → Advanced): live-texture budget in MB. Past this
+                // threshold NG_GL4ES loads new large textures at half resolution — caps runaway
+                // texture memory at the cost of tile detail. Unset = 0 = the mechanism sleeps.
+                // override=false so a manual LIBGL_TEXBUDGET in the env-vars field still wins.
+                if (LauncherPreferences.requireSingleton().isMemorySaver()) {
+                    Os.setenv("LIBGL_TEXBUDGET", "800", false);
+                }
                 boolean isQualcomm = isQualcommGpu();
                 Os.setenv("ZOMDROID_GLES_MAJOR", isQualcomm ? "3" : "2", false);
                 Os.setenv("ZOMDROID_GLES_MINOR", isQualcomm ? "2" : "1", false);

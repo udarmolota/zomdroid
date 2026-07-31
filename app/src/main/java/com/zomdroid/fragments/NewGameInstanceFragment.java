@@ -251,8 +251,10 @@ public class NewGameInstanceFragment extends Fragment {
             installerIntent.putExtra(InstallerService.EXTRA_MODS_URI, modsZipUri);
         }
 
-        Navigation.findNavController(binding.getRoot()).navigateUp();
+        // Start the service before navigating: returning to the launcher immediately fires its
+        // dependency re-check, and the install must already own the service by then.
         requireContext().startForegroundService(installerIntent);
+        Navigation.findNavController(binding.getRoot()).navigateUp();
     }
 
     @Override

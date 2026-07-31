@@ -278,6 +278,8 @@
     </string>
     <string name="controls_export_nothing_to_export">Nothing to export: default controls layout is used.</string>
     <string name="settings_debug_mode">Debug mode (-debug)</string>
+    <string name="settings_memory_saver">Memory saver (NG_GL4ES)</string>
+    <string name="settings_memory_saver_hint">Lowers texture detail when memory runs low. Helps avoid crashes on devices with 8 GB RAM or less; not needed with 12 GB. Applies to the NG_GL4ES renderer on Build 42.</string>
     <string name="select_instance">— Select game instance —</string>
 
     <!-- Vulkan Driver dialogs -->
@@ -483,7 +485,7 @@
     <string name="mod_fix_help_message">Some mods use a folder structure that causes a path conflict on Android. The game ends up looking for files in a doubled path and cannot find them.\n\nThis fix installs the mod twice — once with the original folder names, and once with all names in lowercase — so the game finds the files regardless of which path it uses.\n\nKnown affected mods:\n• Tsar\'s Common Library — ID: 3402491515\n• [B42] Simple Flashlight on Belt — ID: 3394588830\n\nTo use: download the mod and load it here.</string>
 
     <!-- CPU/GPU autodetect -->
-    <string name="preset_dialog_gpu_hint_qualcomm">\u2705 Snapdragon detected. ZINK_ZFA renderer has been set automatically. We recommend selecting a Freedreno/Turnip driver in the app Settings for best results. NG_GL4ES is also available as an alternative renderer in Settings.</string>
+    <string name="preset_dialog_gpu_hint_qualcomm">\u2705 Snapdragon (Adreno) detected. For Build 42, ZINK works best on your device \u2014 it has been selected automatically. For best results, also pick a Freedreno/Turnip driver in Settings. NG_GL4ES is available as an alternative, but it uses noticeably more memory.</string>
     <string name="preset_dialog_gpu_hint_mediatek">\u2705 MediaTek detected. ZINK_ZFA renderer has been set, but ZINK support on Mali GPUs varies. If the game doesn\'t start, try to activate ANGLE built-in graphical driver in the Developer options.</string>
 
     <!-- Manual mods installation -->

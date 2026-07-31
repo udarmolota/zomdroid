@@ -241,6 +241,8 @@
     </string>
     <string name="controls_export_nothing_to_export">Tidak ada yang diekspor: tata letak kontrol default digunakan.</string>
     <string name="settings_debug_mode">Mode debug (-debug)</string>
+    <string name="settings_memory_saver">Hemat memori (NG_GL4ES)</string>
+    <string name="settings_memory_saver_hint">Menurunkan detail tekstur saat memori hampir habis. Membantu menghindari crash pada perangkat dengan RAM 8 GB atau kurang; tidak diperlukan pada 12 GB. Berlaku untuk renderer NG_GL4ES di Build 42.</string>
     <string name="select_instance">— Pilih instans game —</string>
 
     <!-- Vulkan Driver dialogs -->
@@ -432,7 +434,7 @@
     <string name="mod_fix_help_message">Beberapa mod menggunakan struktur folder yang menyebabkan konflik path di Android. Akibatnya, game mencari file di path yang terduplikasi dan tidak dapat menemukannya.\n\nPerbaikan ini menginstal mod dua kali — sekali dengan nama folder asli, dan sekali lagi dengan semua nama dalam huruf kecil — sehingga game dapat menemukan file terlepas dari path yang digunakan.\n\nMod yang diketahui terdampak:\n• Tsar\'s Common Library — ID: 3402491515\n• [B42] Simple Flashlight on Belt — ID: 3394588830\n\nCara menggunakan: unduh mod dan muat di sini.</string>
 
     <!-- CPU/GPU autodetect -->
-    <string name="preset_dialog_gpu_hint_qualcomm">\u2705 Snapdragon terdeteksi. Renderer ZINK_ZFA telah diatur secara otomatis. Kami menyarankan memilih driver Freedreno/Turnip di pengaturan aplikasi untuk hasil terbaik. NG_GL4ES juga tersedia sebagai renderer alternatif di Pengaturan.</string>
+    <string name="preset_dialog_gpu_hint_qualcomm">\u2705 Snapdragon (Adreno) terdeteksi. Untuk Build 42, ZINK paling cocok di perangkat Anda \u2014 sudah dipilih otomatis. Untuk hasil terbaik, pilih juga driver Freedreno/Turnip di Pengaturan. NG_GL4ES tersedia sebagai alternatif, tetapi memakai memori jauh lebih banyak.</string>
     <string name="preset_dialog_gpu_hint_mediatek">\u2705 MediaTek terdeteksi. Renderer ZINK_ZFA telah diatur, tetapi dukungan ZINK pada GPU Mali bervariasi. Jika game tidak dapat dijalankan, coba aktifkan driver grafis bawaan ANGLE di opsi pengembang.</string>
 
     <!-- Manual mods installation -->

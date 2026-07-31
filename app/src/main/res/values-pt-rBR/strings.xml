@@ -241,6 +241,8 @@
     </string>
     <string name="controls_export_nothing_to_export">Nada para exportar: layout padrão está em uso.</string>
     <string name="settings_debug_mode">Modo de depuração (-debug)</string>
+    <string name="settings_memory_saver">Economia de memória (NG_GL4ES)</string>
+    <string name="settings_memory_saver_hint">Reduz o detalhe das texturas quando a memória fica escassa. Ajuda a evitar travamentos em aparelhos com 8 GB de RAM ou menos; desnecessário com 12 GB. Vale para o renderizador NG_GL4ES na Build 42.</string>
     <string name="select_instance">— Selecione uma instância do jogo —</string>
 
     <!-- Vulkan Driver dialogs -->
@@ -431,7 +433,7 @@
     <string name="mod_fix_help_message">Alguns mods usam uma estrutura de pastas que causa conflito de caminho no Android. O jogo acaba procurando arquivos em um caminho duplicado e não consegue encontrá-los.\n\nEsta correção instala o mod duas vezes — uma com os nomes de pasta originais e outra com todos os nomes em minúsculas — para que o jogo encontre os arquivos independentemente do caminho usado.\n\nMods afetados conhecidos:\n• Tsar\'s Common Library — ID: 3402491515\n• [B42] Simple Flashlight on Belt — ID: 3394588830\n\nComo usar: baixe o mod e carregue aqui.</string>
 
     <!-- CPU/GPU autodetect -->
-    <string name="preset_dialog_gpu_hint_qualcomm">\u2705 Snapdragon detectado. O renderizador ZINK_ZFA foi definido automaticamente. Recomendamos selecionar o driver Freedreno/Turnip nas Configurações do aplicativo para melhores resultados. O NG_GL4ES também está disponível como renderizador alternativo em Configurações.</string>
+    <string name="preset_dialog_gpu_hint_qualcomm">\u2705 Snapdragon (Adreno) detectado. Para a Build 42, o ZINK funciona melhor no seu aparelho — já foi selecionado automaticamente. Para melhores resultados, escolha também um driver Freedreno/Turnip nas Configurações. O NG_GL4ES está disponível como alternativa, mas consome bem mais memória.</string>
     <string name="preset_dialog_gpu_hint_mediatek">\u2705 MediaTek detectado. O renderizador ZINK_ZFA foi definido, mas o suporte ao ZINK em GPUs Mali varia. Se o jogo não iniciar, tente ativar o driver gráfico ANGLE integrado nas Opções do desenvolvedor.</string>
 
     <!-- Manual Mods installation -->

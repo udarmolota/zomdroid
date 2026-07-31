@@ -19,20 +19,24 @@ public final class NativeLibraryWorkarounds {
      * Selects the safe implementation of game libraries after class patches have been applied.
      *
      * PZBullet remains unusable on ARM64 in 42.20 even though its export list looks complete.
-     * Lighting is the opposite: its ARM64 build only misses one method that Zomdroid patches to a
-     * Java no-op, while the x86_64 library crashes in getVisibleRooms() through the JNI bridge.
+     * Lighting is the same story in a nastier form: its ARM64 build is a stale snapshot that
+     * binds updateTorch() by name but implements a pre-cone ABI — flashlights and headlights
+     * render as omnidirectional circles instead of cones, and the vision cone is wrong too.
+     * (An earlier launcher version stubbed its one missing export and force-ENABLED it; that
+     * traded a loud bridge crash for silently wrong lighting. The bridge crash was the
+     * signature-cache race in linker.c, fixed separately.)
      */
     public static void disableIncompleteNativeLibraries(GameInstance gameInstance) {
         if (!"42".equals(gameInstance.getBuildVersion())) return;
 
         disable(gameInstance, "libPZBullet64.so",
                 "missing Bullet.defineVehicleScript()");
-        // Content-gated, not layout-gated: isApplied() proves the stub really is in the class on
-        // disk, and the stub is only ever written where the ARM64 library lacks the method. 42.19
-        // has the same incomplete Lighting as 42.20, so it takes the same route back to native.
-        if (LightingTransmissionPatchApplier.isApplied(gameInstance)) {
-            enable(gameInstance, "libLighting64.so",
-                    "squareSetLightTransmission() is patched in Java");
+        // Symbol-gated on purpose, not name-gated: the missing squareSetLightTransmission export
+        // is the marker of the stale snapshot. If TIS ever ships a rebuilt ARM64 Lighting that
+        // has it, the library gets its native speed back automatically, with no code change.
+        if (LightingTransmissionPatchApplier.isArmLightingStale(gameInstance)) {
+            disable(gameInstance, "libLighting64.so",
+                    "stale build: torch/headlight cones ignored, squareSetLightTransmission missing");
         }
     }
 
@@ -52,20 +56,4 @@ public final class NativeLibraryWorkarounds {
                 + "the Linux x86_64 library will run through box64");
     }
 
-    private static void enable(GameInstance gameInstance, String libraryName, String reason) {
-        File active = new File(gameInstance.getGamePath(), "android/arm64-v8a/" + libraryName);
-        if (active.isFile()) return;
-
-        File disabled = new File(active.getParentFile(), active.getName() + ".disabled");
-        if (!disabled.isFile()) return;
-
-        try {
-            Files.move(disabled.toPath(), active.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            throw new IllegalStateException("Failed to enable patched ARM64 "
-                    + active.getName(), e);
-        }
-
-        Log.i(LOG_TAG, "Enabled ARM64 " + libraryName + " (" + reason + ")");
-    }
 }

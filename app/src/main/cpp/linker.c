@@ -33,12 +33,20 @@ static int g_jni_sig_cache_next = 0;
 static pthread_mutex_t g_jni_sig_cache_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t g_jni_lib_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-static const char* jni_sig_cache_get(const char* sym) {
-    const char* result = NULL;
+// Returns a copy the caller owns and must free(), or NULL on a miss. The copy is made while the
+// mutex is still held — this is load-bearing, not style. The cache is a 64-entry ring and PZ
+// resolves more natives than that from several threads at once during world load, so an entry can
+// be evicted — and its strings freed — the instant the lock is released. The old version returned
+// the raw cache pointer and let the caller strdup() it outside the lock: a use-after-free race.
+// A signature string corrupted that way becomes a trampoline with shifted argument marshalling,
+// which is exactly how LightingJNI.getVisibleRooms(I[J)I kept crashing in GetArrayLength with
+// torn array references (low word 1, high word heap garbage) on world load.
+static char* jni_sig_cache_get(const char* sym) {
+    char* result = NULL;
     pthread_mutex_lock(&g_jni_sig_cache_mutex);
     for (int i = 0; i < JNI_SIG_CACHE_SIZE; i++) {
         if (g_jni_sig_cache[i].sym && strcmp(g_jni_sig_cache[i].sym, sym) == 0) {
-            result = g_jni_sig_cache[i].sig;
+            result = strdup(g_jni_sig_cache[i].sig);
             break;
         }
     }
@@ -546,10 +554,9 @@ static char* method_signature_from_symbol_name(const char* sym) {
     char* method_name = NULL;
     char* method_sig = NULL; // argument types + return type
     char* method_sig_short = NULL; // only argument types
-    const char* cached = jni_sig_cache_get(sym);
+    char* cached = jni_sig_cache_get(sym); // already a fresh copy, made under the cache mutex
     if (cached) {
-        // return a fresh copy because caller will free() it
-        return strdup(cached);
+        return cached;
     }
 
     jvmtiError jvmti_err = 0;

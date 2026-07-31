@@ -85,6 +85,9 @@ public class InstallerService extends Service implements TaskProgressListener {
     private Task currentTask;
     private String currentInstallPresetName;
     private String currentGpuVendor;
+    // True between the start of a user-initiated task and its finish/error state. Guards against
+    // the launch-time dependency re-check taking the service over mid-install; see onStartCommand.
+    private volatile boolean userTaskRunning;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -95,9 +98,30 @@ public class InstallerService extends Service implements TaskProgressListener {
         notificationManager.createNotificationChannel(channel);
 
         Task task = Task.values()[intent.getIntExtra(EXTRA_COMMAND, 0)];
+
+        // The dependency re-check runs on every launcher start, including the moment we navigate
+        // back from instance creation — right while CREATE_GAME_INSTANCE is still working. Letting
+        // it through would reassign currentTask and make the launcher miss the create-instance
+        // finish (that is how the post-install renderer/GPU dialog silently stopped appearing).
+        // The check is cheap and repeats next launch, so skipping this one occasion is free.
+        if (task == Task.INSTALL_DEPENDENCIES && userTaskRunning) {
+            Log.i(LOG_TAG, "Dependency re-check skipped: " + currentTask + " is still running");
+            return START_NOT_STICKY;
+        }
+
         currentTask = task;
-        currentInstallPresetName = intent.getStringExtra(EXTRA_INSTALL_PRESET_NAME);
-        currentGpuVendor = intent.getStringExtra(EXTRA_GPU_VENDOR);
+        userTaskRunning = task != Task.INSTALL_DEPENDENCIES;
+        // Only overwrite when the intent actually carries them. Every task shares this service,
+        // and returning to the launcher fires updateDependencies() — an INSTALL_DEPENDENCIES
+        // intent without these extras used to null them out mid-install, so by the time
+        // CREATE_GAME_INSTANCE finished the post-install setup dialog had no preset/GPU left to
+        // show (and currentTask no longer said CREATE_GAME_INSTANCE either).
+        if (intent.hasExtra(EXTRA_INSTALL_PRESET_NAME)) {
+            currentInstallPresetName = intent.getStringExtra(EXTRA_INSTALL_PRESET_NAME);
+        }
+        if (intent.hasExtra(EXTRA_GPU_VENDOR)) {
+            currentGpuVendor = intent.getStringExtra(EXTRA_GPU_VENDOR);
+        }
 
         Intent serviceStartedBroadcast = new Intent(ACTION_STARTED);
         LocalBroadcastManager.getInstance(this).sendBroadcast(serviceStartedBroadcast);
@@ -218,9 +242,10 @@ public class InstallerService extends Service implements TaskProgressListener {
                 // Bink has no ARM64 library. Make getVideo() return the already-supported
                 // "unavailable" result instead of throwing and logging every UI frame.
                 com.zomdroid.patch.BinkVideoPatchApplier.applyIfNeeded(gameInstance);
-                // Keep the ARM64 Lighting implementation and replace only the one void JNI method
-                // it omits in 42.20. This runs after projectzomboid.jar has been unpacked.
-                com.zomdroid.patch.LightingTransmissionPatchApplier.applyIfNeeded(gameInstance);
+                // The Lighting stub is retired (the ARM64 library turned out stale wholesale —
+                // circle light instead of cones); on a fresh install the class is never stubbed,
+                // this only heals a leftover stub if the instance dir survived from before.
+                com.zomdroid.patch.LightingTransmissionPatchApplier.restoreOriginalIfStubbed(gameInstance);
 
                 // Added in 1.3.2 for native game libs
                 File androidDirFromGame = new File(gameInstance.getGamePath() + "/android");
@@ -1598,18 +1623,11 @@ public class InstallerService extends Service implements TaskProgressListener {
             missing.removeAll(present);
             if (missing.isEmpty()) continue;
 
-            // Build 42.20's ARM64 Lighting library is safe after its sole missing void method is
-            // replaced in LightingJNI.class. Its x86_64 twin crashes in getVisibleRooms() through
-            // the box64 JNI bridge, so do not select that fallback.
-            if ("libLighting64.so".equals(nativeLib.getName())
-                    && missing.size() == 1
-                    && missing.contains(
-                    com.zomdroid.patch.LightingTransmissionPatcher.MISSING_JNI_SYMBOL)
-                    && com.zomdroid.patch.LightingTransmissionPatchApplier.isApplied(
-                    gameInstance)) {
-                Log.i(LOG_TAG, "Keeping patched ARM64 libLighting64.so");
-                continue;
-            }
+            // No special case for libLighting64.so any more: its ARM64 build is a stale snapshot
+            // (circle light instead of torch cones — the missing export is just the marker), so
+            // it takes the same disable path as every other incomplete library. The x86_64 twin's
+            // getVisibleRooms() crash through the box64 bridge was the signature-cache race in
+            // linker.c, fixed there.
 
             Log.w(LOG_TAG, "Disabling " + nativeLib.getName() + ": the Android build is missing "
                     + missing.size() + " JNI method(s) exported by the Linux build, first: "
@@ -1725,11 +1743,13 @@ public class InstallerService extends Service implements TaskProgressListener {
     // -------------------- TASK STATE / NOTIFICATION --------------------
 
     private void finish(String title, String message) {
+        userTaskRunning = false;
         this.taskState.postValue(new TaskState(title, message, -1, 0, true, false));
     }
 
     private void finishWithError(String title, String error) {
         Log.e(LOG_TAG, error);
+        userTaskRunning = false;
         this.taskState.postValue(new TaskState(title, error, -1, 0, false, true));
     }
 

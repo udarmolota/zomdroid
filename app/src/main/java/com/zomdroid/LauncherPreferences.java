@@ -30,9 +30,15 @@ public class LauncherPreferences {
     // explicitly. G1 reserves address space for the whole max heap up front, which can behave
     // differently from the JVM's own ergonomic collector choice under an Android app's stricter
     // memory limits; safer to let the JVM decide.
+    // -XX:-OmitStackTraceInFastThrow is a diagnostics flag, not a performance one: by default the
+    // JIT strips the stack trace off an exception that keeps being thrown from the same place, so
+    // the most frequent (and usually most interesting) crash in a bug report arrives as a bare
+    // "java.lang.NullPointerException" with no frames at all. Costs nothing unless something is
+    // actually throwing.
     public static final String DEFAULT_JVM_ARGS =
             "-XX:MaxGCPauseMillis=120 -XX:+UseStringDeduplication"
-                    + " -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20";
+                    + " -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20"
+                    + " -XX:-OmitStackTraceInFastThrow";
 
     // Field-proven set for Build 42, applied by the button in Settings → Advanced. Adds the
     // absolute numbers on top of the defaults above: a capped heap (lower than the ergonomic
@@ -41,15 +47,24 @@ public class LauncherPreferences {
     // Validated on a 12 GB / 8-core device with Build 42.20; do not hand it out for Build 41,
     // where the 2 GB ceiling buys nothing and can push a 4 GB phone into lmkd. No explicit
     // -XX:+UseG1GC — see DEFAULT_JVM_ARGS above.
+    // SoftMaxHeapSize=1536M (75% of the 2048M cap): G1 treats it as a target to stay under
+    // rather than a hard limit, so the heap can still grow to Xmx under load spikes but idles
+    // smaller — the second half of the memory treatment for Build 42, field-tested alongside
+    // the Memory saver toggle (LIBGL_TEXBUDGET).
     public static final String BUILD_42_JVM_ARGS =
-            "-Xms512M -Xmx2048M -XX:MaxGCPauseMillis=120 -XX:ParallelGCThreads=6"
-                    + " -XX:ConcGCThreads=2 -XX:+UseStringDeduplication"
-                    + " -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20";
+            "-Xms512M -Xmx2048M -XX:SoftMaxHeapSize=1536M -XX:MaxGCPauseMillis=120"
+                    + " -XX:ParallelGCThreads=6 -XX:ConcGCThreads=2 -XX:+UseStringDeduplication"
+                    + " -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20"
+                    + " -XX:-OmitStackTraceInFastThrow";
 
     private float renderScale = 0.65f;
     private Renderer renderer = Renderer.GL4ES;
     private VulkanDriver vulkanDriver = VulkanDriver.SYSTEM_DEFAULT;
     private boolean isDebug = false;
+    // Memory saver (Settings → Advanced): when on, the launcher exports LIBGL_TEXBUDGET=800 for
+    // NG_GL4ES — a live-texture budget in MB past which new large textures load at half
+    // resolution. Off by default: it visibly degrades tiles and 12 GB devices don't need it.
+    private boolean memorySaver = false;
     private AudioAPI audioAPI = AudioAPI.AAUDIO;
     // Not seeded at instance creation any more — this IS the default, so it applies to everyone
     // from the first launch. Users who already have their own value keep it: their stored JSON
@@ -154,6 +169,15 @@ public class LauncherPreferences {
 
     public boolean isDebug() {
         return isDebug;
+    }
+
+    public boolean isMemorySaver() {
+        return memorySaver;
+    }
+
+    public void setMemorySaver(boolean enabled) {
+        this.memorySaver = enabled;
+        saveToPreferences();
     }
 
     public void setDebug(boolean debug) {

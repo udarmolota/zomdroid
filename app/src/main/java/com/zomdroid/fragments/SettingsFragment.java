@@ -291,6 +291,10 @@ public class SettingsFragment extends Fragment {
             }
         });
 
+        binding.settingsMemorySaverSwitch.setChecked(LauncherPreferences.requireSingleton().isMemorySaver());
+        binding.settingsMemorySaverSwitch.setOnCheckedChangeListener((v, isChecked) ->
+                LauncherPreferences.requireSingleton().setMemorySaver(isChecked));
+
         binding.settingsDebugSwitch.setChecked(LauncherPreferences.requireSingleton().isDebug());
         binding.settingsDebugSwitch.setOnCheckedChangeListener((v, isChecked) ->
                 LauncherPreferences.requireSingleton().setDebug(isChecked));
