@@ -41,6 +41,9 @@ public class GamepadManager implements InputManager.InputDeviceListener {
     private static final int AXIS_LT_INDEX = 4; // a4
     private static final int AXIS_RT_INDEX = 5; // a5
 
+    // Ignore trigger travel below this before reporting a press. See applyTriggerDeadZone().
+    private static final float TRIGGER_DEAD_ZONE = 0.12f;
+
     // Default mapping: [A, B, X, Y, LB, RB, SELECT, START, GUIDE, LSTICK, RSTICK]
     private static final int[] DEFAULT_MAPPING = {
         KeyEvent.KEYCODE_BUTTON_A,      // 0: A
@@ -301,11 +304,11 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         // If a trigger is configured as AXIS, read analog value (with fallbacks) and send to a4/a5.
         if (isTriggerAxisMode(true)) {
             float lt = readTriggerAxis(event, true);
-            listener.onGamepadAxis(AXIS_LT_INDEX, clamp01(lt));
+            listener.onGamepadAxis(AXIS_LT_INDEX, applyTriggerDeadZone(clamp01(lt)));
         }
         if (isTriggerAxisMode(false)) {
             float rt = readTriggerAxis(event, false);
-            listener.onGamepadAxis(AXIS_RT_INDEX, clamp01(rt));
+            listener.onGamepadAxis(AXIS_RT_INDEX, applyTriggerDeadZone(clamp01(rt)));
         }
 
         // D-Pad (hat) — unchanged
@@ -374,22 +377,22 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         InputDevice d = ev.getDevice();
         if (d == null) return 0f;
 
+        // Z/RZ and RX/RY are deliberately NOT in this list. handleMotionEvent already claims
+        // Z/RZ as the right stick, and on most Android pads that is exactly what they are, so
+        // using them as a trigger fallback made the right stick press LT/RT: pads that expose no
+        // LTRIGGER/BRAKE fell through to Z and reported stick deflection as a held trigger.
         final int[] axes = left
                 ? new int[]{
                 MotionEvent.AXIS_LTRIGGER,
                 MotionEvent.AXIS_BRAKE,
-                MotionEvent.AXIS_Z,
                 MotionEvent.AXIS_GENERIC_1,
-                MotionEvent.AXIS_GENERIC_3,
-                MotionEvent.AXIS_RX // fallback
+                MotionEvent.AXIS_GENERIC_3
         }
                 : new int[]{
                 MotionEvent.AXIS_RTRIGGER,
                 MotionEvent.AXIS_GAS,
-                MotionEvent.AXIS_RZ,
                 MotionEvent.AXIS_GENERIC_2,
-                MotionEvent.AXIS_GENERIC_4,
-                MotionEvent.AXIS_RY // fallback
+                MotionEvent.AXIS_GENERIC_4
         };
 
         final int src = ev.getSource();
@@ -397,8 +400,12 @@ public class GamepadManager implements InputManager.InputDeviceListener {
             // Check support: with source (more strict) and without (broader)
             if (d.getMotionRange(ax, src) != null || d.getMotionRange(ax) != null) {
                 float v = ev.getAxisValue(ax);
-                // Normalize to [0..1]; some devices report [-1..1]
-                if (v < 0f) v = -v;
+                // Clamp to [0..1]. The negative half is dropped rather than mirrored: the old
+                // "v = -v" turned a trigger resting at -1 into a fully held one, which is the
+                // stuck-LT symptom. Android documents LTRIGGER/RTRIGGER/BRAKE/GAS as [0..1], so
+                // this only ever engages on a pad that misreports its range - and dropping the
+                // low half of the travel is harmless next to a permanently pressed trigger.
+                if (v < 0f) v = 0f;
                 if (v > 1f) v = 1f;
                 return v;
             }
@@ -410,6 +417,18 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         if (v < 0f) return 0f;
         if (v > 1f) return 1f;
         return v;
+    }
+
+    /**
+     * Drop trigger noise and resting drift, then rescale so full travel still reaches 1.0.
+     *
+     * The game cannot do this for us: vanilla JoypadManager parses AimingAxisDeadZone from the
+     * joypad config and then overwrites it with Sensitivity for every analog axis, so whatever
+     * dead zone the player configures is discarded. Anything we send raw goes straight through.
+     */
+    private float applyTriggerDeadZone(float v) {
+        if (v <= TRIGGER_DEAD_ZONE) return 0f;
+        return (v - TRIGGER_DEAD_ZONE) / (1f - TRIGGER_DEAD_ZONE);
     }
     /* ======================= end of NEW helpers ======================= */
 }
