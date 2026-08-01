@@ -24,7 +24,16 @@
 #define A64_REG_0 0
 #define A64_REG_1 1
 #define A64_REG_2 2
-#define A64_REG_18 18
+// Two scratch registers for the generated trampolines, one per register file. They were a
+// single shared "register 18" constant once; keep them separate:
+//  - integer scratch is x9, a caller-saved temporary. NEVER x18: on Android x18 is the
+//    reserved platform register, and this JRE's libjvm.so (built with linux rules, no
+//    ShadowCallStack) additionally uses x18 as a live temporary itself.
+//  - SIMD scratch is v18 and must stay within v16..v31. v8..v15 are callee-saved (the JIT
+//    parks live doubles there across JNI calls) - a 2026-07 blanket rename of the shared
+//    constant moved this scratch to v9 and silently corrupted the caller's floats.
+#define A64_REG_9 9
+#define A64_VREG_18 18
 #define A64_REG_29 29
 #define A64_REG_30 30
 #define A64_REG_SP 31
@@ -218,9 +227,9 @@ static void assemble_box64_jni_trampoline(uint32_t** code, int* code_size, const
                     int src_offset = (i64_argc_stack + df64_argc_stack) * 8 - 8;
                     int i64_off = i64_argc + i64_reserved >= 8 ? (i64_argc + i64_reserved - 8) * 8 : 0;
                     int target_offset = (df64_argc + df64_reserved - 8) * 8 + i64_off + src_offset;
-                    ADD_INSN(simd_ldr_imm(0b10, 0b01, (src_offset + stack_size) / 4, A64_REG_SP, A64_REG_18));
-                    ADD_INSN(simd_fcvt(0b00, 0b01, A64_REG_18, A64_REG_18));
-                    ADD_INSN(simd_str_imm(0b11, 0b00, target_offset / 8, A64_REG_SP, A64_REG_18));
+                    ADD_INSN(simd_ldr_imm(0b10, 0b01, (src_offset + stack_size) / 4, A64_REG_SP, A64_VREG_18));
+                    ADD_INSN(simd_fcvt(0b00, 0b01, A64_VREG_18, A64_VREG_18));
+                    ADD_INSN(simd_str_imm(0b11, 0b00, target_offset / 8, A64_REG_SP, A64_VREG_18));
                     df64_argc_stack--;
                 } else {
                     if (df64_argc + df64_reserved <= 8) {
@@ -228,8 +237,8 @@ static void assemble_box64_jni_trampoline(uint32_t** code, int* code_size, const
                     } else {
                         int i64_off = i64_argc + i64_reserved >= 8 ? (i64_argc + i64_reserved - 8) * 8 : 0;
                         int target_offset = (df64_argc + df64_reserved - 8) * 8 + i64_off - 8;
-                        ADD_INSN(simd_fcvt(0b00, 0b01, df64_argc - 1, A64_REG_18));
-                        ADD_INSN(simd_str_imm(0b11, 0b00, target_offset / 8, A64_REG_SP, A64_REG_18));
+                        ADD_INSN(simd_fcvt(0b00, 0b01, df64_argc - 1, A64_VREG_18));
+                        ADD_INSN(simd_str_imm(0b11, 0b00, target_offset / 8, A64_REG_SP, A64_VREG_18));
                     }
                     df64_argc--;
                 }
@@ -239,8 +248,8 @@ static void assemble_box64_jni_trampoline(uint32_t** code, int* code_size, const
                     int src_offset = (i64_argc_stack + df64_argc_stack) * 8 - 8;
                     int i64_off = i64_argc + i64_reserved >= 8 ? (i64_argc + i64_reserved - 8) * 8 : 0;
                     int target_offset = (df64_argc + df64_reserved - 8) * 8 + i64_off + src_offset;
-                    ADD_INSN(simd_ldr_imm(0b11, 0b01, (src_offset + stack_size) / 8, A64_REG_SP, A64_REG_18));
-                    ADD_INSN(simd_str_imm(0b11, 0b00, target_offset / 8, A64_REG_SP, A64_REG_18));
+                    ADD_INSN(simd_ldr_imm(0b11, 0b01, (src_offset + stack_size) / 8, A64_REG_SP, A64_VREG_18));
+                    ADD_INSN(simd_str_imm(0b11, 0b00, target_offset / 8, A64_REG_SP, A64_VREG_18));
                     df64_argc_stack--;
                 } else {
                     if (df64_reserved == 0) {
@@ -268,8 +277,8 @@ static void assemble_box64_jni_trampoline(uint32_t** code, int* code_size, const
                     int src_offset = (i64_argc_stack + df64_argc_stack) * 8 - 8;
                     int d64_off = df64_argc + df64_reserved >= 8 ? (df64_argc + df64_reserved - 8) * 8 : 0;
                     int dst_offset = (i64_argc + i64_reserved - 8) * 8 + d64_off + src_offset;
-                    ADD_INSN(base_ldr_imm(A64_SF_32, (src_offset + stack_size) / 4, A64_REG_SP, A64_REG_18));
-                    ADD_INSN(base_str_imm(A64_SF_32, dst_offset / 4, A64_REG_SP, A64_REG_18));
+                    ADD_INSN(base_ldr_imm(A64_SF_32, (src_offset + stack_size) / 4, A64_REG_SP, A64_REG_9));
+                    ADD_INSN(base_str_imm(A64_SF_32, dst_offset / 4, A64_REG_SP, A64_REG_9));
                     i64_argc_stack--;
                 } else {
                     if (i64_reserved == 0) {
@@ -296,8 +305,8 @@ static void assemble_box64_jni_trampoline(uint32_t** code, int* code_size, const
                     int src_offset = (i64_argc_stack + df64_argc_stack) * 8 - 8;
                     int d64_off = df64_argc + df64_reserved >= 8 ? (df64_argc + df64_reserved - 8) * 8 : 0;
                     int dst_offset = (i64_argc + i64_reserved - 8) * 8 + d64_off + src_offset;
-                    ADD_INSN(base_ldr_imm(A64_SF_64, (src_offset + stack_size) / 8, A64_REG_SP, A64_REG_18));
-                    ADD_INSN(base_str_imm(A64_SF_64, dst_offset / 8, A64_REG_SP, A64_REG_18));
+                    ADD_INSN(base_ldr_imm(A64_SF_64, (src_offset + stack_size) / 8, A64_REG_SP, A64_REG_9));
+                    ADD_INSN(base_str_imm(A64_SF_64, dst_offset / 8, A64_REG_SP, A64_REG_9));
                     i64_argc_stack--;
                 } else {
                     if (i64_reserved == 0) {
@@ -329,37 +338,37 @@ static void assemble_box64_jni_trampoline(uint32_t** code, int* code_size, const
     for (int i = 0; signature[i] != 0;) {
         if (i + 8 <= strlen(signature)) {
             uint64_t chunk = *(uint64_t *)(signature + i);
-            ADD_INSN(base_movz(A64_SF_64, 0, chunk & 0xFFFF, A64_REG_18));
-            ADD_INSN(base_movk(A64_SF_64, 1, (chunk >> 16) & 0xFFFF, A64_REG_18));
-            ADD_INSN(base_movk(A64_SF_64, 2, (chunk >> 32) & 0xFFFF, A64_REG_18));
-            ADD_INSN(base_movk(A64_SF_64, 3, (chunk >> 48) & 0xFFFF, A64_REG_18));
-            ADD_INSN(base_str_imm(A64_SF_64, (signature_offset + i) / 8, A64_REG_SP, A64_REG_18));
+            ADD_INSN(base_movz(A64_SF_64, 0, chunk & 0xFFFF, A64_REG_9));
+            ADD_INSN(base_movk(A64_SF_64, 1, (chunk >> 16) & 0xFFFF, A64_REG_9));
+            ADD_INSN(base_movk(A64_SF_64, 2, (chunk >> 32) & 0xFFFF, A64_REG_9));
+            ADD_INSN(base_movk(A64_SF_64, 3, (chunk >> 48) & 0xFFFF, A64_REG_9));
+            ADD_INSN(base_str_imm(A64_SF_64, (signature_offset + i) / 8, A64_REG_SP, A64_REG_9));
             i += 8;
         } else if (i + 4 <= strlen(signature)) {
             uint32_t chunk = *(uint32_t*)(signature + i);
-            ADD_INSN(base_movz(A64_SF_32, 0, chunk & 0xFFFF, A64_REG_18));
-            ADD_INSN(base_movk(A64_SF_32, 1, (chunk >> 16) & 0xFFFF, A64_REG_18));
-            ADD_INSN(base_str_imm(A64_SF_32, (signature_offset + i) / 4, A64_REG_SP, A64_REG_18));
+            ADD_INSN(base_movz(A64_SF_32, 0, chunk & 0xFFFF, A64_REG_9));
+            ADD_INSN(base_movk(A64_SF_32, 1, (chunk >> 16) & 0xFFFF, A64_REG_9));
+            ADD_INSN(base_str_imm(A64_SF_32, (signature_offset + i) / 4, A64_REG_SP, A64_REG_9));
             i += 4;
         } else {
-            ADD_INSN(base_movz(A64_SF_32, 0, signature[i], A64_REG_18));
-            ADD_INSN(base_strb_imm(signature_offset + i, A64_REG_SP, A64_REG_18));
+            ADD_INSN(base_movz(A64_SF_32, 0, signature[i], A64_REG_9));
+            ADD_INSN(base_strb_imm(signature_offset + i, A64_REG_SP, A64_REG_9));
             i++;
         }
     }
-    ADD_INSN(base_movz(A64_SF_32, 0, 0, A64_REG_18));
-    ADD_INSN(base_strb_imm(signature_offset + strlen(signature), A64_REG_SP, A64_REG_18));
+    ADD_INSN(base_movz(A64_SF_32, 0, 0, A64_REG_9));
+    ADD_INSN(base_strb_imm(signature_offset + strlen(signature), A64_REG_SP, A64_REG_9));
     ADD_INSN(base_add_imm(A64_SF_64, 0, signature_offset, A64_REG_SP, A64_REG_1));
 
 /*    // put third reserved arg - emulated function return type
     ADD_INSN(base_movz(A64_SF_32, 0, returnType, A64_REG_2))*/
 
     // prepare and call RunFunctionFmt
-    ADD_INSN(base_movz(A64_SF_64, 0, (uint64_t) &RunFunctionFmt & 0xFFFF, A64_REG_18));
-    ADD_INSN(base_movk(A64_SF_64, 1, ((uint64_t) &RunFunctionFmt >> 16) & 0xFFFF, A64_REG_18));
-    ADD_INSN(base_movk(A64_SF_64, 2, ((uint64_t) &RunFunctionFmt >> 32) & 0xFFFF, A64_REG_18));
-    ADD_INSN(base_movk(A64_SF_64, 3, ((uint64_t) &RunFunctionFmt >> 48) & 0xFFFF, A64_REG_18));
-    ADD_INSN(base_blr(A64_REG_18));
+    ADD_INSN(base_movz(A64_SF_64, 0, (uint64_t) &RunFunctionFmt & 0xFFFF, A64_REG_9));
+    ADD_INSN(base_movk(A64_SF_64, 1, ((uint64_t) &RunFunctionFmt >> 16) & 0xFFFF, A64_REG_9));
+    ADD_INSN(base_movk(A64_SF_64, 2, ((uint64_t) &RunFunctionFmt >> 32) & 0xFFFF, A64_REG_9));
+    ADD_INSN(base_movk(A64_SF_64, 3, ((uint64_t) &RunFunctionFmt >> 48) & 0xFFFF, A64_REG_9));
+    ADD_INSN(base_blr(A64_REG_9));
 
     // free stack
     if (fp_offset > 0) {

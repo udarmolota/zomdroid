@@ -63,6 +63,17 @@ public class GameLauncher {
         Os.setenv("BOX64_SHOWBT", verboseNativeLogs ? "1" : "0", false);
         Os.setenv("BOX64_LD_LIBRARY_PATH", gameInstance.getLdLibraryPathForEmulation(), false);
 
+        // Emulate x86's Total Store Order for the emulated libraries. box64 defaults to no
+        // barriers at all, which is fine for single-threaded code but breaks x86 code written
+        // against TSO once ARM's weaker model is allowed to reorder. box64 itself force-enables
+        // this combination for the multithreaded libraries it knows about (libjvm, libtbb,
+        // MonoBleedingEdge - see box64 librarian/library.c); PZ's Lighting is multithreaded too
+        // (it runs its own thread, "LightingFPS set to 15") but is not on that list.
+        // Level 3 = barrier on every third guest store, the strongest setting; BIGBLOCK=0 stops
+        // block merging from moving stores across the barriers.
+        Os.setenv("BOX64_DYNAREC_STRONGMEM", "3", false);
+        Os.setenv("BOX64_DYNAREC_BIGBLOCK", "0", false);
+
         Os.setenv("GALLIUM_DRIVER", "zink", false);
 
         Os.setenv("ZOMDROID_CACHE_DIR", AppStorage.requireSingleton().getCachePath(), false);

@@ -30,14 +30,17 @@ import com.google.gson.reflect.TypeToken;
 import com.zomdroid.game.GameInstance;
 import com.zomdroid.game.GameInstanceManager;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
@@ -376,7 +379,20 @@ public class InstallerService extends Service implements TaskProgressListener {
 
             boolean anyChanged = jre21Changed || jre25Changed || libsChanged || jarsChanged;
             if (!anyChanged) {
-                // Nothing to do — never posted an "in progress" state, so no dialog ever showed.
+                // Nothing to extract — but still record that the dependencies ARE installed:
+                // every bundle just passed a CRC32 check against the APK's own copy, which is a
+                // stronger statement than the flag itself makes.
+                //
+                // Skipping this write used to strand the launcher permanently. ZomdroidApplication
+                // clears ARE_DEPENDENCIES_INSTALLED on any versionCode change, and before this
+                // check existed a cleared flag always meant a full re-extract that set it again.
+                // Now a release that touches only code (not the asset bundles) leaves every bundle
+                // identical, so we land here, return without the flag, and LauncherFragment refuses
+                // to start the game - on this launch and on every launch after it, with no manual
+                // way out. Hit on 2026-08-01 going 1.4.7 -> 1.4.8; it would have hit every user of
+                // any code-only release.
+                prefs.edit().putBoolean(C.shprefs.keys.ARE_DEPENDENCIES_INSTALLED, true).apply();
+                // Never posted an "in progress" state, so no dialog ever showed.
                 finish(null, null);
                 return;
             }
@@ -916,6 +932,17 @@ public class InstallerService extends Service implements TaskProgressListener {
             writeLogUtf8(zos, "Zomdroid : " + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")\n");
             writeLogUtf8(zos, "Renderer : " + prefs.getRenderer().name() + "\n");
             writeLogUtf8(zos, "Driver   : " + driverStr + "\n");
+            // The two questions every NG_GL4ES "it just closes" report starts with: how much RAM
+            // does the device have, and did the player ever apply the Build 42 JVM preset. Both
+            // used to require digging through lastlog.txt, which is not always in the archive.
+            writeLogUtf8(zos, "RAM      : " + readRamSummary() + "\n");
+            // The rest of the memory treatment, in the same place as the RAM figure: the texture
+            // budget toggle and the resolution the renderer actually draws at.
+            writeLogUtf8(zos, "Memory   : saver " + (prefs.isMemorySaver() ? "ON" : "off")
+                    + ", render scale " + String.format(Locale.US, "%.2f", prefs.getRenderScale()) + "\n");
+            String jvmArgs = LauncherPreferences.squashWhitespace(prefs.getJvmArgs());
+            writeLogUtf8(zos, "JVM args : " + (jvmArgs.isEmpty() ? "(none)" : jvmArgs)
+                    + "  [" + LauncherPreferences.describeJvmArgsPreset(jvmArgs) + "]\n");
             writeLogUtf8(zos, "===========================\n");
             zos.closeEntry();
 
@@ -930,6 +957,42 @@ public class InstallerService extends Service implements TaskProgressListener {
             addFileToZip(zos, debugLog, "debuglog.txt");
             addFileToZip(zos, prevDebugLog, "debuglog_prev.txt");
         }
+    }
+
+    // Total/available RAM straight from /proc/meminfo. ActivityManager.MemoryInfo would give the
+    // same two numbers plus lowMemory, but writeLogReportZip is static and has no Context, and
+    // these two are what separates "killed for memory" from "crashed on its own". Note MemTotal is
+    // what the kernel manages, so an 8 GB device reports ~7.4 GB — treat it as the marketing size
+    // rounded up, not as an exact figure.
+    private static String readRamSummary() {
+        long totalKb = -1, availKb = -1;
+        try (BufferedReader r = new BufferedReader(new FileReader("/proc/meminfo"))) {
+            String line;
+            while ((line = r.readLine()) != null) {
+                if (line.startsWith("MemTotal:")) totalKb = parseMeminfoKb(line);
+                else if (line.startsWith("MemAvailable:")) availKb = parseMeminfoKb(line);
+                if (totalKb >= 0 && availKb >= 0) break;
+            }
+        } catch (Exception e) {
+            Log.w(LOG_TAG, "Failed to read /proc/meminfo: " + e);
+        }
+        if (totalKb < 0) return "unavailable";
+        String s = formatGb(totalKb) + " total";
+        if (availKb >= 0) s += ", " + formatGb(availKb) + " available";
+        return s;
+    }
+
+    // "MemTotal:        7654321 kB" -> 7654321, or -1 if the line is not shaped as expected.
+    private static long parseMeminfoKb(String line) {
+        try {
+            return Long.parseLong(line.split("\\s+")[1]);
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
+    private static String formatGb(long kb) {
+        return String.format(Locale.US, "%.1f GB", kb / 1048576.0);
     }
 
     // Newest "<date>_<time>_DebugLog.txt" directly inside `dir`, or null if there is none.

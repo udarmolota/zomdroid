@@ -57,6 +57,34 @@ public class LauncherPreferences {
                     + " -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20"
                     + " -XX:-OmitStackTraceInFastThrow";
 
+    // The Build 42 preset exactly as it shipped in 1.4.7, kept only so a bug report can tell
+    // "pressed the button, on the older build" apart from "typed something by hand". The stored
+    // JSON value wins over the constants above, so updating the app does NOT update an already
+    // applied preset — without this entry every pre-1.4.7v2 player reads as "custom" and the
+    // report loses the one fact worth knowing about them.
+    private static final String BUILD_42_JVM_ARGS_147 =
+            "-Xms512M -Xmx2048M -XX:MaxGCPauseMillis=120 -XX:ParallelGCThreads=6"
+                    + " -XX:ConcGCThreads=2 -XX:+UseStringDeduplication"
+                    + " -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20";
+
+    /**
+     * Short tag for the bug report: which of our presets the stored JVM args correspond to.
+     * Whitespace-insensitive, so a stray double space does not read as "custom".
+     */
+    public static String describeJvmArgsPreset(String args) {
+        String a = squashWhitespace(args);
+        if (a.isEmpty()) return "none";
+        if (a.equals(squashWhitespace(DEFAULT_JVM_ARGS))) return "default";
+        if (a.equals(squashWhitespace(BUILD_42_JVM_ARGS))) return "Build 42 preset";
+        if (a.equals(squashWhitespace(BUILD_42_JVM_ARGS_147)))
+            return "Build 42 preset, 1.4.7 revision - re-apply";
+        return "custom";
+    }
+
+    public static String squashWhitespace(String s) {
+        return s == null ? "" : s.trim().replaceAll("\\s+", " ");
+    }
+
     private float renderScale = 0.65f;
     private Renderer renderer = Renderer.GL4ES;
     private VulkanDriver vulkanDriver = VulkanDriver.SYSTEM_DEFAULT;

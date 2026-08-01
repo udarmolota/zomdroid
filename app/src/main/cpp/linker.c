@@ -23,6 +23,10 @@
 
 #define JNI_SIG_CACHE_SIZE 64
 
+// JVMS 4.6, method access_flags. GetMethodModifiers returns these; the JNI headers we bundle do
+// not declare the constant.
+#define JVM_ACC_NATIVE 0x0100
+
 typedef struct {
     char* sym;  // key
     char* sig;  // value (full method signature)
@@ -615,30 +619,67 @@ static char* method_signature_from_symbol_name(const char* sym) {
         LOGE("Failed to get methods for class %s", class_name);
         goto FAIL;
     }
+    // A JNI symbol can only ever bind to a NATIVE method, so anything else must be skipped even
+    // when the name matches. Without that filter a plain Java overload can win the lookup and its
+    // descriptor is what the trampoline gets built from. zombie.iso.LightingJNI ships both
+    //     native int getVisibleRooms(int, long[])  -> (I[J)I                -> "ppip"
+    //            ArrayList getVisibleRooms(int)    -> (I)Ljava/util/ArrayList; -> "ppi"
+    // and picking the second one leaves RCX - the jlongArray - never written, so the emulated
+    // library read whatever the previous emulated call had left there and died inside
+    // GetArrayLength on a pointer that was never a JNI reference (GetObjectRefType == INVALID,
+    // measured on device 2026-08-01). GetClassMethods does not specify an order, which is exactly
+    // why that crash floated: get the good order and the session is clean, get the other one and
+    // it dies on the first lighting frame after the world loads.
+    // The whole loop now runs to the end instead of breaking on the first hit - that is what lets
+    // us notice a genuinely ambiguous symbol instead of silently picking one.
+    int native_matches = 0;
     for (int a = 0; a < method_count; a++) {
         char* mName = NULL;
         char* mSig = NULL;
-        char match = false;
         jvmti_err = (*g_zomdroid_jvmti_env)->GetMethodName(g_zomdroid_jvmti_env, methods[a], &mName, &mSig, NULL);
         if (jvmti_err != JVMTI_ERROR_NONE) {
             LOGW("Failed to get method name, error code %d", jvmti_err);
             continue;
         }
-        if (strcmp(method_name, mName) == 0 && (method_sig_short == NULL || strstr(mSig, method_sig_short) != NULL)) {
-            target_method = methods[a];
-            method_sig = strdup(mSig);
-            match = true;
+        if (strcmp(method_name, mName) == 0) {
+            jint mods = 0;
+            jvmtiError mod_err = (*g_zomdroid_jvmti_env)->GetMethodModifiers(g_zomdroid_jvmti_env,
+                                                                             methods[a], &mods);
+            if (mod_err != JVMTI_ERROR_NONE) {
+                LOGW("Failed to get modifiers of %s, error code %d", mName, mod_err);
+            } else if (mods & JVM_ACC_NATIVE) {
+                // A long JNI name carries the argument list, and it is always a prefix of the
+                // full descriptor - match it as one instead of searching anywhere inside, where
+                // a class name in a later parameter could produce a false hit.
+                if (method_sig_short == NULL
+                    || strncmp(mSig, method_sig_short, strlen(method_sig_short)) == 0) {
+                    native_matches++;
+                    if (target_method == NULL) {
+                        target_method = methods[a];
+                        method_sig = strdup(mSig);
+                    }
+                }
+            }
         }
+        // Single exit path for the JVM TI allocations - no early continue may skip it.
         jvmti_err = (*g_zomdroid_jvmti_env)->Deallocate(g_zomdroid_jvmti_env, (unsigned char*)mName);
         if (jvmti_err != JVMTI_ERROR_NONE) LOGW("Failed to deallocate JVM TI memory, error code: %d", jvmti_err);
         jvmti_err = (*g_zomdroid_jvmti_env)->Deallocate(g_zomdroid_jvmti_env, (unsigned char*)mSig);
         if (jvmti_err != JVMTI_ERROR_NONE) LOGW("Failed to deallocate JVM TI memory, error code: %d", jvmti_err);
-        if (match) break;
     }
 
     if (target_method == NULL) {
         LOGE("Failed to find method %s with signature %s in class %s", method_name, (method_sig_short == NULL) ? "<null>" : method_sig_short, class_name);
         goto FAIL;
+    }
+
+    if (native_matches > 1) {
+        // Two native methods sharing a name can only be told apart by the long, argument-mangled
+        // symbol form; a short name here is unresolvable in principle. Keep the first match so a
+        // working setup does not regress, but never let it pass silently.
+        LOGE("Ambiguous JNI symbol %s: %d native methods named %s in %s. Using %s - the symbol "
+             "needs its long (argument-mangled) form to resolve deterministically.",
+             sym, native_matches, method_name, class_name, method_sig);
     }
 
     free(class_name);
@@ -790,6 +831,11 @@ void *dlsym(void *handle, const char *sym_name) {
                 free(method_sig);
                 return NULL;
             }
+            // One line per resolved symbol (~50 a session, resolution is cached afterwards).
+            // This is what makes an overload mix-up visible in a bug report instead of only
+            // showing up later as a crash: the box64 type string must have one letter per
+            // argument, e.g. getVisibleRooms(I[J)I -> "ppip" and never "ppi".
+            LOGI("[jni-bind] %s -> %s -> %s%c", sym_name, method_sig, arg_types, ret_type);
             free(method_sig);
 
             void* sym = zomdroid_emulation_bridge_jni_symbol(&jni_libs[i], box64_sym,

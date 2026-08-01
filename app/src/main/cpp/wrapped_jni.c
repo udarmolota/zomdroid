@@ -19,6 +19,55 @@ static void ensure_env() {
     }
 }
 
+// Diagnostic for the floating world-load crash: LightingJNI.getVisibleRooms(I[J)I dying inside
+// GetArrayLength on a torn oop (2026-07-29: 0x6d6f7a5f00000001, 2026-07-31: 0x0000007100000001 -
+// both with the low word stomped). A live JNI handle must be a non-null 8-aligned pointer whose
+// slot holds a non-null 8-aligned oop; with this JRE's compressed-oops layout real oops sit near
+// the 32GB heap base, far below 1<<37, while both observed corruptions carried pointer-sized or
+// unaligned garbage. Logs ONLY when an invariant is broken - the healthy path costs two compares
+// and stays silent, so it does not blur A/B testing of the trampoline fix. The call is left to
+// proceed (and crash) afterwards: surviving a corrupt handle would silently corrupt game state,
+// and this way the crash report carries the line right next to the SIGSEGV it explains.
+// Round 2 additions, after the value proved to be the CONSTANT 0x7100000001 across different
+// worlds and different handle addresses - so neither game data nor random garbage. Its shape is
+// (page-aligned pointer | 1), which is how HotSpot chains released slots in a JNIHandleBlock free
+// list. Two extra probes run only once a bad handle is seen:
+//   1. GetObjectRefType - the JVM's own verdict. JNIInvalidRefType proves the native side is
+//      holding a local reference the JVM already released, and points the fix at a global ref.
+//      JNILocalRefType would mean the reference is live and the slot got stomped instead.
+//   2. the neighbouring slots - a live JNIHandleBlock shows real oops (0x78xxxxxxxx here) or more
+//      free-list links; unrelated memory looks like neither.
+static void diag_dump_neighbours(uintptr_t h) {
+    // Stay inside the 4K page the handle sits in so a wild pointer cannot fault the diagnostic.
+    uintptr_t page = h & ~(uintptr_t) 0xFFF;
+    for (int i = -2; i <= 2; i++) {
+        uintptr_t p = h + (uintptr_t) (i * 8);
+        if (p < page || p + 8 > page + 0x1000) continue;
+        LOGE("[jni-diag]   slot%+d @%p = 0x%llx", i, (void*) p,
+             (unsigned long long) *(uint64_t*) p);
+    }
+}
+
+static void diag_check_array_handle(const char* fn, jarray array, void* caller) {
+    uintptr_t h = (uintptr_t) array;
+    if (h == 0 || (h & 7u) != 0) {
+        LOGE("[jni-diag] %s: bad array handle %p (caller %p)", fn, (void*) array, caller);
+        return;
+    }
+    uint64_t oop = *(uint64_t*) h;
+    if (oop == 0 || (oop & 7u) != 0 || oop >= (1ULL << 37)) {
+        LOGE("[jni-diag] %s: handle %p holds torn oop 0x%llx (caller %p)", fn, (void*) array,
+             (unsigned long long) oop, caller);
+        jobjectRefType t = (*g_zomdroid_jni_env)->GetObjectRefType(g_zomdroid_jni_env, array);
+        const char* name = (t == JNIInvalidRefType) ? "INVALID (already released)"
+                         : (t == JNILocalRefType) ? "local (still live)"
+                         : (t == JNIGlobalRefType) ? "global"
+                         : (t == JNIWeakGlobalRefType) ? "weak global" : "unknown";
+        LOGE("[jni-diag]   GetObjectRefType = %d, %s", (int) t, name);
+        diag_dump_neighbours(h);
+    }
+}
+
 __attribute__((visibility("default"), used))
 jint zomdroid_jni_GetVersion(__attribute__((unused)) JNIEnv *env) {
     ensure_env();
@@ -869,6 +918,7 @@ void zomdroid_jni_ReleaseStringUTFChars(__attribute__((unused)) JNIEnv *env, jst
 __attribute__((visibility("default"), used))
 jsize zomdroid_jni_GetArrayLength(__attribute__((unused)) JNIEnv *env, jarray array) {
     ensure_env();
+    diag_check_array_handle("GetArrayLength", array, __builtin_return_address(0));
     return (*g_zomdroid_jni_env)->GetArrayLength(g_zomdroid_jni_env, array);
 }
 
@@ -971,6 +1021,7 @@ jint * zomdroid_jni_GetIntArrayElements(__attribute__((unused)) JNIEnv *env, jin
 __attribute__((visibility("default"), used))
 jlong * zomdroid_jni_GetLongArrayElements(__attribute__((unused)) JNIEnv *env, jlongArray array, jboolean *isCopy) {
     ensure_env();
+    diag_check_array_handle("GetLongArrayElements", array, __builtin_return_address(0));
     return (*g_zomdroid_jni_env)->GetLongArrayElements(g_zomdroid_jni_env, array, isCopy);
 }
 
@@ -1175,6 +1226,7 @@ void zomdroid_jni_GetStringUTFRegion(__attribute__((unused)) JNIEnv *env, jstrin
 __attribute__((visibility("default"), used))
 void * zomdroid_jni_GetPrimitiveArrayCritical(__attribute__((unused)) JNIEnv *env, jarray array, jboolean *isCopy) {
     ensure_env();
+    diag_check_array_handle("GetPrimitiveArrayCritical", array, __builtin_return_address(0));
     return (*g_zomdroid_jni_env)->GetPrimitiveArrayCritical(g_zomdroid_jni_env, array, isCopy);
 }
 
