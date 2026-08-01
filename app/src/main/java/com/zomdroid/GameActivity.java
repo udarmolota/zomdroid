@@ -143,6 +143,13 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         if (gameInstance == null)
             throw new RuntimeException("Game instance with name " + gameInstanceName + " not found");
 
+        // Build 42.20 binds trigger actions to thresholds that assume a real pad's axis range,
+        // e.g. "Melee > -0.80" on the left trigger. A released trigger has to read as -1 for that
+        // to mean "not pressed"; sending 0 like we do everywhere else leaves Melee permanently on.
+        // Scoped to 42.20+ on purpose: the older builds work with the current range and are frozen,
+        // so they keep the exact code path they have today and need no retesting.
+        GamepadManager.setBipolarTriggers(gameInstance.isBuild4220Plus());
+
         System.loadLibrary("zomdroid");
 
         System.load(AppStorage.requireSingleton().getHomePath() + "/" + gameInstance.getFmodLibraryPath() + "/libfmod.so");

@@ -197,11 +197,13 @@ public abstract class AbstractControlElement {
         }
 
         if (binding == GLFWBinding.GAMEPAD_LTRIGGER) {
-          InputNativeInterface.sendJoystickAxis(GLFWBinding.GAMEPAD_AXIS_LT.code, isPressed ? 1f : 0f);
+          InputNativeInterface.sendJoystickAxis(GLFWBinding.GAMEPAD_AXIS_LT.code,
+                  GamepadManager.scaleTrigger(isPressed ? 1f : 0f));
           return;
         }
         if (binding == GLFWBinding.GAMEPAD_RTRIGGER) {
-          InputNativeInterface.sendJoystickAxis(GLFWBinding.GAMEPAD_AXIS_RT.code, isPressed ? 1f : 0f);
+          InputNativeInterface.sendJoystickAxis(GLFWBinding.GAMEPAD_AXIS_RT.code,
+                  GamepadManager.scaleTrigger(isPressed ? 1f : 0f));
           return;
         }
 

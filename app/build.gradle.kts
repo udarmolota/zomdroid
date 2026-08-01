@@ -39,7 +39,7 @@ android {
         minSdk = 30
         targetSdk = 35
         versionCode = 147
-        versionName = "1.4.7v2"
+        versionName = "1.4.7v4"
 
         // JavaSteam + protobuf + kotlin stack push past the 64K method limit.
         multiDexEnabled = true

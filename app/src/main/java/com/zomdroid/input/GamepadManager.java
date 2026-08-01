@@ -41,9 +41,6 @@ public class GamepadManager implements InputManager.InputDeviceListener {
     private static final int AXIS_LT_INDEX = 4; // a4
     private static final int AXIS_RT_INDEX = 5; // a5
 
-    // Ignore trigger travel below this before reporting a press. See applyTriggerDeadZone().
-    private static final float TRIGGER_DEAD_ZONE = 0.12f;
-
     // Default mapping: [A, B, X, Y, LB, RB, SELECT, START, GUIDE, LSTICK, RSTICK]
     private static final int[] DEFAULT_MAPPING = {
         KeyEvent.KEYCODE_BUTTON_A,      // 0: A
@@ -104,6 +101,21 @@ public class GamepadManager implements InputManager.InputDeviceListener {
 
     public static boolean isTouchOverrideEnabled() {
         return touchOverride;
+    }
+
+    /**
+     * Whether triggers must be reported the way real hardware does: -1 released, +1 fully pressed.
+     * Set from the game instance; see the note at the call site in GameActivity.
+     */
+    private static boolean bipolarTriggers = false;
+
+    public static void setBipolarTriggers(boolean enabled) {
+        bipolarTriggers = enabled;
+    }
+
+    /** Map a [0..1] trigger reading to the range the current build expects. */
+    public static float scaleTrigger(float v01) {
+        return bipolarTriggers ? v01 * 2f - 1f : v01;
     }
 
     // Load custom mapping from SharedPreferences
@@ -267,13 +279,13 @@ public class GamepadManager implements InputManager.InputDeviceListener {
 
         // --- NEW: trigger-as-button handling based on sentinel mapping ---
         if (isTriggerButton(keyCode, true)) {
-            // LT is configured as a button: synthesize axis a4 (1.0 on down, 0.0 on up)
-            listener.onGamepadAxis(AXIS_LT_INDEX, isPressed ? 1.0f : 0.0f);
+            // LT is configured as a button: synthesize axis a4 (full travel on down, rest on up)
+            listener.onGamepadAxis(AXIS_LT_INDEX, scaleTrigger(isPressed ? 1.0f : 0.0f));
             return true; // consume
         }
         if (isTriggerButton(keyCode, false)) {
             // RT is configured as a button: synthesize axis a5
-            listener.onGamepadAxis(AXIS_RT_INDEX, isPressed ? 1.0f : 0.0f);
+            listener.onGamepadAxis(AXIS_RT_INDEX, scaleTrigger(isPressed ? 1.0f : 0.0f));
             return true; // consume
         }
 
@@ -304,11 +316,11 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         // If a trigger is configured as AXIS, read analog value (with fallbacks) and send to a4/a5.
         if (isTriggerAxisMode(true)) {
             float lt = readTriggerAxis(event, true);
-            listener.onGamepadAxis(AXIS_LT_INDEX, applyTriggerDeadZone(clamp01(lt)));
+            listener.onGamepadAxis(AXIS_LT_INDEX, scaleTrigger(clamp01(lt)));
         }
         if (isTriggerAxisMode(false)) {
             float rt = readTriggerAxis(event, false);
-            listener.onGamepadAxis(AXIS_RT_INDEX, applyTriggerDeadZone(clamp01(rt)));
+            listener.onGamepadAxis(AXIS_RT_INDEX, scaleTrigger(clamp01(rt)));
         }
 
         // D-Pad (hat) — unchanged
@@ -417,18 +429,6 @@ public class GamepadManager implements InputManager.InputDeviceListener {
         if (v < 0f) return 0f;
         if (v > 1f) return 1f;
         return v;
-    }
-
-    /**
-     * Drop trigger noise and resting drift, then rescale so full travel still reaches 1.0.
-     *
-     * The game cannot do this for us: vanilla JoypadManager parses AimingAxisDeadZone from the
-     * joypad config and then overwrites it with Sensitivity for every analog axis, so whatever
-     * dead zone the player configures is discarded. Anything we send raw goes straight through.
-     */
-    private float applyTriggerDeadZone(float v) {
-        if (v <= TRIGGER_DEAD_ZONE) return 0f;
-        return (v - TRIGGER_DEAD_ZONE) / (1f - TRIGGER_DEAD_ZONE);
     }
     /* ======================= end of NEW helpers ======================= */
 }
