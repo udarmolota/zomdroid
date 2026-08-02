@@ -36,10 +36,10 @@ android {
 
     defaultConfig {
         applicationId = "com.zomdroid"
-        minSdk = 30
-        targetSdk = 35
-        versionCode = 3
-        versionName = "1.2.0"
+        minSdk = 28
+        targetSdk = 28
+        versionCode = 6
+        versionName = "1.2.9.v5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -87,6 +87,7 @@ android {
     packaging {
         jniLibs {
             useLegacyPackaging = true
+            keepDebugSymbols += listOf("**/libjava_exec.so", "**/libbox64_exec.so")
         }
     }
     ndkVersion = "28.0.13004108"

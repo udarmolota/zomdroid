@@ -75,8 +75,13 @@ public class GameLauncher {
         args.add("-debuglog=Shader");*/
 
         String javaHomePath = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.JRE;
-        String ldLibraryPath = AppStorage.requireSingleton().getLibraryPath() + ":/system/lib64:"
+        String nativeLibDir = AppStorage.requireSingleton().getLibraryPath();
+        String ldLibraryPath = nativeLibDir + ":/system/lib64:"
                 + javaHomePath + "/lib:" + javaHomePath + "/lib/server:" + gameInstance.getJavaLibraryPath();
+        
+        String agentPath = javaHomePath + "/lib/zomdroid-agent.jar";
+        jvmArgs.add("-javaagent:" + agentPath + "=" + nativeLibDir);
+
         GameLauncher.startGame(gameInstance.getGamePath(), ldLibraryPath, jvmArgs.toArray(new String[0]),
                 gameInstance.getMainClassName(), args.toArray(new String[0]));
     }
