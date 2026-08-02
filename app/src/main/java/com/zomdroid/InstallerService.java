@@ -49,6 +49,8 @@ import java.util.concurrent.Executors;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -1351,9 +1353,9 @@ public class InstallerService extends Service implements TaskProgressListener {
                     }
                     Log.d("ModFix", "Processing mod: " + modName + " (isBuild42=" + isBuild42 + ")");
 
-                    // Step 4: Check if inception copy needed (scripts/ folder)
-                    boolean needsInception = needsLowercaseFix(modRoot);
-                    Log.d("ModFix", "  needsInception: " + needsInception);
+                    // Step 4: the case workaround is applied unconditionally now. Gating it on a
+                    // scripts/ folder left every mod that only overrides fbx/xml/lua broken, and
+                    // aliases are free, so there is nothing left to gate on.
 
                     // Step 5: Merge 42.x version folders if B42
                     //if (isBuild42) {
@@ -1366,15 +1368,8 @@ public class InstallerService extends Service implements TaskProgressListener {
                     copyDirectory(modRoot, normalDest);
                     Log.d("ModFix", "  Installed normal: " + normalDest.getAbsolutePath());
 
-                    // Step 7: If scripts/ present, also install lowercase inception copy
-                    if (needsInception) {
-                        inceptionDir.mkdirs();
-                        String lowerName = modName.toLowerCase();
-                        File lowerDest = new File(inceptionDir, lowerName);
-                        if (lowerDest.exists()) FileUtils.deleteDirectory(lowerDest);
-                        copyDirectoryLowercase(modRoot, lowerDest);
-                        Log.d("ModFix", "  Installed lowercase: " + lowerDest.getAbsolutePath());
-                    }
+                    // Step 7: lowercase aliases inside the mod + the doubled-path link
+                    applyCaseWorkaround(normalDest, new File(modsPath), gameInstance.getName());
                 }
 
                 finish(getString(R.string.mod_fix_installed), null);
@@ -1384,6 +1379,75 @@ public class InstallerService extends Service implements TaskProgressListener {
                 try { FileUtils.deleteDirectory(tmpDir); } catch (Exception ignored) {}
             }
         });
+    }
+
+    // -------------------- CASE-SENSITIVITY WORKAROUND --------------------
+    // Build 42.13 regressed mod file lookup on case-sensitive filesystems - 41.78 is fine. It is
+    // reported to the Indie Stone ("[42.13] Regression in Build 42.13: Linux filename
+    // case-sensitivity issue") and still open, so this is ours to carry. Two distinct lookups
+    // fail and each needs its own answer:
+    //
+    //   1. The file is requested in lowercase: "media/scripts/recipes/recipes_ladders.txt" while
+    //      the mod ships "recipes_Ladders.txt". Answered by giving every capitalised entry a
+    //      lowercase alias beside it. The multiplayer client check compares the same relative
+    //      path, so the aliases have to live in the real mod folder - a copy off to the side is
+    //      why joining a server still failed.
+    //
+    //   2. The mod's whole absolute path is lowercased and appended to the mods root, yielding
+    //      "<mods>/data/user/0/.../zomboid/mods/<mod>/...". No amount of aliasing inside the mod
+    //      creates that prefix, so the prefix is materialised and its last component points back
+    //      at the real mod.
+    //
+    // Both are symlinks. Measured on the Ladders mod: 206 aliases plus one mod link added 0 KB,
+    // where the lowercase copy this replaces cost 1.2 MB - exactly the size of the mod.
+    private void applyCaseWorkaround(File modDir, File modsDir, String instanceName) {
+        int aliases = createLowercaseAliases(modDir);
+
+        File inceptionDir = new File(modsDir, "data/user/0/com.zomdroid/files/instances/"
+                + instanceName.toLowerCase(Locale.US) + "/zomboid/mods");
+        inceptionDir.mkdirs();
+        File modLink = new File(inceptionDir, modDir.getName().toLowerCase(Locale.US));
+        // Clears a stale link, and equally the full copy left behind by installs made before this
+        // existed - deleteDirectory drops a link without touching what it points at.
+        if (modLink.exists() || Files.isSymbolicLink(modLink.toPath()))
+            FileUtils.deleteDirectory(modLink);
+        try {
+            Files.createSymbolicLink(modLink.toPath(), modDir.toPath());
+        } catch (IOException | UnsupportedOperationException e) {
+            Log.w(LOG_TAG, "Failed to link " + modLink + " -> " + modDir, e);
+        }
+
+        Log.i(LOG_TAG, "Case workaround for " + modDir.getName() + ": " + aliases + " alias(es)");
+    }
+
+    /** Give every entry whose name is not already lowercase a lowercase alias beside it. */
+    private int createLowercaseAliases(File root) {
+        List<File> entries = new ArrayList<>();
+        collectMixedCaseEntries(root, entries);
+        int created = 0;
+        for (File entry : entries) {
+            File alias = new File(entry.getParentFile(), entry.getName().toLowerCase(Locale.US));
+            if (alias.exists() || Files.isSymbolicLink(alias.toPath())) continue;
+            try {
+                // Relative target: the alias keeps working if the tree is moved or renamed.
+                Files.createSymbolicLink(alias.toPath(), Paths.get(entry.getName()));
+                created++;
+            } catch (IOException | UnsupportedOperationException e) {
+                Log.w(LOG_TAG, "Failed to alias " + alias, e);
+            }
+        }
+        return created;
+    }
+
+    // The whole tree is collected before a single alias is created, so the walk never meets one.
+    private void collectMixedCaseEntries(File dir, List<File> out) {
+        File[] files = dir.listFiles();
+        if (files == null) return;
+        for (File f : files) {
+            if (Files.isSymbolicLink(f.toPath())) continue;
+            if (!f.getName().equals(f.getName().toLowerCase(Locale.US))) out.add(f);
+            if (f.isDirectory()) collectMixedCaseEntries(f, out);
+        }
     }
 
     // -------------------- MOD FIX HELPERS --------------------
@@ -1458,19 +1522,6 @@ public class InstallerService extends Service implements TaskProgressListener {
     }
 
 
-    // Returns true if mod needs a lowercase inception copy:
-    // - has a scripts/ folder (causes double-path issues on Android)
-    private boolean needsLowercaseFix(File dir) {
-        String name = dir.getName();
-        if (name.equals("scripts") && dir.isDirectory()) return true;
-        File[] children = dir.listFiles();
-        if (children == null) return false;
-        for (File f : children) {
-            if (f.isDirectory() && needsLowercaseFix(f)) return true;
-        }
-        return false;
-    }
-
     // Extract mod name from ZIP filename via ContentResolver
     private String extractZipName(Uri uri) {
         String name = null;
@@ -1500,7 +1551,7 @@ public class InstallerService extends Service implements TaskProgressListener {
     }
 
     private static File[] listDirs(File root) {
-        File[] dirs = root.listFiles(File::isDirectory);
+        File[] dirs = root.listFiles(FileUtils::isWalkableDirectory);
         return (dirs == null) ? new File[0] : dirs;
     }
 
@@ -1517,29 +1568,18 @@ public class InstallerService extends Service implements TaskProgressListener {
     }
 
     // Copy directory recursively
+    // Symlinks are skipped rather than followed in every copy below: following one duplicates the
+    // data it points at, and a link aimed at an ancestor never terminates. The lowercase aliases we
+    // place inside a mod are regenerated at the destination, so nothing is lost by dropping them.
     private void copyDirectory(File src, File dst) throws IOException {
         dst.mkdirs();
         File[] files = src.listFiles();
         if (files == null) return;
         for (File f : files) {
+            if (Files.isSymbolicLink(f.toPath())) continue;
             File target = new File(dst, f.getName());
             if (f.isDirectory()) {
                 copyDirectory(f, target);
-            } else {
-                copyFile(f, target);
-            }
-        }
-    }
-
-    // Copy directory recursively, all names lowercased
-    private void copyDirectoryLowercase(File src, File dst) throws IOException {
-        dst.mkdirs();
-        File[] files = src.listFiles();
-        if (files == null) return;
-        for (File f : files) {
-            File target = new File(dst, f.getName().toLowerCase());
-            if (f.isDirectory()) {
-                copyDirectoryLowercase(f, target);
             } else {
                 copyFile(f, target);
             }
@@ -1552,6 +1592,7 @@ public class InstallerService extends Service implements TaskProgressListener {
         File[] files = src.listFiles();
         if (files == null) return;
         for (File f : files) {
+            if (Files.isSymbolicLink(f.toPath())) continue;
             File target = new File(dst, f.getName());
             if (f.isDirectory()) {
                 copyDirectoryNoOverwrite(f, target);
@@ -1847,7 +1888,7 @@ public class InstallerService extends Service implements TaskProgressListener {
     // Recursively locate the game root (this dir or a descendant). null if none found.
     private File findGameRoot(File dir) {
         if (isGameRoot(dir)) return dir;
-        File[] children = dir.listFiles(File::isDirectory);
+        File[] children = dir.listFiles(FileUtils::isWalkableDirectory);
         if (children == null) return null;
         for (File child : children) {
             File found = findGameRoot(child);
@@ -1957,9 +1998,8 @@ public class InstallerService extends Service implements TaskProgressListener {
                         modName = modName.substring(0, modName.length() - 4);
                 }
 
-                // Step 4: Check if inception copy needed
-                boolean needsInception = needsLowercaseFix(modRoot);
-                Log.d("SmartMod", "needsInception=" + needsInception + ", isBuild42=" + isBuild42);
+                // Step 4: the case workaround is applied unconditionally now - see applyCaseWorkaround.
+                Log.d("SmartMod", "isBuild42=" + isBuild42);
 
                 // Step 5: Merge 42.x version folders if B42
                 //if (isBuild42) {
@@ -1998,33 +2038,10 @@ public class InstallerService extends Service implements TaskProgressListener {
                     }
                 }
 
-                // Step 7: If needed, install lowercase inception copy
-                if (needsInception) {
-                    String inceptionRelPath = "data/user/0/com.zomdroid/files/instances/"
-                            + instanceName.toLowerCase() + "/zomboid/mods";
-                    File inceptionDir = new File(modsDir, inceptionRelPath);
-                    inceptionDir.mkdirs();
-                    String lowerName = modName.toLowerCase();
-                    File lowerDest = new File(inceptionDir, lowerName);
-                    if (lowerDest.exists()) FileUtils.deleteDirectory(lowerDest);
-                    copyDirectoryLowercase(modRoot, lowerDest);
-                    Log.d("SmartMod", "Installed lowercase: " + lowerDest.getAbsolutePath());
-
-                    // Expand common/ into version folders for inception copy too
-                    File commonDirLower = new File(lowerDest, "common");
-                    if (commonDirLower.exists() && commonDirLower.isDirectory()) {
-                        File[] versionDirs = lowerDest.listFiles(File::isDirectory);
-                        if (versionDirs != null) {
-                            for (File vd : versionDirs) {
-                                String name = vd.getName();
-                                if (name.equals("42") || name.startsWith("42.") ||
-                                    name.equals("41") || name.startsWith("41.")) {
-                                    copyDirectoryNoOverwrite(commonDirLower, vd);
-                                }
-                            }
-                        }
-                    }
-                }
+                // Step 7: lowercase aliases inside the mod + the doubled-path link. The common/
+                // expansion above already ran on the real mod, and the link points at it, so the
+                // second expansion the lowercase copy used to need is gone with the copy.
+                applyCaseWorkaround(normalDest, modsDir, instanceName);
 
                 finish(getString(R.string.install_mod_smart_done), null);
 
@@ -2043,7 +2060,7 @@ public class InstallerService extends Service implements TaskProgressListener {
         File[] children = dir.listFiles();
         if (children == null) return null;
         for (File child : children) {
-            if (child.isDirectory()) {
+            if (FileUtils.isWalkableDirectory(child)) {
                 File found = findModRoot(child);
                 if (found != null) return found;
             }
@@ -2241,7 +2258,7 @@ public class InstallerService extends Service implements TaskProgressListener {
         File[] children = dir.listFiles();
         if (children == null) return;
         for (File child : children) {
-            if (child.isDirectory()) collectModRoots(child, result);
+            if (FileUtils.isWalkableDirectory(child)) collectModRoots(child, result);
         }
     }
 
@@ -2289,7 +2306,7 @@ public class InstallerService extends Service implements TaskProgressListener {
         File[] files = dir.listFiles();
         if (files == null) return null;
         for (File f : files) {
-            if (f.isDirectory()) {
+            if (FileUtils.isWalkableDirectory(f)) {
                 if (f.getName().equals("textures")) return f;
                 File found = findTexturesFolderRecursive(f);
                 if (found != null) return found;
@@ -2463,7 +2480,7 @@ public class InstallerService extends Service implements TaskProgressListener {
         if (files == null) return null;
         for (File f : files) {
             if (f.isFile() && f.getName().equals(fileName)) return f;
-            if (f.isDirectory()) {
+            if (FileUtils.isWalkableDirectory(f)) {
                 File found = findFileRecursive(f, fileName);
                 if (found != null) return found;
             }
@@ -2476,7 +2493,7 @@ public class InstallerService extends Service implements TaskProgressListener {
         File[] files = dir.listFiles();
         if (files == null) return;
         for (File f : files) {
-            if (f.isDirectory()) {
+            if (FileUtils.isWalkableDirectory(f)) {
                 commentOutJavaJarFileRecursive(f);
             } else if (f.getName().equals("mod.info")) {
                 commentOutJavaJarFile(f);

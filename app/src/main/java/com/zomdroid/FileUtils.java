@@ -129,12 +129,27 @@ public class FileUtils {
         }
     }
 
+    /**
+     * True for a directory we may recurse into. A symbolic link to a directory answers
+     * {@code isDirectory()} with true, so every recursive walk has to ask this instead - following
+     * one means leaving the tree we were asked to work on, and a link that points at an ancestor
+     * turns the walk into an endless loop.
+     */
+    public static boolean isWalkableDirectory(File file) {
+        return file.isDirectory() && !Files.isSymbolicLink(file.toPath());
+    }
+
     public static boolean deleteDirectory(File directory) {
+        // The argument itself can be a link - listFiles() would then hand us the contents of
+        // whatever it points at. Drop the link and leave the target alone.
+        if (Files.isSymbolicLink(directory.toPath())) return directory.delete();
         if (directory.exists()) {
             File[] files = directory.listFiles();
             if (files != null) {
                 for (File file : files) {
-                    if (file.isDirectory()) {
+                    // A symlink is deleted as a plain entry: recursing would wipe whatever it
+                    // points at, which lives outside the directory we were told to remove.
+                    if (isWalkableDirectory(file)) {
                         deleteDirectory(file);
                     } else {
                         file.delete();
