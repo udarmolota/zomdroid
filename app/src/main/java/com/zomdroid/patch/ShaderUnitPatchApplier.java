@@ -16,8 +16,11 @@ import java.io.InputStream;
  * (GameLauncher) — the launch-time call picks up instances that were created by an older
  * launcher whose md5-table didn't know their game version (e.g. 42.12.2, 42.13–42.18).
  *
- * Cheap and self-quenching: once the .bak exists (or there is nothing to patch) every later
- * call is a single stat/no-op, so running it on every launch costs nothing.
+ * Whether the work is still needed is decided by reading the class, never by the presence of the
+ * .bak: a game updated in place over a patched instance leaves our .bak next to a fresh unpatched
+ * class, and a .bak used as a "done" marker would silence us for good on exactly the instance
+ * that needs patching again. Re-reading costs one 12 KB file per launch, and the patcher reports
+ * nothing to do once its own output is in place.
  */
 public final class ShaderUnitPatchApplier {
     private static final String LOG_TAG = ShaderUnitPatchApplier.class.getName();
@@ -32,7 +35,6 @@ public final class ShaderUnitPatchApplier {
         if (!target.exists()) return;
 
         File bak = new File(target.getParentFile(), "ShaderUnit.class.bak");
-        if (bak.exists()) return; // already patched
 
         byte[] original;
         String md5; // kept purely as "what we saw in the field" telemetry in the log
@@ -47,13 +49,23 @@ public final class ShaderUnitPatchApplier {
         byte[] patched = ShaderUnitPatcher.patch(original);
         ShaderUnitPatcher.Result r = ShaderUnitPatcher.lastResult();
         if (patched == null) {
+            // With a .bak beside it this is our own output being recognised - the steady state.
+            if (bak.isFile()) return;
+            // Without one we have never touched this class and cannot: either the flag already
+            // ships set, or the layout moved again and the patcher needs a new family. That
+            // second case is how a future PZ version would break NG_GL4ES silently, so say it.
             Log.w(LOG_TAG, "ShaderUnit patch: nothing to patch (family=" + r.family
-                    + ", md5=" + md5 + ") — leaving class untouched");
+                    + ", field=" + r.fieldName + ", md5=" + md5 + ") — leaving class untouched");
             return;
         }
 
-        if (!target.renameTo(bak)) {
-            Log.e(LOG_TAG, "ShaderUnit patch: failed to save original as .bak");
+        // A stale .bak from an earlier install is replaced: it must mirror the class that is
+        // actually here now, otherwise restoring it would resurrect a different game version.
+        try {
+            java.nio.file.Files.move(target.toPath(), bak.toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "ShaderUnit patch: failed to save original as .bak", e);
             return;
         }
 

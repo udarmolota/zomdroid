@@ -21,8 +21,10 @@ public final class FmodLoadPatchApplier {
         File target = new File(gameInstance.getGamePath(), "fmod/javafmodJNI.class");
         if (!target.isFile()) return;
 
+        // Need is decided by reading the class, not by the backup being there: a game updated in
+        // place over a patched instance leaves our .bak beside a fresh unpatched class, and a
+        // .bak treated as a "done" marker would silence us on exactly that instance.
         File backup = new File(target.getParentFile(), "javafmodJNI.class.zomdroid-4220.bak");
-        if (backup.exists()) return;
 
         byte[] original;
         try {
@@ -35,13 +37,20 @@ public final class FmodLoadPatchApplier {
         byte[] patched = FmodLoadPatcher.patch(original);
         FmodLoadPatcher.Result result = FmodLoadPatcher.lastResult();
         if (patched == null) {
+            // The patcher has no already-patched flag, so the backup tells the two apart: with
+            // one beside it, "no matching calls" means our own output is still in place.
+            if (backup.isFile()) return;
             String reason = result.error == null ? "no matching calls" : result.error;
             Log.w(LOG_TAG, "FMOD patch: class left untouched: " + reason);
             return;
         }
 
-        if (!target.renameTo(backup)) {
-            Log.e(LOG_TAG, "FMOD patch: failed to save original as " + backup.getName());
+        // Replace a stale backup: it must mirror the class that is actually installed now.
+        try {
+            Files.move(target.toPath(), backup.toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "FMOD patch: failed to save original as " + backup.getName(), e);
             return;
         }
 
