@@ -37,6 +37,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -285,6 +286,8 @@ public class InstallerService extends Service implements TaskProgressListener {
                 maybePatchPrintSpecsFor4215(gameInstance);
                 // B42: patch ShaderUnit to enable combineShaderSources (required for NG_GL4ES)
                 maybePatchShaderUnitCombine(gameInstance);
+                // 42.15+: restore the two field names the stale Android RakNet still looks up
+                maybePatchZNetStatisticsFor4215Plus(gameInstance);
 
             } catch (Exception e) {
                 finishWithError(getString(R.string.dialog_title_failed_to_create_instance), e.toString());
@@ -945,6 +948,11 @@ public class InstallerService extends Service implements TaskProgressListener {
             String jvmArgs = LauncherPreferences.squashWhitespace(prefs.getJvmArgs());
             writeLogUtf8(zos, "JVM args : " + (jvmArgs.isEmpty() ? "(none)" : jvmArgs)
                     + "  [" + LauncherPreferences.describeJvmArgsPreset(jvmArgs) + "]\n");
+            // Env vars matter as much as the JVM args: knobs like LIBGL_SHRINK, LIBGL_TEXBUDGET and
+            // ZINK_DEBUG travel around chats as folklore, and without this line a report gives no
+            // way to tell an actual finding from something the player pasted in on someone's advice.
+            String envVars = LauncherPreferences.squashWhitespace(prefs.getEnvVars());
+            writeLogUtf8(zos, "Env vars : " + (envVars.isEmpty() ? "(none)" : envVars) + "\n");
             writeLogUtf8(zos, "===========================\n");
             zos.closeEntry();
 
@@ -1830,6 +1838,86 @@ public class InstallerService extends Service implements TaskProgressListener {
         }
 
         Log.i(LOG_TAG, "printSpecs patch applied: " + patchAsset + " (size=" + classSize + ")");
+    }
+
+    // 42.15+: multiplayer dies on join with
+    //   NoSuchFieldError: zombie.core.znet.ZNetStatistics.BPSLimitByOutgoingBandwidthLimit J
+    //       at RakNetPeerInterface.GetNetStatistics (Native Method)
+    //
+    // Build 42.15 renamed two fields of ZNetStatistics — BPSLimitByCongestionControl and
+    // BPSLimitByOutgoingBandwidthLimit became bpsLimit... — and rebuilt the *Linux* libRakNet64.so
+    // to match. The Android arm64 one was never rebuilt: it is byte-identical to the 42.12.1 build
+    // in 42.15.1 and 42.20 alike, so its JNI lookup still asks for the old names, fails, and kills
+    // MainThread on the first network-statistics update after entering the world.
+    //
+    // The bundled class re-adds those two names as plain public long fields. The native writes into
+    // them, nothing reads them, and every other statistic keeps working because no other field name
+    // changed. Cost: the two bandwidth-limit numbers read as zero.
+    //
+    // Only bites on servers that actually collect statistics (StatisticManager is gated by the
+    // server's statisticTransmissionEnabled / prometheusEnabled options), which is why private
+    // servers with no monitoring have always worked and public ones crash.
+    private void maybePatchZNetStatisticsFor4215Plus(GameInstance gameInstance) {
+        File target = new File(gameInstance.getGamePath(),
+                "zombie/core/znet/ZNetStatistics.class");
+        if (!target.exists()) return;
+
+        File disabled = new File(gameInstance.getGamePath(),
+                "zombie/core/znet/ZNetStatistics.class.disabled");
+
+        // Already patched
+        if (disabled.exists()) return;
+
+        // Detect by content, not size: a build whose class still carries the old field name needs
+        // nothing from us (42.12 and earlier, where the shipped native matches).
+        try {
+            if (classContainsUtf8(target, "BPSLimitByOutgoingBandwidthLimit")) {
+                Log.i(LOG_TAG, "ZNetStatistics already has the legacy field names, no patch needed");
+                return;
+            }
+        } catch (IOException e) {
+            Log.w(LOG_TAG, "ZNetStatistics patch: cannot read class, skipping", e);
+            return;
+        }
+
+        if (!target.renameTo(disabled)) {
+            Log.e(LOG_TAG, "ZNetStatistics patch: failed to rename original class");
+            return;
+        }
+
+        // One asset serves 42.15.1 and 42.20 alike: their ZNetStatistics.class is byte-identical.
+        String patchAsset = "patches/ZNetStatistics_4220_patched.class";
+        try (InputStream src = getAssets().open(patchAsset);
+             FileOutputStream out = new FileOutputStream(target)) {
+            byte[] buf = new byte[4096];
+            int n;
+            while ((n = src.read(buf)) != -1) out.write(buf, 0, n);
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Failed to apply ZNetStatistics patch, asset=" + patchAsset, e);
+            disabled.renameTo(target);
+            return;
+        }
+
+        Log.i(LOG_TAG, "ZNetStatistics patch applied: " + patchAsset);
+    }
+
+    // True when the class file's constant pool contains `text` as a UTF8 entry. Field and method
+    // names live there as plain ASCII, so a byte scan is enough and needs no class parser.
+    private static boolean classContainsUtf8(File classFile, String text) throws IOException {
+        byte[] needle = text.getBytes(StandardCharsets.US_ASCII);
+        byte[] data = new byte[(int) classFile.length()];
+        try (FileInputStream in = new FileInputStream(classFile)) {
+            int off = 0, n;
+            while (off < data.length && (n = in.read(data, off, data.length - off)) != -1) off += n;
+        }
+        outer:
+        for (int i = 0; i <= data.length - needle.length; i++) {
+            for (int j = 0; j < needle.length; j++) {
+                if (data[i + j] != needle[j]) continue outer;
+            }
+            return true;
+        }
+        return false;
     }
 
     // 42.13+: extract projectzomboid.jar if present (new fat-jar structure)

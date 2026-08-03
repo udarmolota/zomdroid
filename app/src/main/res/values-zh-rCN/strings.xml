@@ -123,9 +123,9 @@
     <string name="gamepad_mapper_button_dpad_right">方向键右</string>
 
     <!-- Native Libraries -->
-    <string name="game_instance_native_libs_label">原生库 (.zip)</string>
-    <string name="game_instance_no_native_libs_selected">请选择原生库 ZIP（多人游戏可选）</string>
-    <string name="game_instance_browse_native_libs">浏览原生库 ZIP</string>
+    <string name="game_instance_native_libs_label">B41 原生库 (.zip)</string>
+    <string name="game_instance_no_native_libs_selected">请选择原生库 ZIP（可选，仅用于 B41 多人游戏）</string>
+    <string name="game_instance_browse_native_libs">浏览原生库 ZIP（B41）</string>
 
     <!-- Saves -->
     <string name="game_instance_saves_label">存档文件 (.zip)</string>
@@ -314,7 +314,7 @@
     <string name="bug_report_no_mail">此设备上未找到邮件应用。</string>
 
     <!-- New instance -->
-    <string name="native_libs_dialog_title">原生库（可选）</string>
+    <string name="native_libs_dialog_title">B41 原生库（可选）</string>
     <string name="native_libs_dialog_message">原生库是来自42.12版本的文件，主要包含两个文件：\n\n🌐 libRakNet64.so\n🌐 libZNetNoSteam64.so\n\n这些文件是41.78版本多人游戏支持所必需的。详情请查阅Wiki。</string>
     <string name="dialog_button_wiki">Wiki</string>
 

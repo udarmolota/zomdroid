@@ -158,9 +158,9 @@
     <string name="gamepad_mapper_button_dpad_right">D-Pad Right</string>
 
     <!-- Native Libraries -->
-    <string name="game_instance_native_libs_label">Native Libraries (.zip)</string>
-    <string name="game_instance_no_native_libs_selected">Please select native libraries ZIP (opt. for MP)</string>
-    <string name="game_instance_browse_native_libs">Browse native libraries ZIP</string>
+    <string name="game_instance_native_libs_label">Native Libraries for B41 (.zip)</string>
+    <string name="game_instance_no_native_libs_selected">Please select native libraries ZIP (opt., for MP on B41 only)</string>
+    <string name="game_instance_browse_native_libs">Browse native libraries ZIP (B41)</string>
 
     <!-- Saves -->
     <string name="game_instance_saves_label">Save file (.zip)</string>
@@ -364,7 +364,7 @@
     <string name="bug_report_no_mail">No email app found on this device.</string>
 
     <!-- New instance -->
-    <string name="native_libs_dialog_title">Native libraries (optional)</string>
+    <string name="native_libs_dialog_title">Native libraries for B41 (optional)</string>
     <string name="native_libs_dialog_message">Native libraries are files from build 42.12. These are mainly two files:\n\n🌐 libRakNet64.so\n🌐 libZNetNoSteam64.so\n\nThey are required for multiplayer support on build 41.78. You can read more about them on the Wiki.</string>
     <string name="dialog_button_wiki">Wiki</string>
 

@@ -122,9 +122,9 @@
     <string name="gamepad_mapper_button_dpad_right">D-Pad Kanan</string>
 
     <!-- Native Libraries -->
-    <string name="game_instance_native_libs_label">Library Native (.zip)</string>
-    <string name="game_instance_no_native_libs_selected">Pilih ZIP library native (opsional untuk MP)</string>
-    <string name="game_instance_browse_native_libs">Cari ZIP library native</string>
+    <string name="game_instance_native_libs_label">Library Native untuk B41 (.zip)</string>
+    <string name="game_instance_no_native_libs_selected">Pilih ZIP library native (opsional, untuk MP hanya di B41)</string>
+    <string name="game_instance_browse_native_libs">Cari ZIP library native (B41)</string>
 
     <!-- Saves -->
     <string name="game_instance_saves_label">File simpanan (.zip)</string>
@@ -321,7 +321,7 @@
     <string name="bug_report_no_mail">Tidak ada aplikasi email yang ditemukan di perangkat ini.</string>
 
     <!-- New instance -->
-    <string name="native_libs_dialog_title">Library native (opsional)</string>
+    <string name="native_libs_dialog_title">Library native untuk B41 (opsional)</string>
     <string name="native_libs_dialog_message">Library native adalah file dari build 42.12. Ini terutama terdiri dari dua file:\n\n🌐 libRakNet64.so\n🌐 libZNetNoSteam64.so\n\nFile-file ini diperlukan untuk dukungan multiplayer pada build 41.78. Anda dapat membaca lebih lanjut tentangnya di Wiki.</string>
     <string name="dialog_button_wiki">Wiki</string>
 
