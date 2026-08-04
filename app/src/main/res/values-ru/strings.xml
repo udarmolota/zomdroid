@@ -309,6 +309,7 @@
     <string name="version_check_up_to_date">Актуальная версия: %1$s</string>
     <string name="version_check_update_available">Установлена: %1$s\nДоступна: %2$s\n%3$s</string>
     <string name="version_check_error">Не удалось проверить обновления\nТекущая версия: %1$s</string>
+    <string name="version_check_ahead_of_release">Установлена: %1$s\nЭта сборка новее последнего опубликованного релиза (%2$s)</string>
     <string name="nav_menu_version">Проверить обновления</string>
 
     <!-- Bug report -->

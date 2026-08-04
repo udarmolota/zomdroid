@@ -133,7 +133,12 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
                     WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
         }
 
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+        // Orientation is fixed in the manifest (screenOrientation + configChanges) rather than here.
+        // Calling setRequestedOrientation() from onCreate() on a phone held in portrait recreated the
+        // activity immediately, so onCreate() ran twice and fired the RECORD_AUDIO request twice —
+        // Android drops the second one ("Can request only one set of permissions at a time", present
+        // in every bug report we have). The manifest form starts the activity in landscape to begin
+        // with, and configChanges keeps a rotation from tearing down the GL surface underneath us.
 
         //String gameInstanceName = getIntent().getStringExtra(EXTRA_GAME_INSTANCE_NAME);
         gameInstanceName = getIntent().getStringExtra(EXTRA_GAME_INSTANCE_NAME);

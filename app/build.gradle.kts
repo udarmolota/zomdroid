@@ -11,6 +11,25 @@ val localProperties = Properties().apply {
     }
 }
 
+// Short commit hash of the working tree, with a "+" appended when there are uncommitted changes.
+// versionName alone cannot identify a build: 1.4.7 and 1.4.7v4 both reported as "1.4.7 (147)" in
+// bug reports, so we could not tell which build a crash came from. This is computed at build time
+// and never has to be remembered. Falls back to "unknown" outside a git checkout or without git,
+// so the build never depends on it.
+val gitBuildId: String = try {
+    val hash = providers.exec {
+        commandLine("git", "rev-parse", "--short", "HEAD")
+        workingDir = rootProject.projectDir
+    }.standardOutput.asText.get().trim()
+    val dirty = providers.exec {
+        commandLine("git", "status", "--porcelain")
+        workingDir = rootProject.projectDir
+    }.standardOutput.asText.get().trim().isNotEmpty()
+    if (hash.isEmpty()) "unknown" else hash + if (dirty) "+" else ""
+} catch (e: Exception) {
+    "unknown"
+}
+
 val hasSigningConfig = listOf(
     "RELEASE_STORE_FILE",
     "RELEASE_STORE_PASSWORD",
@@ -38,8 +57,10 @@ android {
         applicationId = "com.zomdroid"
         minSdk = 30
         targetSdk = 35
-        versionCode = 147
-        versionName = "1.4.7v5"
+        versionCode = 148
+        versionName = "1.4.8"
+
+        buildConfigField("String", "GIT_BUILD_ID", "\"$gitBuildId\"")
 
         // JavaSteam + protobuf + kotlin stack push past the 64K method limit.
         multiDexEnabled = true

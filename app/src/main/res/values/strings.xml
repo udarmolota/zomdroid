@@ -353,6 +353,7 @@
     <string name="version_check_up_to_date">You have the latest version: %1$s</string>
     <string name="version_check_update_available">Installed: %1$s\nAvailable: %2$s\n%3$s</string>
     <string name="version_check_error">Could not check for updates\nCurrent version: %1$s</string>
+    <string name="version_check_ahead_of_release">Installed: %1$s\nThis build is newer than the latest published release (%2$s)</string>
     <string name="nav_menu_version">Check for updates</string>
 
     <!-- Bug report -->

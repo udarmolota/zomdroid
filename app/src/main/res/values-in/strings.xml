@@ -310,6 +310,7 @@
     <string name="version_check_up_to_date">Anda memiliki versi terbaru: %1$s</string>
     <string name="version_check_update_available">Installed: %1$s\nAvailable: %2$s\n%3$s</string>
     <string name="version_check_error">Could not check for updates\nCurrent version: %1$s</string>
+    <string name="version_check_ahead_of_release">Terpasang: %1$s\nBuild ini lebih baru dari rilis terakhir yang dipublikasikan (%2$s)</string>
     <string name="nav_menu_version">Periksa pembaruan</string>
 
     <!-- Bug report -->

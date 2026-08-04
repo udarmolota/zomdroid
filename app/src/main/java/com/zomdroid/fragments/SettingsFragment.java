@@ -203,24 +203,8 @@ public class SettingsFragment extends Fragment {
 
         binding.settingsResolutionScaleSb.setProgress((int) (LauncherPreferences.requireSingleton().getRenderScale() * 100));
 
-        // AudioAPI
-        ArrayAdapter<LauncherPreferences.AudioAPI> audioAPIAdapter = new ArrayAdapter<>(
-            requireContext(),
-            R.layout.spinner_item,
-            LauncherPreferences.AudioAPI.values());
-        audioAPIAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        binding.settingsAudioApiS.setAdapter(audioAPIAdapter);
-        binding.settingsAudioApiS.setSelection(audioAPIAdapter.getPosition(LauncherPreferences.requireSingleton().getAudioAPI()));
-        binding.settingsAudioApiS.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                LauncherPreferences.AudioAPI audioAPI = (LauncherPreferences.AudioAPI) parent.getSelectedItem();
-                LauncherPreferences.requireSingleton().setAudioAPI(audioAPI);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
+        // The Audio API selector is gone: OpenSL ES is retired and AAudio is the only backend now.
+        // See LauncherPreferences.getAudioAPI() for why.
 
         // Theme
         ArrayAdapter<LauncherPreferences.ThemeMode> themeAdapter = new ArrayAdapter<>(

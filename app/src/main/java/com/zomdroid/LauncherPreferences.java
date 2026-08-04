@@ -140,6 +140,14 @@ public class LauncherPreferences {
         launcherPreferences.gson = gson;
         // One-time migration only for the old launcher-provided default. Custom user values,
         // including a deliberately empty field, remain untouched.
+
+        // OPENSL is retired — see the AudioAPI enum. Healed here rather than in the getter so the
+        // field is correct for every reader, including anything that serializes the object before
+        // a getter has run. Users who had picked it keep every other setting untouched and need to
+        // do nothing; the corrected value reaches disk on the next saveToPreferences().
+        if (launcherPreferences.audioAPI != AudioAPI.AAUDIO) {
+            launcherPreferences.audioAPI = AudioAPI.AAUDIO;
+        }
         singleton = launcherPreferences;
     }
 
@@ -290,6 +298,15 @@ public class LauncherPreferences {
         }
     }
 
+    // OPENSL is retired: not offered in Settings any more, and coerced back to AAUDIO in init().
+    // The constant stays only so Gson can still parse a value stored by an older version.
+    //
+    // Two crash reports (2026-08-02/03, Redmi Note 10 Pro and POCO X6 5G) died at the same
+    // instruction inside FMOD 2.03.09 — libfmod.so+0x1536c8, FMOD::System::recordStart — while the
+    // game was starting voice chat. Both ran OpenSL ES; both had a capture device advertising
+    // 16000 Hz mono, where every AAudio device in our reports advertises 48000. None of the nine
+    // healthy reports used OpenSL. AAudio has existed since API 26 and our minSdk is 30, so the
+    // usual reason to keep an OpenSL fallback — old Android — never applied here.
     public enum AudioAPI {
         AAUDIO,
         OPENSL

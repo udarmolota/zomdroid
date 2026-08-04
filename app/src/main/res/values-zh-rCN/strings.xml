@@ -303,6 +303,7 @@
     <string name="version_check_up_to_date">当前已是最新版本：%1$s</string>
     <string name="version_check_update_available">已安装：%1$s\n可用更新：%2$s\n%3$s</string>
     <string name="version_check_error">无法检查更新\n当前版本：%1$s</string>
+    <string name="version_check_ahead_of_release">已安装：%1$s\n此版本比最新发布版本（%2$s）更新</string>
     <string name="nav_menu_version">检查更新</string>
 
     <!-- Bug report -->

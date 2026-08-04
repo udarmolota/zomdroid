@@ -255,8 +255,22 @@ public class LauncherActivity extends AppCompatActivity {
         return 0;
     }
 
+    /**
+     * Leading digits of a version component, ignoring any suffix: "7v5" -> 7, "8-rc1" -> 8, "" -> 0.
+     *
+     * Test builds are named with a suffix ("1.4.7v4", "1.4.7v5"). A strict parseInt threw on the
+     * last component, the exception was swallowed as 0, and the whole build compared as 1.4.0 —
+     * older than any published release. That is why every tester build showed the update badge
+     * against the v1.4.7 tag regardless of its number, and why lowering 1.4.8 to 1.4.7v5 did not
+     * help: the suffix, not the number, was the problem.
+     */
     private static int parseIntSafe(String s) {
-        try { return Integer.parseInt(s.trim()); } catch (Exception e) { return 0; }
+        if (s == null) return 0;
+        String t = s.trim();
+        int end = 0;
+        while (end < t.length() && Character.isDigit(t.charAt(end))) end++;
+        if (end == 0) return 0;
+        try { return Integer.parseInt(t.substring(0, end)); } catch (Exception e) { return 0; }
     }
 
     private void refreshUpdateBadge() {
@@ -365,10 +379,19 @@ public class LauncherActivity extends AppCompatActivity {
         String message;
         if (latest == null) {
             message = getString(R.string.version_check_error, current);
-        } else if (current.equals(latest)) {
-            message = getString(R.string.version_check_up_to_date, current);
         } else {
-            message = getString(R.string.version_check_update_available, current, latest, releaseUrl);
+            // Numeric compare, not equals(): a dev build that runs ahead of the published release
+            // differs from it but is not behind it, and telling the user to "update" to an older
+            // release is worse than saying nothing. Same comparison the badge uses, so the dialog
+            // and the badge can no longer contradict each other.
+            int cmp = compareVersions(latest, current);
+            if (cmp > 0) {
+                message = getString(R.string.version_check_update_available, current, latest, releaseUrl);
+            } else if (cmp == 0) {
+                message = getString(R.string.version_check_up_to_date, current);
+            } else {
+                message = getString(R.string.version_check_ahead_of_release, current, latest);
+            }
         }
 
         SpannableString s = new SpannableString(message);

@@ -309,6 +309,7 @@
     <string name="version_check_up_to_date">Você tem a versão mais recente: %1$s</string>
     <string name="version_check_update_available">Instalada: %1$s\nDisponível: %2$s\n%3$s</string>
     <string name="version_check_error">Não foi possível verificar atualizações\nVersão atual: %1$s</string>
+    <string name="version_check_ahead_of_release">Instalada: %1$s\nEsta build é mais recente que a última versão publicada (%2$s)</string>
     <string name="nav_menu_version">Verificar atualizações</string>
 
     <!-- Bug report -->

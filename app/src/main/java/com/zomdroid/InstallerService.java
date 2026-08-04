@@ -934,7 +934,11 @@ public class InstallerService extends Service implements TaskProgressListener {
             writeLogUtf8(zos, "=== Zomdroid Bug Report ===\n");
             writeLogUtf8(zos, "Device   : " + Build.MANUFACTURER + " " + Build.MODEL + "\n");
             writeLogUtf8(zos, "Android  : " + Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")\n");
-            writeLogUtf8(zos, "Zomdroid : " + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")\n");
+            // The git id is what actually identifies the build: versionName/versionCode repeat
+            // across test builds (1.4.7 and 1.4.7v4 both reported as "1.4.7 (147)"), so without it
+            // a report cannot say which binary produced it. "+" means the tree had uncommitted work.
+            writeLogUtf8(zos, "Zomdroid : " + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE
+                    + ", " + BuildConfig.GIT_BUILD_ID + ")\n");
             writeLogUtf8(zos, "Renderer : " + prefs.getRenderer().name() + "\n");
             writeLogUtf8(zos, "Driver   : " + driverStr + "\n");
             // The two questions every NG_GL4ES "it just closes" report starts with: how much RAM
