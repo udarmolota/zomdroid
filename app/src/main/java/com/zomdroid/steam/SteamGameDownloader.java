@@ -377,72 +377,98 @@ public class SteamGameDownloader implements Runnable, Cancellable {
             java.util.Set<String> doneSet = loadDoneSet(doneListFile);
             if (!doneSet.isEmpty()) progress("Resuming — " + doneSet.size() + " files already downloaded.");
 
-            long doneBytes = 0;
-            int lastPct = -1;
-            long lastEmit = 0;
+            // Files are downloaded by a small pool rather than one at a time. The single-threaded loop
+            // this replaces spent nearly all its wall clock waiting on CDN round-trips, not on disk or
+            // CPU, so a handful of files in flight multiplies throughput without touching the reason
+            // the manual pipeline exists: peak memory stays at one chunk buffer per worker (~1 MB
+            // each) instead of JavaSteam's DepotDownloader buffering the whole depot.
+            //
+            // Parallelism is per FILE, not per chunk inside a file: the game is ~30k files and most
+            // are a single chunk, so chunk-level splitting would leave the small ones serial anyway,
+            // and per-file keeps the resume bookkeeping honest - a name reaches .zomdroid_complete
+            // only after that whole file is written.
+            final int workers = Math.max(2, Math.min(6, Runtime.getRuntime().availableProcessors()));
+            final java.util.concurrent.atomic.AtomicLong doneBytes =
+                    new java.util.concurrent.atomic.AtomicLong(0);
+            final java.util.concurrent.atomic.AtomicInteger serverCursor =
+                    new java.util.concurrent.atomic.AtomicInteger(serverIdx);
+            final java.util.concurrent.atomic.AtomicInteger lastPct =
+                    new java.util.concurrent.atomic.AtomicInteger(-1);
+            final java.util.concurrent.atomic.AtomicLong lastEmit =
+                    new java.util.concurrent.atomic.AtomicLong(0);
+            final java.util.concurrent.atomic.AtomicReference<Throwable> firstError =
+                    new java.util.concurrent.atomic.AtomicReference<>();
+
+            final List<FileData> pending = new java.util.ArrayList<>();
             for (FileData f : files) {
-                if (!running) { done("Aborted."); return; }
                 String rel = sanitizeRel(f.getFileName());
                 if (rel == null) continue;
                 File outFile = new File(outDir, rel);
                 if (f.getFlags().contains(EDepotFileFlag.Directory)) { outFile.mkdirs(); continue; }
-                // Already complete on a previous run → skip (count toward progress).
+                // Already complete on a previous run -> skip (count toward progress).
                 if (doneSet.contains(rel) && outFile.isFile() && outFile.length() == f.getTotalSize()) {
-                    doneBytes += f.getTotalSize();
+                    doneBytes.addAndGet(f.getTotalSize());
                     continue;
                 }
-                File parent = outFile.getParentFile();
-                if (parent != null) parent.mkdirs();
+                pending.add(f);
+            }
 
-                try (RandomAccessFile raf = new RandomAccessFile(outFile, "rw")) {
-                    if (f.getTotalSize() > 0) raf.setLength(f.getTotalSize());
-                    for (ChunkData chunk : f.getChunks()) {
-                        if (!running) { done("Aborted."); return; }
-                        byte[] dest = new byte[Math.max(chunk.getCompressedLength(), chunk.getUncompressedLength())];
-                        int written = -1;
-                        Exception chunkErr = null;
-                        // Steam CDN edge nodes routinely 503/timeout under load. Retry patiently with
-                        // exponential backoff + server rotation instead of aborting the whole download.
-                        final int maxTries = 30;
-                        for (int t = 0; t < maxTries && written < 0; t++) {
-                            if (!running) { done("Aborted."); return; }
-                            Server s = servers.get(serverIdx % servers.size());
+            final long fTotalBytes = totalBytes;
+            final int fDepot = depot;
+            final byte[] fDepotKey = depotKey;
+            final List<Server> fServers = servers;
+            final Client fCdn = cdn;
+            final SteamContent fContent = content;
+            final Map<String, String> fTokenCache = tokenCache;
+            final File fOutDir = outDir;
+            final File fDoneListFile = doneListFile;
+
+            final java.util.concurrent.ConcurrentLinkedQueue<FileData> queue =
+                    new java.util.concurrent.ConcurrentLinkedQueue<>(pending);
+            final java.util.concurrent.CountDownLatch latch =
+                    new java.util.concurrent.CountDownLatch(workers);
+            final List<Thread> pool = new java.util.ArrayList<>(workers);
+
+            for (int w = 0; w < workers; w++) {
+                Thread t = new Thread(() -> {
+                    try {
+                        FileData f;
+                        while (running && firstError.get() == null && (f = queue.poll()) != null) {
                             try {
-                                written = cdn.downloadDepotChunkFuture(depot, chunk, s, dest, depotKey, null,
-                                        cdnTokenFor(content, appId, depot, s, tokenCache)).get(120, TimeUnit.SECONDS);
-                            } catch (Exception e) {
-                                chunkErr = e;
-                                Log.w(TAG, "chunk via " + s.getHost() + " failed (try " + (t + 1) + "/" + maxTries + "): " + describe(e));
-                                serverIdx++;
-                                long now = System.currentTimeMillis();
-                                if (now - lastEmit > 1500) {
-                                    lastEmit = now;
-                                    if (listener != null) listener.onProgress("Steam CDN busy — retrying… ("
-                                            + (doneBytes / (1024 * 1024)) + " / " + (totalBytes / (1024 * 1024)) + " MB)");
-                                }
-                                long backoff = Math.min(10000L, 500L * (1L << Math.min(t, 4))); // 0.5..10s
-                                try { Thread.sleep(backoff); } catch (InterruptedException ignored) {}
+                                downloadOneFile(f, fOutDir, fDoneListFile, fCdn, fContent, fServers,
+                                        fDepot, fDepotKey, fTokenCache, serverCursor,
+                                        doneBytes, fTotalBytes, lastPct, lastEmit);
+                            } catch (Throwable e) {
+                                firstError.compareAndSet(null, e);
+                                return;
                             }
                         }
-                        if (written < 0) throw chunkErr != null ? chunkErr : new java.io.IOException("chunk download failed");
-                        raf.seek(chunk.getOffset());
-                        raf.write(dest, 0, written);
-                        doneBytes += written;
-
-                        long now = System.currentTimeMillis();
-                        int pct = totalBytes > 0 ? (int) (doneBytes * 100 / totalBytes) : 0;
-                        if (pct != lastPct && now - lastEmit > 500) {
-                            lastPct = pct; lastEmit = now;
-                            progress(pct + "%  (" + (doneBytes / (1024 * 1024)) + " / " + (totalBytes / (1024 * 1024)) + " MB)");
-                            if (listener != null) listener.onPercent(pct);
-                        }
+                    } finally {
+                        latch.countDown();
                     }
-                }
-                // File fully written — record it so a restart of this build can skip it.
-                appendDone(doneListFile, rel);
-                doneSet.add(rel);
+                }, "zd-game-dl-" + w);
+                t.setDaemon(true);
+                pool.add(t);
+                t.start();
             }
-            done("Game downloaded to " + outDir.getAbsolutePath());
+
+            try {
+                latch.await();
+            } catch (InterruptedException cancelled) {
+                // cancel() interrupts the download thread; the workers see running=false and unwind
+                // on their own. Interrupt them too so anyone parked in a backoff sleep leaves now
+                // instead of after its remaining 10 seconds.
+                running = false;
+                for (Thread t : pool) t.interrupt();
+                done("Download cancelled.");
+                return;
+            }
+
+            if (!running) { done("Aborted."); return; }
+            Throwable workerError = firstError.get();
+            if (workerError != null) throw workerError;
+
+            done("Game downloaded to " + fOutDir.getAbsolutePath());
         } catch (Throwable t) {
             if (!running) {
                 done("Download cancelled.");
@@ -470,17 +496,94 @@ public class SteamGameDownloader implements Runnable, Cancellable {
         return null;
     }
 
+    /**
+     * Download one file's chunks and write them at their offsets. Runs on a pool thread; everything
+     * shared with the other workers is passed in as an atomic or guarded internally.
+     */
+    private void downloadOneFile(FileData f, File outDir, File doneListFile,
+                                 Client cdn, SteamContent content, List<Server> servers,
+                                 int depot, byte[] depotKey, Map<String, String> tokenCache,
+                                 java.util.concurrent.atomic.AtomicInteger serverCursor,
+                                 java.util.concurrent.atomic.AtomicLong doneBytes, long totalBytes,
+                                 java.util.concurrent.atomic.AtomicInteger lastPct,
+                                 java.util.concurrent.atomic.AtomicLong lastEmit) throws Exception {
+        String rel = sanitizeRel(f.getFileName());
+        if (rel == null) return;
+        File outFile = new File(outDir, rel);
+        File parent = outFile.getParentFile();
+        if (parent != null) parent.mkdirs();
+
+        try (RandomAccessFile raf = new RandomAccessFile(outFile, "rw")) {
+            if (f.getTotalSize() > 0) raf.setLength(f.getTotalSize());
+            for (ChunkData chunk : f.getChunks()) {
+                if (!running) return;
+                byte[] dest = new byte[Math.max(chunk.getCompressedLength(), chunk.getUncompressedLength())];
+                int written = -1;
+                Exception chunkErr = null;
+                // Steam CDN edge nodes routinely 503/timeout under load. Retry patiently with
+                // exponential backoff + server rotation instead of aborting the whole download.
+                final int maxTries = 30;
+                for (int t = 0; t < maxTries && written < 0; t++) {
+                    if (!running) return;
+                    // Round-robin, not sticky: the single-threaded version stayed on one healthy
+                    // server and only moved after a failure, which with several workers would point
+                    // all of them at the same edge node - the very thing that makes those nodes
+                    // start returning 503. Advancing per attempt spreads the load and also lands a
+                    // retry somewhere else by construction.
+                    Server s = servers.get(Math.floorMod(serverCursor.getAndIncrement(), servers.size()));
+                    try {
+                        written = cdn.downloadDepotChunkFuture(depot, chunk, s, dest, depotKey, null,
+                                cdnTokenFor(content, PROJECT_ZOMBOID_APP_ID, depot, s, tokenCache))
+                                .get(120, TimeUnit.SECONDS);
+                    } catch (Exception e) {
+                        chunkErr = e;
+                        Log.w(TAG, "chunk via " + s.getHost() + " failed (try " + (t + 1) + "/" + maxTries + "): " + describe(e));
+                        long now = System.currentTimeMillis();
+                        long prev = lastEmit.get();
+                        if (now - prev > 1500 && lastEmit.compareAndSet(prev, now) && listener != null) {
+                            listener.onProgress("Steam CDN busy — retrying… ("
+                                    + (doneBytes.get() / (1024 * 1024)) + " / " + (totalBytes / (1024 * 1024)) + " MB)");
+                        }
+                        long backoff = Math.min(10000L, 500L * (1L << Math.min(t, 4))); // 0.5..10s
+                        try { Thread.sleep(backoff); } catch (InterruptedException ignored) { return; }
+                    }
+                }
+                if (written < 0) throw chunkErr != null ? chunkErr : new java.io.IOException("chunk download failed");
+                raf.seek(chunk.getOffset());
+                raf.write(dest, 0, written);
+                long total = doneBytes.addAndGet(written);
+
+                long now = System.currentTimeMillis();
+                int pct = totalBytes > 0 ? (int) (total * 100 / totalBytes) : 0;
+                long prev = lastEmit.get();
+                if (pct != lastPct.get() && now - prev > 500 && lastEmit.compareAndSet(prev, now)) {
+                    lastPct.set(pct);
+                    progress(pct + "%  (" + (total / (1024 * 1024)) + " / " + (totalBytes / (1024 * 1024)) + " MB)");
+                    if (listener != null) listener.onPercent(pct);
+                }
+            }
+        }
+        // File fully written — record it so a restart of this build can skip it. Only reached when
+        // every chunk landed, so a half-written file is never marked complete.
+        if (running) appendDone(doneListFile, rel);
+    }
+
     private String cdnTokenFor(SteamContent content, int appId, int depot, Server s, Map<String, String> cache) {
         String host = s.getHost() != null ? s.getHost() : s.getVHost();
         if (host == null) return null;
-        if (cache.containsKey(host)) return cache.get(host);
-        String token = null;
-        try {
-            CDNAuthToken tok = awaitDeferred(content.getCDNAuthToken(appId, depot, host, GlobalScope.INSTANCE), 15000);
-            if (tok != null && tok.getResult() == EResult.OK) token = tok.getToken();
-        } catch (Throwable ignored) {}
-        cache.put(host, token);
-        return token;
+        // Guarded rather than a ConcurrentHashMap because a null token is a real cached answer and
+        // that map forbids null values. Holding the lock across the fetch is deliberate: the workers
+        // all want the same host's token at the same moment, and one request beats six identical ones.
+        synchronized (cache) {
+            if (cache.containsKey(host)) return cache.get(host);
+            String token = null;
+            try {
+                CDNAuthToken tok = awaitDeferred(content.getCDNAuthToken(appId, depot, host, GlobalScope.INSTANCE), 15000);
+                if (tok != null && tok.getResult() == EResult.OK) token = tok.getToken();
+            } catch (Throwable ignored) {}
+            cache.put(host, token);
+            return token;
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -508,7 +611,8 @@ public class SteamGameDownloader implements Runnable, Cancellable {
     }
 
     /** Appends one completed relative path to the resume marker (flushed immediately). */
-    private static void appendDone(File f, String rel) {
+    // synchronized: several download workers finish files at once and all append to this one list.
+    private static synchronized void appendDone(File f, String rel) {
         try (FileWriter w = new FileWriter(f, true)) {
             w.write(rel);
             w.write('\n');
