@@ -294,6 +294,13 @@
 
     <string name="settings_env_vars">Variáveis de ambiente</string>
     <string name="settings_env_vars_hint">Por exemplo: TU_DEBUG=nogmem</string>
+    <string name="settings_texture_shrink_title">Redução de texturas — GL4ES / NG_GL4ES</string>
+    <string name="settings_texture_shrink_desc">Os valores 1–11 não são uma escala. Mais usados: 1 (ultra) e 7 (equilibrado); o modo 1 pode travar em texturas vazias. Veja a tabela.</string>
+    <string name="settings_texture_shrink_table">1. ⚠  tudo pela metade\n2. ⚠  acima de 512px pela metade\n3. ⚠  acima de 256px pela metade\n4. ⚠  acima de 256px, 1024px+ em 1/4\n5.    acima de 256px → 256px\n6.    acima de 128px, 512px+ → 256px\n7.    acima de 512px pela metade</string>
+    <string name="settings_texture_shrink_notes">⚠  tambem reduz texturas vazias — dai os travamentos.\n\n8–11 sao modos de compatibilidade: informam ao jogo um tamanho maximo maior e nao economizam memoria. Desnecessarios para o PZ.\n\nMetade do lado = um quarto da memoria.</string>
+    <string name="settings_texture_shrink_none">Desligado</string>
+    <string name="settings_texture_shrink_balanced">Equilibrado (7)</string>
+    <string name="settings_texture_shrink_ultra">Ultra (1)</string>
 
     <string name="settings_env_vars_dialog_message">Variáveis de ambiente passadas diretamente ao sistema antes do início do jogo.\n\nUsadas para configurar renderizadores, drivers e outros componentes, ex.:\n\nTU_DEBUG=nogmem\nZINK_DEBUG=norp\n\nUse com cuidado — valores incorretos podem causar travamentos.</string>
 

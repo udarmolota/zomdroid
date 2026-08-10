@@ -288,6 +288,13 @@
 
     <string name="settings_env_vars">环境变量</string>
     <string name="settings_env_vars_hint">例如：TU_DEBUG=nogmem</string>
+    <string name="settings_texture_shrink_title">纹理缩小 — GL4ES / NG_GL4ES</string>
+    <string name="settings_texture_shrink_desc">数值 1–11 并非等级。常用：1（极限）和 7（均衡）；模式 1 可能在空纹理上崩溃。其余见表格。</string>
+    <string name="settings_texture_shrink_table">1. ⚠  全部减半\n2. ⚠  大于 512px 减半\n3. ⚠  大于 256px 减半\n4. ⚠  大于 256px 减半，1024px+ 四分之一\n5.    大于 256px → 256px\n6.    大于 128px 减半，512px+ → 256px\n7.    大于 512px 减半</string>
+    <string name="settings_texture_shrink_notes">⚠  也会缩小空纹理 — 崩溃即源于此。\n\n8–11 为兼容模式：向游戏报告更大的最大纹理尺寸，并不节省内存。PZ 不需要。\n\n边长减半 = 内存降为四分之一。</string>
+    <string name="settings_texture_shrink_none">关闭</string>
+    <string name="settings_texture_shrink_balanced">均衡 (7)</string>
+    <string name="settings_texture_shrink_ultra">极限 (1)</string>
 
     <string name="settings_env_vars_dialog_message">在游戏启动前直接传递给系统的环境变量。\n\n用于配置渲染器、驱动及其他组件，例如：\n\nTU_DEBUG=nogmem\nZINK_DEBUG=norp\n\n请谨慎使用——错误的值可能导致崩溃。</string>
 

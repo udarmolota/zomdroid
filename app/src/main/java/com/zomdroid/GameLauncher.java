@@ -37,6 +37,25 @@ public class GameLauncher {
         // choosing incorrect interaction routes. Use PZ's own Java fallback without affecting
         // Build 41 or the older pre-fat-jar Build 42 releases.
         com.zomdroid.patch.PathfindingWorkaround.forceJavaPathfinderFor4212Plus(gameInstance);
+        // Retire our bundled jassimp (built from Assimp 5.4.3) by taking it off java.library.path.
+        // Each game version ships the importer its models were authored against - B41's x86_64 is
+        // assimp 5.0.1, 42.12+ adds TIS's own ARM64 5.3.1 - and the linker routes libjassimp64 to
+        // those (the game's ARM64 when present, box64 for the x86_64 one). Our copy sat earlier on
+        // the search path and shadowed them for every build, which is where both the B41 floating
+        // hair/clothing and the B42 KI5 part offsets came from. It cannot stay even as a fallback:
+        // with jassimp on the emulated-lib list the dlopen hook would feed our ARM64 file to box64
+        // and fail the whole load on B41. Renamed rather than deleted so this is reversible, and
+        // re-checked every launch because a dependency bundle update re-extracts the file.
+        File bundledJassimp = new File(AppStorage.requireSingleton().getHomePath(),
+                C.deps.LIBS_ANDROID_ARM64_v8a + "/libjassimp64.so");
+        if (bundledJassimp.isFile()) {
+            File retired = new File(bundledJassimp.getParentFile(), "libjassimp64.so.zomdroid-543-off");
+            if (bundledJassimp.renameTo(retired)) {
+                Log.i("GameLauncher", "Bundled libjassimp64.so retired; the game's own importer will load");
+            } else {
+                Log.w("GameLauncher", "Failed to retire bundled libjassimp64.so - model bone offsets may be wrong");
+            }
+        }
 
 /*        // for debug
         Os.setenv("MESA_DEBUG", "1", false);

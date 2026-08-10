@@ -15,3 +15,6 @@
 .cxx
 local.properties
 /.idea/
+
+# Working notes, kept out of the repo on purpose
+/TODO.md

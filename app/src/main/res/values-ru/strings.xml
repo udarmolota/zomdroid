@@ -294,6 +294,13 @@
 
     <string name="settings_env_vars">Переменные окружения</string>
     <string name="settings_env_vars_hint">Например: TU_DEBUG=nogmem</string>
+    <string name="settings_texture_shrink_title">Сжатие текстур — GL4ES / NG_GL4ES</string>
+    <string name="settings_texture_shrink_desc">Значения 1–11 — не шкала. Чаще берут 1 (ультра лоу) и 7 (баланс); у 1 бывают вылеты на пустых текстурах. Остальные — в таблице.</string>
+    <string name="settings_texture_shrink_table">1. ⚠  всё пополам\n2. ⚠  больше 512px пополам\n3. ⚠  больше 256px пополам\n4. ⚠  больше 256px пополам, от 1024px вчетверо\n5.    больше 256px → 256px\n6.    больше 128px пополам, от 512px → 256px\n7.    больше 512px пополам</string>
+    <string name="settings_texture_shrink_notes">⚠  ужимает и пустые текстуры — отсюда вылеты.\n\n8–11 — режимы совместимости: сообщают игре завышенный максимальный размер текстуры и памяти не экономят. Для PZ не нужны.\n\nСторона вдвое меньше — вчетверо меньше памяти.</string>
+    <string name="settings_texture_shrink_none">Выключено</string>
+    <string name="settings_texture_shrink_balanced">Баланс (7)</string>
+    <string name="settings_texture_shrink_ultra">Ультра лоу (1)</string>
 
     <string name="settings_env_vars_dialog_message">Переменные окружения, передаваемые напрямую в систему перед запуском игры.\n\nИспользуются для настройки рендереров, драйверов и других компонентов, например:\n\nTU_DEBUG=nogmem\nZINK_DEBUG=norp\n\nИспользуйте с осторожностью — неверные значения могут вызвать сбои.</string>
 

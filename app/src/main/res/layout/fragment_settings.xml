@@ -335,13 +335,80 @@
                         android:id="@+id/settings_env_vars_et"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
+                        android:layout_marginBottom="4dp"
                         android:hint="@string/settings_env_vars_hint"
                         android:textSize="11sp"
                         android:inputType="textMultiLine|textNoSuggestions"
                         android:lines="2"
                         android:maxLines="5"
                         android:gravity="top"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp"
+                        android:gravity="end"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/settings_env_vars_clear_btn"
+                            style="@style/Widget.Material3.Button.TonalButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:minWidth="0dp"
+                            android:text="@string/settings_jvm_args_clear"
+                            android:textSize="11sp"/>
+
+                    </LinearLayout>
+
+                    <!-- Texture shrink presets. The value lands in the env field above rather than
+                         behind a hidden switch, so the player can see what was turned on, edit it,
+                         and reach the modes we do not offer. -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/settings_texture_shrink_title"
+                            android:textAppearance="?attr/textAppearanceBodySmall"/>
+
+                        <ImageButton
+                            android:id="@+id/settings_texture_shrink_info"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_marginStart="8dp"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/mt_icon_help"
+                            android:background="?android:attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="@string/settings_texture_shrink_title"/>
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp"
+                        android:text="@string/settings_texture_shrink_desc"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:textSize="11sp"/>
+
+                    <Spinner
+                        android:id="@+id/settings_texture_shrink_spinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"/>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="12dp"
+                        android:background="?attr/colorOutlineVariant"/>
 
                     <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/settings_debug_switch"

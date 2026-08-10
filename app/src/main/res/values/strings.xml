@@ -338,6 +338,13 @@
 
     <string name="settings_env_vars">Environment variables</string>
     <string name="settings_env_vars_hint">For example: TU_DEBUG=nogmem</string>
+    <string name="settings_texture_shrink_title">Texture shrink — GL4ES / NG_GL4ES</string>
+    <string name="settings_texture_shrink_desc">Values 1–11 are not a scale. Commonly used: 1 (ultra low) and 7 (balanced); mode 1 can crash on empty textures. See the table for the rest.</string>
+    <string name="settings_texture_shrink_table">1. ⚠  all halved\n2. ⚠  above 512px halved\n3. ⚠  above 256px halved\n4. ⚠  above 256px halved, 1024px+ quartered\n5.    above 256px → 256px\n6.    above 128px halved, 512px+ → 256px\n7.    above 512px halved</string>
+    <string name="settings_texture_shrink_notes">⚠  also shrinks empty textures — this is where the crashes come from.\n\n8–11 are compatibility modes: they report a larger maximum texture size to the game and save no memory. Not needed for PZ.\n\nHalving a side quarters the memory a texture costs.</string>
+    <string name="settings_texture_shrink_none">Off</string>
+    <string name="settings_texture_shrink_balanced">Balanced (7)</string>
+    <string name="settings_texture_shrink_ultra">Ultra low (1)</string>
 
     <string name="settings_env_vars_dialog_message">Environment variables passed directly to the system before the game starts.\n\nUse to configure renderers, drivers and other components, e.g.:\n\nTU_DEBUG=nogmem\nZINK_DEBUG=norp\n\nUse with caution — incorrect values may cause crashes.</string>
 

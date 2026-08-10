@@ -101,7 +101,11 @@ static void* (*loader_android_dlopen_ext)(const char* filename,
 static void* vulkan_driver_handle;
 static void* vulkan_loader_handle;
 
-static EmulatedLib jni_libs[] = {{.name = "PZClipper64"}, {.name = "PZBullet64"}, {.name = "PZBulletNoOpenGL64"}, {.name = "Lighting64"}, {.name = "PZPathFind64"}, {.name = "PZPopMan64"}, {.name = "fmodintegration64"}, { .name = "zomdroidtest"}, { .name = "RakNet64"}, { .name = "ZNetNoSteam"} };
+// jassimp64: lets the game-dir library load when no ARM64 build shadows it on java.library.path.
+// The game ships jassimp built from the Assimp its models were authored against (B41 = 5.0.1,
+// measured), while our ARM64 build tracks 5.4.3 - loading THEIR build through box64 gives each
+// game version the importer semantics it expects.
+static EmulatedLib jni_libs[] = {{.name = "PZClipper64"}, {.name = "PZBullet64"}, {.name = "PZBulletNoOpenGL64"}, {.name = "Lighting64"}, {.name = "PZPathFind64"}, {.name = "PZPopMan64"}, {.name = "fmodintegration64"}, { .name = "zomdroidtest"}, { .name = "RakNet64"}, { .name = "ZNetNoSteam"}, { .name = "jassimp64"} };
 static int jni_lib_count = sizeof (jni_libs) / sizeof (EmulatedLib);
 static void init_jni_libs() {
     static int initialized = 0;

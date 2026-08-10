@@ -295,6 +295,13 @@
 
     <string name="settings_env_vars">Variabel lingkungan</string>
     <string name="settings_env_vars_hint">Misalnya: TU_DEBUG=nogmem</string>
+    <string name="settings_texture_shrink_title">Perkecil tekstur — GL4ES / NG_GL4ES</string>
+    <string name="settings_texture_shrink_desc">Nilai 1–11 bukan skala. Umum dipakai: 1 (ultra) dan 7 (seimbang); mode 1 bisa crash pada tekstur kosong. Sisanya lihat tabel.</string>
+    <string name="settings_texture_shrink_table">1. ⚠  semua setengah\n2. ⚠  di atas 512px setengah\n3. ⚠  di atas 256px setengah\n4. ⚠  di atas 256px, 1024px+ seperempat\n5.    di atas 256px → 256px\n6.    di atas 128px, 512px+ → 256px\n7.    di atas 512px setengah</string>
+    <string name="settings_texture_shrink_notes">⚠  juga memperkecil tekstur kosong — dari sinilah crash berasal.\n\n8–11 adalah mode kompatibilitas: melaporkan ukuran tekstur maksimum yang lebih besar dan tidak menghemat memori. Tidak perlu untuk PZ.\n\nSisi setengah = memori seperempat.</string>
+    <string name="settings_texture_shrink_none">Mati</string>
+    <string name="settings_texture_shrink_balanced">Seimbang (7)</string>
+    <string name="settings_texture_shrink_ultra">Ultra (1)</string>
 
     <string name="settings_env_vars_dialog_message">Variabel lingkungan diteruskan langsung ke sistem sebelum game dimulai.\n\nDigunakan untuk mengonfigurasi renderer, driver, dan komponen lainnya, misalnya:\n\nTU_DEBUG=nogmem\nZINK_DEBUG=norp\n\nGunakan dengan hati-hati — nilai yang tidak tepat dapat menyebabkan crash.</string>
 
