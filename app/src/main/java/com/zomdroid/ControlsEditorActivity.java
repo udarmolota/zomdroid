@@ -206,6 +206,22 @@ public class ControlsEditorActivity extends AppCompatActivity {
                     binding.elementSensitivitySb.setVisibility(View.GONE);
                 }
 
+                // Tap-to-click, touchpad only. Server admins asked to be able to turn the tap off:
+                // while dragging the cursor an accidental tap clicks whatever is underneath, which
+                // on an admin account fires real admin actions. Unchecked = the pad only moves the
+                // cursor; clicking is done with the on-screen mouse buttons.
+                if (element.getType() == AbstractControlElement.Type.TOUCHPAD) {
+                    com.zomdroid.input.TouchpadControlElement touchpad =
+                            (com.zomdroid.input.TouchpadControlElement) element;
+                    binding.elementTapClickCb.setOnCheckedChangeListener(null);
+                    binding.elementTapClickCb.setChecked(!touchpad.isTapDisabled());
+                    binding.elementTapClickCb.setOnCheckedChangeListener(
+                            (v, checked) -> touchpad.setTapDisabled(!checked));
+                    binding.elementTapClickCb.setVisibility(View.VISIBLE);
+                } else {
+                    binding.elementTapClickCb.setVisibility(View.GONE);
+                }
+
                 // apply UI for current type
                 applyInputType(element, element.getInputType());
 

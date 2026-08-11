@@ -383,8 +383,6 @@ public class SettingsFragment extends Fragment {
     private static final String SHRINK_BALANCED = "7";
     private static final String SHRINK_ULTRA = "1";
 
-    private boolean suppressShrinkCallback = false;
-
     private void setUpTextureShrinkSpinner() {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_spinner_item, new String[]{
@@ -398,10 +396,17 @@ public class SettingsFragment extends Fragment {
         binding.settingsTextureShrinkSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (suppressShrinkCallback) return;
+                // Fires for a real tap AND for setSelection() from syncShrinkSpinner(). The two are
+                // told apart without flags or timing: a selection that already matches what the
+                // field says is the spinner catching up to a hand edit and must not write back -
+                // writing back on it is what used to delete a hand-typed mode mid-keystroke (the
+                // old suppress flag was reset via post(), which raced the spinner's own posted
+                // callback, so the "Off" echo fired as if the user chose it and stripped the
+                // variable). Only a selection that DIFFERS from the field is a user decision.
+                String envVars = binding.settingsEnvVarsEt.getText().toString();
+                if (position == spinnerPositionFor(envVars)) return;
                 String value = position == 1 ? SHRINK_BALANCED : position == 2 ? SHRINK_ULTRA : null;
-                binding.settingsEnvVarsEt.setText(withShrink(
-                        binding.settingsEnvVarsEt.getText().toString(), value));
+                binding.settingsEnvVarsEt.setText(withShrink(envVars, value));
             }
 
             @Override
@@ -409,17 +414,21 @@ public class SettingsFragment extends Fragment {
         });
     }
 
+    /**
+     * Which spinner row the field's LIBGL_SHRINK value corresponds to. A hand-typed mode we do not
+     * offer (say 3) lands on "Off": the spinner cannot express it, and it must survive untouched.
+     */
+    private int spinnerPositionFor(String envVars) {
+        String value = readShrink(envVars);
+        return SHRINK_BALANCED.equals(value) ? 1 : SHRINK_ULTRA.equals(value) ? 2 : 0;
+    }
+
     /** Point the spinner at whatever the field actually says, including a value typed by hand. */
     private void syncShrinkSpinner() {
         if (binding == null) return;
-        String current = readShrink(binding.settingsEnvVarsEt.getText().toString());
-        int position = SHRINK_BALANCED.equals(current) ? 1 : SHRINK_ULTRA.equals(current) ? 2 : 0;
-        if (binding.settingsTextureShrinkSpinner.getSelectedItemPosition() == position) return;
-        // A hand-typed mode we do not offer (say 4) lands on "Off" here. That is honest about what
-        // the spinner can express and, crucially, does not rewrite what the player typed.
-        suppressShrinkCallback = true;
-        binding.settingsTextureShrinkSpinner.setSelection(position);
-        binding.settingsTextureShrinkSpinner.post(() -> suppressShrinkCallback = false);
+        int position = spinnerPositionFor(binding.settingsEnvVarsEt.getText().toString());
+        if (binding.settingsTextureShrinkSpinner.getSelectedItemPosition() != position)
+            binding.settingsTextureShrinkSpinner.setSelection(position);
     }
 
     private static String readShrink(String envVars) {

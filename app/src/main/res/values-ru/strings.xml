@@ -24,6 +24,7 @@
     <string name="control_element_select_binding">Выбрать привязку</string>
     <string name="control_element_binding_invalid">Неверная привязка</string>
     <string name="control_element_opacity">Прозрачность</string>
+    <string name="control_element_tap_click">Тап — левый клик</string>
     <string name="control_element_binding_left">Привязка влево</string>
     <string name="control_element_binding_up">Привязка вверх</string>
     <string name="control_element_binding_right">Привязка вправо</string>

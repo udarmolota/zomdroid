@@ -24,6 +24,7 @@
     <string name="control_element_select_binding">Selecionar atalho</string>
     <string name="control_element_binding_invalid">Atalho inválido</string>
     <string name="control_element_opacity">Opacidade</string>
+    <string name="control_element_tap_click">Toque = clique esquerdo</string>
     <string name="control_element_binding_left">Atalho Esquerda</string>
     <string name="control_element_binding_up">Atalho Cima</string>
     <string name="control_element_binding_right">Atalho Direita</string>

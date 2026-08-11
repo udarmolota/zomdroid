@@ -23,6 +23,7 @@
     <string name="control_element_select_binding">Pilih ikatan</string>
     <string name="control_element_binding_invalid">Ikatan tidak valid</string>
     <string name="control_element_opacity">Opasitas</string>
+    <string name="control_element_tap_click">Ketuk = klik kiri</string>
     <string name="control_element_binding_left">Ikatan Kiri</string>
     <string name="control_element_binding_up">Ikatan Atas</string>
     <string name="control_element_binding_right">Ikatan Kanan</string>

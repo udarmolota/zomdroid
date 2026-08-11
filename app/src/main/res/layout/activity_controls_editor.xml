@@ -170,6 +170,17 @@
                     app:layout_constraintTop_toBottomOf="@id/element_sensitivity_tv"
                     app:layout_constraintEnd_toEndOf="parent"/>
 
+                <CheckBox
+                    android:id="@+id/element_tap_click_cb"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/control_element_tap_click"
+                    android:textSize="13sp"
+                    android:visibility="gone"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/element_sensitivity_sb"/>
+
                 <!-- Text + Toggle -->
                 <LinearLayout
                     android:id="@+id/element_toggle_text_row_ll"
@@ -181,7 +192,7 @@
                     android:layout_marginTop="16dp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/element_sensitivity_sb">
+                    app:layout_constraintTop_toBottomOf="@+id/element_tap_click_cb">
 
                     <TextView
                         android:id="@+id/element_text_tv"

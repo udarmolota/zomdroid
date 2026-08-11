@@ -24,6 +24,7 @@
     <string name="control_element_select_binding">选择绑定</string>
     <string name="control_element_binding_invalid">无效绑定</string>
     <string name="control_element_opacity">不透明度</string>
+    <string name="control_element_tap_click">轻点 = 左键点击</string>
     <string name="control_element_binding_left">绑定左</string>
     <string name="control_element_binding_up">绑定上</string>
     <string name="control_element_binding_right">绑定右</string>

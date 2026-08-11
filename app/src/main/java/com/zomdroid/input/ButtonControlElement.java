@@ -290,7 +290,8 @@ public class ButtonControlElement extends AbstractControlElement {
                 ControlElementDescription.DEFAULT_SENSITIVITY,
                 this.drawable.style,
                 this.drawable.iconFile,
-                this.drawable.noTint);
+                this.drawable.noTint,
+                false);
     }
 
     public class ButtonControlDrawable {

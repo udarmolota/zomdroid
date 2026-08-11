@@ -41,6 +41,15 @@ public class ControlElementDescription {
     public final String iconFile;
     /** When true a custom iconFile is drawn with its original colors (not tinted by the button color). */
     public final boolean noTint;
+    /**
+     * Touchpad only: when true a short tap does NOT send a left click - the pad just moves the
+     * cursor and clicking is done deliberately with the on-screen mouse buttons. Asked for by
+     * server admins: while dragging the cursor an accidental tap clicks whatever is underneath,
+     * which on an admin account fires real admin actions. Inverted (default false = tap clicks,
+     * today's behaviour) so layouts saved before this field existed deserialize unchanged - Gson
+     * fills absent booleans with false.
+     */
+    public final boolean tapDisabled;
 
     public static final float DEFAULT_SENSITIVITY = 2.0f;
     public static final Style DEFAULT_STYLE = Style.OUTLINE;
@@ -70,7 +79,7 @@ public class ControlElementDescription {
                                      AbstractControlElement.InputType inputType, @NonNull Icon icon,
                                      boolean isToggle, float sensitivity, Style style) {
         this(centerXRelative, centerYRelative, scale, type, bindings, text, color, alpha,
-                inputType, icon, isToggle, sensitivity, style, null, false);
+                inputType, icon, isToggle, sensitivity, style, null, false, false);
     }
 
     public ControlElementDescription(float centerXRelative, float centerYRelative, float scale,
@@ -79,6 +88,16 @@ public class ControlElementDescription {
                                      AbstractControlElement.InputType inputType, @NonNull Icon icon,
                                      boolean isToggle, float sensitivity, Style style,
                                      String iconFile, boolean noTint) {
+        this(centerXRelative, centerYRelative, scale, type, bindings, text, color, alpha,
+                inputType, icon, isToggle, sensitivity, style, iconFile, noTint, false);
+    }
+
+    public ControlElementDescription(float centerXRelative, float centerYRelative, float scale,
+                                     @NonNull AbstractControlElement.Type type, @NonNull GLFWBinding[] bindings,
+                                     String text, int color, int alpha,
+                                     AbstractControlElement.InputType inputType, @NonNull Icon icon,
+                                     boolean isToggle, float sensitivity, Style style,
+                                     String iconFile, boolean noTint, boolean tapDisabled) {
         this.centerXRelative = centerXRelative;
         this.centerYRelative = centerYRelative;
         this.scale = scale;
@@ -94,6 +113,7 @@ public class ControlElementDescription {
         this.style = (style != null) ? style : DEFAULT_STYLE;
         this.iconFile = iconFile;
         this.noTint = noTint;
+        this.tapDisabled = tapDisabled;
         validate();
     }
 

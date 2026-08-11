@@ -21,6 +21,8 @@ public class TouchpadControlElement extends AbstractControlElement {
     private static final long  TAP_MAX_MS  = 250;
 
     private float sensitivity;
+    // See ControlElementDescription.tapDisabled - true turns the pad into a pure cursor mover.
+    private boolean tapDisabled;
 
     private final TouchpadDrawable drawable;
     private int    pointerId = -1;
@@ -40,6 +42,7 @@ public class TouchpadControlElement extends AbstractControlElement {
                                   ControlElementDescription description) {
         super(parentView, description);
         this.sensitivity = (description.sensitivity > 0f) ? description.sensitivity : ControlElementDescription.DEFAULT_SENSITIVITY;
+        this.tapDisabled = description.tapDisabled;
         this.drawable = new TouchpadDrawable(parentView, description);
         debugCursorFill.setStyle(Paint.Style.FILL);
         debugCursorFill.setColor(Color.WHITE);
@@ -134,7 +137,7 @@ public class TouchpadControlElement extends AbstractControlElement {
 
                 float totalDist = dist(e.getX(actIndex), e.getY(actIndex), downX, downY);
                 long elapsed    = System.currentTimeMillis() - downTime;
-                boolean isTap   = totalDist < TAP_SLOP && elapsed < TAP_MAX_MS;
+                boolean isTap   = totalDist < TAP_SLOP && elapsed < TAP_MAX_MS && !tapDisabled;
                 //Log.d(TAG, "UP dist=" + totalDist + " elapsed=" + elapsed
                 //        + "ms isTap=" + isTap);
 
@@ -210,6 +213,14 @@ public class TouchpadControlElement extends AbstractControlElement {
         return sensitivity;
     }
 
+    public void setTapDisabled(boolean tapDisabled) {
+        this.tapDisabled = tapDisabled;
+    }
+
+    public boolean isTapDisabled() {
+        return tapDisabled;
+    }
+
     @Override
     public ControlElementDescription describe() {
         return new ControlElementDescription(
@@ -220,7 +231,8 @@ public class TouchpadControlElement extends AbstractControlElement {
                 drawable.color, drawable.alpha,
                 InputType.MNK,
                 ControlElementDescription.Icon.NO_ICON, false,
-                sensitivity);
+                sensitivity, ControlElementDescription.DEFAULT_STYLE, null, false,
+                tapDisabled);
     }
 
     private static double clamp(double v, double lo, double hi) {

@@ -23,6 +23,7 @@
     <string name="control_element_select_binding">Select binding</string>
     <string name="control_element_binding_invalid">Invalid binding</string>
     <string name="control_element_opacity">Opacity</string>
+    <string name="control_element_tap_click">Tap = left click</string>
     <string name="control_element_binding_left">Binding Left</string>
     <string name="control_element_binding_up">Binding Up</string>
     <string name="control_element_binding_right">Binding Right</string>
