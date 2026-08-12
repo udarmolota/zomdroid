@@ -31,12 +31,22 @@ public class GameLauncher {
         // gets the native call instead of a leftover Java no-op. Running at launch covers already
         // installed instances without reinstalling the game.
         com.zomdroid.patch.LightingTransmissionPatchApplier.restoreOriginalIfStubbed(gameInstance);
+        // Restore the two ZNetStatistics field names the stale Android RakNet still looks up
+        // (renamed in 42.15, native never rebuilt -> NoSuchFieldError on statistics-enabled
+        // servers). The installer swaps a pre-patched class into NEW instances; running here too
+        // covers instances created by an older launcher, without reinstalling the game.
+        com.zomdroid.patch.ZNetStatisticsPatchApplier.applyIfNeeded(gameInstance);
         // Select safe native implementations after the class-level patches are known to be ready.
         com.zomdroid.patch.NativeLibraryWorkarounds.disableIncompleteNativeLibraries(gameInstance);
         // Build 42.12+'s ARM64 PathFind implementation is under test after reports of characters
         // choosing incorrect interaction routes. Use PZ's own Java fallback without affecting
         // Build 41 or the older pre-fat-jar Build 42 releases.
         com.zomdroid.patch.PathfindingWorkaround.forceJavaPathfinderFor4212Plus(gameInstance);
+        // Re-apply the 42.13 case workaround against where this instance lives right now: lowercase
+        // twins for the instance folders, plus a refresh of the per-mod aliases and the doubled
+        // path, which spells out an absolute location and goes stale when an instance is renamed or
+        // copied. It also reaches mods installed before any of this existed.
+        com.zomdroid.patch.LowercasePathAliases.repair(gameInstance);
         // Retire our bundled jassimp (built from Assimp 5.4.3) by taking it off java.library.path.
         // Each game version ships the importer its models were authored against - B41's x86_64 is
         // assimp 5.0.1, 42.12+ adds TIS's own ARM64 5.3.1 - and the linker routes libjassimp64 to

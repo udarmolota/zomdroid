@@ -1380,8 +1380,9 @@ public class InstallerService extends Service implements TaskProgressListener {
                     copyDirectory(modRoot, normalDest);
                     Log.d("ModFix", "  Installed normal: " + normalDest.getAbsolutePath());
 
-                    // Step 7: lowercase aliases inside the mod + the doubled-path link
-                    applyCaseWorkaround(normalDest, new File(modsPath), gameInstance.getName());
+                    // Step 7: lowercase aliases inside the mod + the doubled-path link. Repeated at
+                    // every launch, because the doubled path spells out where the mod lives today.
+                    com.zomdroid.patch.LowercasePathAliases.applyToMod(normalDest, new File(modsPath));
                 }
 
                 finish(getString(R.string.mod_fix_installed), null);
@@ -1391,75 +1392,6 @@ public class InstallerService extends Service implements TaskProgressListener {
                 try { FileUtils.deleteDirectory(tmpDir); } catch (Exception ignored) {}
             }
         });
-    }
-
-    // -------------------- CASE-SENSITIVITY WORKAROUND --------------------
-    // Build 42.13 regressed mod file lookup on case-sensitive filesystems - 41.78 is fine. It is
-    // reported to the Indie Stone ("[42.13] Regression in Build 42.13: Linux filename
-    // case-sensitivity issue") and still open, so this is ours to carry. Two distinct lookups
-    // fail and each needs its own answer:
-    //
-    //   1. The file is requested in lowercase: "media/scripts/recipes/recipes_ladders.txt" while
-    //      the mod ships "recipes_Ladders.txt". Answered by giving every capitalised entry a
-    //      lowercase alias beside it. The multiplayer client check compares the same relative
-    //      path, so the aliases have to live in the real mod folder - a copy off to the side is
-    //      why joining a server still failed.
-    //
-    //   2. The mod's whole absolute path is lowercased and appended to the mods root, yielding
-    //      "<mods>/data/user/0/.../zomboid/mods/<mod>/...". No amount of aliasing inside the mod
-    //      creates that prefix, so the prefix is materialised and its last component points back
-    //      at the real mod.
-    //
-    // Both are symlinks. Measured on the Ladders mod: 206 aliases plus one mod link added 0 KB,
-    // where the lowercase copy this replaces cost 1.2 MB - exactly the size of the mod.
-    private void applyCaseWorkaround(File modDir, File modsDir, String instanceName) {
-        int aliases = createLowercaseAliases(modDir);
-
-        File inceptionDir = new File(modsDir, "data/user/0/com.zomdroid/files/instances/"
-                + instanceName.toLowerCase(Locale.US) + "/zomboid/mods");
-        inceptionDir.mkdirs();
-        File modLink = new File(inceptionDir, modDir.getName().toLowerCase(Locale.US));
-        // Clears a stale link, and equally the full copy left behind by installs made before this
-        // existed - deleteDirectory drops a link without touching what it points at.
-        if (modLink.exists() || Files.isSymbolicLink(modLink.toPath()))
-            FileUtils.deleteDirectory(modLink);
-        try {
-            Files.createSymbolicLink(modLink.toPath(), modDir.toPath());
-        } catch (IOException | UnsupportedOperationException e) {
-            Log.w(LOG_TAG, "Failed to link " + modLink + " -> " + modDir, e);
-        }
-
-        Log.i(LOG_TAG, "Case workaround for " + modDir.getName() + ": " + aliases + " alias(es)");
-    }
-
-    /** Give every entry whose name is not already lowercase a lowercase alias beside it. */
-    private int createLowercaseAliases(File root) {
-        List<File> entries = new ArrayList<>();
-        collectMixedCaseEntries(root, entries);
-        int created = 0;
-        for (File entry : entries) {
-            File alias = new File(entry.getParentFile(), entry.getName().toLowerCase(Locale.US));
-            if (alias.exists() || Files.isSymbolicLink(alias.toPath())) continue;
-            try {
-                // Relative target: the alias keeps working if the tree is moved or renamed.
-                Files.createSymbolicLink(alias.toPath(), Paths.get(entry.getName()));
-                created++;
-            } catch (IOException | UnsupportedOperationException e) {
-                Log.w(LOG_TAG, "Failed to alias " + alias, e);
-            }
-        }
-        return created;
-    }
-
-    // The whole tree is collected before a single alias is created, so the walk never meets one.
-    private void collectMixedCaseEntries(File dir, List<File> out) {
-        File[] files = dir.listFiles();
-        if (files == null) return;
-        for (File f : files) {
-            if (Files.isSymbolicLink(f.toPath())) continue;
-            if (!f.getName().equals(f.getName().toLowerCase(Locale.US))) out.add(f);
-            if (f.isDirectory()) collectMixedCaseEntries(f, out);
-        }
     }
 
     // -------------------- MOD FIX HELPERS --------------------
@@ -2090,7 +2022,7 @@ public class InstallerService extends Service implements TaskProgressListener {
                         modName = modName.substring(0, modName.length() - 4);
                 }
 
-                // Step 4: the case workaround is applied unconditionally now - see applyCaseWorkaround.
+                // Step 4: the case workaround is applied unconditionally now - see LowercasePathAliases.
                 Log.d("SmartMod", "isBuild42=" + isBuild42);
 
                 // Step 5: Merge 42.x version folders if B42
@@ -2133,7 +2065,7 @@ public class InstallerService extends Service implements TaskProgressListener {
                 // Step 7: lowercase aliases inside the mod + the doubled-path link. The common/
                 // expansion above already ran on the real mod, and the link points at it, so the
                 // second expansion the lowercase copy used to need is gone with the copy.
-                applyCaseWorkaround(normalDest, modsDir, instanceName);
+                com.zomdroid.patch.LowercasePathAliases.applyToMod(normalDest, modsDir);
 
                 finish(getString(R.string.install_mod_smart_done), null);
 
