@@ -74,6 +74,7 @@ public class GameInstanceManager {
 
     private void loadFromPreferences() {
         String json = this.sharedPreferences.getString(C.shprefs.keys.GAME_INSTANCES, null);
+        boolean migrated = false;
         if (json != null) {
             JsonArray rawArray = JsonParser.parseString(json).getAsJsonArray();
             for (JsonElement element : rawArray) {
@@ -86,8 +87,17 @@ public class GameInstanceManager {
                     if (isInstalled) instance.markInstallationFinished();
                 }
 
+                // The home path is the one absolute path we persist - everything else is stored
+                // relative and gets the current home prefixed at use time. Instances written before
+                // AppStorage started handing out the resolved form still carry the other spelling of
+                // the same directory, and it is that spelling the game compares against paths it has
+                // canonicalised itself. See AppStorage.canonical for what breaks.
+                if (instance.normalizeHomePath()) migrated = true;
+
                 gameInstances.add(instance);
             }
+            // Same directory either way, so nothing moves on disk - only the recorded spelling.
+            if (migrated) saveToPreferences();
         }
     }
 

@@ -75,6 +75,29 @@ public class GameInstance {
         return this.homePath;
     }
 
+    /**
+     * Rewrite a stored home path into the spelling the runtime resolves to, so it matches what
+     * {@link AppStorage#getHomePath()} hands out today. Same directory before and after - only the
+     * recorded string changes. Returns true when it changed, so the caller knows to persist.
+     *
+     * <p>Left alone when the directory is not there: a path that cannot be resolved is more likely
+     * an instance whose files are gone than one worth rewriting, and rewriting it would only hide
+     * that.
+     */
+    public boolean normalizeHomePath() {
+        if (this.homePath == null) return false;
+        try {
+            File dir = new File(this.homePath);
+            if (!dir.exists()) return false;
+            String resolved = dir.getCanonicalPath();
+            if (resolved.equals(this.homePath)) return false;
+            this.homePath = resolved;
+            return true;
+        } catch (java.io.IOException e) {
+            return false;
+        }
+    }
+
     public String getGamePath() {
         return this.homePath + "/" + GAME_FILES_DIR_NAME;
     }

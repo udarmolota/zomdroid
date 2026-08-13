@@ -42,10 +42,10 @@ public class GameLauncher {
         // choosing incorrect interaction routes. Use PZ's own Java fallback without affecting
         // Build 41 or the older pre-fat-jar Build 42 releases.
         com.zomdroid.patch.PathfindingWorkaround.forceJavaPathfinderFor4212Plus(gameInstance);
-        // Re-apply the 42.13 case workaround against where this instance lives right now: lowercase
-        // twins for the instance folders, plus a refresh of the per-mod aliases and the doubled
-        // path, which spells out an absolute location and goes stale when an instance is renamed or
-        // copied. It also reaches mods installed before any of this existed.
+        // Re-apply the 42.13 case workaround against where this instance lives right now. The mod
+        // aliases and the doubled path spell out an absolute location, so they go stale when an
+        // instance is renamed or copied; this also reaches mods installed before any of it existed,
+        // and sweeps the instance-level aliases b39a80a briefly shipped.
         com.zomdroid.patch.LowercasePathAliases.repair(gameInstance);
         // Retire our bundled jassimp (built from Assimp 5.4.3) by taking it off java.library.path.
         // Each game version ships the importer its models were authored against - B41's x86_64 is

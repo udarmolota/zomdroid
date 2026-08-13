@@ -8,19 +8,20 @@ import com.zomdroid.game.GameInstance;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 /**
- * The case-sensitivity workaround for Build 42.13+, applied both when a mod is installed and again
- * at every game launch.
+ * The case-sensitivity workaround for Build 42.13+, applied when a mod is installed and again at
+ * every game launch.
  *
  * <p>Build 42.13 regressed file lookup on case-sensitive filesystems - 41.78 is fine. It is
  * reported to the Indie Stone ("[42.13] Regression in Build 42.13: Linux filename case-sensitivity
- * issue") and still open, so this is ours to carry. The game mangles paths in three distinct ways
- * and each needs its own answer:
+ * issue") and still open, so this is ours to carry. Two lookups genuinely go to disk with a mangled
+ * name, and each gets a symlink:
  *
  * <ol>
  *   <li>The file is requested in lowercase: "media/scripts/recipes/recipes_ladders.txt" while the
@@ -32,20 +33,10 @@ import java.util.Locale;
  *       "&lt;mods&gt;/data/user/0/.../zomboid/mods/&lt;mod&gt;/...". No amount of aliasing inside
  *       the mod creates that prefix, so the prefix is materialised and its last component points
  *       back at the real mod.</li>
- *   <li>{@code AdvancedAnimator} lowercases the absolute path and then uses it <em>as</em> an
- *       absolute path, so it looks for "instances/project zomboid/zomboid/mods/...". That never
- *       reaches the mods folder at all - it fails at the instance directory, above anything the
- *       other two answers can build. Two links per instance cover it for every mod at once.</li>
  * </ol>
  *
- * <p>Form 3 is not cosmetic: a missing animation file fails the Lua reload, which leaves
- * {@code globals} null, which throws a NullPointerException out of
- * {@code ConnectToServerState.Finish} - the player sees a dead screen with unclickable buttons when
- * joining a modded server. Any mod carrying animations can trigger it (damnlib, which the popular
- * KI5 vehicles build on, is how we found it).
- *
- * <p>Everything here is symlinks. Measured on the Ladders mod: 206 aliases plus one mod link added
- * 0 KB, where the lowercase copy this replaces cost 1.2 MB - exactly the size of the mod.
+ * <p>Measured on the Ladders mod: 206 aliases plus one mod link added 0 KB, where the lowercase
+ * copy this replaces cost 1.2 MB - exactly the size of the mod.
  *
  * <h3>Why it also runs at launch</h3>
  *
@@ -57,17 +48,24 @@ import java.util.Locale;
  * repair belongs at launch, where the current path is known. It is also the only thing that can
  * help mods installed before any of this existed.
  *
- * <h3>What is deliberately not done</h3>
+ * <h3>Two things that look like more of the same and are not</h3>
  *
- * <p>No lowercase alias is created for a mod's own directory inside "mods". It looks like the
- * obvious fourth form, but the game scans that folder one level deep looking for
- * "&lt;entry&gt;/common/mod.info", follows symlinks while doing it, and would find the same mod
- * twice under two names. Worse, whichever it picked could hand {@code ScriptManager} a path through
- * the link: it builds its base URI from {@code getCanonicalFile()} while {@code ZomboidFileSystem}
- * uses the raw path, so the two disagree, {@code URI.relativize} silently returns the argument
- * unchanged, and every script's "relative" name comes back absolute - which resolves to null and
- * throws out of {@code NetChecksum.addFile} once per script file. Observed mod folder names are
- * already lowercase, so this buys nothing and risks that.
+ * <p><b>Lowercase aliases for the instance folders</b> ("project zomboid02" beside "Project
+ * Zomboid02"). Shipped in b39a80a and removed again: they answered a lookup that does not exist.
+ * {@code AdvancedAnimator.buildChecksum} reports {@code couldn't find "<lowercased absolute path>"},
+ * which reads like a file it failed to open, but the call behind it is
+ * {@code ZomboidFileSystem.getAbsolutePath}, i.e. {@code activeFileMap.get(key.toLowerCase())} - a
+ * HashMap lookup that never touches disk. The string is a key, not a path, and it is absolute
+ * because the game failed to shorten it: {@code AdvancedAnimator.loadModMedia} builds its base URI
+ * from {@code getCanonicalFile()} but enumerates children from the raw path, so when the two
+ * spellings of the app data directory differ, {@code URI.relativize} finds no common prefix and
+ * hands back its argument untouched. That is fixed where it starts, in
+ * {@code AppStorage} - see the note there. The aliases also left a dangling link beside a deleted
+ * instance, since deletion removes the instance directory and nothing next to it.
+ *
+ * <p><b>A lowercase alias for a mod's own directory inside "mods".</b> The game scans that folder
+ * one level deep for "&lt;entry&gt;/common/mod.info" and follows symlinks, so it would find every
+ * mod twice under two names. Observed mod folder names are already lowercase, so it buys nothing.
  */
 public final class LowercasePathAliases {
     private static final String LOG_TAG = LowercasePathAliases.class.getName();
@@ -77,20 +75,51 @@ public final class LowercasePathAliases {
     // -------------------- LAUNCH-TIME REPAIR --------------------
 
     /**
-     * Bring an instance's aliases up to date with where it actually lives right now. Safe to call
-     * on every launch: existing links are left alone, and an instance can be created, renamed or
-     * copied between launches without anything else noticing.
+     * Bring an instance's mod aliases up to date with where it actually lives right now. Safe to
+     * call on every launch: existing links are left alone, and an instance can be created, renamed
+     * or copied between launches without anything else noticing.
      */
     public static void repair(GameInstance gameInstance) {
         File instanceDir = new File(gameInstance.getHomePath());
         if (!instanceDir.isDirectory()) return;
 
-        // Form 3, the instance level. Listing instances reads the preferences JSON rather than
-        // scanning this directory, so the extra entry cannot show up as a duplicate instance.
-        link(instanceDir.getParentFile(), instanceDir.getName());
-        link(instanceDir, "Zomboid");
-
+        removeInstanceAliases(instanceDir);
         repairInstalledMods(new File(instanceDir, "Zomboid/mods"));
+    }
+
+    /**
+     * Drop the instance-level aliases b39a80a created. The whole instances root is swept, not just
+     * this instance: deleting an instance removes its directory and nothing beside it, so an alias
+     * whose instance is already gone survives as a dangling link wearing the instance's name - which
+     * reads, in a file manager, as an instance that refused to delete.
+     *
+     * <p>Recognised precisely - a symlink whose relative target is its own name in a different case
+     * - so nothing else can be caught by this. The sweep can go once b39a80a-era builds are out of
+     * circulation.
+     */
+    private static void removeInstanceAliases(File instanceDir) {
+        File instancesRoot = instanceDir.getParentFile();
+        if (instancesRoot != null) {
+            File[] entries = instancesRoot.listFiles();
+            if (entries != null) for (File entry : entries) unlinkIfLowercaseAlias(entry);
+        }
+        unlinkIfLowercaseAlias(new File(instanceDir, "zomboid"));
+    }
+
+    private static void unlinkIfLowercaseAlias(File alias) {
+        Path path = alias.toPath();
+        try {
+            if (!Files.isSymbolicLink(path)) return;
+            // Target is relative and differs from the link name only in case - i.e. ours. Read
+            // rather than resolved, so a link whose instance is gone is still recognised.
+            String target = Files.readSymbolicLink(path).toString();
+            if (!target.toLowerCase(Locale.US).equals(alias.getName())) return;
+            if (target.equals(alias.getName())) return;
+            Files.delete(path);
+            Log.i(LOG_TAG, "Removed obsolete alias " + path);
+        } catch (IOException | UnsupportedOperationException e) {
+            Log.w(LOG_TAG, "Failed to remove obsolete alias " + path, e);
+        }
     }
 
     /** Re-apply forms 1 and 2 to every mod already sitting in the folder. */
@@ -183,35 +212,6 @@ public final class LowercasePathAliases {
             if (Files.isSymbolicLink(f.toPath())) continue;
             if (!f.getName().equals(f.getName().toLowerCase(Locale.US))) out.add(f);
             if (f.isDirectory()) collectMixedCaseEntries(f, out);
-        }
-    }
-
-    // -------------------- SHARED --------------------
-
-    /**
-     * Give {@code name} inside {@code parent} a lowercase alias beside it. The link target is
-     * relative, so the pair survives the tree being moved.
-     */
-    private static void link(File parent, String name) {
-        if (parent == null) return;
-        String lower = name.toLowerCase(Locale.US);
-        if (lower.equals(name)) return;               // already lowercase, nothing to alias
-        if (!new File(parent, name).exists()) return; // the real directory is not there (yet)
-
-        File alias = new File(parent, lower);
-        if (Files.isSymbolicLink(alias.toPath())) {
-            if (alias.exists()) return; // ours from a previous launch and still resolving
-            alias.delete();             // dangling (the target was renamed) - replace it
-        } else if (alias.exists()) {
-            return;                     // a real file or directory lives there, never touch it
-        }
-
-        try {
-            Files.createSymbolicLink(alias.toPath(), Paths.get(name));
-            Log.i(LOG_TAG, "Lowercase alias created: " + alias.getAbsolutePath() + " -> " + name);
-        } catch (IOException | UnsupportedOperationException e) {
-            Log.w(LOG_TAG, "Failed to alias " + alias.getAbsolutePath()
-                    + " - mods with animations may fail to load", e);
         }
     }
 
