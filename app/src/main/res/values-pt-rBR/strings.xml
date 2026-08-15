@@ -78,7 +78,7 @@
     <string name="nav_menu_controls_editor">Editor de controles</string>
     <string name="nav_menu_gamepad_mapper">Configurar gamepad</string>
     <string name="nav_menu_manage_storage">Gerenciar armazenamento</string>
-    <string name="nav_menu_donate">Apoiar</string>
+    <string name="nav_menu_donate">Doar</string>
     <string name="control_element_delete">Excluir elemento</string>
     <string name="control_element_input_type">Tipo de entrada</string>
     <string name="control_element_stick_binding">Atalho do Analógico</string>
@@ -442,8 +442,6 @@
     <string name="mod_fix_help_message">Alguns mods usam uma estrutura de pastas que causa conflito de caminho no Android. O jogo acaba procurando arquivos em um caminho duplicado e não consegue encontrá-los.\n\nEsta correção instala o mod duas vezes — uma com os nomes de pasta originais e outra com todos os nomes em minúsculas — para que o jogo encontre os arquivos independentemente do caminho usado.\n\nMods afetados conhecidos:\n• Tsar\'s Common Library — ID: 3402491515\n• [B42] Simple Flashlight on Belt — ID: 3394588830\n\nComo usar: baixe o mod e carregue aqui.</string>
 
     <!-- CPU/GPU autodetect -->
-    <string name="preset_dialog_gpu_hint_qualcomm">\u2705 Snapdragon (Adreno) detectado. Para a Build 42, o ZINK funciona melhor no seu aparelho — já foi selecionado automaticamente. Para melhores resultados, escolha também um driver Freedreno/Turnip nas Configurações. O NG_GL4ES está disponível como alternativa, mas consome bem mais memória.</string>
-    <string name="preset_dialog_gpu_hint_mediatek">\u2705 MediaTek detectado. O renderizador ZINK_ZFA foi definido, mas o suporte ao ZINK em GPUs Mali varia. Se o jogo não iniciar, tente ativar o driver gráfico ANGLE integrado nas Opções do desenvolvedor.</string>
 
     <!-- Manual Mods installation -->
     <string name="install_mod_manual_group">Instalação manual</string>
@@ -597,8 +595,4 @@
     <string name="new_game_instance_detect_failed">Não foi possível ler o ZIP do jogo. Verifique se é um arquivo válido do Project Zomboid e tente novamente.</string>
 
     <!-- NG_GL4ES renderer offer dialog -->
-    <string name="ng_offer_title">Renderizador experimental</string>
-    <string name="ng_offer_message">Deseja configurar o renderizador experimental NG_GL4ES? Em algumas GPUs não-Adreno (Mali em MediaTek, Exynos ou Tensor, e similares) ele roda o Build 42 melhor.\n\n• Usar NG_GL4ES — testar o renderizador experimental.\n• Usar ZINK — manter o renderizador padrão. Em dispositivos MediaTek, o ZINK funciona somente por meio do ANGLE.\n\nVocê pode alterar isso a qualquer momento nas Configurações.</string>
-    <string name="ng_offer_use_ng">Usar NG_GL4ES</string>
-    <string name="ng_offer_use_zink">Usar ZINK</string>
 </resources>

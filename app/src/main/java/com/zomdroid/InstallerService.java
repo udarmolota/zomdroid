@@ -2706,13 +2706,23 @@ public class InstallerService extends Service implements TaskProgressListener {
 
     @Override
     public void onProgressUpdate(String message, int progress, int progressMax) {
-        if (System.currentTimeMillis() - lastProgressUpdateMs < 500) return;
+        // The throttle drops the whole event, not just a redraw, so a call carrying a new message
+        // that lands inside the window would lose that message for good - the next call is a bare
+        // percentage tick and could never bring it back. Only rate-limit the ticks.
+        if (message == null && System.currentTimeMillis() - lastProgressUpdateMs < 500) return;
         lastProgressUpdateMs = System.currentTimeMillis();
 
         TaskState currentState = this.taskState.getValue();
         this.taskState.postValue(new TaskState(
                 currentState == null ? null : currentState.title,
-                message, progress, progressMax, false, false));
+                // Carried forward exactly like the title above. Extraction reports progress through
+                // FileUtils, which has no text to give and passes null; treating that as "clear the
+                // line" is what wiped the "Extracting..." set moments earlier and left the dialog
+                // with a bare bar. The notification never had the bug - it only calls
+                // setContentText when the message is non-null - so the two disagreed on the same
+                // event.
+                message != null ? message : (currentState == null ? null : currentState.message),
+                progress, progressMax, false, false));
 
         handler.post(() -> {
             if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)

@@ -78,7 +78,7 @@
     <string name="nav_menu_controls_editor">控制编辑器</string>
     <string name="nav_menu_gamepad_mapper">手柄映射器</string>
     <string name="nav_menu_manage_storage">管理存储</string>
-    <string name="nav_menu_donate">支持</string>
+    <string name="nav_menu_donate">捐赠</string>
     <string name="control_element_delete">删除元素</string>
     <string name="control_element_input_type">输入类型</string>
     <string name="control_element_stick_binding">摇杆绑定</string>
@@ -436,8 +436,6 @@
     <string name="mod_fix_help_message">部分 mod 使用的文件夹结构会在 Android 上引发路径冲突。游戏会在重复路径中查找文件，从而导致找不到。\n\n此修复会将 mod 安装两次——一次使用原始文件夹名称，一次使用全小写名称——使游戏无论使用哪个路径都能找到文件。\n\n已知受影响的 mod：\n• Tsar\'s Common Library — ID: 3402491515\n• [B42] Simple Flashlight on Belt — ID: 3394588830\n\n使用方法：下载 mod，在此处加载。</string>
 
     <!-- CPU/GPU autodetect -->
-    <string name="preset_dialog_gpu_hint_qualcomm">\u2705 检测到骁龙 (Adreno) 处理器。对于 Build 42，ZINK 在你的设备上表现最好——已自动选择。为获得最佳效果，请在设置中另选 Freedreno/Turnip 驱动。也可以试试 NG_GL4ES，但它占用的内存明显更多。</string>
-    <string name="preset_dialog_gpu_hint_mediatek">\u2705 检测到联发科处理器。已设置 ZINK_ZFA 渲染器，但 ZINK 在 Mali GPU 上的支持情况不稳定。如果游戏无法启动，请尝试在开发者选项中启用内置 ANGLE 图形驱动。</string>
 
     <!-- Manual mods installation -->
     <string name="install_mod_manual_group">手动安装</string>
@@ -591,8 +589,4 @@
     <string name="new_game_instance_detect_failed">无法读取游戏 ZIP。请确认它是有效的 Project Zomboid 压缩包后重试。</string>
 
     <!-- NG_GL4ES renderer offer dialog -->
-    <string name="ng_offer_title">实验性渲染器</string>
-    <string name="ng_offer_message">是否设置实验性渲染器 NG_GL4ES？在部分非 Adreno GPU（联发科、Exynos 或 Tensor 上的 Mali 等）上，它运行 Build 42 的效果更好。\n\n• 使用 NG_GL4ES — 尝试实验性渲染器。\n• 使用 ZINK — 保留默认渲染器。在联发科设备上，ZINK 仅能通过 ANGLE 工作。\n\n您可以随时在设置中更改。</string>
-    <string name="ng_offer_use_ng">使用 NG_GL4ES</string>
-    <string name="ng_offer_use_zink">使用 ZINK</string>
 </resources>

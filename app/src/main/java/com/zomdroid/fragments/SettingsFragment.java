@@ -21,6 +21,7 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.zomdroid.R;
 import com.zomdroid.databinding.FragmentSettingsBinding;
+import com.zomdroid.game.SuggestedPreset;
 import com.zomdroid.input.GamepadManager;
 
 public class SettingsFragment extends Fragment {
@@ -38,6 +39,8 @@ public class SettingsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        setUpPresetCard();
+
         // Renderer
         ArrayAdapter<LauncherPreferences.Renderer> rendererArrayAdapter = new ArrayAdapter<>(
             requireContext(),
@@ -54,12 +57,40 @@ public class SettingsFragment extends Fragment {
                 // The spinner fires this once while being restored, before the user touches
                 // anything. Warn only on a real choice, or opening Settings would greet everyone
                 // with a dialog about a renderer they already use.
-                if (rendererSelectionRestored && renderer == LauncherPreferences.Renderer.NG_GL4ES) {
-                    new AlertDialog.Builder(requireContext())
-                            .setTitle(R.string.renderer_ng_build42_only_title)
-                            .setMessage(R.string.renderer_ng_build42_only_message)
-                            .setPositiveButton(android.R.string.ok, null)
-                            .show();
+                if (rendererSelectionRestored) {
+                    if (renderer == LauncherPreferences.Renderer.NG_GL4ES) {
+                        // NG_GL4ES and texture shrinking are one decision in practice - shrinking is
+                        // what holds the framerate, and it applies to this renderer only. Keeping
+                        // them apart is what made our own advice untrue: "switch to NG_GL4ES" on its
+                        // own changes nothing, and nobody went on to find the setting. A value the
+                        // user chose themselves is never overwritten.
+                        boolean enabled = false;
+                        if (SuggestedPreset.readShrink(binding.settingsEnvVarsEt.getText().toString()) == null) {
+                            binding.settingsEnvVarsEt.setText(SuggestedPreset.withShrink(
+                                    binding.settingsEnvVarsEt.getText().toString(),
+                                    SuggestedPreset.SHRINK_BALANCED));
+                            enabled = true;
+                        }
+                        if (warningIsRelevantFor(true)) {
+                            new AlertDialog.Builder(requireContext())
+                                    .setTitle(R.string.renderer_ng_build42_only_title)
+                                    .setMessage(R.string.renderer_ng_build42_only_message)
+                                    .setPositiveButton(android.R.string.ok, null)
+                                    .show();
+                        } else if (enabled) {
+                            Toast.makeText(requireContext(), R.string.renderer_ng_shrink_enabled,
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    } else if (renderer == LauncherPreferences.Renderer.GL4ES
+                            && warningIsRelevantFor(false)) {
+                        // The mirror image, and the cause of a real report: GL4ES picked by hand on
+                        // 42.20 gives a black screen at startup.
+                        new AlertDialog.Builder(requireContext())
+                                .setTitle(R.string.renderer_gl4es_build41_title)
+                                .setMessage(R.string.renderer_gl4es_build41_message)
+                                .setPositiveButton(android.R.string.ok, null)
+                                .show();
+                    }
                 }
                 rendererSelectionRestored = true;
                 switch (renderer) {
@@ -383,6 +414,104 @@ public class SettingsFragment extends Fragment {
     private static final String SHRINK_BALANCED = "7";
     private static final String SHRINK_ULTRA = "1";
 
+    // -------------------- SUGGESTED PRESETS --------------------
+
+    private void setUpPresetCard() {
+        String gpuVendor = SuggestedPreset.detectGpuVendor();
+        SuggestedPreset build42 = SuggestedPreset.forBuild42(gpuVendor);
+
+        binding.settingsPresetB42Btn.setText(build42.getLabelRes());
+        binding.settingsPresetB42Btn.setOnClickListener(v -> confirmPreset(build42));
+        binding.settingsPresetB41Btn.setOnClickListener(v -> confirmPreset(SuggestedPreset.BUILD_41));
+
+        // Only where ZINK is the Build 42 default does the compatibility set need its own button;
+        // everywhere else the "Build 42" button already is that set.
+        if (SuggestedPreset.hasCompatibilityAlternative(gpuVendor)) {
+            binding.settingsPresetB42CompatBtn.setVisibility(View.VISIBLE);
+            binding.settingsPresetB42CompatBtn.setOnClickListener(
+                    v -> confirmPreset(SuggestedPreset.BUILD_42_COMPATIBILITY));
+        }
+
+        updatePresetStatus();
+    }
+
+    /** Name the preset the current settings match, so a drifted setup is visible without digging. */
+    private void updatePresetStatus() {
+        if (binding == null) return;
+        for (SuggestedPreset preset : SuggestedPreset.values()) {
+            if (preset.describeChanges(requireContext()).isEmpty()) {
+                binding.settingsPresetCurrentTv.setText(
+                        getString(R.string.preset_current, getString(preset.getLabelRes())));
+                return;
+            }
+        }
+        binding.settingsPresetCurrentTv.setText(R.string.preset_current_none);
+    }
+
+    /** Never a black box: list what will change, then apply only if the user agrees. */
+    private void confirmPreset(SuggestedPreset preset) {
+        String name = getString(preset.getLabelRes());
+        java.util.List<String> changes = preset.describeChanges(requireContext());
+        if (changes.isEmpty()) {
+            Toast.makeText(requireContext(), R.string.preset_confirm_nothing_to_do,
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        StringBuilder message = new StringBuilder();
+        for (String change : changes) message.append("• ").append(change).append('\n');
+        if (preset == SuggestedPreset.BUILD_42_COMPATIBILITY)
+            message.append(getString(R.string.preset_confirm_shrink_note));
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle(getString(R.string.preset_confirm_title, name))
+                .setMessage(message.toString().trim())
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(android.R.string.ok, (d, w) -> {
+                    preset.apply(requireContext());
+                    // The screen reads its values once, at creation; after writing behind its back
+                    // the controls have to be pointed at the new state or they would show - and on
+                    // the next edit write back - the old one.
+                    refreshFromPreferences();
+                    Toast.makeText(requireContext(), getString(R.string.preset_applied, name),
+                            Toast.LENGTH_SHORT).show();
+                })
+                .show();
+    }
+
+    private void refreshFromPreferences() {
+        if (binding == null) return;
+        LauncherPreferences prefs = LauncherPreferences.requireSingleton();
+        binding.settingsRendererS.setSelection(
+                ((ArrayAdapter<LauncherPreferences.Renderer>) binding.settingsRendererS.getAdapter())
+                        .getPosition(prefs.getRenderer()));
+        binding.settingsJargsEt.setText(prefs.getJvmArgs());
+        binding.settingsEnvVarsEt.setText(prefs.getEnvVars());
+        binding.settingsMemorySaverSwitch.setChecked(prefs.isMemorySaver());
+        binding.settingsResolutionScaleSb.setProgress(Math.round(prefs.getRenderScale() * 100));
+        syncShrinkSpinner();
+        updatePresetStatus();
+    }
+
+    /**
+     * Whether a "this renderer is for the other build" warning applies to this player at all.
+     *
+     * <p>Renderer settings are global while the warning is about a build, so the honest answer only
+     * exists when there is no ambiguity: exactly one instance installed. With one Build 42 instance,
+     * telling someone who just picked NG_GL4ES that it does not work on Build 41 is noise about a
+     * build they do not have. With several, or none, we cannot know which they will launch and the
+     * warning is worth showing.
+     */
+    private boolean warningIsRelevantFor(boolean rendererIsForBuild42) {
+        java.util.ArrayList<com.zomdroid.game.GameInstance> instances =
+                com.zomdroid.game.GameInstanceManager.requireSingleton().getInstances();
+        if (instances.size() != 1) return true;
+        String build = instances.get(0).getBuildVersion();
+        if (build == null) return true;
+        boolean instanceIsBuild42 = build.startsWith("42");
+        return instanceIsBuild42 != rendererIsForBuild42;
+    }
+
     private void setUpTextureShrinkSpinner() {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_spinner_item, new String[]{
@@ -431,26 +560,14 @@ public class SettingsFragment extends Fragment {
             binding.settingsTextureShrinkSpinner.setSelection(position);
     }
 
+    // Reading and rewriting LIBGL_SHRINK inside the free-text field lives in SuggestedPreset, which
+    // needs the same two operations to apply a preset.
     private static String readShrink(String envVars) {
-        for (String token : envVars.trim().split("\\s+")) {
-            if (token.startsWith(SHRINK_KEY + "=")) return token.substring(SHRINK_KEY.length() + 1);
-        }
-        return null;
+        return SuggestedPreset.readShrink(envVars);
     }
 
-    /** Replace or drop LIBGL_SHRINK, leaving every other variable exactly where it was. */
     private static String withShrink(String envVars, String value) {
-        StringBuilder out = new StringBuilder();
-        for (String token : envVars.trim().split("\\s+")) {
-            if (token.isEmpty() || token.startsWith(SHRINK_KEY + "=")) continue;
-            if (out.length() > 0) out.append(' ');
-            out.append(token);
-        }
-        if (value != null) {
-            if (out.length() > 0) out.append(' ');
-            out.append(SHRINK_KEY).append('=').append(value);
-        }
-        return out.toString();
+        return SuggestedPreset.withShrink(envVars, value);
     }
 
     @Override

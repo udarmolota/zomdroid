@@ -77,7 +77,7 @@
     <string name="nav_menu_controls_editor">Editor kontrol</string>
     <string name="nav_menu_gamepad_mapper">Pengatur gamepad</string>
     <string name="nav_menu_manage_storage">Kelola penyimpanan</string>
-    <string name="nav_menu_donate">Dukung</string>
+    <string name="nav_menu_donate">Donasi</string>
     <string name="control_element_delete">Hapus elemen</string>
     <string name="control_element_input_type">Jenis input</string>
     <string name="control_element_stick_binding">Ikatan Stik</string>
@@ -443,8 +443,6 @@
     <string name="mod_fix_help_message">Beberapa mod menggunakan struktur folder yang menyebabkan konflik path di Android. Akibatnya, game mencari file di path yang terduplikasi dan tidak dapat menemukannya.\n\nPerbaikan ini menginstal mod dua kali — sekali dengan nama folder asli, dan sekali lagi dengan semua nama dalam huruf kecil — sehingga game dapat menemukan file terlepas dari path yang digunakan.\n\nMod yang diketahui terdampak:\n• Tsar\'s Common Library — ID: 3402491515\n• [B42] Simple Flashlight on Belt — ID: 3394588830\n\nCara menggunakan: unduh mod dan muat di sini.</string>
 
     <!-- CPU/GPU autodetect -->
-    <string name="preset_dialog_gpu_hint_qualcomm">\u2705 Snapdragon (Adreno) terdeteksi. Untuk Build 42, ZINK paling cocok di perangkat Anda \u2014 sudah dipilih otomatis. Untuk hasil terbaik, pilih juga driver Freedreno/Turnip di Pengaturan. NG_GL4ES tersedia sebagai alternatif, tetapi memakai memori jauh lebih banyak.</string>
-    <string name="preset_dialog_gpu_hint_mediatek">\u2705 MediaTek terdeteksi. Renderer ZINK_ZFA telah diatur, tetapi dukungan ZINK pada GPU Mali bervariasi. Jika game tidak dapat dijalankan, coba aktifkan driver grafis bawaan ANGLE di opsi pengembang.</string>
 
     <!-- Manual mods installation -->
     <string name="install_mod_manual_group">Instalasi manual</string>
@@ -598,8 +596,4 @@
     <string name="new_game_instance_detect_failed">Tidak dapat membaca ZIP game. Pastikan itu arsip Project Zomboid yang valid dan coba lagi.</string>
 
     <!-- NG_GL4ES renderer offer dialog -->
-    <string name="ng_offer_title">Renderer eksperimental</string>
-    <string name="ng_offer_message">Ingin menyiapkan renderer eksperimental NG_GL4ES? Pada sebagian GPU non-Adreno (Mali di MediaTek, Exynos atau Tensor, dan sejenisnya) ia menjalankan Build 42 lebih baik.\n\n• Gunakan NG_GL4ES — coba renderer eksperimental.\n• Gunakan ZINK — pertahankan renderer default. Pada perangkat MediaTek, ZINK hanya berfungsi melalui ANGLE.\n\nAnda dapat mengubahnya kapan saja di Pengaturan.</string>
-    <string name="ng_offer_use_ng">Gunakan NG_GL4ES</string>
-    <string name="ng_offer_use_zink">Gunakan ZINK</string>
 </resources>

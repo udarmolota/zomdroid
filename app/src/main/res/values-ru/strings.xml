@@ -78,7 +78,7 @@
     <string name="nav_menu_controls_editor">Редактор управления</string>
     <string name="nav_menu_gamepad_mapper">Настройка геймпада</string>
     <string name="nav_menu_manage_storage">Управление хранилищем</string>
-    <string name="nav_menu_donate">Поддержать</string>
+    <string name="nav_menu_donate">Донат</string>
     <string name="control_element_delete">Удалить элемент</string>
     <string name="control_element_input_type">Тип ввода</string>
     <string name="control_element_stick_binding">Привязка стика</string>
@@ -442,8 +442,6 @@
     <string name="mod_fix_help_message">Некоторые моды используют структуру папок, которая вызывает конфликт путей на Android. Игра ищет файлы по двойному пути и не может их найти.\n\nФикс устанавливает мод дважды — один раз с оригинальными именами папок, второй раз со всеми именами в нижнем регистре — чтобы игра находила файлы независимо от того, какой путь использует.\n\nИзвестные проблемные моды:\n• Tsar\'s Common Library — ID: 3402491515\n• [B42] Simple Flashlight on Belt — ID: 3394588830\n\nКак использовать: скачайте мод и загрузите сюда.</string>
 
     <!-- CPU/GPU autodetect -->
-    <string name="preset_dialog_gpu_hint_qualcomm">\u2705 Обнаружен Snapdragon (Adreno). Для Build 42 на вашем устройстве лучше всего подходит ZINK — он выбран автоматически. Для лучшего результата выберите также драйвер Freedreno/Turnip в настройках. Можно попробовать и NG_GL4ES, но он потребляет заметно больше памяти.</string>
-    <string name="preset_dialog_gpu_hint_mediatek">\u2705 Обнаружен MediaTek. Рендерер ZINK_ZFA установлен, но поддержка ZINK на Mali-видеочипах нестабильна. Если игра не запускается, попробуйте активировать встроенный графический драйвер ANGLE в настройках разработчика.</string>
 
     <!-- Manual mods installation -->
     <string name="install_mod_manual_group">Ручная установка</string>
@@ -597,8 +595,4 @@
     <string name="new_game_instance_detect_failed">Не удалось прочитать ZIP игры. Убедитесь, что это корректный архив Project Zomboid, и попробуйте снова.</string>
 
     <!-- NG_GL4ES renderer offer dialog -->
-    <string name="ng_offer_title">Экспериментальный рендерер</string>
-    <string name="ng_offer_message">Настроить экспериментальный рендерер NG_GL4ES? На некоторых видеочипах не-Adreno (Mali на MediaTek, Exynos или Tensor и подобных) он лучше запускает Build 42.\n\n• Включить NG_GL4ES — попробовать экспериментальный рендерер.\n• Оставить ZINK — оставить стандартный рендерер. На устройствах MediaTek ZINK работает только через ANGLE.\n\nЭто можно изменить в любой момент в Настройках.</string>
-    <string name="ng_offer_use_ng">Включить NG_GL4ES</string>
-    <string name="ng_offer_use_zink">Оставить ZINK</string>
 </resources>

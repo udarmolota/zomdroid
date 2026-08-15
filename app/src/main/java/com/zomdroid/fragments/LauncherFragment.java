@@ -55,6 +55,7 @@ import com.zomdroid.databinding.FragmentLauncherBinding;
 import com.zomdroid.databinding.TaskProgressDialogBinding;
 import com.zomdroid.game.GameInstance;
 import com.zomdroid.game.GameInstanceManager;
+import com.zomdroid.game.SuggestedPreset;
 import android.widget.ImageView;
 
 public class LauncherFragment extends Fragment {
@@ -405,24 +406,13 @@ public class LauncherFragment extends Fragment {
     private void showPostInstallSetupDialog(String presetName, String gpuVendor) {
         if (presetName == null) return;
 
-        // Non-Qualcomm on any Build 42: offer the choice, because neither renderer is a clear
-        // win there — ZINK needs ANGLE on Mali, NG_GL4ES doesn't but costs more memory. This used
-        // to be limited to the pre-42.12 preset; NG_GL4ES now covers every Build 42 version, and
-        // "Build 42.12+" is the preset most of those users actually pick.
-        if (presetName.startsWith("Build 42") && !"QUALCOMM".equals(gpuVendor)) {
-            new MaterialAlertDialogBuilder(requireContext())
-                    .setTitle(R.string.ng_offer_title)
-                    .setMessage(R.string.ng_offer_message)
-                    .setCancelable(false)
-                    .setPositiveButton(R.string.ng_offer_use_ng, (dialog, which) ->
-                            LauncherPreferences.requireSingleton().setRenderer(
-                                    LauncherPreferences.Renderer.NG_GL4ES))
-                    .setNegativeButton(R.string.ng_offer_use_zink, (dialog, which) ->
-                            LauncherPreferences.requireSingleton().setRenderer(
-                                    LauncherPreferences.Renderer.ZINK_ZFA))
-                    .show();
-            return;
-        }
+        // A dialog used to stand here asking non-Qualcomm users to pick between NG_GL4ES and ZINK,
+        // and it returned early - so this whole screen never ran for exactly the people it was
+        // written for. It is gone for two reasons. The choice is no longer open: two and a half
+        // weeks of reports say NG_GL4ES with shrinking works everywhere, while ZINK needs an Adreno
+        // GPU or ANGLE. And it set the renderer alone, leaving shrinking, the Java arguments and
+        // the memory saver at whatever they were - half a preset, which is no preset. ZINK stays
+        // one tap away in Settings for anyone who wants the cleaner picture.
 
         int titleRes;
         String message;
@@ -441,25 +431,48 @@ public class LauncherFragment extends Fragment {
             isBuild42 = false;
         }
 
-        if (isBuild42) {
-            if ("QUALCOMM".equals(gpuVendor)) {
-                message += "\n\n" + getString(R.string.preset_dialog_gpu_hint_qualcomm);
-            } else if ("MEDIATEK".equals(gpuVendor)) {
-                message += "\n\n" + getString(R.string.preset_dialog_gpu_hint_mediatek);
-            }
-        }
+        // Apply before showing, so the dialog can report what the settings ARE rather than tell
+        // someone to go and set them. Renderer, texture shrinking, Java arguments, resolution and
+        // the memory saver only work as a set - handing out one of them and naming the rest is how
+        // "switch to NG_GL4ES" ended up being advice that changed nothing.
+        SuggestedPreset preset = SuggestedPreset.forInstall(presetName, gpuVendor);
+        preset.apply(requireContext());
 
-        final boolean useZink = isBuild42;
+        // Three short paragraphs, in this order: which build this is, what was set for this GPU,
+        // and what to do if it still misbehaves. The wall of text this replaces was accurate and
+        // unread - the requirements paragraph alone used to explain which chipsets the build runs
+        // on, which nobody can act on after the install has already happened.
+        if (isBuild42) {
+            // Named from the GPU probe, not from the vendor: on Adreno the driver we just chose
+            // depends on the exact model, so printing the model is what makes the choice checkable.
+            // The probe answers for Mali and the rest too, and falls back to a nameless line.
+            com.zomdroid.GpuInfo gpu = com.zomdroid.GpuInfo.query();
+            boolean named = gpu.renderer != null && !gpu.renderer.trim().isEmpty();
+            if (SuggestedPreset.QUALCOMM.equals(gpuVendor)) {
+                message += "\n\n" + (named
+                        ? getString(R.string.preset_dialog_gpu_zink, gpu.displayName())
+                        : getString(R.string.preset_dialog_gpu_zink_unnamed));
+            } else {
+                // Mali, Exynos, Tensor, Kirin, Unisoc. These used to get ZINK and not one word
+                // about it, which is the worst of both.
+                message += "\n\n" + (named
+                        ? getString(R.string.preset_dialog_gpu_ng, gpu.displayName())
+                        : getString(R.string.preset_dialog_gpu_ng_unnamed));
+            }
+        } else {
+            message += "\n\n" + getString(R.string.preset_dialog_b41_applied);
+        }
+        message += "\n\n" + getString(R.string.preset_dialog_troubleshoot);
+
         new MaterialAlertDialogBuilder(requireContext())
                 .setTitle(titleRes)
                 .setMessage(message)
                 .setCancelable(false)
-                .setPositiveButton(R.string.dialog_button_ok, (dialog, which) -> {
-                    if (useZink) {
-                        LauncherPreferences.requireSingleton().setRenderer(
-                                LauncherPreferences.Renderer.ZINK_ZFA);
-                    }
-                })
+                .setPositiveButton(R.string.dialog_button_ok, null)
+                // Where these settings live, for the Adreno owner the hint above sends here and for
+                // anyone who wants to look. One canonical place; every other screen points at it.
+                .setNeutralButton(R.string.preset_card_title, (dialog, which) ->
+                        Navigation.findNavController(requireView()).navigate(R.id.settings_fragment))
                 .show();
     }
 

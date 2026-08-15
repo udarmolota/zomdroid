@@ -442,44 +442,12 @@ public class NewGameInstanceFragment extends Fragment {
         return baseLower.startsWith("imgui") && baseLower.endsWith(".jar");
     }
 
+    // The detector itself lives in SuggestedPreset: Settings asks the same question to decide which
+    // preset buttons to show, and a second copy of this would drift from it.
     private GpuVendor detectGpuVendor() {
-        // Try /proc/cpuinfo first
-        try {
-            java.io.BufferedReader reader = new java.io.BufferedReader(
-                    new java.io.FileReader("/proc/cpuinfo"));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String lower = line.toLowerCase();
-                if (lower.contains("qualcomm") || lower.contains("snapdragon")) {
-                    reader.close();
-                    return GpuVendor.QUALCOMM;
-                }
-                if (lower.contains("mediatek") || lower.contains("dimensity") || lower.contains("helio")) {
-                    reader.close();
-                    return GpuVendor.MEDIATEK;
-                }
-            }
-            reader.close();
-        } catch (Exception ignored) {}
-    
-        // Fallback: android.os.Build fields
-        String[] buildFields = {
-            android.os.Build.HARDWARE,
-            android.os.Build.BOARD,
-            android.os.Build.SOC_MODEL,     // API 31+
-            android.os.Build.SOC_MANUFACTURER // API 31+
-        };
-        for (String field : buildFields) {
-            if (field == null) continue;
-            String lower = field.toLowerCase();
-            if (lower.contains("qcom") || lower.contains("qualcomm") || lower.contains("snapdragon")) {
-                return GpuVendor.QUALCOMM;
-            }
-            if (lower.contains("mt") || lower.contains("mediatek") || lower.contains("dimensity") || lower.contains("helio")) {
-                return GpuVendor.MEDIATEK;
-            }
-        }
-    
+        String vendor = com.zomdroid.game.SuggestedPreset.detectGpuVendor();
+        if (com.zomdroid.game.SuggestedPreset.QUALCOMM.equals(vendor)) return GpuVendor.QUALCOMM;
+        if (com.zomdroid.game.SuggestedPreset.MEDIATEK.equals(vendor)) return GpuVendor.MEDIATEK;
         return GpuVendor.UNKNOWN;
     }
 }

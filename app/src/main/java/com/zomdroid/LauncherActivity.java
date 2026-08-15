@@ -159,6 +159,7 @@ public class LauncherActivity extends AppCompatActivity {
         binding.navBottomDonate.setOnClickListener(v -> showDonateDialog());
         binding.navBottomReddit.setOnClickListener(v -> showRedditDialog());
         binding.navBottomVersion.setOnClickListener(v -> checkForUpdate());
+        binding.navBottomRimdroid.setOnClickListener(v -> showRimDroidDialog());
 
         // Silent, at-most-once-a-day check so the GitHub icon can badge a newer release without
         // the user having to tap it. A manual tap still runs checkForUpdate() and shows a dialog.
@@ -170,6 +171,20 @@ public class LauncherActivity extends AppCompatActivity {
         Linkify.addLinks(s, Linkify.WEB_URLS);
         AlertDialog dialog = new MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.dialog_title_donate)
+                .setMessage(s)
+                .setPositiveButton(getString(R.string.dialog_button_ok), null)
+                .create();
+        dialog.show();
+        TextView messageView = dialog.findViewById(android.R.id.message);
+        if (messageView != null) messageView.setMovementMethod(LinkMovementMethod.getInstance());
+    }
+
+    /** Same shape as the Reddit and Support dialogs: a sentence and a tappable link, no browser jump. */
+    private void showRimDroidDialog() {
+        final SpannableString s = new SpannableString(getString(R.string.rimdroid_dialog_message));
+        Linkify.addLinks(s, Linkify.WEB_URLS);
+        AlertDialog dialog = new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.rimdroid_dialog_title)
                 .setMessage(s)
                 .setPositiveButton(getString(R.string.dialog_button_ok), null)
                 .create();
@@ -393,6 +408,12 @@ public class LauncherActivity extends AppCompatActivity {
                 message = getString(R.string.version_check_ahead_of_release, current, latest);
             }
         }
+
+        // Attribution for third-party artwork lives here rather than in the legal notice: that one
+        // is shown once, on first launch, and never again, while a CC BY credit has to stay
+        // reachable. This dialog is the app's de facto About screen - it sits behind the GitHub
+        // icon and can be opened any time.
+        message += "\n\n" + getString(R.string.credits_third_party);
 
         SpannableString s = new SpannableString(message);
         Linkify.addLinks(s, Linkify.WEB_URLS);

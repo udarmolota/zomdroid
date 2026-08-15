@@ -72,12 +72,12 @@
     <string name="settings_vulkan_driver">Vulkan driver</string>
     <string name="settings_resolution_scale">Resolution scale</string>
     <string name="settings_audio_api">Audio API</string>
-    <string name="settings_render_hint">Build 41 → GL4ES, Build 42 → ZINK (Dimensity: turn on ANGLE)</string>
+    <string name="settings_render_hint">Build 41 → GL4ES, Build 42 → NG_GL4ES (Adreno: ZINK)</string>
 
     <string name="nav_menu_controls_editor">Controls editor</string>
     <string name="nav_menu_gamepad_mapper">Gamepad mapper</string>
     <string name="nav_menu_manage_storage">Manage storage</string>
-    <string name="nav_menu_donate">Support</string>
+    <string name="nav_menu_donate">Donate</string>
     <string name="control_element_delete">Delete element</string>
     <string name="control_element_input_type">Input type</string>
     <string name="control_element_stick_binding">Stick Binding</string>
@@ -334,6 +334,16 @@
     <string name="dialog_title_failed_to_export_log">Failed to export log</string>
 
     <string name="nav_menu_reddit">Reddit</string>
+    <!-- Labels for the bottom icon row. Short on purpose: five columns share the drawer width. -->
+    <string name="nav_bottom_github">GitHub</string>
+    <!-- CC BY requires the credit to stay visible, so it rides along in the version dialog - the
+         one "about this app" surface reachable at any time. Untranslated on purpose: a licence
+         attribution names people and a licence, and both stay as written. -->
+    <string name="credits_third_party" translatable="false">Donate icon: \"Donate\" by Edward Boatman from the Noun Project, CC BY 3.0.\nhttps://thenounproject.com/icon/donate-285/</string>
+    <string name="nav_bottom_rimdroid" translatable="false">RimDroid</string>
+    <string name="rimdroid_url" translatable="false">https://github.com/udarmolota/RimDroid/releases</string>
+    <string name="rimdroid_dialog_title" translatable="false">RimDroid</string>
+    <string name="rimdroid_dialog_message">RimDroid runs RimWorld on Android, the same way this launcher runs Project Zomboid. Same author, same approach.\n\nhttps://github.com/udarmolota/RimDroid/releases</string>
     <string name="reddit_dialog_title">Zomdroid on Reddit</string>
     <string name="reddit_message">Join our community on Reddit:\nhttps://www.reddit.com/r/zomdroid</string>
 
@@ -381,9 +391,9 @@
     <string name="preset_dialog_title_b42">Build 42</string>
     <string name="preset_dialog_title_b4212">Build 42.12+</string>
 
-    <string name="preset_dialog_message_b41">Build 41.78 — the most stable version available today. Runs on most devices with 4GB RAM or more.</string>
-    <string name="preset_dialog_message_b42">Build 42 (versions 42.0–42.11). Requires 6GB+ RAM. Runs mainly on Snapdragon, and also on powerful Dimensity devices.</string>
-    <string name="preset_dialog_message_b4212">Build 42.12 and above. Requires slightly different settings and at least 8GB RAM. Runs mainly on Snapdragon and newer powerful Dimensity devices.</string>
+    <string name="preset_dialog_message_b41">Build 41.78. Needs 4 GB of RAM or more.</string>
+    <string name="preset_dialog_message_b42">Build 42.0–42.11. Needs at least 6 GB of RAM.</string>
+    <string name="preset_dialog_message_b4212">Build 42.12 and above. Needs at least 8 GB of RAM to play comfortably.</string>
 
     <!-- Settings groups -->
     <string name="settings_group_rendering">Rendering</string>
@@ -435,10 +445,36 @@
     <string name="new_game_instance_no_preset_title">Select preset</string>
     <string name="new_game_instance_detect_failed">Could not read the game ZIP. Make sure it is a valid Project Zomboid archive and try again.</string>
     <string name="new_game_instance_analyzing">Analyzing the game file, please wait…</string>
-    <string name="ng_offer_title">Experimental renderer</string>
-    <string name="ng_offer_message">Would you like to set up the experimental NG_GL4ES renderer? On some non-Adreno GPUs (Mali on MediaTek, Exynos or Tensor, and similar) it runs Build 42 better.\n\n• Use NG_GL4ES — try the experimental renderer.\n• Use ZINK — keep the default renderer. On MediaTek devices, ZINK works only through ANGLE.\n\nYou can change this any time in Settings.</string>
-    <string name="ng_offer_use_ng">Use NG_GL4ES</string>
-    <string name="ng_offer_use_zink">Use ZINK</string>
+    <!-- Suggested presets: the settings combinations we hand out. See SuggestedPreset. -->
+    <string name="preset_card_title">Suggested presets</string>
+    <string name="preset_card_subtitle">Renderer, texture shrinking, Java arguments and resolution, set together for your game build.</string>
+    <string name="preset_name_b42">Build 42</string>
+    <string name="preset_name_b42_compat">Build 42 — compatibility</string>
+    <string name="preset_name_b41">Build 41</string>
+    <string name="preset_current">Currently applied: %1$s</string>
+    <string name="preset_current_none">Currently applied: your own settings</string>
+    <string name="preset_button_apply_suggested">Suggested preset</string>
+
+    <string name="preset_confirm_title">Apply %1$s?</string>
+    <string name="preset_confirm_nothing_to_do">Your settings already match this preset.</string>
+    <string name="preset_confirm_shrink_note">\n\nOn Build 42 you will see a faint grid of seams on the ground: textures are shrunk so they fit in memory. That is the trade for a stable framerate.</string>
+    <string name="preset_change_renderer">Renderer: %1$s → %2$s</string>
+    <string name="preset_change_shrink">Texture shrinking: %1$s → %2$s</string>
+    <string name="preset_change_jvm_args">Java arguments: set to the recommended set</string>
+    <string name="preset_change_render_scale">Resolution scale: %1$s → %2$s</string>
+    <string name="preset_change_vulkan_driver">Vulkan driver: %1$s → %2$s</string>
+    <string name="preset_change_memory_saver_on">Memory saver: on</string>
+    <string name="preset_change_memory_saver_off">Memory saver: off</string>
+    <string name="preset_applied">Preset applied: %1$s</string>
+
+    <!-- Shown when the renderer spinner is set to NG_GL4ES and no shrink mode was chosen by hand.
+         NG_GL4ES and shrinking are one choice in practice; keeping them apart is what made our
+         own advice inaccurate ("switch to NG_GL4ES" alone changes nothing about the framerate). -->
+    <string name="renderer_ng_shrink_enabled">Texture shrinking enabled — it is what keeps the framerate steady on NG_GL4ES. Advanced → Texture shrinking to change it.</string>
+
+    <string name="renderer_gl4es_build41_title">GL4ES is for Build 41</string>
+    <string name="renderer_gl4es_build41_message">On Build 41 this is the right choice: it runs on any GPU and needs no driver setup.\n\nOn Build 42 it does not work — you will get a black screen. There, use NG_GL4ES (any GPU) or ZINK (Adreno).</string>
+
 
     <string name="nav_menu_optimization">Optimization</string>
     <string name="nav_menu_mod_fixes">Mod Fixes</string>
@@ -451,7 +487,7 @@
     <string name="settings_jvm_args_b42_recommendation">Recommended for Build 42: caps the Java heap and returns memory to the system, which leaves room for the renderer. In some cases the game may fail to start without some of these parameters. Not for Build 41 — on 4 GB devices it does more harm than good.</string>
     <string name="settings_jvm_args_apply">Apply</string>
     <string name="renderer_ng_build42_only_title">NG_GL4ES is for Build 42</string>
-    <string name="renderer_ng_build42_only_message">This renderer was written for Build 42 and does not work on Build 41 — the game will not start.\n\nIf you play Build 41, choose ZINK or GL4ES instead.\n\nBuild 42 also needs the recommended JVM arguments: Settings → Advanced → JVM arguments.</string>
+    <string name="renderer_ng_build42_only_message">This renderer was written for Build 42 and does not work on Build 41 — the game will not start. On Build 41 choose GL4ES.\n\nTexture shrinking has been enabled with it, which is what keeps the framerate steady. Build 42 also wants its own Java arguments — the suggested preset sets everything at once: Settings → Suggested presets.</string>
     <string name="new_game_instance_b42_jvm_hint">Build 42 needs tuned JVM arguments — there is a one-button preset for them in the settings.</string>
     <string name="new_game_instance_open_settings">Open Settings → Advanced → JVM arguments →</string>
     <string name="optimization_jvm_recommended_label">→ Current default:</string>
@@ -494,8 +530,12 @@
     <string name="mod_fix_help_message">Some mods use a folder structure that causes a path conflict on Android. The game ends up looking for files in a doubled path and cannot find them.\n\nThis fix installs the mod twice — once with the original folder names, and once with all names in lowercase — so the game finds the files regardless of which path it uses.\n\nKnown affected mods:\n• Tsar\'s Common Library — ID: 3402491515\n• [B42] Simple Flashlight on Belt — ID: 3394588830\n\nTo use: download the mod and load it here.</string>
 
     <!-- CPU/GPU autodetect -->
-    <string name="preset_dialog_gpu_hint_qualcomm">\u2705 Snapdragon (Adreno) detected. For Build 42, ZINK works best on your device \u2014 it has been selected automatically. For best results, also pick a Freedreno/Turnip driver in Settings. NG_GL4ES is available as an alternative, but it uses noticeably more memory.</string>
-    <string name="preset_dialog_gpu_hint_mediatek">\u2705 MediaTek detected. ZINK_ZFA renderer has been set, but ZINK support on Mali GPUs varies. If the game doesn\'t start, try to activate ANGLE built-in graphical driver in the Developer options.</string>
+    <string name="preset_dialog_gpu_zink">%1$s detected. ZINK_ZFA renderer and the Vulkan driver that suits your GPU have been set. If the picture looks wrong, try another driver or import your own in Settings.</string>
+    <string name="preset_dialog_gpu_zink_unnamed">ZINK_ZFA renderer and a Vulkan driver have been set. If the picture looks wrong, try another driver or import your own in Settings.</string>
+    <string name="preset_dialog_gpu_ng">%1$s detected. NG_GL4ES renderer with texture shrinking has been set — it runs on any GPU and needs no driver. The trade is a faint grid of seams on the ground.</string>
+    <string name="preset_dialog_gpu_ng_unnamed">NG_GL4ES renderer with texture shrinking has been set — it runs on any GPU and needs no driver. The trade is a faint grid of seams on the ground.</string>
+    <string name="preset_dialog_troubleshoot">If the game will not start with these settings, or closes soon after it does, try a ready-made preset — the button below.</string>
+    <string name="preset_dialog_b41_applied">GL4ES renderer has been set — it runs on any GPU and needs no driver setup.</string>
 
     <!-- Manual mods installation -->
     <string name="install_mod_manual_group">Manual installation</string>

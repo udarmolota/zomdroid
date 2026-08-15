@@ -15,6 +15,17 @@
         <item name="android:paddingStart">24dp</item>
         <item name="android:paddingEnd">24dp</item>
     </style>
+    <!-- Caption under each icon in the drawer's bottom row. Single line and ellipsized: five
+         columns share the drawer width, and a wrapped label would shove the row's height around. -->
+    <style name="AppTheme.NavBottomLabel" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:textSize">9sp</item>
+        <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">end</item>
+    </style>
     <style name="AppTheme.NavigationView" parent="Widget.Material3.NavigationView">
         <item name="dividerColor">@color/pz_orange</item>
     </style>

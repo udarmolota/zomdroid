@@ -11,6 +11,79 @@
         android:orientation="vertical"
         android:padding="12dp">
 
+        <!-- Group 0: Suggested presets.
+             Deliberately the first thing on the screen: it writes to every control below it, so
+             reading order matches causality, and someone who opened Settings because something is
+             wrong meets the answer before the knobs. -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="12dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:text="@string/preset_card_title"
+                    android:textAppearance="?attr/textAppearanceLabelSmall"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="13sp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:text="@string/preset_card_subtitle"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOnSurfaceVariant"/>
+
+                <!-- No style attribute on purpose: the theme's materialButtonStyle is
+                     AppTheme.Button, the filled orange one. These are the primary action of the
+                     screen, so they wear the primary colour rather than the tonal grey the
+                     secondary buttons below use. -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/settings_preset_b42_btn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"
+                    android:text="@string/preset_name_b42"/>
+
+                <!-- Adreno only: there ZINK is the default, so the compatibility set needs its own
+                     way in. Hidden everywhere else, where it IS the default. -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/settings_preset_b42_compat_btn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"
+                    android:visibility="gone"
+                    android:text="@string/preset_name_b42_compat"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/settings_preset_b41_btn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/preset_name_b41"/>
+
+                <TextView
+                    android:id="@+id/settings_preset_current_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    tools:text="Currently applied: Build 42"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
         <!-- Group 1: Rendering -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
