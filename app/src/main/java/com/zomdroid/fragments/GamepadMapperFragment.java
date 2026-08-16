@@ -274,10 +274,14 @@ public class GamepadMapperFragment extends Fragment {
   }
 
   /**
-   * Read trigger axis for current step, with fallbacks:
-   * - Preferred: AXIS_LTRIGGER / AXIS_RTRIGGER
-   * - Fallbacks: AXIS_Z / AXIS_RZ, AXIS_BRAKE / AXIS_GAS
-   * Returns normalized float [0..1] (clamped).
+   * Read the trigger axis for the current step, preferring AXIS_LTRIGGER / AXIS_RTRIGGER and
+   * falling back to BRAKE / GAS. Returns [0..1].
+   *
+   * <p>This is the wizard's copy of {@code GamepadManager.readTriggerAxis} and had drifted from it:
+   * both defects fixed there were still live here, and both let an LT/RT step close on its own with
+   * a wrong binding. Since the mapping is only written after all twelve steps complete, a step that
+   * closes early does not merely mis-bind one button - the wizard runs to the end on garbage, which
+   * is what "my remap does not save" turned out to mean for controllers with unusual triggers.
    */
   private float readTriggerAxis(MotionEvent ev, boolean leftTrigger) {
     InputDevice d = ev.getDevice();
@@ -285,18 +289,19 @@ public class GamepadMapperFragment extends Fragment {
 
     final int src = ev.getSource();
 
+    // Z/RZ are deliberately absent: they are the right stick on most Android pads, so a pad that
+    // exposes no LTRIGGER/BRAKE fell through to them and reported stick deflection as a held
+    // trigger. Nudging the stick during the LT step was enough to close it.
     final int[] axes = leftTrigger
             ? new int[]{
             MotionEvent.AXIS_LTRIGGER,
             MotionEvent.AXIS_BRAKE,
-            MotionEvent.AXIS_Z,
             MotionEvent.AXIS_GENERIC_1,
             MotionEvent.AXIS_GENERIC_3
     }
             : new int[]{
             MotionEvent.AXIS_RTRIGGER,
             MotionEvent.AXIS_GAS,
-            MotionEvent.AXIS_RZ,
             MotionEvent.AXIS_GENERIC_2,
             MotionEvent.AXIS_GENERIC_4
     };
@@ -304,9 +309,10 @@ public class GamepadMapperFragment extends Fragment {
     for (int ax : axes) {
       if (d.getMotionRange(ax, src) != null || d.getMotionRange(ax) != null) {
         float v = ev.getAxisValue(ax);
-
-        // normalize
-        if (v < 0f) v = -v;
+        // Clamp to [0..1]. The negative half is dropped rather than mirrored: the old "v = -v"
+        // turned a trigger resting at -1 into a fully held one, which is above the 0.5 threshold -
+        // so the step completed before the user touched anything.
+        if (v < 0f) v = 0f;
         if (v > 1f) v = 1f;
         return v;
       }
