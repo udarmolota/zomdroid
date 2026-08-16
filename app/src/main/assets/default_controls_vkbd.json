@@ -1,1 +1,532 @@
-[{"alpha":128,"bindings":["UI_TOGGLE_OVERLAY"],"centerXRelative":0.46999994,"centerYRelative":0.08,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":0.9,"sensitivity":2.0,"style":"OUTLINE","text":"V","type":"BUTTON_CIRCLE"},{"alpha":128,"bindings":["UI_TOGGLE_KEYBOARD"],"centerXRelative":0.53,"centerYRelative":0.08,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":0.9,"sensitivity":2.0,"style":"OUTLINE","text":"KB","type":"BUTTON_CIRCLE"},{"alpha":128,"bindings":["MOUSE_BUTTON_RIGHT"],"centerXRelative":0.063449,"centerYRelative":0.13386503,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":1.19,"sensitivity":2.0,"style":"OUTLINE","text":"RBC","type":"BUTTON_CIRCLE"},{"alpha":128,"bindings":["KEY_R"],"centerXRelative":0.95291674,"centerYRelative":0.70845085,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":0.7,"sensitivity":2.0,"style":"OUTLINE","text":"R","type":"BUTTON_CIRCLE"},{"alpha":128,"bindings":["KEY_Q"],"centerXRelative":0.71439075,"centerYRelative":0.06666667,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":0.6,"sensitivity":2.0,"style":"OUTLINE","text":"Q","type":"BUTTON_CIRCLE"},{"alpha":128,"bindings":["KEY_T"],"centerXRelative":0.80056304,"centerYRelative":0.06431206,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":0.6,"sensitivity":2.0,"style":"OUTLINE","text":"T","type":"BUTTON_CIRCLE"},{"alpha":153,"bindings":["KEY_ESCAPE"],"centerXRelative":0.84598905,"centerYRelative":0.06377496,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":0.6,"sensitivity":2.0,"style":"OUTLINE","text":"ESC","type":"BUTTON_CIRCLE"},{"alpha":128,"bindings":["KEY_1"],"centerXRelative":0.37530062,"centerYRelative":0.94546086,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":0.66,"sensitivity":2.0,"style":"OUTLINE","text":"1","type":"BUTTON_CIRCLE"},{"alpha":128,"bindings":["KEY_2"],"centerXRelative":0.42503172,"centerYRelative":0.9424027,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":0.66,"sensitivity":2.0,"style":"OUTLINE","text":"2","type":"BUTTON_CIRCLE"},{"alpha":128,"bindings":["KEY_3"],"centerXRelative":0.47318548,"centerYRelative":0.94327617,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":0.66,"sensitivity":2.0,"style":"OUTLINE","text":"3","type":"BUTTON_CIRCLE"},{"alpha":128,"bindings":["KEY_V"],"centerXRelative":0.75706476,"centerYRelative":0.06485641,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":0.6,"sensitivity":2.0,"style":"OUTLINE","text":"v","type":"BUTTON_CIRCLE"},{"alpha":153,"bindings":["KEY_LEFT_CONTROL"],"centerXRelative":0.6426695,"centerYRelative":0.915106,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":1.0,"sensitivity":2.0,"style":"OUTLINE","text":"CONTROL","type":"BUTTON_CIRCLE"},{"alpha":128,"bindings":["KEY_C"],"centerXRelative":0.7220871,"centerYRelative":0.9277805,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":0.74,"sensitivity":2.0,"style":"OUTLINE","text":"c","type":"BUTTON_CIRCLE"},{"alpha":128,"bindings":["KEY_SPACE"],"centerXRelative":0.7105343,"centerYRelative":0.2513066,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":1.14,"sensitivity":2.0,"style":"OUTLINE","text":"SPACE","type":"BUTTON_CIRCLE"},{"alpha":128,"bindings":["MOUSE_BUTTON_LEFT"],"centerXRelative":0.8016111,"centerYRelative":0.25402108,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":1.21,"sensitivity":2.0,"style":"OUTLINE","text":"LBC","type":"BUTTON_CIRCLE"},{"alpha":128,"bindings":["KEY_E"],"centerXRelative":0.91498137,"centerYRelative":0.5599311,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":0.89,"sensitivity":2.0,"style":"OUTLINE","text":"E","type":"BUTTON_CIRCLE"},{"alpha":128,"bindings":["KEY_H"],"centerXRelative":0.90866524,"centerYRelative":0.21299371,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":1.0,"sensitivity":2.0,"style":"OUTLINE","text":"H","type":"BUTTON_CIRCLE"},{"alpha":128,"bindings":["KEY_LEFT_SHIFT"],"centerXRelative":0.9003543,"centerYRelative":0.9037941,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":1.0,"sensitivity":2.0,"style":"OUTLINE","text":"SHIFT","type":"BUTTON_CIRCLE"},{"alpha":128,"bindings":["KEY_K"],"centerXRelative":0.37180597,"centerYRelative":0.07638889,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":0.5,"sensitivity":2.0,"style":"OUTLINE","text":"k","type":"BUTTON_CIRCLE"},{"alpha":128,"bindings":[],"centerXRelative":0.806555,"centerYRelative":0.7529279,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":1.0,"sensitivity":2.0,"style":"OUTLINE","type":"STICK_MOUSE"},{"alpha":128,"bindings":["MOUSE_WHEEL_DOWN"],"centerXRelative":0.050349098,"centerYRelative":0.5095206,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":0.87,"sensitivity":2.0,"style":"OUTLINE","text":"-","type":"BUTTON_CIRCLE"},{"alpha":128,"bindings":["MOUSE_WHEEL_UP"],"centerXRelative":0.049307544,"centerYRelative":0.36333913,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":0.87,"sensitivity":2.0,"style":"OUTLINE","text":"+","type":"BUTTON_CIRCLE"},{"alpha":128,"bindings":["KEY_5"],"centerXRelative":0.5660624,"centerYRelative":0.94455475,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":0.66,"sensitivity":2.0,"style":"OUTLINE","text":"5","type":"BUTTON_CIRCLE"},{"alpha":128,"bindings":["KEY_4"],"centerXRelative":0.5209314,"centerYRelative":0.9464925,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":0.66,"sensitivity":2.0,"style":"OUTLINE","text":"4","type":"BUTTON_CIRCLE"},{"alpha":150,"bindings":["KEY_I"],"centerXRelative":0.0564931,"centerYRelative":0.90830976,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":1.0,"sensitivity":2.0,"style":"OUTLINE","text":"I","type":"BUTTON_CIRCLE"},{"alpha":128,"bindings":["MOUSE_BUTTON_LEFT"],"centerXRelative":0.17876668,"centerYRelative":0.1773745,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":1.58,"sensitivity":2.0,"style":"OUTLINE","text":"LBC","type":"BUTTON_CIRCLE"},{"alpha":150,"bindings":["KEY_LEFT_ALT"],"centerXRelative":0.6797483,"centerYRelative":0.69928384,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":1.0,"sensitivity":2.0,"style":"OUTLINE","text":"ALT","type":"BUTTON_CIRCLE"},{"alpha":150,"bindings":["KEY_M"],"centerXRelative":0.9135413,"centerYRelative":0.060855217,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":0.7,"sensitivity":2.0,"style":"OUTLINE","text":"M","type":"BUTTON_RECT"},{"alpha":153,"bindings":[],"centerXRelative":0.1837229,"centerYRelative":0.75382036,"color":-3355444,"icon":"NO_ICON","inputType":"MNK","isToggle":false,"noTint":false,"scale":1.0,"sensitivity":2.0,"style":"OUTLINE","type":"STICK_WASD"}]
+[
+  {
+    "alpha": 128,
+    "bindings": [
+      "UI_TOGGLE_OVERLAY"
+    ],
+    "centerXRelative": 0.46999994,
+    "centerYRelative": 0.08,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 0.9,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "text": "V",
+    "type": "BUTTON_CIRCLE"
+  },
+  {
+    "alpha": 128,
+    "bindings": [
+      "UI_TOGGLE_KEYBOARD"
+    ],
+    "centerXRelative": 0.53,
+    "centerYRelative": 0.08,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 0.9,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "text": "KB",
+    "type": "BUTTON_CIRCLE"
+  },
+  {
+    "alpha": 128,
+    "bindings": [
+      "KEY_F10"
+    ],
+    "centerXRelative": 0.59,
+    "centerYRelative": 0.08,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "scale": 0.9,
+    "text": "F10",
+    "type": "BUTTON_CIRCLE"
+  },
+  {
+    "alpha": 128,
+    "bindings": [
+      "MOUSE_BUTTON_RIGHT"
+    ],
+    "centerXRelative": 0.063449,
+    "centerYRelative": 0.13386503,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 1.19,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "text": "RBC",
+    "type": "BUTTON_CIRCLE"
+  },
+  {
+    "alpha": 128,
+    "bindings": [
+      "KEY_R"
+    ],
+    "centerXRelative": 0.95291674,
+    "centerYRelative": 0.70845085,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 0.7,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "text": "R",
+    "type": "BUTTON_CIRCLE"
+  },
+  {
+    "alpha": 128,
+    "bindings": [
+      "KEY_Q"
+    ],
+    "centerXRelative": 0.71439075,
+    "centerYRelative": 0.06666667,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 0.6,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "text": "Q",
+    "type": "BUTTON_CIRCLE"
+  },
+  {
+    "alpha": 128,
+    "bindings": [
+      "KEY_T"
+    ],
+    "centerXRelative": 0.80056304,
+    "centerYRelative": 0.06431206,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 0.6,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "text": "T",
+    "type": "BUTTON_CIRCLE"
+  },
+  {
+    "alpha": 153,
+    "bindings": [
+      "KEY_ESCAPE"
+    ],
+    "centerXRelative": 0.84598905,
+    "centerYRelative": 0.06377496,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 0.6,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "text": "ESC",
+    "type": "BUTTON_CIRCLE"
+  },
+  {
+    "alpha": 128,
+    "bindings": [
+      "KEY_1"
+    ],
+    "centerXRelative": 0.37530062,
+    "centerYRelative": 0.94546086,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 0.66,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "text": "1",
+    "type": "BUTTON_CIRCLE"
+  },
+  {
+    "alpha": 128,
+    "bindings": [
+      "KEY_2"
+    ],
+    "centerXRelative": 0.42503172,
+    "centerYRelative": 0.9424027,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 0.66,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "text": "2",
+    "type": "BUTTON_CIRCLE"
+  },
+  {
+    "alpha": 128,
+    "bindings": [
+      "KEY_3"
+    ],
+    "centerXRelative": 0.47318548,
+    "centerYRelative": 0.94327617,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 0.66,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "text": "3",
+    "type": "BUTTON_CIRCLE"
+  },
+  {
+    "alpha": 128,
+    "bindings": [
+      "KEY_V"
+    ],
+    "centerXRelative": 0.75706476,
+    "centerYRelative": 0.06485641,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 0.6,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "text": "v",
+    "type": "BUTTON_CIRCLE"
+  },
+  {
+    "alpha": 153,
+    "bindings": [
+      "KEY_LEFT_CONTROL"
+    ],
+    "centerXRelative": 0.6426695,
+    "centerYRelative": 0.915106,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 1.0,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "text": "CONTROL",
+    "type": "BUTTON_CIRCLE"
+  },
+  {
+    "alpha": 128,
+    "bindings": [
+      "KEY_C"
+    ],
+    "centerXRelative": 0.7220871,
+    "centerYRelative": 0.9277805,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 0.74,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "text": "c",
+    "type": "BUTTON_CIRCLE"
+  },
+  {
+    "alpha": 128,
+    "bindings": [
+      "KEY_SPACE"
+    ],
+    "centerXRelative": 0.7105343,
+    "centerYRelative": 0.2513066,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 1.14,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "text": "SPACE",
+    "type": "BUTTON_CIRCLE"
+  },
+  {
+    "alpha": 128,
+    "bindings": [
+      "MOUSE_BUTTON_LEFT"
+    ],
+    "centerXRelative": 0.8016111,
+    "centerYRelative": 0.25402108,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 1.21,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "text": "LBC",
+    "type": "BUTTON_CIRCLE"
+  },
+  {
+    "alpha": 128,
+    "bindings": [
+      "KEY_E"
+    ],
+    "centerXRelative": 0.91498137,
+    "centerYRelative": 0.5599311,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 0.89,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "text": "E",
+    "type": "BUTTON_CIRCLE"
+  },
+  {
+    "alpha": 128,
+    "bindings": [
+      "KEY_H"
+    ],
+    "centerXRelative": 0.90866524,
+    "centerYRelative": 0.21299371,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 1.0,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "text": "H",
+    "type": "BUTTON_CIRCLE"
+  },
+  {
+    "alpha": 128,
+    "bindings": [
+      "KEY_LEFT_SHIFT"
+    ],
+    "centerXRelative": 0.9003543,
+    "centerYRelative": 0.9037941,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 1.0,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "text": "SHIFT",
+    "type": "BUTTON_CIRCLE"
+  },
+  {
+    "alpha": 128,
+    "bindings": [
+      "KEY_K"
+    ],
+    "centerXRelative": 0.37180597,
+    "centerYRelative": 0.07638889,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 0.5,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "text": "k",
+    "type": "BUTTON_CIRCLE"
+  },
+  {
+    "alpha": 128,
+    "bindings": [],
+    "centerXRelative": 0.806555,
+    "centerYRelative": 0.7529279,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 1.0,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "type": "STICK_MOUSE"
+  },
+  {
+    "alpha": 128,
+    "bindings": [
+      "MOUSE_WHEEL_DOWN"
+    ],
+    "centerXRelative": 0.050349098,
+    "centerYRelative": 0.5095206,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 0.87,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "text": "-",
+    "type": "BUTTON_CIRCLE"
+  },
+  {
+    "alpha": 128,
+    "bindings": [
+      "MOUSE_WHEEL_UP"
+    ],
+    "centerXRelative": 0.049307544,
+    "centerYRelative": 0.36333913,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 0.87,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "text": "+",
+    "type": "BUTTON_CIRCLE"
+  },
+  {
+    "alpha": 128,
+    "bindings": [
+      "KEY_5"
+    ],
+    "centerXRelative": 0.5660624,
+    "centerYRelative": 0.94455475,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 0.66,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "text": "5",
+    "type": "BUTTON_CIRCLE"
+  },
+  {
+    "alpha": 128,
+    "bindings": [
+      "KEY_4"
+    ],
+    "centerXRelative": 0.5209314,
+    "centerYRelative": 0.9464925,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 0.66,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "text": "4",
+    "type": "BUTTON_CIRCLE"
+  },
+  {
+    "alpha": 150,
+    "bindings": [
+      "KEY_I"
+    ],
+    "centerXRelative": 0.0564931,
+    "centerYRelative": 0.90830976,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 1.0,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "text": "I",
+    "type": "BUTTON_CIRCLE"
+  },
+  {
+    "alpha": 128,
+    "bindings": [
+      "MOUSE_BUTTON_LEFT"
+    ],
+    "centerXRelative": 0.17876668,
+    "centerYRelative": 0.1773745,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 1.58,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "text": "LBC",
+    "type": "BUTTON_CIRCLE"
+  },
+  {
+    "alpha": 150,
+    "bindings": [
+      "KEY_LEFT_ALT"
+    ],
+    "centerXRelative": 0.6797483,
+    "centerYRelative": 0.69928384,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 1.0,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "text": "ALT",
+    "type": "BUTTON_CIRCLE"
+  },
+  {
+    "alpha": 150,
+    "bindings": [
+      "KEY_M"
+    ],
+    "centerXRelative": 0.9135413,
+    "centerYRelative": 0.060855217,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 0.7,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "text": "M",
+    "type": "BUTTON_RECT"
+  },
+  {
+    "alpha": 153,
+    "bindings": [],
+    "centerXRelative": 0.1837229,
+    "centerYRelative": 0.75382036,
+    "color": -3355444,
+    "icon": "NO_ICON",
+    "inputType": "MNK",
+    "isToggle": false,
+    "noTint": false,
+    "scale": 1.0,
+    "sensitivity": 2.0,
+    "style": "OUTLINE",
+    "type": "STICK_WASD"
+  }
+]
