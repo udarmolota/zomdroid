@@ -315,6 +315,27 @@ public class SettingsFragment extends Fragment {
         binding.settingsMemorySaverSwitch.setOnCheckedChangeListener((v, isChecked) ->
                 LauncherPreferences.requireSingleton().setMemorySaver(isChecked));
 
+        // The F10 backup is opt-in behind a priced warning: the copy is world-sized (players report
+        // 300-600 MB) and the game visibly freezes while it is written. Turning it ON requires
+        // reading and accepting that; turning it off is one tap.
+        binding.settingsBackupSwitch.setChecked(LauncherPreferences.requireSingleton().isQuickSaveBackup());
+        binding.settingsBackupSwitch.setOnCheckedChangeListener((v, isChecked) -> {
+            if (!isChecked) {
+                LauncherPreferences.requireSingleton().setQuickSaveBackup(false);
+                return;
+            }
+            if (LauncherPreferences.requireSingleton().isQuickSaveBackup()) return; // restore echo
+            new AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.backup_warning_title)
+                    .setMessage(R.string.backup_warning_message)
+                    .setPositiveButton(R.string.dialog_button_confirm, (d, w) ->
+                            LauncherPreferences.requireSingleton().setQuickSaveBackup(true))
+                    .setNegativeButton(R.string.dialog_button_cancel, (d, w) ->
+                            binding.settingsBackupSwitch.setChecked(false))
+                    .setOnCancelListener(d -> binding.settingsBackupSwitch.setChecked(false))
+                    .show();
+        });
+
         binding.settingsDebugSwitch.setChecked(LauncherPreferences.requireSingleton().isDebug());
         binding.settingsDebugSwitch.setOnCheckedChangeListener((v, isChecked) ->
                 LauncherPreferences.requireSingleton().setDebug(isChecked));

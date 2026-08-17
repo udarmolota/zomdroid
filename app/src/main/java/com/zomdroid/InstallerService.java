@@ -270,6 +270,7 @@ public class InstallerService extends Service implements TaskProgressListener {
                 Uri nativeLibsArchiveUri = intent.getParcelableExtra(EXTRA_NATIVE_LIBS_URI);
                 if (nativeLibsArchiveUri != null) {
                     try (InputStream nativeLibsStream = getContentResolver().openInputStream(nativeLibsArchiveUri)) {
+                        announceExtraction();
                         FileUtils.extractZipToDisk(nativeLibsStream, nativeLibsPath, this,
                                 FileUtils.queryFileSize(getContentResolver(), nativeLibsArchiveUri));
                     } catch (IOException e) {
@@ -412,6 +413,7 @@ public class InstallerService extends Service implements TaskProgressListener {
                     if (jre21Dir.exists()) FileUtils.deleteDirectory(jre21Dir);
 
                     InputStream jreBundleInStream = getAssets().open(C.assets.BUNDLES_JRE21);
+                    announceExtraction();
                     FileUtils.extractTarXzToDisk(jreBundleInStream, jre21Path, this, 0);
                     jreBundleInStream.close();
                 } catch (IOException e) {
@@ -427,6 +429,7 @@ public class InstallerService extends Service implements TaskProgressListener {
                     if (jre25Dir.exists()) FileUtils.deleteDirectory(jre25Dir);
 
                     InputStream jreBundleInStream = getAssets().open(C.assets.BUNDLES_JRE25);
+                    announceExtraction();
                     FileUtils.extractTarXzToDisk(jreBundleInStream, jre25Path, this, 0);
                     jreBundleInStream.close();
                 } catch (IOException e) {
@@ -442,6 +445,7 @@ public class InstallerService extends Service implements TaskProgressListener {
                     if (libsDir.exists()) FileUtils.deleteDirectory(libsDir);
 
                     InputStream libsBundleInStream = getAssets().open(C.assets.BUNDLES_LIBS);
+                    announceExtraction();
                     FileUtils.extractTarXzToDisk(libsBundleInStream, libsPath, this, 0);
                 } catch (IOException e) {
                     finishWithError(getString(R.string.dialog_title_failed_to_install_dependencies), e.toString());
@@ -456,6 +460,7 @@ public class InstallerService extends Service implements TaskProgressListener {
                     if (jarsDir.exists()) FileUtils.deleteDirectory(jarsDir);
 
                     InputStream jarsBundleInStream = getAssets().open(C.assets.BUNDLES_JARS);
+                    announceExtraction();
                     FileUtils.extractTarToDisk(jarsBundleInStream, jarsPath, this, 0);
                 } catch (IOException e) {
                     finishWithError(getString(R.string.dialog_title_failed_to_install_dependencies), e.toString());
@@ -514,6 +519,7 @@ public class InstallerService extends Service implements TaskProgressListener {
                 try {
                     // 1) Extract ZIP to temp dir
                     try (InputStream modsStream = getContentResolver().openInputStream(modsArchiveUri)) {
+                        announceExtraction();
                         FileUtils.extractZipToDisk(
                                 modsStream,
                                 tempDir.getAbsolutePath(),
@@ -581,6 +587,7 @@ public class InstallerService extends Service implements TaskProgressListener {
                 if (!savesRootDir.exists()) savesRootDir.mkdirs();
 
                 try (InputStream savesStream = getContentResolver().openInputStream(savesArchiveUri)) {
+                    announceExtraction();
                     FileUtils.extractZipToDisk(
                             savesStream,
                             savesRootPath,
@@ -1864,6 +1871,7 @@ public class InstallerService extends Service implements TaskProgressListener {
 
         Log.i(LOG_TAG, "42.13+: extracting projectzomboid.jar");
         try (InputStream is = new FileInputStream(jar)) {
+            announceExtraction();
             FileUtils.extractZipToDisk(is, gameDir.getAbsolutePath(), this, jar.length());
         }
     }
@@ -1881,10 +1889,21 @@ public class InstallerService extends Service implements TaskProgressListener {
         this.taskState.postValue(new TaskState(title, error, -1, 0, false, true));
     }
 
+
+    // Every archive extraction reports progress through FileUtils, which has no text to give -
+    // its ticks carry null and rely on onProgressUpdate keeping the previous message. That only
+    // works if a message was SET first, and most tasks never set one: the instance-creation
+    // dialog showed a bare bar under its title for exactly this reason. One announcement before
+    // each extraction; repeated calls are harmless (message calls bypass the tick throttle).
+    private void announceExtraction() {
+        onProgressUpdate(getString(R.string.extracting), -1, 0);
+    }
+
     private void installGameFromZip(GameInstance gameInstance, Uri zipUri) throws IOException {
         ContentResolver contentResolver = getApplicationContext().getContentResolver();
         try (InputStream inputStream = contentResolver.openInputStream(zipUri)) {
             long fileSize = FileUtils.queryFileSize(contentResolver, zipUri);
+            announceExtraction();
             FileUtils.extractZipToDisk(inputStream, gameInstance.getGamePath(), this, fileSize);
         }
     }
@@ -2673,6 +2692,7 @@ public class InstallerService extends Service implements TaskProgressListener {
 
                 try (InputStream is = getContentResolver().openInputStream(archiveUri)) {
                     if (is == null) throw new IllegalStateException("openInputStream returned null");
+                    announceExtraction();
                     FileUtils.extractZipToDisk(is, nativeLibsPath, this,
                             FileUtils.queryFileSize(getContentResolver(), archiveUri));
                 }

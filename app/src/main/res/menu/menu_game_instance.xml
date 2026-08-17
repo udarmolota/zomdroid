@@ -7,6 +7,11 @@
         android:title="@string/game_instance_manage_storage"
         app:showAsAction="never"/>
     <item
+        android:id="@+id/action_game_instance_restore_backup"
+        android:icon="@drawable/mt_icon_folder_open"
+        android:title="@string/game_instance_restore_backup"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/action_game_instance_delete"
         android:icon="@drawable/mt_icon_delete"
         android:title="@string/game_instance_delete"

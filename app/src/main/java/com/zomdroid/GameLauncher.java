@@ -196,6 +196,25 @@ public class GameLauncher {
 
         jvmArgs.add("-Dorg.lwjgl.opengl.libname=" + LauncherPreferences.requireSingleton().getRenderer().libName);
         jvmArgs.add("-Dzomdroid.renderer=" + LauncherPreferences.requireSingleton().getRenderer().name());
+        // Presence of backup.dir is what arms the F10 backup in the agent. Build 42 only: the
+        // flush sequence it relies on was verified against 42.20's classes, and the mod it is read
+        // from targets 42 - Build 41 keeps the plain quick save. Multiplayer is refused inside the
+        // agent, where GameClient.client is visible.
+        //
+        // When the feature is OFF on Build 42, that is said explicitly with backup=off: F10 then
+        // tells the player the feature is disabled instead of silently doing a plain save. The
+        // plain save resumes convincingly after a kill (the game streams the world anyway), which
+        // is exactly how two testers and we misread it as a working checkpoint - better no save
+        // and an honest message than a convincing illusion. No property at all (Build 41, or an
+        // older launcher) keeps the plain save: there the backup was never on offer.
+        if (gameInstance.getBuildVersion() != null && gameInstance.getBuildVersion().startsWith("42")) {
+            if (LauncherPreferences.requireSingleton().isQuickSaveBackup()) {
+                jvmArgs.add("-Dzomdroid.backup.dir=" + gameInstance.getHomePath() + "/"
+                        + com.zomdroid.game.BackupManager.BACKUP_DIR_NAME);
+            } else {
+                jvmArgs.add("-Dzomdroid.backup=off");
+            }
+        }
 
         if (BuildConfig.DEBUG) {
             jvmArgs.add("-Dorg.lwjgl.util.Debug=true"); //print LWJGL library errors

@@ -4,14 +4,14 @@
     "bindings": [
       "UI_TOGGLE_OVERLAY"
     ],
-    "centerXRelative": 0.46999994,
+    "centerXRelative": 0.4617,
     "centerYRelative": 0.08,
     "color": -3355444,
     "icon": "NO_ICON",
     "inputType": "MNK",
     "isToggle": false,
     "noTint": false,
-    "scale": 0.9,
+    "scale": 0.6,
     "sensitivity": 2.0,
     "style": "OUTLINE",
     "text": "V",
@@ -22,14 +22,14 @@
     "bindings": [
       "UI_TOGGLE_KEYBOARD"
     ],
-    "centerXRelative": 0.53,
+    "centerXRelative": 0.5,
     "centerYRelative": 0.08,
     "color": -3355444,
     "icon": "NO_ICON",
     "inputType": "MNK",
     "isToggle": false,
     "noTint": false,
-    "scale": 0.9,
+    "scale": 0.6,
     "sensitivity": 2.0,
     "style": "OUTLINE",
     "text": "KB",
@@ -40,12 +40,12 @@
     "bindings": [
       "KEY_F10"
     ],
-    "centerXRelative": 0.59,
+    "centerXRelative": 0.5383,
     "centerYRelative": 0.08,
     "color": -3355444,
     "icon": "NO_ICON",
     "inputType": "MNK",
-    "scale": 0.9,
+    "scale": 0.6,
     "text": "F10",
     "type": "BUTTON_CIRCLE"
   },

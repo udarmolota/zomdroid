@@ -93,6 +93,10 @@ public class LauncherPreferences {
     // NG_GL4ES — a live-texture budget in MB past which new large textures load at half
     // resolution. Off by default: it visibly degrades tiles and 12 GB devices don't need it.
     private boolean memorySaver = false;
+    // F10 additionally copies the whole save folder aside, giving a point to return to after a
+    // crash. Off by default: the copy is as large as the world (players report 300-600 MB) and the
+    // game visibly freezes while it is written, so it is opt-in behind a warning that says so.
+    private boolean quickSaveBackup = false;
     private AudioAPI audioAPI = AudioAPI.AAUDIO;
     // Not seeded at instance creation any more — this IS the default, so it applies to everyone
     // from the first launch. Users who already have their own value keep it: their stored JSON
@@ -213,6 +217,15 @@ public class LauncherPreferences {
 
     public void setMemorySaver(boolean enabled) {
         this.memorySaver = enabled;
+        saveToPreferences();
+    }
+
+    public boolean isQuickSaveBackup() {
+        return quickSaveBackup;
+    }
+
+    public void setQuickSaveBackup(boolean enabled) {
+        this.quickSaveBackup = enabled;
         saveToPreferences();
     }
 
