@@ -284,6 +284,12 @@
 
     <!-- Quick Save (the F10 backup): opt-in, priced honestly. The feature is called Quick Save in
          every language; zh-rCN carries its own translated name. See BackupManager and the agent. -->
+    <!-- Shown once after an update, then recorded. The body is DELIBERATELY in strings.xml, not
+         fetched from GitHub: a once-only dialog that needs the network up at exactly the right
+         moment is a dialog most people never see. Rewrite the body as part of every release. -->
+    <string name="release_notes_title">What\'s new in %1$s</string>
+    <string name="release_notes_body">• Quick Save (F10) — a real backup of your world you can return to after a crash or a death. Turn it on in Settings → Features and read the note there. The F10 button ships with the new control layouts; on a layout from an older version, add it yourself in the controls editor: input type MNK, binding KEY_F10.\n\n• Fixed a bug with joining some multiplayer servers — the join screen no longer freezes with unclickable buttons.\n\n• Animated mods are now supported — mod vehicles and hairstyles sit where they should: each game build now uses its own model importer.\n\n• Suggested presets — one tap in Settings applies the renderer, texture shrinking and Java arguments that fit your device and game build. ZINK now detects your GPU and starts with the matching Vulkan driver.\n\n• NG_GL4ES updated to v40 — black areas, car glitches and map fps drops fixed, faster on Mali.\n\n• The Steam downloader downloads the game much faster.\n\n• LIBGL_SHRINK made easy — a selector with a reference table for NG_GL4ES texture shrinking, right in Settings.\n\n• Touchpad — tap-to-click can now be turned off, so an accidental tap while moving the cursor doesn\'t click things.\n\nTechnical: LT/RT input fixes, gamepad mapper polish, better bug report logs.\n\nFull changelog:\nhttps://github.com/udarmolota/zomdroid/releases</string>
+
     <string name="settings_features_title">Features</string>
     <string name="settings_backup_switch">Quick Save (F10 button press)</string>
     <string name="backup_warning_title">Before you turn this on</string>

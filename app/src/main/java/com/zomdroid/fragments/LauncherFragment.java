@@ -368,8 +368,40 @@ public class LauncherFragment extends Fragment {
             requireActivity().findViewById(android.R.id.content).setVisibility(View.GONE);
         } else {
             updateDependencies();
+            maybeShowReleaseNotes(prefs);
         }
 
+    }
+
+    /**
+     * Release notes, shown once per installed version and only on an UPDATE. The distinction is the
+     * legal notice flag: a fresh install has not accepted it yet, so it lands in the branch above
+     * and the version is recorded silently here on its first pass - someone who just installed has
+     * nothing to be told "what's new" relative to. The text ships in strings.xml rather than being
+     * fetched: a once-only dialog that depends on the network being up at the right moment is a
+     * dialog most people never see.
+     */
+    private void maybeShowReleaseNotes(SharedPreferences prefs) {
+        String current = com.zomdroid.BuildConfig.VERSION_NAME;
+        String shownFor = prefs.getString(C.shprefs.keys.RELEASE_NOTES_SHOWN_FOR, null);
+        if (current.equals(shownFor)) return;
+
+        // First pass ever (pre-notes versions stored nothing): if the legal notice was accepted,
+        // this IS an update - those versions could not have recorded anything. Show the notes.
+        prefs.edit().putString(C.shprefs.keys.RELEASE_NOTES_SHOWN_FOR, current).apply();
+
+        final android.text.SpannableString s =
+                new android.text.SpannableString(getString(R.string.release_notes_body));
+        android.text.util.Linkify.addLinks(s, android.text.util.Linkify.WEB_URLS);
+        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
+                .setTitle(getString(R.string.release_notes_title, current))
+                .setMessage(s)
+                .setPositiveButton(R.string.dialog_button_ok, null)
+                .create();
+        dialog.show();
+        TextView messageView = dialog.findViewById(android.R.id.message);
+        if (messageView != null)
+            messageView.setMovementMethod(android.text.method.LinkMovementMethod.getInstance());
     }
 
     private void showLegalNoticeDialog() {
@@ -379,7 +411,13 @@ public class LauncherFragment extends Fragment {
                 .setCancelable(false)
                 .setPositiveButton(R.string.dialog_button_accept, (dialog, which) -> {
                     requireContext().getSharedPreferences(C.shprefs.NAME, MODE_PRIVATE)
-                            .edit().putBoolean(C.shprefs.keys.IS_LEGAL_NOTICE_ACCEPTED, true).apply();
+                            .edit().putBoolean(C.shprefs.keys.IS_LEGAL_NOTICE_ACCEPTED, true)
+                            // A fresh install has nothing to be told "what's new" relative to -
+                            // record the version now so the notes dialog stays quiet until the
+                            // first actual update.
+                            .putString(C.shprefs.keys.RELEASE_NOTES_SHOWN_FOR,
+                                    com.zomdroid.BuildConfig.VERSION_NAME)
+                            .apply();
                     requireActivity().findViewById(android.R.id.content).setVisibility(View.VISIBLE);
                     updateDependencies();
                     requestNotificationPermission();

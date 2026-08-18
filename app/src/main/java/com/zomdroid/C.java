@@ -56,6 +56,9 @@ public class C {
             public static final String INSTALLED_BUNDLES = "installedBundles";
             public static final String ARE_DEPENDENCIES_INSTALLED = "areDependenciesInstalled";
             public static final String IS_LEGAL_NOTICE_ACCEPTED = "isLegalNoticeAccepted";
+            // versionName the release notes were last shown for (or recorded silently on a fresh
+            // install). Differing from BuildConfig.VERSION_NAME means an update happened.
+            public static final String RELEASE_NOTES_SHOWN_FOR = "releaseNotesShownFor";
         }
     }
 }
