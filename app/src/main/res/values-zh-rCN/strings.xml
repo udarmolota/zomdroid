@@ -589,4 +589,7 @@
     <string name="new_game_instance_detect_failed">无法读取游戏 ZIP。请确认它是有效的 Project Zomboid 压缩包后重试。</string>
 
     <!-- NG_GL4ES renderer offer dialog -->
+    <string name="settings_features_title">功能</string>
+    <string name="settings_backup_switch">快速存档（F10 按钮）</string>
+    <string name="game_instance_restore_backup">恢复快速存档备份…</string>
 </resources>

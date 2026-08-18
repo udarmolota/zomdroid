@@ -282,10 +282,12 @@
     <string name="settings_memory_saver">Memory saver (NG_GL4ES)</string>
     <string name="settings_memory_saver_hint">Lowers texture detail when memory runs low. Helps avoid crashes on devices with 8 GB RAM or less; not needed with 12 GB. Applies to the NG_GL4ES renderer on Build 42.</string>
 
-    <!-- F10 backup: opt-in, priced honestly. See BackupManager and the agent's QuickSave. -->
-    <string name="settings_backup_switch">Backup on quick save (F10)</string>
+    <!-- Quick Save (the F10 backup): opt-in, priced honestly. The feature is called Quick Save in
+         every language; zh-rCN carries its own translated name. See BackupManager and the agent. -->
+    <string name="settings_features_title">Features</string>
+    <string name="settings_backup_switch">Quick Save (F10 button press)</string>
     <string name="backup_warning_title">Before you turn this on</string>
-    <string name="backup_warning_message">Pressing F10 will also make a full copy of your world — a point you can return to after a crash or a death. The game\'s own saving writes over itself and has nothing to go back to; this is the only way to have that.\n\nIt costs. The copy is as large as your world — often 300–600 MB — and it is written every time you press the button. The game will look frozen while it happens, up to a minute on a slower phone. It is not frozen. Do not close it.\n\nSo press F10 where you are safe: indoors, nothing chasing you, a few minutes to spare.\n\nOne copy is kept per world; each new one replaces the last. Build 42, single player only.</string>
+    <string name="backup_warning_message">Pressing F10 makes a full copy of your world — a point you can return to after a crash or a death.\n\nThe bigger your save (the longer your character has lived), the longer the copy takes. Find a couple of safe minutes before pressing F10: the game may look frozen while the copy is written — it is not. Just wait and do not close it.\n\nThe F10 button is part of the new control layouts. If you keep your own layout from an earlier version, add the button yourself in the controls editor: input type MNK, binding KEY_F10.\n\nOne copy is kept per world; each new one replaces the last. Build 42, single player only.</string>
     <string name="backup_restore_title">Previous session crashed</string>
     <string name="backup_restore_message">There is a backup of “%1$s” from %2$s (%3$d MB) — the moment you pressed F10.\n\nReturning to it will erase everything that happened after it was made.</string>
     <string name="backup_restore_continue">Continue as is</string>
@@ -293,7 +295,7 @@
     <string name="backup_restoring">Restoring the backup…</string>
     <string name="backup_restore_done">Backup restored</string>
     <string name="backup_restore_failed">Restore failed: %1$s</string>
-    <string name="game_instance_restore_backup">Restore F10 backup…</string>
+    <string name="game_instance_restore_backup">Restore Quick Save backup…</string>
     <string name="backup_manual_restore_message">There is a backup of “%1$s” from %2$s (%3$d MB).\n\nRestoring it will replace your current progress in that world with the state at the moment the backup was made. This cannot be undone.</string>
     <string name="backup_none_found">No backup found for the last played world</string>
     <string name="select_instance">— Select game instance —</string>

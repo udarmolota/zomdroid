@@ -226,6 +226,41 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Group: Features. New player-facing capabilities live here, not under Advanced -
+             Advanced is for people tuning internals, a feature toggle is for everyone. -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="12dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:text="@string/settings_features_title"
+                    android:textAppearance="?attr/textAppearanceLabelSmall"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="13sp"/>
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/settings_backup_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:text="@string/settings_backup_switch"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
         <!-- Group 3: Advanced (collapsible) -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
@@ -499,13 +534,6 @@
                         android:textAppearance="?attr/textAppearanceBodySmall"
                         android:text="@string/settings_memory_saver"/>
 
-                    <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/settings_backup_switch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:textAppearance="?attr/textAppearanceBodySmall"
-                        android:text="@string/settings_backup_switch"/>
 
                     <TextView
                         android:layout_width="match_parent"
