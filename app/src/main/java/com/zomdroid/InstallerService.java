@@ -111,6 +111,17 @@ public class InstallerService extends Service implements TaskProgressListener {
         // finish (that is how the post-install renderer/GPU dialog silently stopped appearing).
         // The check is cheap and repeats next launch, so skipping this one occasion is free.
         if (task == Task.INSTALL_DEPENDENCIES && userTaskRunning) {
+            // The skip must still keep the promise startForegroundService() made, or the system
+            // kills the whole process ten seconds later (ForegroundServiceDidNotStartInTime) -
+            // mid-install, taking the running task with it. Shipped broken since 1.4.7v2; the
+            // window is narrow (the fragment has to be recreated - rotation, minimize, a trip to
+            // Settings - while a task runs), which is why it took three weeks to be reported.
+            // The running task's OWN notification is re-posted so nothing visibly changes; the
+            // fallback exists only for the freak case where none was built yet. No stopSelf: the
+            // service is mid-task and must keep living.
+            startForeground(NOTIFICATION_ID, notificationBuilder != null
+                    ? notificationBuilder.build()
+                    : buildNotification(getString(R.string.dialog_title_installing_dependencies)));
             Log.i(LOG_TAG, "Dependency re-check skipped: " + currentTask + " is still running");
             return START_NOT_STICKY;
         }
