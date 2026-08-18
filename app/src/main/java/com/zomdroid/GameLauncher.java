@@ -299,26 +299,12 @@ public class GameLauncher {
 
     // Positive-ID Qualcomm/Adreno only (they tolerate the ES3 EGL context). Everything else —
     // MediaTek/Mali, and any unknown, to stay safe — returns false so NG gets the ES2 context.
-    // Same GPU split RC13 uses on the lib side; sourced from Android-level info that the GL
-    // stack can't hide (GL_RENDERER comes back '<unknown>' through box64/Krypton).
+    // Delegates to the one shared detector: this used to be a private copy with the same
+    // unguarded Build.SOC_* array that crashed Android 11 (those fields are API 31+, and
+    // NoSuchFieldError is not an Exception) — the guard must live in exactly one place.
     private static boolean isQualcommGpu() {
-        try (java.io.BufferedReader r = new java.io.BufferedReader(new java.io.FileReader("/proc/cpuinfo"))) {
-            String line;
-            while ((line = r.readLine()) != null) {
-                String l = line.toLowerCase();
-                if (l.contains("qualcomm") || l.contains("snapdragon")) return true;
-                if (l.contains("mediatek") || l.contains("dimensity") || l.contains("helio")) return false;
-            }
-        } catch (Exception ignored) {}
-
-        String[] fields = { android.os.Build.HARDWARE, android.os.Build.BOARD,
-                            android.os.Build.SOC_MODEL, android.os.Build.SOC_MANUFACTURER };
-        for (String f : fields) {
-            if (f == null) continue;
-            String l = f.toLowerCase();
-            if (l.contains("qcom") || l.contains("qualcomm") || l.contains("snapdragon")) return true;
-        }
-        return false;
+        return com.zomdroid.game.SuggestedPreset.QUALCOMM.equals(
+                com.zomdroid.game.SuggestedPreset.detectGpuVendor());
     }
 
     public static native int initZomdroidWindow();

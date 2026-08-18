@@ -126,12 +126,19 @@ public enum SuggestedPreset {
             }
         } catch (Exception ignored) {}
 
-        String[] buildFields = {
-                android.os.Build.HARDWARE,
-                android.os.Build.BOARD,
-                android.os.Build.SOC_MODEL,      // API 31+
-                android.os.Build.SOC_MANUFACTURER // API 31+
-        };
+        java.util.ArrayList<String> buildFields = new java.util.ArrayList<>();
+        buildFields.add(android.os.Build.HARDWARE);
+        buildFields.add(android.os.Build.BOARD);
+        // SOC_MODEL/SOC_MANUFACTURER exist only from API 31. On Android 11 merely referencing them
+        // throws NoSuchFieldError - an Error, so a catch(Exception) never helped - and the old
+        // fixed array computed all four up front, dying before HARDWARE/BOARD were even looked at.
+        // That crashed A11 on every Settings open and at NG_GL4ES launch; two players reported it
+        // against 1.4.8. Devices whose cpuinfo names the vendor never got here, which is why not
+        // every A11 user crashed.
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            buildFields.add(android.os.Build.SOC_MODEL);
+            buildFields.add(android.os.Build.SOC_MANUFACTURER);
+        }
         for (String field : buildFields) {
             if (field == null) continue;
             String lower = field.toLowerCase(Locale.US);
@@ -140,6 +147,12 @@ public enum SuggestedPreset {
             if (lower.contains("mt") || lower.contains("mediatek")
                     || lower.contains("dimensity") || lower.contains("helio")) return MEDIATEK;
         }
+
+        // Last resort, and what keeps Android 11 Snapdragons auto-detected without the SOC fields:
+        // the cached EGL probe reads GL_RENDERER from the phone's own driver, and "Adreno" is a
+        // positive Qualcomm ID. Adreno only - a Mali renderer says nothing about the SoC vendor
+        // (MediaTek, Exynos and Tensor all ship Mali), so everything else stays unknown.
+        if (GpuInfo.query().isAdreno()) return QUALCOMM;
         return null;
     }
 

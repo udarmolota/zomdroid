@@ -29,7 +29,10 @@ import java.util.regex.Pattern;
 public final class GpuInfo {
 
     private static final Pattern ADRENO_MODEL_PATTERN = Pattern.compile(
-            "(?i)\\badreno(?:\\s*\\(tm\\))?[^0-9]{0,24}(\\d{3,4})\\b");
+            // (?![0-9]) rather than \b after the digits: "Adreno 642L" has no word boundary
+            // between 642 and L, so \b silently rejected the whole model and the phone read as
+            // not-Adreno. The lookahead only forbids further digits and lets letter suffixes be.
+            "(?i)\\badreno(?:\\s*\\(tm\\))?[^0-9]{0,24}(\\d{3,4})(?![0-9])");
     private static volatile GpuInfo cached;
 
     /** Raw GL_RENDERER, e.g. "Adreno (TM) 830"; null when the probe failed. */
@@ -57,9 +60,11 @@ public final class GpuInfo {
             result = cached;
             if (result != null) return result;
             result = queryUncached();
-            // A failed probe can be transient, so only a real answer is cached: a later launch or a
-            // trip through Settings still gets a chance to identify the GPU.
-            if (result.renderer != null && !result.renderer.trim().isEmpty()) cached = result;
+            // Cached whether it succeeded or not. A failed probe used to retry on every Settings
+            // open, and on a fragile driver every retry is another chance to die natively inside
+            // EGL. One attempt per process; the next app launch retries anyway, which covers the
+            // transient-failure case the old success-only caching was written for.
+            cached = result;
             return result;
         }
     }

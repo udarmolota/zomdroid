@@ -374,12 +374,12 @@ public class LauncherFragment extends Fragment {
     }
 
     /**
-     * Release notes, shown once per installed version and only on an UPDATE. The distinction is the
-     * legal notice flag: a fresh install has not accepted it yet, so it lands in the branch above
-     * and the version is recorded silently here on its first pass - someone who just installed has
-     * nothing to be told "what's new" relative to. The text ships in strings.xml rather than being
-     * fetched: a once-only dialog that depends on the network being up at the right moment is a
-     * dialog most people never see.
+     * Release notes, shown once per installed version - on updates AND on fresh installs. Our own
+     * notes tell people a clean install is the safer upgrade path, so "freshly installed" very
+     * often IS an update: treating those users as newcomers hid the notes from exactly the people
+     * following our advice. The text ships in strings.xml rather than being fetched: a once-only
+     * dialog that depends on the network being up at the right moment is a dialog most people
+     * never see.
      */
     private void maybeShowReleaseNotes(SharedPreferences prefs) {
         String current = com.zomdroid.BuildConfig.VERSION_NAME;
@@ -411,16 +411,12 @@ public class LauncherFragment extends Fragment {
                 .setCancelable(false)
                 .setPositiveButton(R.string.dialog_button_accept, (dialog, which) -> {
                     requireContext().getSharedPreferences(C.shprefs.NAME, MODE_PRIVATE)
-                            .edit().putBoolean(C.shprefs.keys.IS_LEGAL_NOTICE_ACCEPTED, true)
-                            // A fresh install has nothing to be told "what's new" relative to -
-                            // record the version now so the notes dialog stays quiet until the
-                            // first actual update.
-                            .putString(C.shprefs.keys.RELEASE_NOTES_SHOWN_FOR,
-                                    com.zomdroid.BuildConfig.VERSION_NAME)
-                            .apply();
+                            .edit().putBoolean(C.shprefs.keys.IS_LEGAL_NOTICE_ACCEPTED, true).apply();
                     requireActivity().findViewById(android.R.id.content).setVisibility(View.VISIBLE);
                     updateDependencies();
                     requestNotificationPermission();
+                    maybeShowReleaseNotes(requireContext()
+                            .getSharedPreferences(C.shprefs.NAME, MODE_PRIVATE));
                 })
                 .create();
         legalNoticeDialog.show();

@@ -590,6 +590,6 @@
 
     <!-- NG_GL4ES renderer offer dialog -->
     <string name="settings_features_title">功能</string>
-    <string name="settings_backup_switch">快速存档（F10 按钮）</string>
+    <string name="settings_backup_switch">快速存档（F10，Build 42）</string>
     <string name="game_instance_restore_backup">恢复快速存档备份…</string>
 </resources>
