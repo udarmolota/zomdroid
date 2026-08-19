@@ -334,7 +334,10 @@ public class LauncherActivity extends AppCompatActivity {
                 + "\nZomdroid: " + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")";
 
         java.util.List<GameInstance> instances = GameInstanceManager.requireSingleton().getInstances();
-        if (instances.isEmpty()) { startBugReportEmail(date, device, null); return; }
+        // No instance is the hottest report, not the empty one: it is the user whose install is
+        // failing. The launcher-level logcat capture exists without any instance and is exactly
+        // where that failure landed, so the zip is still built - from whatever there is.
+        if (instances.isEmpty()) { buildAndSendBugReport(date, device, null); return; }
 
         // More than one instance: ask which game the report is about. This used to take
         // instances.get(0) silently, so a player reporting a Build 42 bug shipped Build 41 logs -

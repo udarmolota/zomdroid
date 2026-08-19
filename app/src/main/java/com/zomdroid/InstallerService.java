@@ -915,17 +915,21 @@ public class InstallerService extends Service implements TaskProgressListener {
     // Builds the same diagnostic zip (report.txt + crash/native/shader/console/launcher logs) used
     // by both "Export logs" (SAF-picked destination) and the "Report a bug" email attachment, so
     // there is one definition of what a Zomdroid bug report contains. Caller owns/closes `os`.
+    /** gi may be null - no instance installed yet. That is not the empty case but the hottest one:
+     *  the user whose dependency install or instance creation is failing has no instance BY
+     *  DEFINITION, and the launcher-level logcat capture is exactly where that failure is written.
+     *  The zip is built from whatever exists instead of not at all. */
     public static void writeLogReportZip(GameInstance gi, OutputStream os) throws IOException {
-        File consoleFile = new File(gi.getHomePath() + "/Zomboid/console.txt");
+        File consoleFile = gi == null ? null : new File(gi.getHomePath() + "/Zomboid/console.txt");
         File launcherLog = new File(AppStorage.requireSingleton().getHomePath() + "/" + CrashHandler.LOG_FILE_NAME);
         // Crash session's logcat lives in lastlog.txt: after a native game crash the process
         // dies and the app restarts, which rotates log.txt -> lastlog.txt.
         File lastLauncherLog = new File(AppStorage.requireSingleton().getHomePath() + "/" + CrashHandler.LAST_LOG_FILE_NAME);
         // Native crash handler dump (SIGSEGV/SIGBUS/SIGILL/SIGFPE) written into the game dir.
-        File crashFile = new File(gi.getGamePath() + "/crash.txt");
+        File crashFile = gi == null ? null : new File(gi.getGamePath() + "/crash.txt");
         // Persistent mirror of native stdout/stderr (box64 SEGV/BT reports, NG probes) —
         // survives crashes/restarts, unlike the rotating logcat.
-        File nativeLog = new File(gi.getGamePath() + "/native.log");
+        File nativeLog = gi == null ? null : new File(gi.getGamePath() + "/native.log");
         // NG_GL4ES shader diagnostics: full source + driver log of shaders that failed to
         // compile/link (up to 10 programs) + GL trace. Written by libng_gl4es into files/.
         File failedShaders = new File(AppStorage.requireSingleton().getHomePath() + "/failed_shaders.txt");
@@ -936,9 +940,9 @@ public class InstallerService extends Service implements TaskProgressListener {
         // The live session writes straight into Zomboid/Logs/; on the next launch PZ rotates that
         // file into Logs/logs_<date>/, so after a crash-and-relaunch the interesting one is the
         // newest file in the newest archive folder. Collect both.
-        File pzLogsDir = new File(gi.getHomePath() + "/Zomboid/Logs");
-        File debugLog = newestDebugLog(pzLogsDir);
-        File prevDebugLog = newestDebugLog(newestLogArchiveDir(pzLogsDir));
+        File pzLogsDir = gi == null ? null : new File(gi.getHomePath() + "/Zomboid/Logs");
+        File debugLog = pzLogsDir == null ? null : newestDebugLog(pzLogsDir);
+        File prevDebugLog = pzLogsDir == null ? null : newestDebugLog(newestLogArchiveDir(pzLogsDir));
 
         try (ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(os, 256 * 1024))) {
             // report.txt — device / build metadata
@@ -961,9 +965,11 @@ public class InstallerService extends Service implements TaskProgressListener {
             // keys on. A player exported a Build 41 report for a Build 42 bug and it took two
             // assistants a day to establish from java.library.path what one header line would
             // have said outright: the instance, its build, and build4220Plus.
-            writeLogUtf8(zos, "Instance : " + gi.getName()
-                    + " (" + gi.getPresetName() + ", build " + gi.getBuildVersion()
-                    + ", 4220plus=" + gi.isBuild4220Plus() + ")\n");
+            writeLogUtf8(zos, gi == null
+                    ? "Instance : (none installed)\n"
+                    : "Instance : " + gi.getName()
+                        + " (" + gi.getPresetName() + ", build " + gi.getBuildVersion()
+                        + ", 4220plus=" + gi.isBuild4220Plus() + ")\n");
             writeLogUtf8(zos, "Renderer : " + prefs.getRenderer().name() + "\n");
             writeLogUtf8(zos, "Driver   : " + driverStr + "\n");
             // The two questions every NG_GL4ES "it just closes" report starts with: how much RAM
