@@ -303,6 +303,7 @@
     <string name="backup_restore_failed">Restore failed: %1$s</string>
     <string name="game_instance_restore_backup">Restore Quick Save backup…</string>
     <string name="backup_manual_restore_message">There is a backup of “%1$s” from %2$s (%3$d MB).\n\nRestoring it will replace your current progress in that world with the state at the moment the backup was made. This cannot be undone.</string>
+    <string name="bug_report_pick_instance">Which game is this report about?</string>
     <string name="backup_none_found">No backup found for the last played world</string>
     <string name="select_instance">— Select game instance —</string>
 

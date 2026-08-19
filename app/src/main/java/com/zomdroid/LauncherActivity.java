@@ -329,17 +329,35 @@ public class LauncherActivity extends AppCompatActivity {
     private void sendBugReport() {
         final java.util.Date now = new java.util.Date();
         final String date = new java.text.SimpleDateFormat("ddMMyyyy", java.util.Locale.US).format(now);
-        // Distinct timestamp for the zip name (adds time-of-day) so a tester sending several
-        // reports in one sitting doesn't overwrite the same "zomdroid_report.zip" attachment.
-        final String timestamp = new java.text.SimpleDateFormat("ddMMyyyy_HHmm", java.util.Locale.US).format(now);
         final String device = "Device: " + Build.MANUFACTURER + " " + Build.MODEL
                 + "\nAndroid: " + Build.VERSION.RELEASE
                 + "\nZomdroid: " + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")";
 
         java.util.List<GameInstance> instances = GameInstanceManager.requireSingleton().getInstances();
-        GameInstance instance = instances.isEmpty() ? null : instances.get(0);
-        if (instance == null) { startBugReportEmail(date, device, null); return; }
+        if (instances.isEmpty()) { startBugReportEmail(date, device, null); return; }
 
+        // More than one instance: ask which game the report is about. This used to take
+        // instances.get(0) silently, so a player reporting a Build 42 bug shipped Build 41 logs -
+        // and neither he nor we could tell until the mismatch surfaced mid-investigation. The
+        // reporter is the one person who knows which game just misbehaved; one tap collects it.
+        if (instances.size() > 1) {
+            String[] names = new String[instances.size()];
+            for (int i = 0; i < instances.size(); i++) names[i] = instances.get(i).getName();
+            new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                    .setTitle(R.string.bug_report_pick_instance)
+                    .setItems(names, (d, which) ->
+                            buildAndSendBugReport(date, device, instances.get(which)))
+                    .setNegativeButton(R.string.dialog_button_cancel, null)
+                    .show();
+            return;
+        }
+        buildAndSendBugReport(date, device, instances.get(0));
+    }
+
+    private void buildAndSendBugReport(String date, String device, GameInstance instance) {
+        // Distinct timestamp for the zip name (adds time-of-day) so a tester sending several
+        // reports in one sitting doesn't overwrite the same "zomdroid_report.zip" attachment.
+        final String timestamp = new java.text.SimpleDateFormat("ddMMyyyy_HHmm", java.util.Locale.US).format(new java.util.Date());
         Toast.makeText(this, R.string.bug_report_preparing, Toast.LENGTH_SHORT).show();
         new Thread(() -> {
             Uri attach = null;

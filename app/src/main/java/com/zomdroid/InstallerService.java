@@ -957,6 +957,13 @@ public class InstallerService extends Service implements TaskProgressListener {
             // a report cannot say which binary produced it. "+" means the tree had uncommitted work.
             writeLogUtf8(zos, "Zomdroid : " + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE
                     + ", " + BuildConfig.GIT_BUILD_ID + ")\n");
+            // Which instance this report is even about, and the flag half our trigger handling
+            // keys on. A player exported a Build 41 report for a Build 42 bug and it took two
+            // assistants a day to establish from java.library.path what one header line would
+            // have said outright: the instance, its build, and build4220Plus.
+            writeLogUtf8(zos, "Instance : " + gi.getName()
+                    + " (" + gi.getPresetName() + ", build " + gi.getBuildVersion()
+                    + ", 4220plus=" + gi.isBuild4220Plus() + ")\n");
             writeLogUtf8(zos, "Renderer : " + prefs.getRenderer().name() + "\n");
             writeLogUtf8(zos, "Driver   : " + driverStr + "\n");
             // The two questions every NG_GL4ES "it just closes" report starts with: how much RAM
