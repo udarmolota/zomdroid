@@ -729,12 +729,13 @@ void *dlopen(const char* filename, int flags) {
         }
 
         // jassimp64 only: the launcher can point at a specific importer build to load instead of
-        // whatever the search order would find - our Assimp 5.4.3 with the PZ compatibility
-        // revert (patches/assimp/0002.patch in zomdroid-dependencies). When the override is set,
-        // the game's own ARM64 build (42.12+) is skipped ON PURPOSE even if the override fails
-        // to load: that build is proven on device (2026-08-20, ZomboRut) to break mod animation
-        // clips, so the only acceptable fallback is the game's x86_64 build through box64 - the
-        // same route every pre-42.12 build already uses. Unset or empty = behaviour unchanged.
+        // whatever the search order would find. Nothing sets this any more - GameLauncher clears
+        // it on every launch, and 42.12+ keeps the game's own ARM64 build - but the hook stays,
+        // because it is the cheap way to A/B an importer without touching the game's files. When
+        // it IS set, the game's own ARM64 build is skipped even if the override fails to load:
+        // the point of an override is to replace that library, so falling back to it would defeat
+        // the experiment; the fallback is the x86_64 build through box64, the same route every
+        // pre-42.12 build already uses. Unset or empty = behaviour unchanged.
         int force_box64 = 0;
         if (strcmp(jni_libs[i].name, "jassimp64") == 0) {
             const char* override_path = getenv("ZOMDROID_JASSIMP64_OVERRIDE");
