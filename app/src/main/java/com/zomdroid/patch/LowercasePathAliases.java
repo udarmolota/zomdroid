@@ -72,6 +72,25 @@ public final class LowercasePathAliases {
 
     private LowercasePathAliases() {}
 
+    /**
+     * Kill switch for form 1 (the per-entry lowercase aliases). When false, existing aliases are
+     * removed from every mod and no new ones are created; form 2 (the doubled path) is untouched.
+     *
+     * <p>Why it exists: aliasing every mixed-case entry INCLUDING directories makes a file
+     * reachable by 2^k paths, k being its mixed-case ancestors - `anims_X|anims_x` × `Bob|bob` ×
+     * `Foo.glb|foo.glb` is eight routes to one file. Measured on ZomboRut: 1611 files become 8688
+     * reachable paths, and the game's own log agrees, reporting ~7100 self-collisions where 1.4.7
+     * reported 49. The suspicion is `media/AnimSets`, which goes from 48 registrations to 8346 -
+     * exactly the animation-transition content whose `pickup -> BwdDrag -> BwdDragHead` promote is
+     * the one thing observed broken on 1.4.8, on every importer we tried.
+     *
+     * <p>This is a diagnostic switch, not the fix. If it proves the cause, the real answer is to
+     * stop creating per-level twins and build ONE fully-lowercase mirror instead: two routes per
+     * file rather than 2^k, with the workaround - and the multiplayer path check that needs the
+     * aliases to live inside the mod folder - preserved.
+     */
+    public static final boolean PER_ENTRY_ALIASES_ENABLED = false;
+
     // -------------------- LAUNCH-TIME REPAIR --------------------
 
     /**
@@ -106,19 +125,21 @@ public final class LowercasePathAliases {
         unlinkIfLowercaseAlias(new File(instanceDir, "zomboid"));
     }
 
-    private static void unlinkIfLowercaseAlias(File alias) {
+    /** @return true if this really was one of our aliases and it is now gone. */
+    private static boolean unlinkIfLowercaseAlias(File alias) {
         Path path = alias.toPath();
         try {
-            if (!Files.isSymbolicLink(path)) return;
+            if (!Files.isSymbolicLink(path)) return false;
             // Target is relative and differs from the link name only in case - i.e. ours. Read
             // rather than resolved, so a link whose instance is gone is still recognised.
             String target = Files.readSymbolicLink(path).toString();
-            if (!target.toLowerCase(Locale.US).equals(alias.getName())) return;
-            if (target.equals(alias.getName())) return;
+            if (!target.toLowerCase(Locale.US).equals(alias.getName())) return false;
+            if (target.equals(alias.getName())) return false;
             Files.delete(path);
-            Log.i(LOG_TAG, "Removed obsolete alias " + path);
+            return true;
         } catch (IOException | UnsupportedOperationException e) {
             Log.w(LOG_TAG, "Failed to remove obsolete alias " + path, e);
+            return false;
         }
     }
 
@@ -182,11 +203,16 @@ public final class LowercasePathAliases {
             Log.w(LOG_TAG, "Failed to link " + modLink + " -> " + modDir, e);
         }
 
+        // Negative means the kill switch is off and that many stale aliases were swept instead.
         if (aliases > 0) Log.i(LOG_TAG, "Case workaround for " + modDir.getName() + ": " + aliases + " alias(es)");
+        else if (aliases < 0) Log.i(LOG_TAG, "Case workaround DISABLED for " + modDir.getName()
+                + ": removed " + (-aliases) + " per-entry alias(es)");
     }
 
     /** Give every entry whose name is not already lowercase a lowercase alias beside it. */
     private static int createLowercaseAliases(File root) {
+        if (!PER_ENTRY_ALIASES_ENABLED) return -removeLowercaseAliases(root);
+
         List<File> entries = new ArrayList<>();
         collectMixedCaseEntries(root, entries);
         int created = 0;
@@ -202,6 +228,28 @@ public final class LowercasePathAliases {
             }
         }
         return created;
+    }
+
+    /**
+     * Remove the form-1 aliases from a mod, returning how many went. Walks the real tree only:
+     * a directory alias is deleted without ever being descended into, so the 2^k duplication that
+     * created the mess is not re-walked while cleaning it up. Recognised by the same precise shape
+     * as {@link #unlinkIfLowercaseAlias} - a symlink whose relative target is its own name in a
+     * different case - so a mod's own symlinks, if any, are never touched.
+     */
+    private static int removeLowercaseAliases(File dir) {
+        File[] files = dir.listFiles();
+        if (files == null) return 0;
+
+        int removed = 0;
+        for (File f : files) {
+            if (Files.isSymbolicLink(f.toPath())) {
+                if (unlinkIfLowercaseAlias(f)) removed++;
+                continue; // never descend into a link, ours or the mod's own
+            }
+            if (f.isDirectory()) removed += removeLowercaseAliases(f);
+        }
+        return removed;
     }
 
     // The whole tree is collected before a single alias is created, so the walk never meets one.

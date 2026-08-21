@@ -5,6 +5,7 @@
 #include <malloc.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 #include <pthread.h>
 #include "logger.h"
 #include "emulation.h"
@@ -742,7 +743,12 @@ void *dlopen(const char* filename, int flags) {
                 if (override_handle != NULL) {
                     jni_libs[i].handle = override_handle;
                     jni_libs[i].is_emulated = false;
-                    LOG_REPORTED("[linker] jassimp source=zomdroid-hybrid (%s)", override_path);
+                    // Size, because the file name is fixed and says nothing about which build is
+                    // actually in it - a hand-swapped importer looked identical in the log during
+                    // the 2026-08-21 A/B and only the tester knew what had been put there.
+                    struct stat ov_st;
+                    long long ov_size = (stat(override_path, &ov_st) == 0) ? (long long)ov_st.st_size : -1;
+                    LOG_REPORTED("[linker] jassimp source=override size=%lld (%s)", ov_size, override_path);
                     return override_handle;
                 }
                 const char* dl_msg = dlerror();
