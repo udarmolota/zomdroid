@@ -988,6 +988,13 @@ public class InstallerService extends Service implements TaskProgressListener {
             // way to tell an actual finding from something the player pasted in on someone's advice.
             String envVars = LauncherPreferences.squashWhitespace(prefs.getEnvVars());
             writeLogUtf8(zos, "Env vars : " + (envVars.isEmpty() ? "(none)" : envVars) + "\n");
+            // Since 1.4.8 each build loads the game's OWN jassimp/Lighting/PZBullet from
+            // android/arm64-v8a instead of ours, so the health of that folder now decides whether
+            // the game starts at all - and a copy truncated during install is invisible in every
+            // other file we collect. One player's game stopped starting because that jassimp was
+            // shorter on disk than the game's zip says it should be; the sizes below make that a
+            // glance instead of a two-day investigation.
+            writeLogUtf8(zos, nativeLibInventory(gi));
             writeLogUtf8(zos, "===========================\n");
             zos.closeEntry();
 
@@ -1002,6 +1009,36 @@ public class InstallerService extends Service implements TaskProgressListener {
             addFileToZip(zos, debugLog, "debuglog.txt");
             addFileToZip(zos, prevDebugLog, "debuglog_prev.txt");
         }
+    }
+
+    /**
+     * One line per file in the instance's {@code game/android/arm64-v8a} folder, plus the state of
+     * our own bundled jassimp. Build 41 has no such folder - TIS ships x86_64 only there - so the
+     * "no android/arm64-v8a folder" line is the normal answer for it, not a fault. Sizes are raw
+     * bytes: compare a suspicious one against the same entry in the game's own zip.
+     */
+    private static String nativeLibInventory(GameInstance gi) {
+        StringBuilder sb = new StringBuilder("Game libs: ");
+        File nativeDir = gi == null ? null : new File(gi.getGamePath() + "/android/arm64-v8a");
+        File[] libs = nativeDir == null ? null : nativeDir.listFiles();
+        if (libs == null || libs.length == 0) {
+            sb.append("no android/arm64-v8a folder - box64 loads the x86_64 build\n");
+        } else {
+            java.util.Arrays.sort(libs, (a, b) -> a.getName().compareToIgnoreCase(b.getName()));
+            sb.append(libs.length).append(" file(s) in android/arm64-v8a\n");
+            for (File lib : libs) {
+                if (!lib.isFile()) continue;
+                sb.append("           ").append(lib.getName()).append(' ').append(lib.length()).append('\n');
+            }
+        }
+        // ACTIVE means the retire in GameLauncher did not run or failed, and our 5.4.3 is shadowing
+        // whatever importer the build expects - the exact state 1.4.8 set out to end.
+        File bundledDir = new File(AppStorage.requireSingleton().getHomePath(), C.deps.LIBS_ANDROID_ARM64_v8a);
+        String jassimpState = new File(bundledDir, "libjassimp64.so").isFile()
+                ? "ACTIVE - shadows the game's own importer"
+                : new File(bundledDir, "libjassimp64.so.zomdroid-543-off").isFile() ? "retired" : "absent";
+        sb.append("Our jassimp: ").append(jassimpState).append('\n');
+        return sb.toString();
     }
 
     // Total/available RAM straight from /proc/meminfo. ActivityManager.MemoryInfo would give the

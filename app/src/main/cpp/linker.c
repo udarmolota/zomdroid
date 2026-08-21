@@ -4,6 +4,7 @@
 #include <android/dlext.h>
 #include <malloc.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <pthread.h>
 #include "logger.h"
 #include "emulation.h"
@@ -18,6 +19,15 @@
 
 
 #define LOG_TAG "zomdroid-linker"
+
+// Diagnostics that have to reach the exported Bug Report. LOGx goes to logcat only, and the
+// launcher rotates its logcat capture on every app start - by the time a player exports a report
+// the game session's lines are long gone. stdout is mirrored into <game>/native.log by
+// monitor_stdio_and_memory() in zomdroid.c, which survives the crash and the restart.
+#define LOG_REPORTED(fmt, ...) do {                  \
+        LOGI(fmt __VA_OPT__(,) __VA_ARGS__);         \
+        printf(fmt "\n" __VA_OPT__(,) __VA_ARGS__);  \
+    } while (0)
 
 #define BUF_SIZE 1024
 
@@ -717,8 +727,33 @@ void *dlopen(const char* filename, int flags) {
             return jni_libs[i].handle;
         }
 
+        // jassimp64 only: the launcher can point at a specific importer build to load instead of
+        // whatever the search order would find - our Assimp 5.4.3 with the PZ compatibility
+        // revert (patches/assimp/0002.patch in zomdroid-dependencies). When the override is set,
+        // the game's own ARM64 build (42.12+) is skipped ON PURPOSE even if the override fails
+        // to load: that build is proven on device (2026-08-20, ZomboRut) to break mod animation
+        // clips, so the only acceptable fallback is the game's x86_64 build through box64 - the
+        // same route every pre-42.12 build already uses. Unset or empty = behaviour unchanged.
+        int force_box64 = 0;
+        if (strcmp(jni_libs[i].name, "jassimp64") == 0) {
+            const char* override_path = getenv("ZOMDROID_JASSIMP64_OVERRIDE");
+            if (override_path != NULL && override_path[0] != '\0') {
+                void* override_handle = loader_dlopen(override_path, flags, __builtin_return_address(0));
+                if (override_handle != NULL) {
+                    jni_libs[i].handle = override_handle;
+                    jni_libs[i].is_emulated = false;
+                    LOG_REPORTED("[linker] jassimp source=zomdroid-hybrid (%s)", override_path);
+                    return override_handle;
+                }
+                const char* dl_msg = dlerror();
+                LOG_REPORTED("[linker] jassimp override %s failed to load (%s), falling back to box64",
+                             override_path, dl_msg ? dl_msg : "no error reported");
+                force_box64 = 1;
+            }
+        }
+
         //trying to load native library
-        if (strcmp(jni_libs[i].name, "fmodintegration64") != 0) { //later I should fix that. Java for some reason didn't see classes inside
+        if (!force_box64 && strcmp(jni_libs[i].name, "fmodintegration64") != 0) { //later I should fix that. Java for some reason didn't see classes inside
             const char* base = strrchr(filename, '/');
             if (base)
                 base++;
@@ -729,16 +764,30 @@ void *dlopen(const char* filename, int flags) {
             snprintf(android_filename, BUF_SIZE, "android/arm64-v8a/%s", base);
 
             if (access(android_filename, F_OK) == 0) {
-                //LOGD("[linker] Native Android version of %s is found", android_filename);
-                jni_libs[i].handle = loader_dlopen(android_filename, flags, __builtin_return_address(0));
-                jni_libs[i].is_emulated = false;
-                return jni_libs[i].handle;
+                void* native_handle = loader_dlopen(android_filename, flags, __builtin_return_address(0));
+                if (native_handle != NULL) {
+                    jni_libs[i].handle = native_handle;
+                    jni_libs[i].is_emulated = false;
+                    LOG_REPORTED("[linker] %s loaded natively", android_filename);
+                    return native_handle;
+                }
+                // A file that is present but will not load must never be fatal. The game's ARM64
+                // folder has a track record - three of its libraries ship incomplete and we
+                // disable them by hand - and a copy truncated during install fails the Android
+                // linker's own bounds check ("invalid shdr offset/size"), which is what killed
+                // startup for players on 1.4.8. Returning NULL here left the JVM with no library
+                // at all; the game's x86_64 build under box64 is a working equivalent, so fall
+                // through to it instead of giving up.
+                const char* dl_msg = dlerror();
+                LOG_REPORTED("[linker] %s exists but dlopen failed (%s), falling back to box64",
+                             android_filename, dl_msg ? dl_msg : "no error reported");
+            } else {
+                LOG_REPORTED("[linker] no native %s, loading through box64...", android_filename);
             }
-            LOGW("[linker] Native Android version of %s not found, loading through box64...", android_filename);
         }
 
         //elsewise loading in box64
-        LOGE("[linker] Loading %s in box64...", filename);
+        LOG_REPORTED("[linker] Loading %s in box64...", filename);
         needed_libs_t* needed_lib = new_neededlib(1);
         needed_lib->names[0] = strdup(filename);
         int bindnow = (flags & 0x2) ? 1 : 0;

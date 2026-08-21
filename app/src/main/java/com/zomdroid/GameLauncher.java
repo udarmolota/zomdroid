@@ -67,6 +67,52 @@ public class GameLauncher {
             }
         }
 
+        // And the other half: TIS's OWN ARM64 jassimp, shipped from 42.12, breaks animation clips in
+        // mods. Proven on device 2026-08-20 - the ZomboRut author renamed this file away, the load
+        // fell through to the game's x86_64 build under box64, and his animations came back, with
+        // KI5 vehicles and hair still correct and no visible slowdown. Three of the four ARM64
+        // libraries in that folder were already disabled for their own defects (PZBullet, Lighting,
+        // PZPopMan); this is the fourth. The symbol-comparison check in InstallerService cannot
+        // catch it - jassimp's exports are complete, it is the behaviour that differs - so this one
+        // is by name.
+        //
+        // Here rather than in NativeLibraryWorkarounds because that list runs at INSTALL time only,
+        // and every 42.12+ instance already on a phone would stay broken until reinstalled. Matched
+        // by file name, never by wiping the folder: a Build 41 instance can have the same folder,
+        // created by us for the two multiplayer libraries.
+        File gameJassimp = new File(gameInstance.getGamePath(), "android/arm64-v8a/libjassimp64.so");
+        if (gameJassimp.isFile()) {
+            File disabled = new File(gameJassimp.getParentFile(), "libjassimp64.so.disabled");
+            //noinspection ResultOfMethodCallIgnored
+            disabled.delete(); // a leftover from an earlier launch would block the rename
+            if (gameJassimp.renameTo(disabled)) {
+                Log.i("GameLauncher", "Disabled the game's ARM64 libjassimp64.so; the x86_64 build "
+                        + "will run through box64");
+            } else {
+                Log.w("GameLauncher", "Failed to disable the game's ARM64 libjassimp64.so - mod "
+                        + "animations may not play");
+            }
+        }
+
+        // Importer override for the dlopen hook in linker.c: when the hybrid build is present -
+        // our Assimp 5.4.3 with the PZ compatibility revert, shipped as libjassimp64.zomdroid.so
+        // precisely so the retire above cannot eat it - and this instance has the 42.12+ layout
+        // (TIS's ARM64 jassimp exists, possibly already renamed by the block above), the hook
+        // loads the hybrid natively instead. Dormant until the hybrid lands in the dependency
+        // bundle: without the file the variable is cleared and nothing changes. B41 and
+        // 42.8-42.11 have no such game file and keep the game's own x86_64 importer via box64.
+        File hybridJassimp = new File(AppStorage.requireSingleton().getHomePath(),
+                C.deps.LIBS_ANDROID_ARM64_v8a + "/libjassimp64.zomdroid.so");
+        File tisJassimpDisabled = new File(gameInstance.getGamePath(),
+                "android/arm64-v8a/libjassimp64.so.disabled");
+        if (hybridJassimp.isFile() && (gameJassimp.isFile() || tisJassimpDisabled.isFile())) {
+            Os.setenv("ZOMDROID_JASSIMP64_OVERRIDE", hybridJassimp.getAbsolutePath(), true);
+            Log.i("GameLauncher", "jassimp override -> " + hybridJassimp.getAbsolutePath());
+        } else {
+            // Never leave a stale path behind for the next launch of this process.
+            Os.unsetenv("ZOMDROID_JASSIMP64_OVERRIDE");
+        }
+
 /*        // for debug
         Os.setenv("MESA_DEBUG", "1", false);
         Os.setenv("MESA_LOG_LEVEL", "debug", false);

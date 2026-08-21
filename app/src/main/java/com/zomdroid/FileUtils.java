@@ -90,8 +90,25 @@ public class FileUtils {
             if (parent != null && !parent.isDirectory() && !parent.mkdirs()) {
                 throw new IOException("Failed to create directory " + parent);
             }
+            long written;
             try (OutputStream fileOutStream = new BufferedOutputStream(new FileOutputStream(file), 1024 * 1024)) {
-                IOUtils.copy(archiveInStream, fileOutStream);
+                // copyLarge, not copy: copy() returns an int and reports -1 once the count passes
+                // Integer.MAX_VALUE, which would read as a truncation on a multi-GB entry.
+                written = IOUtils.copyLarge(archiveInStream, fileOutStream);
+            }
+            // An extraction cut short - storage filled up, the process killed - used to leave a
+            // shorter file behind and the instance still looked installed. The damage only
+            // surfaces much later and far from its cause: a truncated native library fails the
+            // Android linker's own bounds check at load time ("invalid shdr offset/size"), which
+            // is how one player's game stopped starting on 1.4.8. Fail here instead, where the
+            // cause is still visible. Some streamed archives do not state an entry size, so only
+            // check when the archive gives one.
+            long expectedSize = archiveEntry.getSize();
+            if (expectedSize >= 0 && written != expectedSize) {
+                //noinspection ResultOfMethodCallIgnored
+                file.delete();
+                throw new IOException("Truncated extraction of " + archiveEntry.getName()
+                        + ": wrote " + written + " of " + expectedSize + " bytes");
             }
         }
     }
