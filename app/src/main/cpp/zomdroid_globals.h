@@ -23,7 +23,8 @@ typedef enum {
     GL4ES,
     ZINK_OSMESA,
     ZINK_ZFA,
-    NG_GL4ES
+    NG_GL4ES,
+    MOBILEGLUES_EXPERIMENTAL
 } Renderer;
 
 typedef struct {

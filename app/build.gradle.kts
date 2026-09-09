@@ -57,8 +57,8 @@ android {
         applicationId = "com.zomdroid"
         minSdk = 30
         targetSdk = 35
-        versionCode = 149
-        versionName = "1.4.9"
+        versionCode = 150
+        versionName = "1.5.0"
 
         buildConfigField("String", "GIT_BUILD_ID", "\"$gitBuildId\"")
 

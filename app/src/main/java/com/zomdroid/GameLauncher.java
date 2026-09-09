@@ -207,6 +207,19 @@ public class GameLauncher {
                 //Os.setenv("ZOMDROID_DEBUG_RED_CLEAR", "1", false);
                 break;
             }
+            case MOBILEGLUES_EXPERIMENTAL: {
+                // MobileGlues runs on a real GLES 3.x context; 3.2 is what the fork was tested on.
+                Os.setenv("ZOMDROID_GLES_MAJOR", "3", false);
+                Os.setenv("ZOMDROID_GLES_MINOR", "2", false);
+                // Its config.json, latest.log and GLSL cache live here. Without MG_DIR_PATH the
+                // library falls back to /sdcard/MG, cannot create it and silently drops its log.
+                File mgDir = new File(AppStorage.requireSingleton().getHomePath(), "mobileglues");
+                if (!mgDir.isDirectory() && !mgDir.mkdirs()) {
+                    Log.w("Zomdroid", "Failed to create MobileGlues directory " + mgDir);
+                }
+                Os.setenv("MG_DIR_PATH", mgDir.getAbsolutePath(), false);
+                break;
+            }
             default: {
                 Os.setenv("ZOMDROID_GLES_MAJOR", "2", false);
                 Os.setenv("ZOMDROID_GLES_MINOR", "1", false);

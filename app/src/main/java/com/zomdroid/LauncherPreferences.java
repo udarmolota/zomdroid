@@ -286,7 +286,10 @@ public class LauncherPreferences {
         ZINK_ZFA("libzfa.so"),
         ZINK_OSMESA("libOSMesa.so"),
         NG_GL4ES("libng_gl4es.so"),
-        GL4ES("libgl4es.so");
+        GL4ES("libgl4es.so"),
+        // MobileGlues, zomdroid-experimental fork: desktop GL on top of a GLES 3.2 context.
+        // Experimental renderer candidate for Build 42; NG_GL4ES stays the supported route.
+        MOBILEGLUES_EXPERIMENTAL("libMobileGluesZomDroid.so");
 
         final String libName;
         Renderer(String libName) {
