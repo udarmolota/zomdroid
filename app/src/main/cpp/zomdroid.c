@@ -56,6 +56,41 @@ static long get_mem_available_mb() {
     return (memAvailableKb > 0) ? (memAvailableKb / 1024) : -1;
 }
 
+// Our own memory footprint, sampled periodically into native.log.
+//
+// Performance reports on the stock GL4ES renderer arrive with no telemetry at all: only NG_GL4ES
+// writes gl_trace.txt, so for Build 41 there was nothing to read but the reporter's description.
+// RSS and swap answer most of what those reports need ("is it memory?") and are cheap to obtain
+// from the kernel, without touching the GL layer - so they are sampled here rather than patched
+// into gl4es, and they cover every renderer for free.
+static void get_self_mem_mb(long* rss_mb, long* swap_mb) {
+    *rss_mb = -1;
+    *swap_mb = -1;
+
+    // statm's second field is the resident set size in pages.
+    FILE* f = fopen("/proc/self/statm", "r");
+    if (f) {
+        long size_pages = 0, rss_pages = 0;
+        if (fscanf(f, "%ld %ld", &size_pages, &rss_pages) == 2) {
+            long page_kb = sysconf(_SC_PAGESIZE) / 1024;
+            if (page_kb > 0) *rss_mb = (rss_pages * page_kb) / 1024;
+        }
+        fclose(f);
+    }
+
+    // Swap is not in statm; ZRAM makes it the difference between "large" and "being evicted".
+    f = fopen("/proc/self/status", "r");
+    if (f) {
+        char line[256];
+        long swap_kb = -1;
+        while (fgets(line, sizeof(line), f)) {
+            if (sscanf(line, "VmSwap: %ld kB", &swap_kb) == 1) break;
+        }
+        fclose(f);
+        if (swap_kb >= 0) *swap_mb = swap_kb / 1024;
+    }
+}
+
 // Absolute path to a persistent file that mirrors the game's native stdout/stderr
 // (box64 SHOWSEGV/SHOWBT reports, NG [NGG] probes, etc). Unlike logcat it survives the
 // crash and app restarts, so diagnostic output always reaches the Bug Report zip.
@@ -86,6 +121,7 @@ static void monitor_stdio_and_memory() {
 
     time_t last_mem_check = 0;
     time_t last_mem_log = 0;
+    time_t last_mem_sample = 0;
 
     while (1) {
         ssize_t i = read(pipefd[0], buffer, sizeof(buffer) - 1);
@@ -109,6 +145,19 @@ static void monitor_stdio_and_memory() {
             if (free_mb != -1 && free_mb < 300) {
                 last_mem_log = now;
                 LOGW("Low memory: only %ld MB available", free_mb);
+            }
+        }
+
+        // Printed to stdout on purpose: this loop is what mirrors stdout into native.log, so the
+        // sample lands in the bug report next to the renderer's own output, in timeline order.
+        if (now - last_mem_sample >= 30) {
+            last_mem_sample = now;
+
+            long rss_mb = -1, swap_mb = -1;
+            get_self_mem_mb(&rss_mb, &swap_mb);
+            if (rss_mb >= 0) {
+                printf("[ZMEM] rss=%ldMB swap=%ldMB avail=%ldMB\n",
+                       rss_mb, swap_mb, get_mem_available_mb());
             }
         }
 
