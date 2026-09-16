@@ -223,7 +223,7 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
                 return;
             }
             dl = SteamGameDownloader.macos(text(etUser), etPass.getText().toString(),
-                    new java.io.File(instance.getGamePath()), st);
+                    macosInstanceName, new java.io.File(instance.getGamePath()), st);
         }
         if (mpInstanceName != null) {
             com.zomdroid.game.GameInstance instance = com.zomdroid.game.GameInstanceManager.requireSingleton()

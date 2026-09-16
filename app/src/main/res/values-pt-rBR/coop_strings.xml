@@ -2,7 +2,7 @@
 <resources>
     <string name="settings_multiplayer_title">Multijogador</string>
     <string name="settings_coop_hosting">Permitir hospedar servidor</string>
-    <string name="settings_coop_hosting_short">Recurso experimental, pode ter bugs. Inicie normalmente e escolha Host no jogo.</string>
+    <string name="settings_coop_hosting_short">Recurso experimental, pode ter bugs. Inicie normalmente e escolha Host no jogo. Para jogar normalmente, desligue de novo.</string>
     <string name="settings_coop_hosting_hint">Inicie normalmente e escolha Host no jogo. O servidor só roda quando você o cria.&lt;br&gt;&lt;br&gt;Na Build 42, dê ao servidor pelo menos 2 GB de memória ao criá-lo. Essa é só a parte do servidor: o próprio jogo precisa de memória além disso, então hospedar exige um celular potente com bastante RAM.&lt;br&gt;&lt;br&gt;A hospedagem usa um perfil separado: seus saves, mods e configurações do jogo de sempre ficam ocultos enquanto esta opção estiver ligada e voltam quando você a desligar. O jogo recebe um limite de 2 GB de memória e roda sem o modo de depuração. A hospedagem em segundo plano não é garantida.</string>
     <string name="coop_b41_libraries_required">O servidor na Build 41 precisa de duas bibliotecas: libRakNet64.so e libZNetNoSteam64.so. Elas vêm da pasta android da versão 42.12. Você pode baixá-las do Steam, se comprou o jogo lá, ou carregá-las de um arquivo compactado, se já o baixou.</string>
     <string name="coop_internet_title">Hospedagem pela internet</string>
@@ -24,4 +24,7 @@
     <string name="coop_internet_unverified">O acesso pela internet ainda não foi verificado. Confirme conectando de outra rede, como os dados móveis.</string>
     <string name="coop_internet_copy">Copiar detalhes</string>
     <string name="coop_internet_close">Fechar</string>
+    <string name="coop_profile_warning_title">Perfil de jogo separado</string>
+    <string name="coop_profile_warning">Enquanto a hospedagem de servidor estiver ligada, o jogo inicia com um perfil próprio: seus saves, mods e configurações habituais não aparecem nele. Para jogar como de costume, desligue a chave de novo.</string>
+    <string name="coop_hosting_badge">Hospedagem de servidor ligada</string>
 </resources>

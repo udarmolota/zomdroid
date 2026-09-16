@@ -22,16 +22,6 @@ public final class NativeLibraryWorkarounds {
     private NativeLibraryWorkarounds() {}
 
     /**
-     * Debug builds only: asks the linker to log every JVM lookup against the native Bullet
-     * ([bullet-diag] lines in native.log). Nothing is renamed here - whether Bullet runs natively
-     * is decided by disableIncompleteNativeLibraries() for every build type.
-     */
-    public static boolean prepareBulletDiagnostic(GameInstance instance) {
-        if (!com.zomdroid.BuildConfig.DEBUG || !instance.isBuild4220Plus()) return false;
-        return new File(instance.getGamePath(), "android/arm64-v8a/libPZBullet64.so").isFile();
-    }
-
-    /**
      * Selects the safe implementation of game libraries after class patches have been applied.
      *
      * PZBullet: the ARM64 build used to be disabled for "missing Bullet.defineVehicleScript()".

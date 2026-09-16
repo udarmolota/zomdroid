@@ -29,6 +29,26 @@
             android:layout_height="match_parent"
             android:background="@drawable/banner_gradient_overlay"/>
 
+        <!-- Shown above the name while "Allow server hosting" is on: the game then runs on a
+             separate profile, and this is the reminder that the usual saves are not gone. -->
+        <TextView
+            android:id="@+id/game_instance_item_hosting_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|start"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="44dp"
+            android:text="@string/coop_hosting_badge"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:shadowColor="#80000000"
+            android:shadowDx="1"
+            android:shadowDy="1"
+            android:shadowRadius="4"
+            android:visibility="gone"
+            tools:visibility="visible"/>
+
         <!-- Instance name bottom left -->
         <TextView
             android:id="@+id/game_instance_item_name_tv"

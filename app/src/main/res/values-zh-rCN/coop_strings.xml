@@ -2,7 +2,7 @@
 <resources>
     <string name="settings_multiplayer_title">多人游戏</string>
     <string name="settings_coop_hosting">允许创建服务器</string>
-    <string name="settings_coop_hosting_short">实验性功能，可能存在错误。正常启动游戏，然后在游戏中选择 Host。</string>
+    <string name="settings_coop_hosting_short">实验性功能，可能存在错误。正常启动游戏，然后在游戏中选择 Host。正常游戏时请再关闭。</string>
     <string name="settings_coop_hosting_hint">正常启动游戏，然后在游戏中选择 Host。只有在你创建服务器时它才会运行。&lt;br&gt;&lt;br&gt;在 Build 42 上，创建服务器时请至少为它分配 2 GB 内存。这只是服务器的份额：游戏本身还需要额外的内存，因此开服需要一台内存充足的高性能手机。&lt;br&gt;&lt;br&gt;开服使用独立的配置档：开关开启期间，你平时的存档、模组和游戏设置都不会显示，关闭开关后会恢复。游戏内存上限为 2 GB，并且不启用调试模式。不保证后台开服。</string>
     <string name="coop_b41_libraries_required">在 Build 41 上开服需要两个库：libRakNet64.so 和 libZNetNoSteam64.so。它们来自 42.12 版本的 android 文件夹。如果你在 Steam 购买了游戏，可以从 Steam 下载；如果之前已经下载过压缩包，也可以从文件导入。</string>
     <string name="coop_internet_title">通过互联网开服</string>
@@ -24,4 +24,7 @@
     <string name="coop_internet_unverified">尚未验证能否从互联网访问。请从其他网络连接来确认，例如移动数据。</string>
     <string name="coop_internet_copy">复制详情</string>
     <string name="coop_internet_close">关闭</string>
+    <string name="coop_profile_warning_title">独立的游戏配置</string>
+    <string name="coop_profile_warning">开启服务器托管后，游戏会使用单独的配置启动：你平时的存档、模组和游戏设置在其中不可见。要正常游戏，请再关闭此开关。</string>
+    <string name="coop_hosting_badge">服务器托管已开启</string>
 </resources>

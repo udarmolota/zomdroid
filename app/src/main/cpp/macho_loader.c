@@ -35,6 +35,15 @@
         printf(fmt "\n" __VA_OPT__(,) __VA_ARGS__);  \
     } while (0)
 
+int macho_verbose(void) {
+    static int verbose = -1; /* read once; a racing first call only reads the same value twice */
+    if (verbose < 0) {
+        const char* env = getenv("ZOMDROID_NATIVE_VERBOSE");
+        verbose = env != NULL && strcmp(env, "1") == 0;
+    }
+    return verbose;
+}
+
 /* ------------------------------------------------------------------------------------------ */
 /* Mach-O on-disk structures - only the subset this loader reads. Layouts per Apple's mach-o headers. */
 
@@ -898,7 +907,7 @@ static void macho_rewrite_ldapr(macho_load_ctx_t* ctx) {
             if (macho_is_data_in_code(ctx, a)) { skipped++; continue; }
             insn = (insn & 0xC00003FFu) | 0x08DFFC00u;
             memcpy(lib->base + a, &insn, sizeof(insn));
-            LOGI("[macho] %s: LDAPR at +0x%llx -> LDAR", lib->name, (unsigned long long)a);
+            if (macho_verbose()) LOGI("[macho] %s: LDAPR at +0x%llx -> LDAR", lib->name, (unsigned long long)a);
             rewritten++;
         }
     }

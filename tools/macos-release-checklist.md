@@ -18,7 +18,7 @@ Scope: Lighting, PopMan, PathFind. Bullet/Clipper stay Android ARM64; multiplaye
 - [ ] Missing EH runtime fails safely; no broken JNI raw-pointer fallback.
 - [ ] Test compatible newer B42 versions and keep B41 behavior unchanged.
 - [ ] Multiplayer client and phone-hosted server tested separately, including save/restart.
-- [ ] Remove excessive diagnostic logging; keep actual library selection and rejection reasons.
+- [x] Remove excessive diagnostic logging; keep actual library selection and rejection reasons. Done 2026-09-16: per-symbol `[macho] bridge`, `[jni-bind] (macho)` and per-offset LDAPR lines only with ZOMDROID_NATIVE_VERBOSE=1 (set by the launcher for debug builds and instances with Debug on); the debug-only Bullet diagnostic was removed.
 - [ ] Verify downloaded-library version/manifest handling and update behavior. Changed 2026-09-13: only the 3 used dylibs are downloaded or required (`MacosLibraries.NAMES`), the build-number status lines are gone, and a "Load from file" ZIP import writes the same manifest. To test: download on a fresh instance, import a ZIP (with extra files and nested folders) into a second one, a ZIP missing one dylib must fail without touching the existing set.
 - [ ] Per-library switches ("Libraries in use", folded, all on by default): turning one off must send only that library to its regular path; PathFind off must keep `Pathfind.UseNativeCode=false`.
 - [ ] Inspect packaged release native libraries when an APK build is authorized.

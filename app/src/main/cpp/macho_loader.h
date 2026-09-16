@@ -36,6 +36,12 @@ void* macho_dlsym(macho_lib_t* lib, const char* name);
 /* File name the library was loaded from (for log lines). */
 const char* macho_lib_name(const macho_lib_t* lib);
 
+/* True when per-symbol and per-instruction detail should be logged ([macho] bridge, [jni-bind],
+ * LDAPR offsets): ZOMDROID_NATIVE_VERBOSE=1, which the launcher sets for debug builds and for
+ * instances with Debug on. Release reports keep the library-level lines - loaded, rejected and
+ * why - and lose the dozens of lines per launch that only the loader's author reads. */
+int macho_verbose(void);
+
 /* True when the dylib calls variadic JNI functions and must see the wrapper JNIEnv
  * (macho_jnienv.h); the bridge then substitutes it on every entry. */
 int macho_lib_wraps_env(const macho_lib_t* lib);

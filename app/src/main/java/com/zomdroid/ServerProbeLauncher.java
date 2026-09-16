@@ -100,6 +100,8 @@ final class ServerProbeLauncher {
             jvm.replaceAll(arg -> arg.startsWith("-Djava.class.path=") ? arg + ":" + asm : arg);
             jvm.add("-javaagent:" + guard.getAbsolutePath() + "=server-upnp");
             jvm.add("-Dzomdroid.server.upnpGuard=" + ("41".equals(build) || (build != null && build.startsWith("41."))));
+            jvm.add("-Dzomdroid.server.absoluteLuaFiles="
+                    + ("42".equals(build) || (build != null && build.startsWith("42."))));
             File internet = new File(root, "hosting-internet.properties");
             // Reset on each launch so a previous successful mapping is never shown as current.
             try (java.io.FileOutputStream reset = new java.io.FileOutputStream(internet)) { }

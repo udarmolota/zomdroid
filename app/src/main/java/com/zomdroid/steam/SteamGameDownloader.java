@@ -86,10 +86,14 @@ public class SteamGameDownloader implements Runnable, Cancellable {
     private final String buildLabel;     // "41" or "42" — for the output folder name only
     private final Listener listener;
     private File librariesGameDir;
+    private String librariesInstanceName; // macOS pack: whose "Libraries in use" to switch on
     private LibraryPack libraryPack;
 
-    public static SteamGameDownloader macos(String username, String password, File gameDir, Listener listener) {
-        return libraries(username, password, gameDir, LibraryPack.MACOS, listener);
+    public static SteamGameDownloader macos(String username, String password, String instanceName,
+                                            File gameDir, Listener listener) {
+        SteamGameDownloader downloader = libraries(username, password, gameDir, LibraryPack.MACOS, listener);
+        downloader.librariesInstanceName = instanceName;
+        return downloader;
     }
 
     public static SteamGameDownloader libraries(String username, String password, File gameDir,
@@ -554,8 +558,16 @@ public class SteamGameDownloader implements Runnable, Cancellable {
                 metadata.put("pack", libraryPack.id);
                 java.nio.file.Files.write(new File(fOutDir, libraryPack.metadataName).toPath(), metadata.toString(2).getBytes(java.nio.charset.StandardCharsets.UTF_8));
                 if (!running) { done("Download cancelled."); return; }
-                if (libraryPack == LibraryPack.MACOS) MacosLibraries.publish(librariesGameDir, fOutDir);
-                else MultiplayerLibraries.publish(librariesGameDir, fOutDir);
+                if (libraryPack == LibraryPack.MACOS) {
+                    MacosLibraries.publish(librariesGameDir, fOutDir);
+                    // A download is the player's request to use what it installed (no switch above
+                    // the libraries since 2026-09-16).
+                    if (librariesInstanceName != null)
+                        new com.zomdroid.game.InstanceSettings(librariesInstanceName)
+                                .enableMacosModules(MacosLibraries.installed(librariesGameDir));
+                } else {
+                    MultiplayerLibraries.publish(librariesGameDir, fOutDir);
+                }
                 done(libraryPack.id + " libraries installed, manifest " + Long.toUnsignedString(gid));
             } else {
                 java.nio.file.Files.write(new File(fOutDir, MacosLibraries.LINUX_METADATA).toPath(), metadata.toString(2).getBytes(java.nio.charset.StandardCharsets.UTF_8));

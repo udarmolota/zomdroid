@@ -7,7 +7,9 @@ import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 /** On-disk contract shared with the native Mach-O loader. No proprietary files are bundled. */
@@ -17,8 +19,20 @@ public final class MacosLibraries {
      *  downloaded nor required. */
     public static final Set<String> NAMES = Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList(
             "libLighting.dylib", "libPZPathFind.dylib", "libPZPopMan.dylib")));
+    /** Each library's switch under "Libraries in use" (InstanceSettings.isMacosModuleEnabled). */
+    public static final Map<String, String> MODULE_KEYS = orderedMap(
+            "libLighting.dylib", "lighting", "libPZPathFind.dylib", "pathfind", "libPZPopMan.dylib", "popman");
+    /** The JNI name the native loader knows each library by (linker.c, ZOMDROID_MACHO_SKIP). */
+    public static final Map<String, String> JNI_NAMES = orderedMap(
+            "libLighting.dylib", "Lighting64", "libPZPathFind.dylib", "PZPathFind64", "libPZPopMan.dylib", "PZPopMan64");
     public static final String LINUX_METADATA = "zomdroid-steam.json";
     private MacosLibraries() {}
+
+    private static Map<String, String> orderedMap(String... pairs) {
+        Map<String, String> map = new LinkedHashMap<>();
+        for (int i = 0; i < pairs.length; i += 2) map.put(pairs[i], pairs[i + 1]);
+        return Collections.unmodifiableMap(map);
+    }
 
     public static JSONObject readMetadata(File file) {
         try {
@@ -39,16 +53,28 @@ public final class MacosLibraries {
         return result.toString();
     }
 
-    public static boolean isReady(File game) {
+    /** manifest.json entries of the libraries that are installed and intact: present, listed and
+     *  still the size they were verified at. Any subset counts - the loader takes each library on
+     *  its own, so one installed library is used even when the other two are not there. */
+    public static JSONObject installedEntries(File game) {
         File folder = new File(game, "macos");
         JSONObject entries = readMetadata(new File(folder, "manifest.json")).optJSONObject("files");
-        if (entries == null) return false;
+        JSONObject result = new JSONObject();
+        if (entries == null) return result;
         for (String name : NAMES) {
             JSONObject entry = entries.optJSONObject(name);
             File file = new File(folder, name);
-            if (entry == null || !file.isFile() || file.length() != entry.optLong("size", -1)) return false;
+            if (entry == null || !file.isFile() || file.length() != entry.optLong("size", -1)) continue;
+            try { result.put(name, entry); } catch (org.json.JSONException ignored) { }
         }
-        return true;
+        return result;
+    }
+
+    public static Set<String> installed(File game) {
+        JSONObject entries = installedEntries(game);
+        Set<String> names = new LinkedHashSet<>();
+        for (String name : NAMES) if (entries.has(name)) names.add(name);
+        return names;
     }
 
     /** Recover the old complete set if the process died between the two directory renames. */

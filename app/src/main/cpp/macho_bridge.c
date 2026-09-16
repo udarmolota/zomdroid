@@ -134,7 +134,7 @@ void* macho_jni_bridge(EmulatedLib* lib, void* target, const char* arg_types, co
     }
 
     if (!nfix && !nstack && !wrap_env) {
-        LOGI("[macho] bridge %s args=%s direct", sym_name, arg_types);
+        if (macho_verbose()) LOGI("[macho] bridge %s args=%s direct", sym_name, arg_types);
         return target;
     }
 
@@ -225,7 +225,8 @@ void* macho_jni_bridge(EmulatedLib* lib, void* target, const char* arg_types, co
         LOG_REPORTED("[macho] bridge %s: no code page", sym_name);
         return NULL;
     }
-    LOG_REPORTED("[macho] bridge %s args=%s stack-shim=%d extended=%d apple-area=%u env-wrap=%d",
-                 sym_name, arg_types, nstack ? 1 : 0, nfix, area, wrap_env ? 1 : 0);
+    if (macho_verbose())
+        LOG_REPORTED("[macho] bridge %s args=%s stack-shim=%d extended=%d apple-area=%u env-wrap=%d",
+                     sym_name, arg_types, nstack ? 1 : 0, nfix, area, wrap_env ? 1 : 0);
     return mem;
 }

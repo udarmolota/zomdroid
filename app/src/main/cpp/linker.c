@@ -196,8 +196,9 @@ static const char* macho_dylib_for(const char* jni_name) {
         if (strcmp(jni_name, map[i][0]) == 0) return map[i][1];
     return NULL;
 }
-// ZOMDROID_MACHO_SKIP: comma-separated JNI names of the macOS libraries the player turned off
-// one by one in Settings ("Libraries in use"). A skipped entry takes its regular path.
+// ZOMDROID_MACHO_SKIP: comma-separated JNI names of the macOS libraries that are not in use -
+// turned off in Settings ("Libraries in use") or not installed. A skipped entry takes its
+// regular path.
 static int macho_module_skipped(const char* jni_name) {
     const char* skip = getenv("ZOMDROID_MACHO_SKIP");
     if (skip == NULL || *skip == '\0') return 0;
@@ -217,7 +218,7 @@ void zomdroid_linker_prepare_pathfind(void) {
     const char* enabled = getenv("ZOMDROID_MACHO_LIBS");
     if (!options || !*options || !enabled || strcmp(enabled, "1")) return;
     if (macho_module_skipped("PZPathFind64")) {
-        LOG_REPORTED("[macho] PathFind turned off in settings; keeping Java pathfinding");
+        LOG_REPORTED("[macho] PathFind off or not installed; keeping Java pathfinding");
         return;
     }
     for (int i = 0; i < jni_lib_count; ++i) {
@@ -886,14 +887,6 @@ void *dlopen(const char* filename, int flags) {
 
     for (int i = 0; i < jni_lib_count; i++) {
         if (!strstr(filename, jni_libs[i].name)) continue;
-        const char* bullet_diag_env = getenv("ZOMDROID_BULLET_DIAGNOSTIC");
-        int bullet_diag = bullet_diag_env && strcmp(bullet_diag_env, "1") == 0
-                && strcmp(jni_libs[i].name, "PZBullet64") == 0;
-        if (bullet_diag) {
-            LOG_REPORTED("[bullet-diag] dlopen requested=%s flags=%x cached=%p emulated=%d",
-                         filename, flags, jni_libs[i].handle, jni_libs[i].is_emulated);
-        }
-
         // Already loaded once -> return cached handle.
         // This prevents repeated AddNeededLib/RunDeferredElfInit and reduces instability.
         if (jni_libs[i].handle != NULL) {
@@ -928,7 +921,7 @@ void *dlopen(const char* filename, int flags) {
         const char* dylib_name = (macho_env != NULL && strcmp(macho_env, "1") == 0)
                                  ? macho_dylib_for(jni_libs[i].name) : NULL;
         if (dylib_name != NULL && macho_module_skipped(jni_libs[i].name)) {
-            LOG_REPORTED("[macho] %s turned off in settings, taking the regular path", jni_libs[i].name);
+            LOG_REPORTED("[macho] %s off or not installed, taking the regular path", jni_libs[i].name);
             dylib_name = NULL;
         }
         if (dylib_name != NULL) {
@@ -1010,12 +1003,6 @@ void *dlopen(const char* filename, int flags) {
                     jni_libs[i].is_emulated = false;
                     snprintf(jni_native_path[i], BUF_SIZE, "%s", android_filename);
                     LOG_REPORTED("[linker] %s loaded natively", android_filename);
-                    if (bullet_diag) {
-                        const char* probe_name = "Java_zombie_core_physics_Bullet_defineVehicleScript";
-                        void* probe = loader_dlsym(native_handle, probe_name, __builtin_return_address(0));
-                        LOG_REPORTED("[bullet-diag] native handle=%p direct lookup %s=%p",
-                                     native_handle, probe_name, probe);
-                    }
                     return native_handle;
                 }
                 // A file that is present but will not load must never be fatal. The game's ARM64
@@ -1106,7 +1093,7 @@ static void* macho_jni_lookup(int i, const char* sym_name) {
         LOG_REPORTED("[macho] %s: signature not understood, handing out the symbol unshimmed", sym_name);
         return target;
     }
-    LOGI("[jni-bind] %s -> %s -> %s%c (macho)", sym_name, method_sig, arg_types, ret_type);
+    if (macho_verbose()) LOGI("[jni-bind] %s -> %s -> %s%c (macho)", sym_name, method_sig, arg_types, ret_type);
     free(method_sig);
     void* sym = macho_jni_bridge(&jni_libs[i], target, arg_types, sym_name,
                                  macho_lib_wraps_env(jni_macho[i]));
@@ -1207,18 +1194,7 @@ void *dlsym(void *handle, const char *sym_name) {
                     return native_fmod_create_bridge;
                 if (strstr(sym_name, "getAudioDevices")) return stub_getAudioDevices;
             }
-            void* resolved = loader_dlsym(handle, sym_name, __builtin_return_address(0));
-            const char* diag = getenv("ZOMDROID_BULLET_DIAGNOSTIC");
-            if (diag && strcmp(diag, "1") == 0 && strcmp(elib->name, "PZBullet64") == 0) {
-                // On a miss, bionic's own words tell an absent symbol ("undefined symbol") from
-                // a library that is no longer there ("invalid handle") - the distinction this
-                // whole diagnostic exists for.
-                const char* dl_msg = resolved ? NULL : dlerror();
-                LOG_REPORTED("[bullet-diag] JVM lookup handle=%p symbol=%s resolved=%p native=1%s%s",
-                             handle, sym_name, resolved,
-                             dl_msg ? " dlerror=" : "", dl_msg ? dl_msg : "");
-            }
-            return resolved;
+            return loader_dlsym(handle, sym_name, __builtin_return_address(0));
         }
     }
 

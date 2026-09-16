@@ -159,6 +159,10 @@ public class LauncherFragment extends Fragment {
                 ImageButton moreIb = itemView.findViewById(R.id.game_instance_item_more_ib);
 
                 nameTv.setText(gameInstance.getName());
+                // The hosting switch lives in the instance settings; the card repeats it so the
+                // player sees why the game will open on the hosting profile before launching.
+                itemView.findViewById(R.id.game_instance_item_hosting_tv).setVisibility(
+                        gameInstance.settings().isCoopHostingEnabled() ? View.VISIBLE : View.GONE);
 
                 ImageView bannerIv = itemView.findViewById(R.id.game_instance_item_banner_iv);
                 int bannerRes;
@@ -673,6 +677,7 @@ public class LauncherFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        if (adapter != null) adapter.notifyDataSetChanged();
         updateEmptyState();
 
         bindInstallerService();

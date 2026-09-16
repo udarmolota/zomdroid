@@ -2,7 +2,7 @@
 <resources>
     <string name="settings_multiplayer_title">Multiplayer</string>
     <string name="settings_coop_hosting">Izinkan hosting server</string>
-    <string name="settings_coop_hosting_short">Fitur eksperimental, mungkin ada bug. Jalankan seperti biasa, lalu pilih Host di dalam game.</string>
+    <string name="settings_coop_hosting_short">Fitur eksperimental, mungkin ada bug. Jalankan seperti biasa, lalu pilih Host di dalam game. Untuk bermain biasa, matikan lagi.</string>
     <string name="settings_coop_hosting_hint">Jalankan seperti biasa, lalu pilih Host di dalam game. Server hanya berjalan saat Anda membuatnya.&lt;br&gt;&lt;br&gt;Di Build 42, beri server minimal 2 GB memori saat membuatnya. Itu hanya bagian untuk server: game sendiri membutuhkan memori tambahan di luar itu, jadi hosting membutuhkan ponsel yang kuat dengan RAM besar.&lt;br&gt;&lt;br&gt;Hosting memakai profil terpisah: simpanan, mod, dan pengaturan game Anda yang biasa tidak terlihat selama sakelar ini aktif dan akan kembali saat Anda mematikannya. Game mendapat batas memori 2 GB dan berjalan tanpa mode debug. Hosting di latar belakang tidak dijamin.</string>
     <string name="coop_b41_libraries_required">Server di Build 41 membutuhkan dua pustaka: libRakNet64.so dan libZNetNoSteam64.so. Keduanya diambil dari folder android versi 42.12. Anda bisa mengunduhnya dari Steam jika game dibeli di sana, atau memuatnya dari file arsip jika sudah diunduh sebelumnya.</string>
     <string name="coop_internet_title">Hosting lewat internet</string>
@@ -24,4 +24,7 @@
     <string name="coop_internet_unverified">Akses dari internet belum diverifikasi. Pastikan dengan menyambung dari jaringan lain, misalnya data seluler.</string>
     <string name="coop_internet_copy">Salin detail</string>
     <string name="coop_internet_close">Tutup</string>
+    <string name="coop_profile_warning_title">Profil game terpisah</string>
+    <string name="coop_profile_warning">Selama hosting server aktif, game dijalankan dengan profil tersendiri: save, mod, dan pengaturan game Anda yang biasa tidak terlihat di sana. Untuk bermain seperti biasa, matikan lagi sakelarnya.</string>
+    <string name="coop_hosting_badge">Hosting server aktif</string>
 </resources>

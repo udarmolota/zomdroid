@@ -51,8 +51,6 @@ public class SettingsFragment extends Fragment {
         binding.settingsMpTitle.setVisibility(multiplayer ? View.VISIBLE : View.GONE);
         binding.settingsLibrariesHint.setText(multiplayer ? R.string.mp_libs_hint : R.string.macos_libs_short);
         binding.settingsMacosInfo.setOnClickListener(view -> showHelp(R.string.macos_libs_title, R.string.macos_libs_hint));
-        binding.settingsMacosSwitch.setChecked(settings.isMacosLibrariesEnabled());
-        binding.settingsMacosSwitch.setOnCheckedChangeListener((view, enabled) -> settings.setMacosLibrariesEnabled(enabled));
         binding.settingsNativeFmodSwitch.setVisibility(multiplayer ? View.GONE : View.VISIBLE);
         binding.settingsNativeFmodHint.setVisibility(multiplayer ? View.GONE : View.VISIBLE);
         binding.settingsNativeFmodSwitch.setChecked(settings.isNativeFmodEnabled());
@@ -63,14 +61,15 @@ public class SettingsFragment extends Fragment {
         if (multiplayer) binding.settingsMacosModulesContent.setVisibility(View.GONE);
         setupCollapsible(binding.settingsMacosModulesHeader, binding.settingsMacosModulesContent,
                 binding.settingsMacosModulesExpandIv);
-        bindMacosModule(binding.settingsMacosLightingSwitch, "lighting");
-        bindMacosModule(binding.settingsMacosPathfindSwitch, "pathfind");
-        bindMacosModule(binding.settingsMacosPopmanSwitch, "popman");
         refreshMacosStatus();
     }
 
-    private void bindMacosModule(androidx.appcompat.widget.SwitchCompat sw, String module) {
-        sw.setChecked(settings.isMacosModuleEnabled(module));
+    // Bound again on every resume: an install turns its libraries back on. A library that is not
+    // installed shows off and cannot be touched, and the choice stored for it is left alone.
+    private void bindMacosModule(androidx.appcompat.widget.SwitchCompat sw, String module, boolean installed) {
+        sw.setOnCheckedChangeListener(null);
+        sw.setChecked(installed && settings.isMacosModuleEnabled(module));
+        sw.setEnabled(installed);
         sw.setOnCheckedChangeListener((view, enabled) -> settings.setMacosModuleEnabled(module, enabled));
     }
 
@@ -124,8 +123,11 @@ public class SettingsFragment extends Fragment {
         }
         // Installed or not - that is all a player can act on. The build number the manifest
         // carries meant nothing to anyone (an instance keeps the build it was created with).
-        binding.settingsMacosStatus.setText(com.zomdroid.steam.MacosLibraries.isReady(game)
-                ? R.string.macos_libs_ready : R.string.macos_libs_missing);
+        java.util.Set<String> installed = com.zomdroid.steam.MacosLibraries.installed(game);
+        binding.settingsMacosStatus.setText(installed.isEmpty() ? R.string.macos_libs_missing : R.string.macos_libs_ready);
+        bindMacosModule(binding.settingsMacosLightingSwitch, "lighting", installed.contains("libLighting.dylib"));
+        bindMacosModule(binding.settingsMacosPathfindSwitch, "pathfind", installed.contains("libPZPathFind.dylib"));
+        bindMacosModule(binding.settingsMacosPopmanSwitch, "popman", installed.contains("libPZPopMan.dylib"));
     }
 
     @Override public void onResume() {
@@ -178,27 +180,16 @@ public class SettingsFragment extends Fragment {
                 // with a dialog about a renderer they already use.
                 if (rendererSelectionRestored) {
                     if (renderer == LauncherPreferences.Renderer.NG_GL4ES) {
-                        // NG_GL4ES and texture shrinking are one decision in practice - shrinking is
-                        // what holds the framerate, and it applies to this renderer only. Keeping
-                        // them apart is what made our own advice untrue: "switch to NG_GL4ES" on its
-                        // own changes nothing, and nobody went on to find the setting. A value the
-                        // user chose themselves is never overwritten.
-                        boolean enabled = false;
-                        if (SuggestedPreset.readShrink(binding.settingsEnvVarsEt.getText().toString()) == null) {
-                            binding.settingsEnvVarsEt.setText(SuggestedPreset.withShrink(
-                                    binding.settingsEnvVarsEt.getText().toString(),
-                                    SuggestedPreset.SHRINK_BALANCED));
-                            enabled = true;
-                        }
+                        // Switching to NG_GL4ES used to write LIBGL_SHRINK=7 too. Not any more
+                        // (2026-09-16): ETC2, on by default, takes the big textures at full size
+                        // before any shrinking, so 7 halves next to nothing - while a non-zero
+                        // LIBGL_SHRINK keeps NG's memory saver budget off.
                         if (warningIsRelevantFor(true)) {
                             new AlertDialog.Builder(requireContext())
                                     .setTitle(R.string.renderer_ng_build42_only_title)
                                     .setMessage(R.string.renderer_ng_build42_only_message)
                                     .setPositiveButton(android.R.string.ok, null)
                                     .show();
-                        } else if (enabled) {
-                            Toast.makeText(requireContext(), R.string.renderer_ng_shrink_enabled,
-                                    Toast.LENGTH_LONG).show();
                         }
                     } else if (renderer == LauncherPreferences.Renderer.GL4ES
                             && warningIsRelevantFor(false)) {
@@ -422,7 +413,20 @@ public class SettingsFragment extends Fragment {
                 showHostingLibrariesDialog(v);
                 return;
             }
-            settings.setCoopHostingEnabled(checked);
+            // Hosting runs the game on its own profile (coop-probe, not Zomboid), so the usual
+            // saves vanish from the game's menus. Players read that as lost saves: say it here,
+            // and let Cancel undo the tap. Turning the switch off needs no warning.
+            if (checked) {
+                new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                        .setTitle(R.string.coop_profile_warning_title)
+                        .setMessage(R.string.coop_profile_warning)
+                        .setPositiveButton(android.R.string.ok, (d, w) -> settings.setCoopHostingEnabled(true))
+                        .setNegativeButton(android.R.string.cancel, (d, w) -> v.setChecked(false))
+                        .setOnCancelListener(d -> v.setChecked(false))
+                        .show();
+                return;
+            }
+            settings.setCoopHostingEnabled(false);
         });
 
         binding.settingsMemorySaverSwitch.setChecked(settings.isMemorySaver());

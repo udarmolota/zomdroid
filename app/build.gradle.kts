@@ -201,6 +201,14 @@ tasks.register<JavaExec>("testCoopInternet") {
     jvmArgs("-Dzomdroid.server.upnpGuard=true",
             "-javaagent:" + coopAgentJar.get().archiveFile.get().asFile.absolutePath + "=server-upnp")
 }
+tasks.register<JavaExec>("testServerAbsoluteLuaFiles") {
+    dependsOn(compileCoopAgentTest, coopAgentJar)
+    classpath = files(compileCoopAgentTest.flatMap { it.destinationDirectory }, coopAgentJar.flatMap { it.archiveFile }) +
+            fileTree(layout.buildDirectory.dir("coopAgent/dependencies")) { include("**/*.jar") }
+    mainClass.set("com.zomdroid.coop.AbsoluteLuaFileTest")
+    jvmArgs("-Dzomdroid.server.absoluteLuaFiles=true",
+            "-javaagent:" + coopAgentJar.get().archiveFile.get().asFile.absolutePath + "=server-upnp")
+}
 val compileServerBootstrapTest by tasks.registering(JavaCompile::class) {
     dependsOn(compileServerBootstrap)
     source("src/serverBootstrapTest/java")

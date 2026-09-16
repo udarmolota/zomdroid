@@ -1080,8 +1080,9 @@ public class InstallerService extends Service implements TaskProgressListener {
     }
 
     /**
-     * One line per file in the instance's {@code game/android/arm64-v8a} folder, plus the state of
-     * our own bundled jassimp. Build 41 has no such folder - TIS ships x86_64 only there - so the
+     * One line per file in the instance's {@code game/android/arm64-v8a} folder, the macOS
+     * libraries in {@code game/macos}, plus the state of our own bundled jassimp. Build 41 has no
+     * android/arm64-v8a folder - TIS ships x86_64 only there - so the
      * "no android/arm64-v8a folder" line is the normal answer for it, not a fault. Sizes are raw
      * bytes: compare a suspicious one against the same entry in the game's own zip.
      */
@@ -1099,6 +1100,7 @@ public class InstallerService extends Service implements TaskProgressListener {
                 sb.append("           ").append(lib.getName()).append(' ').append(lib.length()).append('\n');
             }
         }
+        sb.append(macosLibInventory(gi));
         // ACTIVE means the retire in GameLauncher did not run or failed, and our 5.4.3 is shadowing
         // whatever importer the build expects - the exact state 1.4.8 set out to end.
         File bundledDir = new File(AppStorage.requireSingleton().getHomePath(), C.deps.LIBS_ANDROID_ARM64_v8a);
@@ -1106,6 +1108,37 @@ public class InstallerService extends Service implements TaskProgressListener {
                 ? "ACTIVE - shadows the game's own importer"
                 : new File(bundledDir, "libjassimp64.so.zomdroid-543-off").isFile() ? "retired" : "absent";
         sb.append("Our jassimp: ").append(jassimpState).append('\n');
+        return sb.toString();
+    }
+
+    /**
+     * The three macOS libraries of a 42.20+ instance, one line each: size, and whether the launch
+     * hands it to the loader ("on"), the player turned it off, or it is missing or unverified.
+     * Without this block a "with macOS" report could not be checked from its header - in the first
+     * one we got, the libraries were installed and never used. Whether the loader actually took a
+     * library that is "on" is in native.log ("[macho] ... loaded natively" or "... rejected").
+     */
+    private static String macosLibInventory(GameInstance gi) {
+        if (gi == null || !gi.isBuild4220Plus()) return "";
+        File game = new File(gi.getGamePath());
+        File folder = new File(game, "macos");
+        java.util.Set<String> installed = com.zomdroid.steam.MacosLibraries.installed(game);
+        com.zomdroid.game.InstanceSettings settings = gi.settings();
+        StringBuilder sb = new StringBuilder("macOS libs: ").append(installed.size()).append(" of ")
+                .append(com.zomdroid.steam.MacosLibraries.NAMES.size()).append(" installed in game/macos\n");
+        for (String name : com.zomdroid.steam.MacosLibraries.NAMES) {
+            File file = new File(folder, name);
+            String state;
+            if (installed.contains(name)) {
+                state = settings.isMacosModuleEnabled(com.zomdroid.steam.MacosLibraries.MODULE_KEYS.get(name))
+                        ? "on" : "turned off in settings";
+            } else {
+                state = file.isFile() ? "present but not verified (manifest)" : "not installed";
+            }
+            sb.append("           ").append(name);
+            if (file.isFile()) sb.append(' ').append(file.length());
+            sb.append(" - ").append(state).append('\n');
+        }
         return sb.toString();
     }
 
@@ -2775,9 +2808,10 @@ public class InstallerService extends Service implements TaskProgressListener {
     // -------------------- INSTALL MACOS LIBS (from a ZIP) --------------------
     /**
      * The "Load from file" twin of the Steam download: takes a ZIP the player got elsewhere, picks
-     * the three dylibs out of it wherever they sit in the archive, checks they are Mach-O files,
-     * writes the same manifest.json the downloader writes, and publishes the set into game/macos
-     * through MacosLibraries.publish(), so a half-done import can never replace a working set.
+     * the dylibs out of it wherever they sit in the archive, checks they are Mach-O files, writes
+     * the same manifest.json the downloader writes, and publishes the set into game/macos through
+     * MacosLibraries.publish(), so a half-done import can never replace a working set. Any subset
+     * of the three is accepted, and every library the archive installed is switched on.
      */
     private void doInstallMacosLibs(Intent intent) {
         String taskTitle = getString(R.string.macos_libs_installing);
@@ -2802,26 +2836,45 @@ public class InstallerService extends Service implements TaskProgressListener {
                             FileUtils.queryFileSize(getContentResolver(), archiveUri));
                 }
                 // The wanted files come up to the stage root, whatever folders the archive had.
+                // Every one that is a Mach-O file is installed; a library the archive lacks, or
+                // carries broken, keeps the copy that is already installed, if there is one.
                 java.util.Map<String, File> found = new java.util.HashMap<>();
                 collectMacosLibraries(stage, found);
-                java.util.List<String> missing = new java.util.ArrayList<>();
-                for (String name : com.zomdroid.steam.MacosLibraries.NAMES)
-                    if (!found.containsKey(name)) missing.add(name);
-                if (!missing.isEmpty())
-                    throw new IOException(getString(R.string.macos_libs_missing_files, String.join(", ", missing)));
+                org.json.JSONObject previous = com.zomdroid.steam.MacosLibraries.installedEntries(game);
                 org.json.JSONObject entries = new org.json.JSONObject();
+                java.util.List<String> imported = new java.util.ArrayList<>();
+                java.util.List<String> rejected = new java.util.ArrayList<>();
+                java.util.List<String> kept = new java.util.ArrayList<>();
                 for (String name : com.zomdroid.steam.MacosLibraries.NAMES) {
                     File target = new File(stage, name);
                     File source = found.get(name);
-                    if (!source.getCanonicalFile().equals(target.getCanonicalFile()))
-                        java.nio.file.Files.move(source.toPath(), target.toPath(),
-                                java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-                    if (!isMachO(target)) throw new IOException(getString(R.string.macos_libs_bad_file, name));
-                    org.json.JSONObject entry = new org.json.JSONObject();
-                    entry.put("size", target.length());
-                    entry.put("sha256", com.zomdroid.steam.MacosLibraries.hash(target, "SHA-256"));
-                    entries.put(name, entry);
+                    if (source != null) {
+                        if (!source.getCanonicalFile().equals(target.getCanonicalFile()))
+                            java.nio.file.Files.move(source.toPath(), target.toPath(),
+                                    java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                        if (isMachO(target)) {
+                            org.json.JSONObject entry = new org.json.JSONObject();
+                            entry.put("size", target.length());
+                            entry.put("sha256", com.zomdroid.steam.MacosLibraries.hash(target, "SHA-256"));
+                            entries.put(name, entry);
+                            imported.add(name);
+                            continue;
+                        }
+                        rejected.add(name);
+                        java.nio.file.Files.delete(target.toPath());
+                    }
+                    org.json.JSONObject old = previous.optJSONObject(name);
+                    if (old != null) {
+                        java.nio.file.Files.copy(new File(new File(game, "macos"), name).toPath(), target.toPath());
+                        entries.put(name, old);
+                        kept.add(name);
+                    }
                 }
+                if (imported.isEmpty())
+                    throw new IOException(rejected.isEmpty()
+                            ? getString(R.string.macos_libs_missing_files,
+                                        String.join(", ", com.zomdroid.steam.MacosLibraries.NAMES))
+                            : getString(R.string.macos_libs_bad_file, String.join(", ", rejected)));
                 // Everything else the archive carried is not ours to keep.
                 File[] leftovers = stage.listFiles();
                 if (leftovers != null) for (File f : leftovers) {
@@ -2837,7 +2890,9 @@ public class InstallerService extends Service implements TaskProgressListener {
                 java.nio.file.Files.write(new File(stage, "manifest.json").toPath(),
                         metadata.toString(2).getBytes(java.nio.charset.StandardCharsets.UTF_8));
                 com.zomdroid.steam.MacosLibraries.publish(game, stage);
-                Log.i(LOG_TAG, "macOS libraries installed from a ZIP into " + new File(game, "macos"));
+                gameInstance.settings().enableMacosModules(imported);
+                Log.i(LOG_TAG, "macOS libraries installed from a ZIP into " + new File(game, "macos")
+                        + ": imported " + imported + ", kept " + kept + ", rejected " + rejected);
                 finish(getString(R.string.macos_libs_installed), null);
             } catch (Exception e) {
                 try { if (stage.exists()) FileUtils.deleteDirectory(stage); } catch (Exception ignored) { }

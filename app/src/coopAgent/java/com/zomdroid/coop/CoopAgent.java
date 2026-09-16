@@ -12,6 +12,8 @@ public final class CoopAgent {
         if ("server-upnp".equals(options)) {
             if (Boolean.getBoolean("zomdroid.server.upnpGuard"))
                 instrumentation.addTransformer(new ServerUpnpGuard());
+            if (Boolean.getBoolean("zomdroid.server.absoluteLuaFiles"))
+                instrumentation.addTransformer(new ServerAbsoluteLuaFiles());
             instrumentation.addTransformer(new ServerInternetObserver());
             return;
         }

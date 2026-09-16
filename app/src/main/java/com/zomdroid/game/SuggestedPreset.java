@@ -42,16 +42,17 @@ public enum SuggestedPreset {
     /**
      * Build 42 everywhere else, and the fallback offered on Adreno when ZINK misbehaves.
      *
-     * <p>Shrinking is switched off rather than cleared: NG_GL4ES now compresses textures with
-     * ETC2, which claims every upload of 512x512 and up at full resolution before the shrink
-     * logic can halve it. The two end up costing the same memory - a half-size RGBA8 texture and
-     * a full-size ETC2 one are both one byte per original pixel - so shrinking no longer buys
-     * anything, it only used to pay for it with the grid of seams on the ground. Writing
-     * {@code LIBGL_SHRINK=0} instead of removing the line keeps the setting visible and one edit
-     * away for anyone who wants it back.
+     * <p>Shrinking is cleared: NG_GL4ES now compresses textures with ETC2, which claims every
+     * upload of 512x512 and up at full resolution before the shrink logic can halve it. The two
+     * end up costing the same memory - a half-size RGBA8 texture and a full-size ETC2 one are both
+     * one byte per original pixel - so shrinking no longer buys anything, it only used to pay for
+     * it with the grid of seams on the ground. The line is removed, not written as
+     * {@code LIBGL_SHRINK=0}: NG took any LIBGL_SHRINK for the player's own choice and kept the
+     * memory saver's texture budget off, so the saver never engaged on this preset (found
+     * 2026-09-16 from field reports; NG now ignores 0, and we no longer write it).
      */
     BUILD_42_COMPATIBILITY(R.string.preset_name_b42_compat, LauncherPreferences.Renderer.NG_GL4ES,
-            SuggestedPreset.SHRINK_OFF, LauncherPreferences.BUILD_42_JVM_ARGS, null),
+            null, LauncherPreferences.BUILD_42_JVM_ARGS, null),
 
     /**
      * Build 41. NG_GL4ES does not run on it at all, and ZINK would need an Adreno GPU and a driver,
@@ -71,8 +72,6 @@ public enum SuggestedPreset {
      */
     public static final String SHRINK_BALANCED = "7";
 
-    /** No shrinking, stated explicitly - see the note on BUILD_42_COMPATIBILITY. */
-    public static final String SHRINK_OFF = "0";
     public static final String SHRINK_KEY = "LIBGL_SHRINK";
 
     /** Field-proven on every device we have data from; also what the reports run at. */
@@ -215,6 +214,9 @@ public enum SuggestedPreset {
                     prefs.getRenderer().name(), renderer.name()));
 
         String currentShrink = readShrink(prefs.getEnvVars());
+        // LIBGL_SHRINK=0 is what this preset used to write; it means the same as no line at all,
+        // so it is not announced as a change (applying the preset still removes it).
+        if ("0".equals(currentShrink)) currentShrink = null;
         if (!equal(currentShrink, shrink))
             changes.add(context.getString(R.string.preset_change_shrink,
                     shrinkLabel(context, currentShrink), shrinkLabel(context, shrink)));

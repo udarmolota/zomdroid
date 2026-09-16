@@ -58,9 +58,6 @@ public class GameLauncher {
         com.zomdroid.patch.MainScreenStatePatchApplier.applyIfNeeded(gameInstance);
         // Select safe native implementations after the class-level patches are known to be ready.
         com.zomdroid.patch.NativeLibraryWorkarounds.disableIncompleteNativeLibraries(gameInstance);
-        boolean bulletDiagnostic = !serverProbeClient && !coopHostTest
-                && com.zomdroid.patch.NativeLibraryWorkarounds.prepareBulletDiagnostic(gameInstance);
-        Os.setenv("ZOMDROID_BULLET_DIAGNOSTIC", bulletDiagnostic ? "1" : "0", true);
         // Build 42.12+'s ARM64 PathFind implementation is under test after reports of characters
         // choosing incorrect interaction routes. Use PZ's own Java fallback without affecting
         // Build 41 or the older pre-fat-jar Build 42 releases.
@@ -142,6 +139,9 @@ public class GameLauncher {
                 || settings.isDebug();
         Os.setenv("BOX64_LOG", verboseNativeLogs ? "1" : "0", false);
         Os.setenv("BOX64_SHOWBT", verboseNativeLogs ? "1" : "0", false);
+        // Per-symbol detail of the macOS loader ([macho] bridge, [jni-bind], LDAPR offsets): dozens
+        // of lines per launch that only matter when the loader itself is being debugged.
+        Os.setenv("ZOMDROID_NATIVE_VERBOSE", verboseNativeLogs ? "1" : "0", false);
         Os.setenv("BOX64_LD_LIBRARY_PATH", gameInstance.getLdLibraryPathForEmulation(), false);
 
         // Emulate x86's Total Store Order for the emulated libraries. box64 defaults to no
@@ -283,9 +283,9 @@ public class GameLauncher {
             }
         }
 
-        // The native-library switches, set AFTER the user's env vars on purpose: a leftover
-        // ZOMDROID_MACHO_LIBS=1 typed during testing kept the macOS libraries on with the switch
-        // off (2026-09-12, twice), so the switches are the only authority for these two names.
+        // The native-library settings, applied AFTER the user's env vars on purpose: a leftover
+        // ZOMDROID_MACHO_LIBS=1 typed during testing kept the macOS libraries on against the
+        // settings (2026-09-12, twice), so the settings are the only authority for these names.
         NativeLibraryEnvironment.applyMacos(gameInstance, new File(gameInstance.getHomePath(),
                 coopHostTest ? "coop-probe" : serverProbeClient ? "client-probe" : "Zomboid"));
         Os.setenv("ZOMDROID_NATIVE_FMOD", settings.isNativeFmodEnabled() ? "1" : "0", true);
@@ -324,6 +324,10 @@ public class GameLauncher {
         }
 
         jvmArgs.add("-XX:ErrorFile=/dev/stdout"); // print jvm crash report to stdout for now
+        // One line per garbage collection into native.log (stderr is mirrored there): heap before
+        // -> after (committed) and the pause. The heap after a collection is what a world really
+        // needs, which decides whether phones short on memory can get a lower -Xmx (2026-09-16).
+        jvmArgs.add("-Xlog:gc:stderr");
 
 
         ArrayList<String> args = gameInstance.getArgsAsList();

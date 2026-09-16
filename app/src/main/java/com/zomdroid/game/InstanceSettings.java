@@ -33,22 +33,26 @@ public class InstanceSettings {
 
     private static final String PREFIX = "inst:";
 
-    public boolean isMacosLibrariesEnabled() {
-        return prefs.getBoolean(keyPrefix + "macos_libraries", false);
-    }
-
-    public void setMacosLibrariesEnabled(boolean enabled) {
-        prefs.edit().putBoolean(keyPrefix + "macos_libraries", enabled).apply();
-    }
-
     /** One of the three macOS libraries ("lighting", "pathfind", "popman"): on unless the player
-     *  turned it off under "Libraries in use". Only meaningful while the macOS option is on. */
+     *  turned it off under "Libraries in use". Only meaningful while that library is installed -
+     *  there is no switch above the three any more (her call, 2026-09-16). */
     public boolean isMacosModuleEnabled(String module) {
         return prefs.getBoolean(keyPrefix + "macos_module_" + module, true);
     }
 
     public void setMacosModuleEnabled(String module, boolean enabled) {
         prefs.edit().putBoolean(keyPrefix + "macos_module_" + module, enabled).apply();
+    }
+
+    /** An install is the player's request to use what it installed: every library it verified
+     *  gets its switch turned on again, whatever was chosen for the copy it replaced. */
+    public void enableMacosModules(java.util.Collection<String> libraryNames) {
+        SharedPreferences.Editor editor = prefs.edit();
+        for (String name : libraryNames) {
+            String module = com.zomdroid.steam.MacosLibraries.MODULE_KEYS.get(name);
+            if (module != null) editor.putBoolean(keyPrefix + "macos_module_" + module, true);
+        }
+        editor.apply();
     }
 
     /** The game's own ARM64 fmodintegration instead of the x86_64 one through box64. On by

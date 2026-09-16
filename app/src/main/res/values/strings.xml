@@ -299,7 +299,7 @@
          fetched from GitHub: a once-only dialog that needs the network up at exactly the right
          moment is a dialog most people never see. Rewrite the body as part of every release. -->
     <string name="release_notes_title">What\'s new in %1$s</string>
-    <string name="release_notes_body">Main features\n\n• ETC2 texture compression — on by default for NG_GL4ES and both ZINK renderers. Comes with a shared on-disk cache (ZINK and NG_GL4ES use the same one) and a Clear button in Settings. Can be switched off per instance.\n\n• Pinch to zoom — two fingers on the game surface zoom the camera.\n\n• Quick Save (F10) on Build 41 — the world backup and restore were Build 42 only and now work on both builds.\n\n• Per-instance settings — renderer, JVM arguments, environment variables, resolution scale and the memory saver are now stored per game instance.\n\n• The game\'s own mouse cursor — with a mouse attached, the Android pointer is hidden when the game\'s \"Lock cursor to window\" option is on.\n\nChanged\n\n• NG_GL4ES no longer ships with texture shrinking. The recommended preset now sets LIBGL_SHRINK=0.\n\nTechnical\n\n• Black wet ground and puddles on NG_GL4ES low settings.\n• ZBBetterFPS: removed the one patch that crashed Build 42.20 when its optimizeIsoMovingObject option was enabled.\n• Bug reports are now built even when no instance is installed.</string>
+    <string name="release_notes_body">Main features\n\n• ETC2 texture compression — on by default for NG_GL4ES and both ZINK renderers. Comes with a shared on-disk cache (ZINK and NG_GL4ES use the same one) and a Clear button in Settings. Can be switched off per instance.\n\n• Pinch to zoom — two fingers on the game surface zoom the camera.\n\n• Quick Save (F10) on Build 41 — the world backup and restore were Build 42 only and now work on both builds.\n\n• Per-instance settings — renderer, JVM arguments, environment variables, resolution scale and the memory saver are now stored per game instance.\n\n• The game\'s own mouse cursor — with a mouse attached, the Android pointer is hidden when the game\'s \"Lock cursor to window\" option is on.\n\nChanged\n\n• NG_GL4ES no longer ships with texture shrinking. The recommended preset and switching to NG_GL4ES leave LIBGL_SHRINK unset.\n\n• The memory saver now really works. Before, it stayed off whenever LIBGL_SHRINK was set - and our own preset set it. With the saver on and texture compression off, new large textures load at half size once textures take more than 800 MB, so a thin grid may show on tiles. With compression on, very little changes.\n\n• macOS libraries have no main switch any more: installed libraries are used, and single ones can be turned off under Libraries in use.\n\nTechnical\n\n• Black wet ground and puddles on NG_GL4ES low settings.\n• ZBBetterFPS: removed the one patch that crashed Build 42.20 when its optimizeIsoMovingObject option was enabled.\n• Bug reports are now built even when no instance is installed.</string>
 
     <string name="settings_features_title">Features</string>
     <string name="settings_backup_switch">Quick Save (F10)</string>
@@ -504,11 +504,6 @@
     <string name="preset_change_memory_saver_off">Memory saver: off</string>
     <string name="preset_applied">Preset applied: %1$s</string>
 
-    <!-- Shown when the renderer spinner is set to NG_GL4ES and no shrink mode was chosen by hand.
-         NG_GL4ES and shrinking are one choice in practice; keeping them apart is what made our
-         own advice inaccurate ("switch to NG_GL4ES" alone changes nothing about the framerate). -->
-    <string name="renderer_ng_shrink_enabled">Texture shrinking enabled — it is what keeps the framerate steady on NG_GL4ES. Advanced → Texture shrinking to change it.</string>
-
     <string name="renderer_gl4es_build41_title">GL4ES is for Build 41</string>
     <string name="renderer_gl4es_build41_message">On Build 41 this is the right choice: it runs on any GPU and needs no driver setup.\n\nOn Build 42 it does not work — you will get a black screen. There, use NG_GL4ES (any GPU) or ZINK (Adreno).</string>
 
@@ -525,7 +520,7 @@
     <string name="settings_jvm_args_b42_preset_title">Preset for Build 42 (recommended)</string>
     <string name="settings_jvm_args_apply">Apply</string>
     <string name="renderer_ng_build42_only_title">NG_GL4ES is for Build 42</string>
-    <string name="renderer_ng_build42_only_message">This renderer was written for Build 42 and does not work on Build 41 — the game will not start. On Build 41 choose GL4ES.\n\nTexture shrinking has been enabled with it, which is what keeps the framerate steady. Build 42 also wants its own Java arguments — the suggested preset sets everything at once: Settings → Suggested presets.</string>
+    <string name="renderer_ng_build42_only_message">This renderer was written for Build 42 and does not work on Build 41 — the game will not start. On Build 41 choose GL4ES.\n\nBuild 42 also wants its own Java arguments — the suggested preset sets everything at once: Settings → Suggested presets.</string>
     <string name="new_game_instance_b42_jvm_hint">Build 42 needs tuned JVM arguments — there is a one-button preset for them in the settings.</string>
     <string name="new_game_instance_open_settings">Open Settings → Advanced → JVM arguments →</string>
     <string name="optimization_jvm_recommended_label">→ Current default:</string>

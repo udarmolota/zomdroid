@@ -533,8 +533,9 @@
                     android:layout_marginTop="4dp"
                     android:textAppearance="?attr/textAppearanceBodySmall"
                     android:text="@string/mp_libs_title" android:visibility="gone" />
-                <!-- Title with the "?" glued to it, toggle at the right edge. A ConstraintLayout so a long
-                     title (Russian) wraps instead of pushing the toggle off the screen. -->
+                <!-- Title with the "?" glued to it. No toggle since 2026-09-16: installed libraries are
+                     used, single ones are turned off under "Libraries in use". A ConstraintLayout so a
+                     long title (Russian) wraps instead of pushing the "?" off the screen. -->
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/settings_macos_row"
                     android:layout_width="match_parent"
@@ -566,15 +567,6 @@
                         android:background="?android:attr/selectableItemBackgroundBorderless"
                         android:contentDescription="@string/macos_libs_title"
                         app:layout_constraintStart_toEndOf="@id/settings_macos_title"
-                        app:layout_constraintEnd_toStartOf="@id/settings_macos_switch"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"/>
-
-                    <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/settings_macos_switch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"/>
