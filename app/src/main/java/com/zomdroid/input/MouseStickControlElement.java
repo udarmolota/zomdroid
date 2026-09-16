@@ -135,7 +135,7 @@ public class MouseStickControlElement extends AbstractControlElement {
     public void draw(Canvas canvas) {
         drawable.draw(canvas);
 
-        if (cursorX >= 0 && cursorY >= 0) {
+        if (cursorX >= 0 && cursorY >= 0 && !parentView.gameDrawsCursor) {
             float x = (float) cursorX;
             float y = (float) cursorY;
             float s = parentView.pixelScale;

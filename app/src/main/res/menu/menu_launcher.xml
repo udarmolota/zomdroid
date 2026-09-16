@@ -1,6 +1,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
+    <!-- The wiki one tap away, also after the first-steps card is gone. -->
+    <item
+        android:id="@+id/action_open_wiki_help"
+        android:icon="@drawable/mt_icon_help_toolbar"
+        android:title="@string/fragment_label_wiki"
+        app:showAsAction="always"/>
     <item
         android:id="@+id/action_new_game_instance"
         android:icon="@drawable/mt_icon_add"

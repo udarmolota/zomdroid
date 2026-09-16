@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="additional_libraries_title">附加库</string>
+    <string name="mp_libs_title">Build 41 多人游戏</string>
+    <string name="mp_libs_hint">通过您的 Steam 账户下载 Linux B42.12 中的两个 ARM64 库。安装后自动启用。现有多人游戏库将被替换并保留备份，其他原生文件保持不变。</string>
+    <string name="mp_libs_ready">已安装 B42.12 多人游戏库</string>
+    <string name="mp_libs_manual">库为手动安装，来源版本未知</string>
+    <string name="mp_libs_login">为 %1$s 下载两个 B42.12 多人游戏库。请登录拥有 Project Zomboid 的 Steam 账户。</string>
+    <string name="mp_libs_invalid_instance">多人游戏库下载仅适用于 Build 41 实例。</string>
+</resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="macos_libs_title">Bibliotecas nativas do macOS</string>
+    <string name="macos_libs_hint">Para rodar o jogo, parte das bibliotecas é emulada pelo box64. Aqui você pode baixar e instalar bibliotecas nativas da versão macOS do jogo, que dispensam emulação. Isso reduz a carga na memória e no processador. Pegue-as direto do Steam, se você possui o jogo, ou carregue um arquivo pronto, se já as baixou antes.</string>
+    <string name="macos_libs_short">Substitui as partes emuladas do jogo por bibliotecas ARM64 nativas da versão macOS. Menos carga na CPU e na memória, jogo mais fluido. Build 42.20+, experimental.</string>
+    <string name="macos_libs_download">Do Steam</string>
+    <string name="macos_libs_missing">Bibliotecas ausentes ou incompletas. Serão usadas as bibliotecas normais.</string>
+    <string name="macos_libs_login">Baixar bibliotecas nativas para “%1$s”. Requer login no Steam e uma conta que possui o jogo; o jogo completo para macOS não será baixado.</string>
+    <string name="macos_libs_invalid_instance">Esta instância está indisponível ou não suporta este recurso.</string>
+    <string name="native_fmod_title">FMOD</string>
+    <string name="native_fmod_hint">Não vem da versão macOS: é a biblioteca de som ARM64 para Android do próprio jogo, usada no lugar da x86_64 pelo box64. Nada para baixar.</string>
+    <string name="macos_libs_import">Do arquivo</string>
+    <string name="macos_libs_import_title">Carregar bibliotecas macOS</string>
+    <string name="macos_libs_import_hint">Selecione um ZIP com libLighting.dylib, libPZPathFind.dylib e libPZPopMan.dylib da versão macOS do Project Zomboid. As pastas dentro do arquivo não importam. Os arquivos vão para game/macos da instância selecionada.</string>
+    <string name="macos_libs_ready">Bibliotecas macOS instaladas</string>
+    <string name="macos_libs_installing">Instalando bibliotecas macOS…</string>
+    <string name="macos_libs_installed">Bibliotecas macOS instaladas</string>
+    <string name="macos_libs_modules">Bibliotecas em uso</string>
+    <string name="macos_libs_modules_hint">Todas as bibliotecas vêm ligadas. Desligue uma de cada vez se precisar: a biblioteca desligada usa a versão normal.</string>
+    <string name="macos_libs_missing_files">Faltando no arquivo: %1$s</string>
+    <string name="macos_libs_bad_file">Não é uma biblioteca macOS: %1$s</string>
+</resources>

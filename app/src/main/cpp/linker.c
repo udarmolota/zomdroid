@@ -17,6 +17,10 @@
 #include "box64/src/include/myalign.h"
 #include "box64/src/include/elfloader.h"
 #include "box64/src/include/library.h"
+#include "box64/src/include/zomdroid_jni_stats.h"
+#include "macho_loader.h"
+#include "macho_jnienv.h"
+#include "macho_pathfind.h"
 
 
 #define LOG_TAG "zomdroid-linker"
@@ -37,6 +41,8 @@
 // JVMS 4.6, method access_flags. GetMethodModifiers returns these; the JNI headers we bundle do
 // not declare the constant.
 #define JVM_ACC_NATIVE 0x0100
+
+static void* (*loader_dlsym)(void* handle, const char* symbol, const void* caller);
 
 typedef struct {
     char* sym;  // key
@@ -77,6 +83,54 @@ static jobjectArray JNICALL stub_getAudioDevices(JNIEnv* env, jclass clazz, jint
     return NULL;  // пусть FMOD использует дефолтное устройство
 }
 
+// Opt-in Android FMOD integration. Keep FMOD's Android runtime on ART, but pass
+// the original HotSpot JNIEnv to the game's integration and its Java callbacks.
+static jint (JNICALL *native_fmod_create)(JNIEnv*, jclass);
+static void** native_fmod_system;
+static int (*native_fmod_set_output)(void*, int);
+
+static jint JNICALL native_fmod_create_bridge(JNIEnv* env, jclass clazz) {
+    JNIEnv* art = NULL;
+    jint status = g_zomdroid_art_vm
+        ? (*g_zomdroid_art_vm)->GetEnv(g_zomdroid_art_vm, (void**)&art, JNI_VERSION_1_6)
+        : JNI_ERR;
+    if (status == JNI_EDETACHED)
+        status = (*g_zomdroid_art_vm)->AttachCurrentThread(g_zomdroid_art_vm, (void**)&art, NULL);
+    if (status != JNI_OK || !art) {
+        jclass error = (*env)->FindClass(env, "java/lang/IllegalStateException");
+        if (error) (*env)->ThrowNew(env, error, "Cannot attach FMOD thread to Android VM");
+        return -1;
+    }
+    jint result = native_fmod_create(env, clazz);
+    if ((*env)->ExceptionCheck(env)) return result;
+    const char* api = getenv("ZOMDROID_AUDIO_API");
+    // Same FMOD_OUTPUTTYPE values as wrappedfmodstudio.c. Apply after create,
+    // before the game's separate System_Init, retaining the existing setting.
+    int output = api && strstr(api, "AAUDIO") ? 18
+               : api && strstr(api, "OPENSL") ? 12 : -1;
+    if (result == 0 && *native_fmod_system && output >= 0) {
+        int set_result = native_fmod_set_output(*native_fmod_system, output);
+        LOG_REPORTED("[fmod-native] audio output=%s result=%d", api, set_result);
+    }
+    LOG_REPORTED("[fmod-native] System_Create result=%d, ART attached", result);
+    return result;
+}
+
+static int prepare_native_fmod(void* handle) {
+    native_fmod_create = loader_dlsym(handle,
+        "Java_fmod_javafmodJNI_FMOD_1System_1Create", __builtin_return_address(0));
+    native_fmod_system = loader_dlsym(handle, "globalSystem", __builtin_return_address(0));
+    native_fmod_set_output = loader_dlsym(handle,
+        "_ZN4FMOD6System9setOutputE15FMOD_OUTPUTTYPE", __builtin_return_address(0));
+    // Audited TIS 42.20.0/.4 has no own JNI_OnLoad. Do not silently suppress
+    // an initialization routine introduced by a future integration binary.
+    void* onload = loader_dlsym(handle, "JNI_OnLoad", __builtin_return_address(0));
+    Dl_info owner = {0};
+    if (onload && (!dladdr(onload, &owner) || !owner.dli_fname ||
+                  strstr(owner.dli_fname, "libfmodintegration"))) return 0;
+    return native_fmod_create && native_fmod_system && native_fmod_set_output;
+}
+
 static void jni_sig_cache_put(const char* sym, const char* sig) {
     if (!sym || !sig) return;
     // store our own copies, because caller frees its return value
@@ -103,7 +157,6 @@ static void jni_sig_cache_put(const char* sym, const char* sig) {
 }
 
 static void* (*loader_dlopen)(const char* filename, int flags, const void* caller);
-static void* (*loader_dlsym)(void* handle, const char* symbol, const void* caller);
 
 static void* (*loader_android_dlopen_ext)(const char* filename,
                                           int flag,
@@ -118,6 +171,72 @@ static void* vulkan_loader_handle;
 // game version the importer semantics it expects.
 static EmulatedLib jni_libs[] = {{.name = "PZClipper64"}, {.name = "PZBullet64"}, {.name = "PZBulletNoOpenGL64"}, {.name = "Lighting64"}, {.name = "PZPathFind64"}, {.name = "PZPopMan64"}, {.name = "fmodintegration64"}, { .name = "zomdroidtest"}, { .name = "RakNet64"}, { .name = "ZNetNoSteam"}, { .name = "jassimp64"} };
 static int jni_lib_count = sizeof (jni_libs) / sizeof (EmulatedLib);
+// The path each natively loaded entry was opened from (empty while emulated or not loaded yet).
+// Kept beside the table rather than in EmulatedLib: only dlopen() below needs it, to re-open the
+// same file through bionic on a cache hit - see the note there.
+static char jni_native_path[sizeof (jni_libs) / sizeof (EmulatedLib)][BUF_SIZE];
+// The entries currently served by a macOS dylib through our own loader (NULL otherwise). The
+// handle in jni_libs[] is then the macho_lib_t*, which is fine: the JVM only ever hands it back
+// to dlsym, and a dlclose on it is a harmless "invalid handle" from bionic. jni_native_path
+// stays empty for these, so the cache hit above returns the handle without a bionic re-open.
+static macho_lib_t* jni_macho[sizeof (jni_libs) / sizeof (EmulatedLib)];
+
+// The libraries the macOS depot has current ARM64 builds of, by their JNI entry name.
+// tools/macos-native-libs-brief.md, section 3, is the contract for these names. RakNet is
+// deliberately absent: the multiplayer libraries stay on their current path for now. Of the
+// rest only Lighting loads today - the others are refused by the loader's libc++ layout
+// guard - but the names stay so a future build that passes the guard is picked up.
+static const char* macho_dylib_for(const char* jni_name) {
+    static const char* const map[][2] = {
+        { "Lighting64",   "libLighting.dylib"   },
+        { "PZPopMan64",   "libPZPopMan.dylib"   },
+        { "PZPathFind64", "libPZPathFind.dylib" },
+    };
+    for (size_t i = 0; i < sizeof(map) / sizeof(map[0]); i++)
+        if (strcmp(jni_name, map[i][0]) == 0) return map[i][1];
+    return NULL;
+}
+// ZOMDROID_MACHO_SKIP: comma-separated JNI names of the macOS libraries the player turned off
+// one by one in Settings ("Libraries in use"). A skipped entry takes its regular path.
+static int macho_module_skipped(const char* jni_name) {
+    const char* skip = getenv("ZOMDROID_MACHO_SKIP");
+    if (skip == NULL || *skip == '\0') return 0;
+    size_t n = strlen(jni_name);
+    for (const char* p = skip; *p != '\0'; ) {
+        const char* e = strchr(p, ',');
+        size_t len = e ? (size_t)(e - p) : strlen(p);
+        if (len == n && strncmp(p, jni_name, n) == 0) return 1;
+        if (e == NULL) break;
+        p = e + 1;
+    }
+    return 0;
+}
+
+void zomdroid_linker_prepare_pathfind(void) {
+    const char* options = getenv("ZOMDROID_MACHO_PATHFIND_OPTIONS");
+    const char* enabled = getenv("ZOMDROID_MACHO_LIBS");
+    if (!options || !*options || !enabled || strcmp(enabled, "1")) return;
+    if (macho_module_skipped("PZPathFind64")) {
+        LOG_REPORTED("[macho] PathFind turned off in settings; keeping Java pathfinding");
+        return;
+    }
+    for (int i = 0; i < jni_lib_count; ++i) {
+        if (strcmp(jni_libs[i].name, "PZPathFind64")) continue;
+        macho_lib_t* ml = jni_macho[i];
+        if (!ml) ml = macho_load("macos/libPZPathFind.dylib");
+        if (!ml) {
+            LOG_REPORTED("[macho] PathFind preflight rejected; keeping Java pathfinding");
+            return;
+        }
+        jni_macho[i] = ml;
+        jni_libs[i].handle = (library_t*)ml;
+        jni_libs[i].is_emulated = false;
+        LOG_REPORTED("[macho] PathFind preflight loaded; UseNativeCode=%s",
+                     macho_pathfind_enable_option(options) ? "true" : "false (options update failed)");
+        return;
+    }
+}
+
 static void init_jni_libs() {
     static int initialized = 0;
     if (initialized) return;
@@ -154,9 +273,55 @@ void zomdroid_linker_set_proc_addrs(void* _loader_dlopen_fn, void* _loader_dlsym
 
 
 __attribute__((visibility("default"), used))
+// Java signature of a method id, for the wrapper JNIEnv's variadic shims (macho_jnienv.c). JVMTI
+// hands out its own copies of the strings; the caller keeps the result, so it gets a plain copy.
+static const char* macho_method_signature(jmethodID mid) {
+    if (g_zomdroid_jvmti_env == NULL || mid == NULL) return NULL;
+    char* name = NULL;
+    char* sig = NULL;
+    static __thread char copy[1024];
+    if ((*g_zomdroid_jvmti_env)->GetMethodName(g_zomdroid_jvmti_env, mid, &name, &sig, NULL) != JVMTI_ERROR_NONE)
+        return NULL;
+    const char* result = NULL;
+    if (sig != NULL && strlen(sig) < sizeof(copy)) {
+        strcpy(copy, sig);
+        result = copy;
+    }
+    if (name) (*g_zomdroid_jvmti_env)->Deallocate(g_zomdroid_jvmti_env, (unsigned char*)name);
+    if (sig) (*g_zomdroid_jvmti_env)->Deallocate(g_zomdroid_jvmti_env, (unsigned char*)sig);
+    return result;
+}
+
+// Resident set size of this process in MB, from /proc/self/statm; -1 if unreadable.
+static long zomdroid_rss_mb(void) {
+    FILE* f = fopen("/proc/self/statm", "r");
+    if (f == NULL) return -1;
+    long size_pages = 0, resident_pages = 0;
+    int ok = fscanf(f, "%ld %ld", &size_pages, &resident_pages) == 2;
+    fclose(f);
+    if (!ok) return -1;
+    return resident_pages * (sysconf(_SC_PAGESIZE) / 1024) / 1024;
+}
+
 int zomdroid_linker_init() {
     init_jni_libs();
-    if (zomdroid_emulation_init() != 0) {
+    macho_jnienv_set_signature_provider(macho_method_signature);
+
+    // What box64 costs at startup: context, the x86_64 glibc and libjniwrapper loaded through
+    // emulation. Measured to decide whether initialising it only on demand is worth the trouble
+    // (it is not free: its signal handlers would then be installed after the JVM's).
+    struct timespec t0, t1;
+    long rss_before = zomdroid_rss_mb();
+    clock_gettime(CLOCK_MONOTONIC, &t0);
+    int rc = zomdroid_emulation_init();
+    clock_gettime(CLOCK_MONOTONIC, &t1);
+    long rss_after = zomdroid_rss_mb();
+    double ms = (double)(t1.tv_sec - t0.tv_sec) * 1000.0 + (double)(t1.tv_nsec - t0.tv_nsec) / 1e6;
+    LOG_REPORTED("[box64-init] emulation init %s in %.1f ms, RSS %ld -> %ld MB (%+ld MB)",
+                 rc == 0 ? "done" : "FAILED", ms, rss_before, rss_after, rss_after - rss_before);
+    fflush(stdout);
+
+    if (rc != 0) {
         LOGE("Failed to initialize emulation");
         return -1;
     }
@@ -721,11 +886,67 @@ void *dlopen(const char* filename, int flags) {
 
     for (int i = 0; i < jni_lib_count; i++) {
         if (!strstr(filename, jni_libs[i].name)) continue;
+        const char* bullet_diag_env = getenv("ZOMDROID_BULLET_DIAGNOSTIC");
+        int bullet_diag = bullet_diag_env && strcmp(bullet_diag_env, "1") == 0
+                && strcmp(jni_libs[i].name, "PZBullet64") == 0;
+        if (bullet_diag) {
+            LOG_REPORTED("[bullet-diag] dlopen requested=%s flags=%x cached=%p emulated=%d",
+                         filename, flags, jni_libs[i].handle, jni_libs[i].is_emulated);
+        }
 
         // Already loaded once -> return cached handle.
         // This prevents repeated AddNeededLib/RunDeferredElfInit and reduces instability.
         if (jni_libs[i].handle != NULL) {
+            // For an EMULATED entry the cached handle is the whole story. For a NATIVE one it is
+            // not: bionic counts opens against closes, and a handle handed out from here without
+            // an open behind it leaves that count one short. Seen 2026-09-10 on PZBullet64: the
+            // JVM opened it once, then something on the Java side dlopen'ed the same file again
+            // with RTLD_NOLOAD while LWJGL was loading libzfa and got this cached handle; its
+            // matching dlclose took bionic's count from one to zero and unmapped Bullet under the
+            // JVM. Every later dlsym on the still-cached handle then returned NULL - which read as
+            // "defineVehicleScript missing" although the file exports it, and killed the game at
+            // script load. So re-open the same file through bionic: it finds the loaded library,
+            // returns the same handle, and the count balances. dlclose is deliberately not
+            // interposed, so this is the only place the count can be kept honest.
+            if (!jni_libs[i].is_emulated && jni_native_path[i][0] != '\0') {
+                void* again = loader_dlopen(jni_native_path[i], flags | RTLD_NODELETE,
+                                            __builtin_return_address(0));
+                if (again != NULL) return again;
+                const char* dl_msg = dlerror();
+                LOG_REPORTED("[linker] re-open of %s failed (%s), answering from the cache",
+                             jni_native_path[i], dl_msg ? dl_msg : "no error reported");
+            }
             return jni_libs[i].handle;
+        }
+
+        // First option: the macOS ARM64 build through our Mach-O loader, when the player turned
+        // the option on and the downloader put the file next to the game's own android/ folder.
+        // A rejection is logged by the loader and we simply go on to the next option - a dylib
+        // can never take the launch down. See tools/macos-native-libs-brief.md.
+        int force_box64 = 0;
+        const char* macho_env = getenv("ZOMDROID_MACHO_LIBS");
+        const char* dylib_name = (macho_env != NULL && strcmp(macho_env, "1") == 0)
+                                 ? macho_dylib_for(jni_libs[i].name) : NULL;
+        if (dylib_name != NULL && macho_module_skipped(jni_libs[i].name)) {
+            LOG_REPORTED("[macho] %s turned off in settings, taking the regular path", jni_libs[i].name);
+            dylib_name = NULL;
+        }
+        if (dylib_name != NULL) {
+            force_box64 = strcmp(jni_libs[i].name, "PZPathFind64") == 0
+                       || strcmp(jni_libs[i].name, "PZPopMan64") == 0;
+            char dylib_path[BUF_SIZE];
+            snprintf(dylib_path, BUF_SIZE, "macos/%s", dylib_name);
+            if (access(dylib_path, F_OK) == 0) {
+                macho_lib_t* ml = macho_load(dylib_path);
+                if (ml != NULL) {
+                    jni_macho[i] = ml;
+                    jni_libs[i].handle = (library_t*)ml;
+                    jni_libs[i].is_emulated = false;
+                    return ml;
+                }
+            } else {
+                LOG_REPORTED("[macho] no %s, trying the next option", dylib_path);
+            }
         }
 
         // jassimp64 only: the launcher can point at a specific importer build to load instead of
@@ -736,14 +957,15 @@ void *dlopen(const char* filename, int flags) {
         // the point of an override is to replace that library, so falling back to it would defeat
         // the experiment; the fallback is the x86_64 build through box64, the same route every
         // pre-42.12 build already uses. Unset or empty = behaviour unchanged.
-        int force_box64 = 0;
         if (strcmp(jni_libs[i].name, "jassimp64") == 0) {
             const char* override_path = getenv("ZOMDROID_JASSIMP64_OVERRIDE");
             if (override_path != NULL && override_path[0] != '\0') {
-                void* override_handle = loader_dlopen(override_path, flags, __builtin_return_address(0));
+                void* override_handle = loader_dlopen(override_path, flags | RTLD_NODELETE,
+                                                      __builtin_return_address(0));
                 if (override_handle != NULL) {
                     jni_libs[i].handle = override_handle;
                     jni_libs[i].is_emulated = false;
+                    snprintf(jni_native_path[i], BUF_SIZE, "%s", override_path);
                     // Size, because the file name is fixed and says nothing about which build is
                     // actually in it - a hand-swapped importer looked identical in the log during
                     // the 2026-08-21 A/B and only the tester knew what had been put there.
@@ -760,7 +982,9 @@ void *dlopen(const char* filename, int flags) {
         }
 
         //trying to load native library
-        if (!force_box64 && strcmp(jni_libs[i].name, "fmodintegration64") != 0) { //later I should fix that. Java for some reason didn't see classes inside
+        const int is_fmod = strcmp(jni_libs[i].name, "fmodintegration64") == 0;
+        const char* native_fmod = getenv("ZOMDROID_NATIVE_FMOD");
+        if (!force_box64 && (!is_fmod || (native_fmod && strcmp(native_fmod, "1") == 0))) {
             const char* base = strrchr(filename, '/');
             if (base)
                 base++;
@@ -771,11 +995,27 @@ void *dlopen(const char* filename, int flags) {
             snprintf(android_filename, BUF_SIZE, "android/arm64-v8a/%s", base);
 
             if (access(android_filename, F_OK) == 0) {
-                void* native_handle = loader_dlopen(android_filename, flags, __builtin_return_address(0));
+                // RTLD_NODELETE: a JNI library the JVM holds must never be unmapped by an
+                // unbalanced dlclose from anyone else - the count fix above is the cure, this is
+                // the belt to its braces.
+                void* native_handle = loader_dlopen(android_filename, flags | RTLD_NODELETE,
+                                                    __builtin_return_address(0));
+                if (native_handle && is_fmod && !prepare_native_fmod(native_handle)) {
+                    LOG_REPORTED("[fmod-native] compatibility checks failed; falling back to box64");
+                    dlclose(native_handle);
+                    native_handle = NULL;
+                }
                 if (native_handle != NULL) {
                     jni_libs[i].handle = native_handle;
                     jni_libs[i].is_emulated = false;
+                    snprintf(jni_native_path[i], BUF_SIZE, "%s", android_filename);
                     LOG_REPORTED("[linker] %s loaded natively", android_filename);
+                    if (bullet_diag) {
+                        const char* probe_name = "Java_zombie_core_physics_Bullet_defineVehicleScript";
+                        void* probe = loader_dlsym(native_handle, probe_name, __builtin_return_address(0));
+                        LOG_REPORTED("[bullet-diag] native handle=%p direct lookup %s=%p",
+                                     native_handle, probe_name, probe);
+                    }
                     return native_handle;
                 }
                 // A file that is present but will not load must never be fatal. The game's ARM64
@@ -835,6 +1075,45 @@ void *dlopen(const char* filename, int flags) {
     return loader_dlopen(filename, flags, __builtin_return_address(0));
 }
 
+// A JNI lookup against a macOS dylib: the export, wrapped in an Apple-ABI shim when the Java
+// signature calls for one (macho_bridge.c). Non-JNI names (the JVM's JNI_OnLoad probe) come
+// back as they are.
+static void* macho_jni_lookup(int i, const char* sym_name) {
+    void* target = macho_dlsym(jni_macho[i], sym_name);
+    if (target == NULL) return NULL;
+    if (strncmp(sym_name, "Java_", 5) != 0) return target;
+
+    char* method_sig = method_signature_from_symbol_name(sym_name);
+    if (method_sig == NULL) {
+        if (macho_lib_wraps_env(jni_macho[i])) {
+            LOG_REPORTED("[macho] %s: missing signature; refusing an unwrapped JNI entry", sym_name);
+            return NULL;
+        }
+        // Without the signature the argument layout is unknown. The plain symbol is right for
+        // every function with at most eight arguments per register class and no small ints,
+        // which is most of them; the log line is there for the day it is not.
+        LOG_REPORTED("[macho] %s: no Java signature found, handing out the symbol unshimmed", sym_name);
+        return target;
+    }
+    char* arg_types = NULL;
+    char ret_type = 0;
+    if (method_signature_to_types(method_sig, &arg_types, &ret_type) != 0) {
+        free(method_sig);
+        if (macho_lib_wraps_env(jni_macho[i])) {
+            LOG_REPORTED("[macho] %s: invalid signature; refusing an unwrapped JNI entry", sym_name);
+            return NULL;
+        }
+        LOG_REPORTED("[macho] %s: signature not understood, handing out the symbol unshimmed", sym_name);
+        return target;
+    }
+    LOGI("[jni-bind] %s -> %s -> %s%c (macho)", sym_name, method_sig, arg_types, ret_type);
+    free(method_sig);
+    void* sym = macho_jni_bridge(&jni_libs[i], target, arg_types, sym_name,
+                                 macho_lib_wraps_env(jni_macho[i]));
+    free(arg_types);
+    return sym;
+}
+
 __attribute__((visibility("default"), used))
 void *dlsym(void *handle, const char *sym_name) {
     //LOGE("[linker] dlsym called with filename=%s", sym_name);
@@ -843,11 +1122,15 @@ void *dlsym(void *handle, const char *sym_name) {
         EmulatedLib* elib = &jni_libs[i];
         if (sym_name == NULL || handle == NULL || lib != handle) continue;
 
+        if (jni_macho[i] != NULL) return macho_jni_lookup(i, sym_name);
+
         if (elib->is_emulated) {
             // 1) Stub for getAudioDevices
             if (strcmp(jni_libs[i].name, "fmodintegration64") == 0 &&
                 strstr(sym_name, "getAudioDevices")) {
 
+                if (zomdroid_jni_stats_on)
+                    zomdroid_jni_stats_register((uintptr_t)stub_getAudioDevices, jni_libs[i].name, strdup(sym_name));
                 void* sym = zomdroid_emulation_bridge_jni_symbol(
                         &jni_libs[i],
                         (uintptr_t)stub_getAudioDevices,
@@ -898,6 +1181,10 @@ void *dlsym(void *handle, const char *sym_name) {
             LOGI("[jni-bind] %s -> %s -> %s%c", sym_name, method_sig, arg_types, ret_type);
             free(method_sig);
 
+            // The stats table keys on the emulated address; only this place knows the name.
+            // Registered only while the diagnostic is on, so normal sessions pay nothing.
+            if (zomdroid_jni_stats_on)
+                zomdroid_jni_stats_register((uintptr_t)box64_sym, jni_libs[i].name, strdup(sym_name));
             void* sym = zomdroid_emulation_bridge_jni_symbol(&jni_libs[i], box64_sym,
                                                              arg_types, ret_type);
             if (sym == NULL) {
@@ -909,7 +1196,29 @@ void *dlsym(void *handle, const char *sym_name) {
             //LOGD("Successfully created emulation bridge for jni symbol %s at %p (target=%ld)", sym_name, sym, box64_sym);
             return sym;
         } else {
-            return loader_dlsym(handle, sym_name, __builtin_return_address(0));
+            if (strcmp(elib->name, "fmodintegration64") == 0) {
+                // dlsym searches dependencies: without this guard HotSpot calls
+                // libfmod.so's Android JNI_OnLoad and replaces its ART context.
+                if (strcmp(sym_name, "JNI_OnLoad") == 0 || strcmp(sym_name, "JNI_OnUnload") == 0) {
+                    LOG_REPORTED("[fmod-native] skipped dependency %s (FMOD initialized on ART)", sym_name);
+                    return NULL;
+                }
+                if (strcmp(sym_name, "Java_fmod_javafmodJNI_FMOD_1System_1Create") == 0)
+                    return native_fmod_create_bridge;
+                if (strstr(sym_name, "getAudioDevices")) return stub_getAudioDevices;
+            }
+            void* resolved = loader_dlsym(handle, sym_name, __builtin_return_address(0));
+            const char* diag = getenv("ZOMDROID_BULLET_DIAGNOSTIC");
+            if (diag && strcmp(diag, "1") == 0 && strcmp(elib->name, "PZBullet64") == 0) {
+                // On a miss, bionic's own words tell an absent symbol ("undefined symbol") from
+                // a library that is no longer there ("invalid handle") - the distinction this
+                // whole diagnostic exists for.
+                const char* dl_msg = resolved ? NULL : dlerror();
+                LOG_REPORTED("[bullet-diag] JVM lookup handle=%p symbol=%s resolved=%p native=1%s%s",
+                             handle, sym_name, resolved,
+                             dl_msg ? " dlerror=" : "", dl_msg ? dl_msg : "");
+            }
+            return resolved;
         }
     }
 

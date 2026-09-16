@@ -32,6 +32,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.zomdroid.input.AbstractControlElement;
 import com.zomdroid.input.ControlElementDescription;
+import com.zomdroid.input.ControlLabels;
 import com.zomdroid.input.GLFWBinding;
 import com.zomdroid.input.InputControlsView;
 import com.zomdroid.databinding.ActivityControlsEditorBinding;
@@ -235,8 +236,9 @@ public class ControlsEditorActivity extends AppCompatActivity {
                     binding.elementInputTypeS.setVisibility(View.GONE);
                 } else {
                     ArrayAdapter<AbstractControlElement.InputType> inputTypeAdapter =
-                            new ArrayAdapter<>(ControlsEditorActivity.this, R.layout.spinner_item,
-                                    AbstractControlElement.InputType.values());
+                            new ControlLabels.Adapter<>(ControlsEditorActivity.this, R.layout.spinner_item,
+                                    AbstractControlElement.InputType.values(),
+                                    t -> ControlLabels.inputType(ControlsEditorActivity.this, t));
 
                     binding.elementInputTypeS.setVisibility(View.GONE);
                     binding.elementInputTypeS.setAdapter(inputTypeAdapter);
@@ -286,9 +288,10 @@ public class ControlsEditorActivity extends AppCompatActivity {
                         binding.elementIconTv.setVisibility(showBuiltinIcon ? View.VISIBLE : View.GONE);
                         binding.elementIconS.setVisibility(showBuiltinIcon ? View.VISIBLE : View.GONE);
 
-                        ArrayAdapter<ControlElementDescription.Icon> adapterIcon = new ArrayAdapter<>(ControlsEditorActivity.this,
+                        ArrayAdapter<ControlElementDescription.Icon> adapterIcon = new ControlLabels.Adapter<>(ControlsEditorActivity.this,
                                 R.layout.spinner_item,
-                                ControlElementDescription.Icon.values());
+                                ControlElementDescription.Icon.values(),
+                                i -> ControlLabels.icon(ControlsEditorActivity.this, i));
                         binding.elementIconS.setAdapter(adapterIcon);
                         binding.elementIconS.setOnItemSelectedListener(null);
                         binding.elementIconS.setSelection(adapterIcon.getPosition(element.getIcon()));
@@ -306,9 +309,10 @@ public class ControlsEditorActivity extends AppCompatActivity {
                         // Style — only for buttons
                         binding.elementStyleTv.setVisibility(View.VISIBLE);
                         binding.elementStyleS.setVisibility(View.VISIBLE);
-                        ArrayAdapter<ControlElementDescription.Style> adapterStyle = new ArrayAdapter<>(ControlsEditorActivity.this,
+                        ArrayAdapter<ControlElementDescription.Style> adapterStyle = new ControlLabels.Adapter<>(ControlsEditorActivity.this,
                                 R.layout.spinner_item,
-                                ControlElementDescription.Style.values());
+                                ControlElementDescription.Style.values(),
+                                st -> ControlLabels.style(ControlsEditorActivity.this, st));
                         binding.elementStyleS.setAdapter(adapterStyle);
                         binding.elementStyleS.setOnItemSelectedListener(null);
                         if (element instanceof com.zomdroid.input.ButtonControlElement) {
@@ -556,9 +560,7 @@ public class ControlsEditorActivity extends AppCompatActivity {
                     binding.elementTogglingCb.setVisibility(View.GONE);
 
                     GLFWBinding bindingLeft = element.getBindingLeft();
-                    ArrayAdapter<GLFWBinding> adapterLeft = new ArrayAdapter<>(this,
-                            R.layout.spinner_item,
-                            GLFWBinding.valuesForType(AbstractControlElement.InputType.MNK));
+                    ArrayAdapter<GLFWBinding> adapterLeft = bindingAdapter(GLFWBinding.valuesForType(AbstractControlElement.InputType.MNK));
                     binding.elementBindingLeftS.setAdapter(adapterLeft);
                     binding.elementBindingLeftS.setOnItemSelectedListener(null);
                     binding.elementBindingLeftS.setSelection(adapterLeft.getPosition(bindingLeft));
@@ -574,9 +576,7 @@ public class ControlsEditorActivity extends AppCompatActivity {
                     });
 
                     GLFWBinding bindingUp = element.getBindingUp();
-                    ArrayAdapter<GLFWBinding> adapterUp = new ArrayAdapter<>(this,
-                            R.layout.spinner_item,
-                            GLFWBinding.valuesForType(AbstractControlElement.InputType.MNK));
+                    ArrayAdapter<GLFWBinding> adapterUp = bindingAdapter(GLFWBinding.valuesForType(AbstractControlElement.InputType.MNK));
                     binding.elementBindingUpS.setAdapter(adapterUp);
                     binding.elementBindingUpS.setOnItemSelectedListener(null);
                     binding.elementBindingUpS.setSelection(adapterUp.getPosition(bindingUp), false);
@@ -592,9 +592,7 @@ public class ControlsEditorActivity extends AppCompatActivity {
                     });
 
                     GLFWBinding bindingRight = element.getBindingRight();
-                    ArrayAdapter<GLFWBinding> adapterRight = new ArrayAdapter<>(this,
-                            R.layout.spinner_item,
-                            GLFWBinding.valuesForType(AbstractControlElement.InputType.MNK));
+                    ArrayAdapter<GLFWBinding> adapterRight = bindingAdapter(GLFWBinding.valuesForType(AbstractControlElement.InputType.MNK));
                     binding.elementBindingRightS.setAdapter(adapterRight);
                     binding.elementBindingRightS.setOnItemSelectedListener(null);
                     binding.elementBindingRightS.setSelection(adapterRight.getPosition(bindingRight));
@@ -610,9 +608,7 @@ public class ControlsEditorActivity extends AppCompatActivity {
                     });
 
                     GLFWBinding bindingDown = element.getBindingDown();
-                    ArrayAdapter<GLFWBinding> adapterDown = new ArrayAdapter<>(this,
-                            R.layout.spinner_item,
-                            GLFWBinding.valuesForType(AbstractControlElement.InputType.MNK));
+                    ArrayAdapter<GLFWBinding> adapterDown = bindingAdapter(GLFWBinding.valuesForType(AbstractControlElement.InputType.MNK));
                     binding.elementBindingDownS.setAdapter(adapterDown);
                     binding.elementBindingDownS.setOnItemSelectedListener(null);
                     binding.elementBindingDownS.setSelection(adapterDown.getPosition(bindingDown));
@@ -687,9 +683,7 @@ public class ControlsEditorActivity extends AppCompatActivity {
 
                         binding.elementStickBindingTv.setVisibility(View.VISIBLE);
 
-                        ArrayAdapter<GLFWBinding> adapterStick = new ArrayAdapter<>(this,
-                                R.layout.spinner_item,
-                                new GLFWBinding[]{GLFWBinding.LEFT_JOYSTICK, GLFWBinding.RIGHT_JOYSTICK});
+                        ArrayAdapter<GLFWBinding> adapterStick = bindingAdapter(new GLFWBinding[]{GLFWBinding.LEFT_JOYSTICK, GLFWBinding.RIGHT_JOYSTICK});
                         binding.elementStickBindingS.setAdapter(adapterStick);
                         binding.elementStickBindingS.setOnItemSelectedListener(null);
                         binding.elementStickBindingS.setSelection(adapterStick.getPosition(element.getBindingStick()));
@@ -757,7 +751,7 @@ public class ControlsEditorActivity extends AppCompatActivity {
     private void setupRadialSectorSpinner(android.widget.Spinner spinner, GLFWBinding[] options,
                                           GLFWBinding current,
                                           java.util.function.Consumer<GLFWBinding> onPick) {
-        ArrayAdapter<GLFWBinding> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, options);
+        ArrayAdapter<GLFWBinding> adapter = bindingAdapter(options);
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(null);
         int pos = adapter.getPosition(current);
@@ -770,6 +764,11 @@ public class ControlsEditorActivity extends AppCompatActivity {
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         }));
+    }
+
+    private ArrayAdapter<GLFWBinding> bindingAdapter(GLFWBinding[] options) {
+        return new ControlLabels.Adapter<>(this, R.layout.spinner_item, options,
+                b -> ControlLabels.binding(this, b));
     }
 
     /** Short human label from a binding name, e.g. KEY_A→A, GAMEPAD_BUTTON_X→X, MOUSE_WHEEL_UP→UP. */
@@ -785,9 +784,7 @@ public class ControlsEditorActivity extends AppCompatActivity {
                                         @NonNull GLFWBinding binding, int bindingIndex) {
         ElementBindingFieldBinding fieldBinding = ElementBindingFieldBinding.inflate(getLayoutInflater());
 
-        ArrayAdapter<GLFWBinding> adapter = new ArrayAdapter<>(this,
-                R.layout.spinner_item,
-                GLFWBinding.valuesForType(inputType));
+        ArrayAdapter<GLFWBinding> adapter = bindingAdapter(GLFWBinding.valuesForType(inputType));
         fieldBinding.elementBindingS.setAdapter(adapter);
         fieldBinding.elementBindingS.setSelection(adapter.getPosition(binding));
         fieldBinding.elementBindingS.post(() -> {

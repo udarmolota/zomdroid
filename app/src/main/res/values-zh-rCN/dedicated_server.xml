@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ds_start">启动服务器</string>
+    <string name="ds_title">专用服务器</string>
+    <string name="ds_installing">请等待安装或依赖检查完成。</string>
+    <string name="ds_close_game">请先退出游戏，再启动专用服务器。</string>
+    <string name="ds_need_libraries">请先在附加库中下载 Build 41 多人游戏库。</string>
+    <string name="ds_description">无需本地玩家即可运行。可以关闭面板和屏幕；请使用“保存并停止”关闭服务器。选择已有 Host 配置继续原世界，使用新名称创建新世界。配置位于 coop-probe/Server。托管模组文件夹为空时共享已安装的模组。长时间运行和玩家容量仍在测试中。</string>
+    <string name="ds_profile">配置名称（英文字母、数字、_ 或 -）</string>
+    <string name="ds_load">加载配置</string>
+    <string name="ds_load_first">请先加载所选配置。</string>
+    <string name="ds_heap">服务器 Java 内存（MB）</string>
+    <string name="ds_port">UDP 端口</string>
+    <string name="ds_players">最大玩家数</string>
+    <string name="ds_interval">世界保存间隔（分钟，1–120）</string>
+    <string name="ds_password">连接密码（可选）</string>
+    <string name="ds_admin">管理员密码（首次创建使用；不会重置已有账号）</string>
+    <string name="ds_mods">启用的模组 ID，用 ; 分隔</string>
+    <string name="ds_map">按加载顺序填写地图，用 ; 分隔</string>
+    <string name="ds_advanced">编辑 PZ 配置文件</string>
+    <string name="ds_save_config">保存文件</string>
+    <string name="ds_save">保存世界</string>
+    <string name="ds_stop">保存并停止</string>
+    <string name="ds_stop_confirm">断开玩家、保存世界并停止服务器？请等待关闭完成。</string>
+    <string name="ds_idle">服务器已停止</string>
+    <string name="ds_starting">正在启动服务器…</string>
+    <string name="ds_running">服务器运行中</string>
+    <string name="ds_stopping">正在保存并停止…</string>
+    <string name="ds_saving">已请求保存，等待完成…</string>
+    <string name="ds_stopped">服务器已正常关闭</string>
+    <string name="ds_unconfirmed">服务器已停止。尚未确认保存及正常关闭，请查看日志。</string>
+    <string name="ds_failed">服务器错误</string>
+    <string name="ds_busy">请先停止专用服务器，再启动游戏或修改已安装文件。</string>
+    <string name="ds_metrics">玩家：%1$s · Java 内存：%2$s / %3$s MB</string>
+<string name="ds_force">强制停止</string>
+<string name="ds_force_confirm">服务器尚未完成关闭。强制停止可能丢失未保存的进度。是否立即停止，不再等待保存？</string>
+<string name="ds_uptime">运行时间：%1$s</string>
+    <string name="ds_profile_loaded">已加载配置“%1$s”，将继续它的世界。</string>
+    <string name="ds_profile_loaded_no_world">已加载配置“%1$s”，首次启动时将创建世界。</string>
+    <string name="ds_profile_new">还没有名为“%1$s”的配置：启动将创建新世界。</string>
+    <string name="ds_profile_changed">名称已更改：请重新加载配置。</string>
+    <string name="ds_new_world_confirm">没有名为“%1$s”的服务器配置。启动将以此名称创建新世界。</string>
+    <string name="ds_new_world_create">创建世界</string>
+    <string name="ds_profiles_show">显示服务器</string>
+</resources>

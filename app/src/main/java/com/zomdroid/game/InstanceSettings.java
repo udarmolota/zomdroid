@@ -33,6 +33,43 @@ public class InstanceSettings {
 
     private static final String PREFIX = "inst:";
 
+    public boolean isMacosLibrariesEnabled() {
+        return prefs.getBoolean(keyPrefix + "macos_libraries", false);
+    }
+
+    public void setMacosLibrariesEnabled(boolean enabled) {
+        prefs.edit().putBoolean(keyPrefix + "macos_libraries", enabled).apply();
+    }
+
+    /** One of the three macOS libraries ("lighting", "pathfind", "popman"): on unless the player
+     *  turned it off under "Libraries in use". Only meaningful while the macOS option is on. */
+    public boolean isMacosModuleEnabled(String module) {
+        return prefs.getBoolean(keyPrefix + "macos_module_" + module, true);
+    }
+
+    public void setMacosModuleEnabled(String module, boolean enabled) {
+        prefs.edit().putBoolean(keyPrefix + "macos_module_" + module, enabled).apply();
+    }
+
+    /** The game's own ARM64 fmodintegration instead of the x86_64 one through box64. On by
+     * default (her call, 2026-09-12): the linker falls back to box64 on its own when the library
+     * fails its checks, and the switch is the way out for "loads but sounds wrong". */
+    public boolean isNativeFmodEnabled() {
+        return prefs.getBoolean(keyPrefix + "native_fmod", true);
+    }
+
+    public void setNativeFmodEnabled(boolean enabled) {
+        prefs.edit().putBoolean(keyPrefix + "native_fmod", enabled).apply();
+    }
+
+    public boolean isCoopHostingEnabled() {
+        return prefs.getBoolean(keyPrefix + "coop_hosting", false);
+    }
+
+    public void setCoopHostingEnabled(boolean enabled) {
+        prefs.edit().putBoolean(keyPrefix + "coop_hosting", enabled).apply();
+    }
+
     private final LauncherPreferences global;
     private final SharedPreferences prefs;
     private final String keyPrefix;

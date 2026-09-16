@@ -168,6 +168,7 @@ public class TouchpadControlElement extends AbstractControlElement {
         drawable.draw(canvas);
 
         if (!DEBUG_DRAW_CURSOR) return;
+        if (parentView.gameDrawsCursor) return; // the game draws its own cursor
         if (cursorX < 0 || cursorY < 0) return;
 
         float x = (float) cursorX;

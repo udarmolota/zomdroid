@@ -28,5 +28,21 @@
     </style>
     <style name="AppTheme.NavigationView" parent="Widget.Material3.NavigationView">
         <item name="dividerColor">@color/pz_orange</item>
+        <!-- Half the Material 3 side spacing (inset 12dp to 6dp, padding 28dp to 14dp): the longest
+             drawer labels, like "Import/Export Custom Driver", were cut off at the old spacing. -->
+        <item name="itemShapeInsetStart">6dp</item>
+        <item name="itemShapeInsetEnd">6dp</item>
+        <item name="itemHorizontalPadding">14dp</item>
+        <item name="dividerInsetStart">14dp</item>
+        <item name="dividerInsetEnd">14dp</item>
+        <item name="subheaderInsetStart">14dp</item>
+        <item name="subheaderInsetEnd">14dp</item>
+        <!-- One step below the Material 3 drawer label (Label Large, 14sp): with the spacing
+             above, the longest labels still did not fit. -->
+        <item name="itemTextAppearance">@style/AppTheme.NavigationView.ItemText</item>
+    </style>
+
+    <style name="AppTheme.NavigationView.ItemText" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:textSize">13sp</item>
     </style>
 </resources>

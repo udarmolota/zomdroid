@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gog_dl_menu">Baixar da GOG</string>
+    <string name="gog_login_note">Entre com seu e-mail e senha da GOG. O login por conta vinculada não se conclui dentro de um app: se você costuma entrar assim, defina primeiro uma senha da GOG em gog.com → Sign in → Password reset.</string>
+    <string name="gog_disclaimer_title">Aviso</string>
+    <string name="gog_disclaimer_text">O Zomdroid nunca vê sua senha — você a digita na página da própria GOG. O token de acesso fica apenas na memória e some quando o app fecha; os cookies do login permanecem no armazenamento privado deste app para não perguntar toda vez, e sair da conta apaga os dois.</string>
+    <string name="gog_login_finishing">Concluindo o login…</string>
+    <string name="gog_login_ok">Login na GOG concluído</string>
+    <string name="gog_login_failed">Não foi possível entrar: %1$s</string>
+    <string name="gog_user_id">ID de usuário: %1$s</string>
+    <string name="gog_check_library">Verificar biblioteca</string>
+    <string name="gog_sign_out">Sair</string>
+    <string name="gog_checking">Lendo a biblioteca…</string>
+    <string name="gog_probe_failed">Não foi possível ler a biblioteca: %1$s</string>
+    <string name="gog_scanning">Verificando a sua biblioteca — %1$d de %2$d</string>
+    <string name="gog_no_game">Não há Project Zomboid nesta conta — mostrando todos os jogos com instalador para Linux.</string>
+    <string name="gog_nothing_linux">Nenhum jogo desta conta tem instalador para Linux.</string>
+    <string name="gog_download">Baixar</string>
+    <string name="gog_queued">Na fila</string>
+    <string name="gog_downloading">Baixando…</string>
+    <string name="gog_percent">%1$d%%</string>
+    <string name="gog_create_instance">Criar uma instância</string>
+    <string name="gog_item_installer">%1$s · %2$s</string>
+    <string name="gog_keepalive">Baixando da GOG: você pode alternar para outros aplicativos</string>
+    <string name="gog_download_interrupted">O download foi interrompido. Toque em “%1$s” de novo para continuar.</string>
+    <string name="gog_download_failed">Falha no download: %1$s</string>
+    <string name="gog_extracting">Extraindo o instalador da GOG…</string>
+</resources>

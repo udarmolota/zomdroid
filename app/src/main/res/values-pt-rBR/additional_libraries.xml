@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="additional_libraries_title">Bibliotecas adicionais</string>
+    <string name="mp_libs_title">Multijogador para Build 41</string>
+    <string name="mp_libs_hint">Baixa duas bibliotecas ARM64 do Linux B42.12 pela sua conta Steam. São ativadas automaticamente após a instalação. As bibliotecas de multijogador existentes são substituídas com backup. Os outros arquivos nativos são preservados.</string>
+    <string name="mp_libs_ready">Bibliotecas de multijogador B42.12 instaladas</string>
+    <string name="mp_libs_manual">Bibliotecas instaladas manualmente; versão de origem desconhecida</string>
+    <string name="mp_libs_login">Baixar duas bibliotecas de multijogador B42.12 para %1$s. Entre com uma conta Steam que possua Project Zomboid.</string>
+    <string name="mp_libs_invalid_instance">O download das bibliotecas de multijogador está disponível apenas para instâncias Build 41.</string>
+</resources>

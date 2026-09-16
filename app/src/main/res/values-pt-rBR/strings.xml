@@ -85,6 +85,18 @@
     <string name="control_element_icon">Ícone</string>
 
     <string name="game_instance_manage_storage">Gerenciar armazenamento</string>
+    <string name="game_instance_restore_backup">Restaurar cópia F10</string>
+    <string name="backup_warning_title">Antes de ativar</string>
+    <string name="backup_warning_message">Pressionar F10 cria uma cópia completa do seu mundo, um ponto para voltar depois de um travamento ou de uma morte.\n\nQuanto maior o save, ou seja, quanto mais tempo o personagem viveu, mais demora a cópia. Reserve uns minutos tranquilos antes de pressionar F10: o jogo pode parecer travado enquanto a cópia é gravada, mas não está. Apenas espere e não o feche.\n\nO botão F10 faz parte dos novos layouts de controle. Se você mantém um layout próprio de uma versão anterior, adicione o botão no editor de controles: tipo de entrada Teclado e mouse, atalho F10.\n\nÉ mantida uma cópia por mundo; cada nova substitui a anterior. Build 41 e 42, somente um jogador.</string>
+    <string name="backup_restore_title">A sessão anterior travou</string>
+    <string name="backup_restore_message">Há uma cópia de “%1$s” de %2$s (%3$d MB), feita quando você pressionou F10.\n\nVoltar a ela apagará tudo o que aconteceu depois.</string>
+    <string name="backup_restore_continue">Continuar assim</string>
+    <string name="backup_restore_do">Voltar à cópia</string>
+    <string name="backup_restoring">Restaurando a cópia…</string>
+    <string name="backup_restore_done">Cópia restaurada</string>
+    <string name="backup_restore_failed">Falha ao restaurar: %1$s</string>
+    <string name="backup_manual_restore_message">Há uma cópia de “%1$s” de %2$s (%3$d MB).\n\nRestaurá-la vai substituir seu progresso atual nesse mundo pelo estado do momento em que a cópia foi feita. Isso não pode ser desfeito.</string>
+    <string name="backup_none_found">Nenhuma cópia encontrada para o último mundo jogado</string>
     <string name="game_instance_delete">Excluir</string>
 
     <string name="donate_message">Gostando do app e quer nos apoiar? \n\nAgora mantido e desenvolvido por ko-fi.com/udarmolota, \ncriado por ko-fi.com/liamelui. \n\nColaboradores: \nshimux0, Wakort, LeHiepDuy, deadgamer182, Liko, Willing-Run-8987.</string>
@@ -343,6 +355,7 @@
 
     <!-- Settings groups -->
     <string name="settings_group_rendering">Renderização</string>
+    <string name="settings_group_texture">Compressão de texturas</string>
     <string name="settings_group_advanced">Avançado</string>
     <string name="settings_group_controls">Controles</string>
     <string name="settings_group_audio">Áudio</string>
@@ -360,7 +373,8 @@
         \u00A0\u00A0Project Zomboid/\n
         \u00A0\u00A0\u00A0\u00A0ProjectZomboid64.json\n
         \u00A0\u00A0\u00A0\u00A0java/\n
-        \u00A0\u00A0\u00A0\u00A0...
+        \u00A0\u00A0\u00A0\u00A0...\n\n
+        O instalador Linux da GOG (.sh) também serve: coloque só ele em um arquivo .zip.
     </string>
     <string name="game_instance_files_help_title">Estrutura do ZIP dos arquivos do jogo</string>
 
@@ -397,6 +411,7 @@
     <string name="settings_jvm_args_reset">Restaurar padrão</string>
     <string name="settings_jvm_args_clear">Limpar</string>
     <string name="settings_jvm_args_b42_recommendation">Recomendado para a Build 42: limita o heap Java e devolve memória ao sistema, deixando espaço para o renderizador. Em alguns casos, o jogo pode não iniciar sem alguns desses parâmetros. Não é para a Build 41 — em aparelhos de 4 GB faz mais mal que bem.</string>
+    <string name="settings_jvm_args_b42_preset_title">Preset para Build 42 (recomendado)</string>
     <string name="settings_jvm_args_apply">Aplicar</string>
     <string name="renderer_ng_build42_only_title">NG_GL4ES é só para a Build 42</string>
     <string name="renderer_ng_build42_only_message">Este renderizador foi feito para a Build 42 e não funciona na Build 41 — o jogo não vai iniciar.\n\nSe você joga a Build 41, escolha ZINK ou GL4ES.\n\nA Build 42 também precisa dos argumentos JVM recomendados: Configurações → Avançado → Argumentos JVM.</string>
@@ -610,4 +625,18 @@
     <string name="preset_applied">Preset aplicado: %1$s</string>
     <string name="preset_dialog_gpu_ng">%1$s detectada. O renderizador NG_GL4ES foi definido — ele funciona em qualquer GPU e não precisa de driver. As texturas são comprimidas com ETC2 em resolução total, então a memória é economizada sem perda de qualidade.</string>
     <string name="preset_dialog_gpu_ng_unnamed">O renderizador NG_GL4ES foi definido — ele funciona em qualquer GPU e não precisa de driver. As texturas são comprimidas com ETC2 em resolução total, então a memória é economizada sem perda de qualidade.</string>
+    <string name="preset_card_title">Presets sugeridos</string>
+    <string name="preset_card_subtitle">Renderizador, redução de texturas, argumentos Java e resolução, tudo definido de uma vez</string>
+    <string name="preset_name_b41">Build 41</string>
+    <string name="preset_name_b42">Build 42</string>
+    <string name="settings_backup_switch">Salvamento rápido (F10)</string>
+    <string name="settings_etc2_cache_clear">Limpar</string>
+    <string name="settings_etc2_cache_hint">Compartilhado por todas as instâncias. Pode ser limpo a qualquer momento: o renderizador recomprime o que precisa, o que leva alguns segundos no próximo carregamento.</string>
+    <string name="settings_features_title">Recursos</string>
+    <string name="settings_texture_compression">Compressão de texturas (ETC2)</string>
+    <string name="settings_texture_compression_short">Comprime texturas grandes com perda mínima de qualidade. Mantém um cache que você pode limpar.</string>
+    <string name="settings_jvm_args_title">Argumentos da JVM</string>
+    <string name="launcher_empty_title">Por onde começar</string>
+    <string name="launcher_empty_body">Para começar a jogar, crie uma instância: uma cópia instalada de Project Zomboid. Adicione os arquivos do jogo com o + no topo ou baixe o jogo da Steam ou da GOG pelo menu lateral. Um download da Steam precisa ser compactado em .zip antes; da GOG, toque em “Criar uma instância” quando o download terminar.</string>
+    <string name="launcher_empty_quick_start">Início rápido</string>
 </resources>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="coop_internet_title">Hosting over the internet</string>
+    <string name="coop_internet_pending">Internet: checking router</string>
+    <string name="coop_internet_mapped">Internet: port mapped</string>
+    <string name="coop_internet_failed">Internet: port mapping failed</string>
+    <string name="coop_internet_no_gateway">Internet: UPnP router not found</string>
+    <string name="coop_internet_unknown">Internet: port status unknown</string>
+    <string name="coop_internet_pending_detail">Waiting for the game to finish its UPnP check.</string>
+    <string name="coop_internet_mapped_detail">The router accepted the game’s UDP port mapping. Friends outside your Wi-Fi can try the external address and port below.</string>
+    <string name="coop_internet_failed_detail">The game could not open the UDP port. Check the router’s UPnP settings or forward the port manually to the phone’s Wi-Fi address.</string>
+    <string name="coop_internet_no_gateway_detail">The game did not find a router offering UPnP port mapping. Enable UPnP on the router or forward the UDP port manually to the phone’s Wi-Fi address.</string>
+    <string name="coop_internet_unknown_detail">The server started without a recorded UPnP result. UPnP may be disabled in its settings. Check the server log or configure forwarding manually.</string>
+    <string name="coop_internet_unavailable_detail">This game library does not provide the required UPnP functions. Configure UDP port forwarding manually on the router.</string>
+    <string name="coop_internet_addresses">UDP port: %1$s\nRouter external address: %2$s\nPhone Wi-Fi address: %3$s</string>
+    <string name="coop_internet_address_unknown">unavailable</string>
+    <string name="coop_internet_port_unknown">see server settings</string>
+    <string name="coop_internet_double_nat">The router reports a non-public address. Another router or your provider may be doing NAT. Forwarding on this router alone may not be enough; check upstream forwarding, a public IP, or a shared VPN network.</string>
+    <string name="coop_internet_unverified">Internet access has not been verified. Confirm by connecting from another network, such as mobile data.</string>
+    <string name="coop_internet_copy">Copy details</string>
+    <string name="coop_internet_close">Close</string>
+    <string name="settings_multiplayer_title">Multiplayer</string>
+    <string name="settings_coop_hosting">Allow server hosting</string>
+    <string name="settings_coop_hosting_hint">Launch normally, then select Host in the game. The server starts only when you create it.&lt;br&gt;&lt;br&gt;On Build 42, give the server at least 2 GB of memory when you create it. That is only the server’s share: the game itself needs its own memory on top of it, so hosting needs a powerful phone with plenty of RAM.&lt;br&gt;&lt;br&gt;Hosting uses a separate profile: your usual saves, mods and game settings are hidden while this switch is on and come back when you turn it off. The game gets a 2 GB memory limit and runs without debug mode. Background hosting is not guaranteed.</string>
+    <string name="coop_b41_libraries_required">Hosting on Build 41 needs two libraries: libRakNet64.so and libZNetNoSteam64.so. They come from the android folder of version 42.12. You can download them from Steam if you own the game there, or load them from a file with the archive if you have already downloaded it.</string>
+    <string name="settings_coop_hosting_short">Experimental feature, bugs are possible. Launch normally, then choose Host in the game.</string>
+</resources>

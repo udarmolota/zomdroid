@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ds_start">Start Server</string>
+    <string name="ds_title">Dedicated server</string>
+    <string name="ds_installing">Wait for installation or the dependency check to finish.</string>
+    <string name="ds_close_game">Exit the game before starting a dedicated server on this phone.</string>
+    <string name="ds_need_libraries">Download the Build 41 multiplayer libraries in Additional libraries first.</string>
+    <string name="ds_description">Runs without a local player. You may close this panel and turn off the screen; use Save and stop to shut down. Choose an existing Host profile to continue its world, or a new name to create a world. Server files are in coop-probe/Server. Installed mods are shared when the hosting mods folder is empty; enable their IDs below. Long sessions and capacity are still being tested.</string>
+    <string name="ds_profile">Profile name (letters, digits, _ or -)</string>
+    <string name="ds_load">Load profile</string>
+    <string name="ds_load_first">Load the selected profile before editing or starting.</string>
+    <string name="ds_heap">Server Java memory (MB)</string>
+    <string name="ds_port">UDP port</string>
+    <string name="ds_players">Maximum players</string>
+    <string name="ds_interval">Save world every (minutes, 1–120)</string>
+    <string name="ds_password">Connection password (optional)</string>
+    <string name="ds_admin">Administrator password (first creation; does not reset an existing account)</string>
+    <string name="ds_mods">Enabled mod IDs, separated by ;</string>
+    <string name="ds_map">Maps, in load order, separated by ;</string>
+    <string name="ds_advanced">Edit PZ configuration files</string>
+    <string name="ds_save_config">Save file</string>
+    <string name="ds_save">Save world</string>
+    <string name="ds_stop">Save and stop</string>
+    <string name="ds_stop_confirm">Disconnect players, save the world and stop the server? Wait until shutdown completes.</string>
+    <string name="ds_idle">Server is stopped</string>
+    <string name="ds_starting">Starting server…</string>
+    <string name="ds_running">Server is running</string>
+    <string name="ds_stopping">Saving and stopping…</string>
+    <string name="ds_saving">Save requested; waiting for completion…</string>
+    <string name="ds_stopped">Server stopped after completing shutdown</string>
+    <string name="ds_unconfirmed">Server is stopped. A completed save and shutdown were not confirmed; inspect the log.</string>
+    <string name="ds_failed">Server error</string>
+    <string name="ds_busy">Stop the dedicated server before launching the game or changing installed files.</string>
+    <string name="ds_metrics">Players: %1$s · Java memory: %2$s / %3$s MB</string>
+<string name="ds_force">Force stop</string>
+<string name="ds_force_confirm">The server has not finished. Force stopping may lose unsaved progress. Stop it immediately without waiting for a save?</string>
+<string name="ds_uptime">Uptime: %1$s</string>
+    <string name="ds_profile_loaded">Profile “%1$s” loaded. Its world will continue.</string>
+    <string name="ds_profile_loaded_no_world">Profile “%1$s” loaded. Its world will be created at the first start.</string>
+    <string name="ds_profile_new">No profile “%1$s” yet: starting will create a new world.</string>
+    <string name="ds_profile_changed">Name changed: load the profile again.</string>
+    <string name="ds_new_world_confirm">There is no server profile named “%1$s”. Starting will create a new world with this name.</string>
+    <string name="ds_new_world_create">Create world</string>
+    <string name="ds_profiles_show">Show servers</string>
+</resources>

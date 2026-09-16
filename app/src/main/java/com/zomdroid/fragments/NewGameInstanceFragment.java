@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -22,6 +23,9 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipFile;
+
 import com.zomdroid.InstallerService;
 import com.zomdroid.LauncherPreferences;
 import com.zomdroid.R;
@@ -30,9 +34,14 @@ import com.zomdroid.game.GameInstance;
 import com.zomdroid.game.InstallationPreset;
 import com.zomdroid.game.GameInstanceManager;
 import com.zomdroid.game.PresetManager;
+import com.zomdroid.gog.GogInstallerExtractor;
+import com.zomdroid.gog.PrefixedZip;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.FileSystemException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Objects;
 
@@ -43,6 +52,16 @@ public class NewGameInstanceFragment extends Fragment {
     private enum GpuVendor { QUALCOMM, MEDIATEK, UNKNOWN }
 
     private InstallationPreset detectedPreset = null;
+
+    /**
+     * Navigation argument: the absolute path of an archive to install, so the screen opens with the
+     * file already chosen. The GOG downloader hands over the installer it fetched this way, because
+     * the picker below is ZIP-only and most file managers would not show it a bare .sh anyway.
+     */
+    public static final String ARG_PRESELECTED_FILE = "preselected_file";
+
+    // What kind of archive gameFilesZipUri is; InstallerService unpacks each differently.
+    private String archiveKind = GogInstallerExtractor.KIND_GAME_ZIP;
 
     // URIs for selected ZIP files
     private Uri gameFilesZipUri = null;
@@ -58,6 +77,7 @@ public class NewGameInstanceFragment extends Fragment {
                 if (Objects.equals(contentResolver.getType(uri), ZIP_MIME)) {
                     gameFilesZipUri = uri;
                     detectedPreset = null;
+                    archiveKind = GogInstallerExtractor.KIND_GAME_ZIP;
                     binding.newGameInstanceBannerIv.setImageResource(R.drawable.banner_default);
                     String fileName = extractFileName(uri);
                     binding.newGameInstanceFilesPathEt.setText(fileName);
@@ -148,7 +168,7 @@ public class NewGameInstanceFragment extends Fragment {
                     .setMessage(R.string.native_libs_dialog_message)
                     .setPositiveButton(R.string.dialog_button_ok, null)
                     .setNeutralButton(R.string.dialog_button_wiki, (dialog, which) ->
-                            Navigation.findNavController(v).navigate(R.id.wiki_fragment))
+                            Navigation.findNavController(v).navigate(R.id.wiki_fragment, WikiFragment.section("native-libraries")))
                     .show();
         });
 
@@ -167,6 +187,20 @@ public class NewGameInstanceFragment extends Fragment {
         // Browse button for native libs ZIP
         binding.newGameInstanceNativeLibsBrowseIb.setOnClickListener(v ->
                 actionOpenNativeLibsLauncher.launch(ZIP_MIME));
+
+        // Opened with the file already chosen (see ARG_PRESELECTED_FILE). A path of our own never
+        // goes through the picker, so its ZIP-only rule does not apply; detection reads the
+        // installer in place.
+        String preselected = getArguments() == null ? null : getArguments().getString(ARG_PRESELECTED_FILE);
+        if (preselected != null) {
+            File chosen = new File(preselected);
+            if (chosen.isFile()) {
+                gameFilesZipUri = Uri.fromFile(chosen);
+                detectedPreset = null;
+                binding.newGameInstanceFilesPathEt.setText(chosen.getName());
+                detectAndSelectPreset(gameFilesZipUri);
+            }
+        }
 
         // Create button
         binding.newGameInstanceCreateBtn.setOnClickListener(v -> {
@@ -197,17 +231,17 @@ public class NewGameInstanceFragment extends Fragment {
             final Uri uri = gameFilesZipUri;
             final Context appCtx = requireContext().getApplicationContext();
             new Thread(() -> {
-                InstallationPreset preset = detectPreset(appCtx, uri);
+                Detection detection = detect(appCtx, uri);
                 if (!isAdded()) return;
                 requireActivity().runOnUiThread(() -> {
                     if (!isAdded() || binding == null) return;
                     binding.newGameInstanceCreateBtn.setEnabled(true);
-                    if (preset == null) {
+                    if (detection == null) {
                         Toast.makeText(requireContext(), R.string.new_game_instance_detect_failed, Toast.LENGTH_LONG).show();
                         return;
                     }
-                    detectedPreset = preset;
-                    startInstall(name, preset);
+                    apply(detection);
+                    startInstall(name, detection.preset);
                 });
             }).start();
         });
@@ -244,6 +278,7 @@ public class NewGameInstanceFragment extends Fragment {
         installerIntent.putExtra(InstallerService.EXTRA_ARCHIVE_URI, gameFilesZipUri);
         installerIntent.putExtra(InstallerService.EXTRA_INSTALL_PRESET_NAME, selectedPreset.name);
         installerIntent.putExtra(InstallerService.EXTRA_GPU_VENDOR, gpu.name());
+        installerIntent.putExtra(InstallerService.EXTRA_ARCHIVE_KIND, archiveKind);
         if (nativeLibsZipUri != null) {
             installerIntent.putExtra(InstallerService.EXTRA_NATIVE_LIBS_URI, nativeLibsZipUri);
         }
@@ -267,6 +302,7 @@ public class NewGameInstanceFragment extends Fragment {
     }
 
     private String extractFileName(Uri uri) {
+        if (isFileUri(uri)) return new File(uri.getPath()).getName();
         String fileName = null;
         Cursor cursor = requireContext().getContentResolver().query(
                 uri,
@@ -285,21 +321,29 @@ public class NewGameInstanceFragment extends Fragment {
         return fileName;
     }    
 
-    // Scans the selected game ZIP in a background thread, sets detectedPreset and updates banner.
-    // This is a UX convenience (early banner); Create button also detects synchronously as a fallback.
+    // Scans the archive in a background thread and records what it found: preset, kind, banner.
+    // This is a UX convenience (early banner); the Create button detects as a fallback.
     private void detectAndSelectPreset(Uri zipUri) {
         Context ctx = requireContext().getApplicationContext();
         new Thread(() -> {
-            InstallationPreset preset = detectPreset(ctx, zipUri);
-            if (preset == null || !isAdded()) return;
+            Detection detection = detect(ctx, zipUri);
+            if (detection == null || !isAdded()) return;
             requireActivity().runOnUiThread(() -> {
                 if (!isAdded()) return;
-                detectedPreset = preset;
-                FragmentNewGameInstanceBinding b = binding;
-                if (b == null) return;
-                b.newGameInstanceBannerIv.setImageResource(bannerForPreset(preset));
+                apply(detection);
             });
         }).start();
+    }
+
+    // Records a detection. A ZIP of GOG installers keeps the default banner: which build is inside
+    // is only known once the installer is unpacked, and the placeholder preset would mislead.
+    private void apply(Detection detection) {
+        detectedPreset = detection.preset;
+        archiveKind = detection.archiveKind;
+        FragmentNewGameInstanceBinding b = binding;
+        if (b == null) return;
+        b.newGameInstanceBannerIv.setImageResource(GogInstallerExtractor.KIND_BUNDLE.equals(detection.archiveKind)
+                ? R.drawable.banner_default : bannerForPreset(detection.preset));
     }
 
     private int bannerForPreset(InstallationPreset preset) {
@@ -310,139 +354,79 @@ public class NewGameInstanceFragment extends Fragment {
         }
     }
 
-    // Detects the matching InstallationPreset from the game ZIP, or null on failure.
-    // Tries fast central-directory read (ZipFile via /proc/self/fd/); if that provider/fd
-    // isn't seekable, falls back to a sequential ZipInputStream scan (works on any stream).
-    //   android/   → Build 42.12+
-    //   imgui*.jar → Build 42
-    //   neither    → Build 41
-    private InstallationPreset detectPreset(Context ctx, Uri zipUri) {
-        long t0 = System.currentTimeMillis();
-        int idx = detectPresetIndexCentralDir(ctx, zipUri);
-        android.util.Log.i("PresetDetect", "detectPreset: idx=" + idx
-                + " took=" + (System.currentTimeMillis() - t0) + "ms");
-        if (idx < 0) return null;
-        List<InstallationPreset> presets = PresetManager.getPresets();
-        if (idx >= presets.size()) return null;
-        return presets.get(idx);
+    /** What the archive turned out to be. */
+    private static final class Detection {
+        final InstallationPreset preset;
+        final String archiveKind;
+
+        Detection(InstallationPreset preset, String archiveKind) {
+            this.preset = preset;
+            this.archiveKind = archiveKind;
+        }
     }
 
-    // presets index: 0=Build 42, 1=Build 42.12+, 2=Build 41
-    // Reads ONLY the ZIP central directory (the archive's index at the end of the file)
-    // via random access on the seekable content fd. This reads a few hundred KB regardless
-    // of ZIP size — no scanning of entry data. Returns -1 if it can't (e.g. non-seekable fd).
-    private int detectPresetIndexCentralDir(Context ctx, Uri zipUri) {
-        android.os.ParcelFileDescriptor pfd = null;
+    // Reads only the archive's central directory - the index at its end, a few hundred KB whatever
+    // the archive size - through a seekable file descriptor, and picks the preset from the entry
+    // names (PresetManager holds the rules). A bare GOG installer is a ZIP behind a shell script,
+    // which PrefixedZip reads in place. A ZIP holding nothing but installers cannot say which build
+    // is inside: it gets Build 41 as a placeholder, and InstallerService picks the real preset from
+    // the extracted files. Returns null if the archive cannot be read (e.g. a non-seekable provider).
+    private Detection detect(Context ctx, Uri uri) {
+        long t0 = System.currentTimeMillis();
+        List<String> names = entryNames(ctx, uri);
+        if (names == null) return null;
+        String kind = GogInstallerExtractor.KIND_GAME_ZIP;
+        int idx;
+        if (isFileUri(uri) && GogInstallerExtractor.isMakeselfInstaller(new File(uri.getPath()))) {
+            kind = GogInstallerExtractor.KIND_INSTALLER;
+            idx = PresetManager.detectPresetIndex(names);
+        } else if (GogInstallerExtractor.isInstallerBundle(names)) {
+            kind = GogInstallerExtractor.KIND_BUNDLE;
+            idx = PresetManager.PRESET_BUILD_41;
+        } else {
+            idx = PresetManager.detectPresetIndex(names);
+        }
+        android.util.Log.i("PresetDetect", "detect: idx=" + idx + " kind=" + kind + " entries=" + names.size()
+                + " took=" + (System.currentTimeMillis() - t0) + "ms");
+        List<InstallationPreset> presets = PresetManager.getPresets();
+        if (idx < 0 || idx >= presets.size()) return null;
+        return new Detection(presets.get(idx), kind);
+    }
+
+    // The entry names of the archive behind uri, or null if it cannot be read as a ZIP.
+    private List<String> entryNames(Context ctx, Uri uri) {
+        ParcelFileDescriptor pfd;
         try {
-            pfd = ctx.getContentResolver().openFileDescriptor(zipUri, "r");
-            if (pfd == null) return -1;
-            java.io.FileInputStream fis = new java.io.FileInputStream(pfd.getFileDescriptor());
-            java.nio.channels.FileChannel ch = fis.getChannel();
-            long fileSize = ch.size();
-            if (fileSize < 22) return -1; // smaller than a minimal EOCD record
-
-            // 1) Locate End Of Central Directory (EOCD, signature PK\5\6) in the tail.
-            int tailLen = (int) Math.min(fileSize, 64 * 1024 + 22);
-            long tailStart = fileSize - tailLen;
-            java.nio.ByteBuffer tail = readAt(ch, tailStart, tailLen);
-            int eocdPos = -1;
-            for (int i = tailLen - 22; i >= 0; i--) {
-                if (tail.getInt(i) == 0x06054b50) { eocdPos = i; break; }
+            pfd = ctx.getContentResolver().openFileDescriptor(uri, "r");
+        } catch (Exception e) {
+            android.util.Log.w("PresetDetect", "cannot open " + uri + ": " + e);
+            return null;
+        }
+        if (pfd == null) return null;
+        // Closing the archive closes the channel, the stream behind it and with it the descriptor.
+        java.nio.channels.FileChannel ch = new ParcelFileDescriptor.AutoCloseInputStream(pfd).getChannel();
+        boolean handedOver = false;
+        try {
+            ZipFile zf = PrefixedZip.open(ch);
+            handedOver = true;
+            try (ZipFile archive = zf) {
+                List<String> names = new ArrayList<>();
+                for (Enumeration<ZipArchiveEntry> en = archive.getEntries(); en.hasMoreElements(); )
+                    names.add(en.nextElement().getName());
+                return names;
             }
-            if (eocdPos < 0) return -1;
-
-            long cdSize      = tail.getInt(eocdPos + 12) & 0xFFFFFFFFL;
-            long cdOffset    = tail.getInt(eocdPos + 16) & 0xFFFFFFFFL;
-            long totalEntries = tail.getShort(eocdPos + 10) & 0xFFFF;
-
-            // 2) Zip64 fallback (archives > 4GB or > 65535 entries use sentinel values).
-            if (cdOffset == 0xFFFFFFFFL || cdSize == 0xFFFFFFFFL || totalEntries == 0xFFFF) {
-                long locPos = tailStart + eocdPos - 20; // Zip64 EOCD locator sits before EOCD
-                if (locPos >= 0) {
-                    java.nio.ByteBuffer loc = readAt(ch, locPos, 20);
-                    if (loc.getInt(0) == 0x07064b50) {
-                        long z64Off = loc.getLong(8);
-                        java.nio.ByteBuffer z = readAt(ch, z64Off, 56);
-                        if (z.getInt(0) == 0x06064b50) {
-                            cdSize   = z.getLong(40);
-                            cdOffset = z.getLong(48);
-                        }
-                    }
-                }
-            }
-
-            if (cdOffset < 0 || cdSize <= 0 || cdOffset + cdSize > fileSize) return -1;
-            if (cdSize > 64L * 1024 * 1024) return -1; // sanity guard against absurd CD size
-
-            // 3) Read the central directory and scan entry filenames only.
-            java.nio.ByteBuffer cd = readAt(ch, cdOffset, (int) cdSize);
-            boolean hasImguiJar = false;
-            boolean hasAndroidDir = false;
-            boolean hasBuild4220NativeLayout = false;
-            int p = 0;
-            int cap = cd.capacity();
-            while (p + 46 <= cap) {
-                if (cd.getInt(p) != 0x02014b50) break; // central-dir file header signature PK\1\2
-                int nameLen    = cd.getShort(p + 28) & 0xFFFF;
-                int extraLen   = cd.getShort(p + 30) & 0xFFFF;
-                int commentLen = cd.getShort(p + 32) & 0xFFFF;
-                int nameStart  = p + 46;
-                if (nameStart + nameLen > cap) break;
-                byte[] nameBytes = new byte[nameLen];
-                for (int i = 0; i < nameLen; i++) nameBytes[i] = cd.get(nameStart + i);
-                String name = new String(nameBytes, java.nio.charset.StandardCharsets.UTF_8);
-                if (isBuild4220NativeLayoutEntry(name)) hasBuild4220NativeLayout = true;
-                if (isAndroidDirEntry(name)) hasAndroidDir = true;
-                if (isImguiJar(name)) hasImguiJar = true;
-                p = nameStart + nameLen + extraLen + commentLen;
-            }
-            if (hasBuild4220NativeLayout) {
-                android.util.Log.i("PresetDetect",
-                        "Detected Build 42.20+ native layout in ZIP");
-                return 1; // Same runtime preset; InstallerService normalizes the file layout.
-            }
-            if (hasAndroidDir) return 1; // Build 42.12+
-            return hasImguiJar ? 0 : 2; // Build 42 : Build 41
         } catch (Exception e) {
             android.util.Log.w("PresetDetect", "central-dir read failed: " + e, e);
-            return -1;
+            return null;
         } finally {
-            try { if (pfd != null) pfd.close(); } catch (Exception ignored) {}
+            if (!handedOver) {
+                try { ch.close(); } catch (IOException ignored) {}
+            }
         }
     }
 
-    // Reads exactly len bytes at absolute position pos into a little-endian buffer (index-0 based).
-    private java.nio.ByteBuffer readAt(java.nio.channels.FileChannel ch, long pos, int len) throws java.io.IOException {
-        java.nio.ByteBuffer buf = java.nio.ByteBuffer.allocate(len);
-        ch.position(pos);
-        while (buf.hasRemaining()) {
-            if (ch.read(buf) < 0) break;
-        }
-        buf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
-        buf.clear(); // reset position/limit so absolute getInt/getShort span the whole buffer
-        return buf;
-    }
-
-    // Matches an "android" directory at ANY depth — tolerant of wrapper folders
-    // (e.g. "PZ/android/arm64-v8a/...") so version detection still works on nested zips.
-    private boolean isAndroidDirEntry(String name) {
-        String n = name.replace('\\', '/');
-        return n.equals("android") || n.startsWith("android/")
-                || n.endsWith("/android") || n.contains("/android/");
-    }
-
-    // Matches the Linux Bullet library at any wrapper depth. Unlike a generic natives/ match,
-    // this cannot be confused with an unrelated dependency directory in the archive.
-    private boolean isBuild4220NativeLayoutEntry(String name) {
-        String n = name.replace('\\', '/');
-        return n.equals("natives/libPZBullet64.so")
-                || n.endsWith("/natives/libPZBullet64.so");
-    }
-
-    private boolean isImguiJar(String name) {
-        String base = name.contains("/") ? name.substring(name.lastIndexOf('/') + 1) : name;
-        String baseLower = base.toLowerCase();
-        return baseLower.startsWith("imgui") && baseLower.endsWith(".jar");
+    private static boolean isFileUri(Uri uri) {
+        return "file".equals(uri.getScheme());
     }
 
     // The detector itself lives in SuggestedPreset: Settings asks the same question to decide which

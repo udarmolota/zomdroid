@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ctl_type_stick">Stik (gamepad)</string>
+    <string name="ctl_type_stick_wasd">Stik (tombol WASD)</string>
+    <string name="ctl_type_stick_mouse">Stik (mouse)</string>
+    <string name="ctl_type_dpad">D-pad</string>
+    <string name="ctl_type_button_rect">Tombol (persegi)</string>
+    <string name="ctl_type_button_circle">Tombol (bulat)</string>
+    <string name="ctl_type_touchpad">Touchpad (mouse)</string>
+    <string name="ctl_type_scroll_bar">Bilah gulir (roda mouse)</string>
+    <string name="ctl_type_radial_menu">Menu radial</string>
+    <string name="ctl_input_mnk">Keyboard &amp; mouse</string>
+    <string name="ctl_input_gamepad">Gamepad</string>
+    <string name="ctl_icon_none">Tanpa ikon</string>
+    <string name="ctl_style_outline">Garis tepi</string>
+    <string name="ctl_style_filled">Penuh</string>
+    <string name="ctl_style_glass">Kaca</string>
+    <string name="ctl_key_space">Spasi</string>
+    <string name="ctl_key_left">%1$s kiri</string>
+    <string name="ctl_key_right">%1$s kanan</string>
+    <string name="ctl_mouse_left">Klik kiri</string>
+    <string name="ctl_mouse_right">Klik kanan</string>
+    <string name="ctl_mouse_middle">Klik tengah</string>
+    <string name="ctl_mouse_button">Tombol mouse %1$s</string>
+    <string name="ctl_mouse_wheel_up">Gulir ke atas</string>
+    <string name="ctl_mouse_wheel_down">Gulir ke bawah</string>
+    <string name="ctl_ui_toggle_overlay">Tampilkan/sembunyikan kontrol layar</string>
+    <string name="ctl_ui_toggle_keyboard">Tampilkan/sembunyikan keyboard</string>
+    <string name="ctl_pad_left_stick">Stik kiri</string>
+    <string name="ctl_pad_right_stick">Stik kanan</string>
+    <string name="ctl_pad_left_stick_press">Tekan stik kiri (L3)</string>
+    <string name="ctl_pad_right_stick_press">Tekan stik kanan (R3)</string>
+    <string name="ctl_pad_axis">%1$s (sumbu)</string>
+    <string name="ctl_pad_dpad">D-pad %1$s</string>
+    <string name="control_element_toggle">Toggle</string>
+</resources>

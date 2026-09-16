@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gog_dl_menu">Unduh dari GOG</string>
+    <string name="gog_login_note">Masuk dengan e-mail dan kata sandi GOG Anda. Masuk lewat akun tertaut tidak bisa diselesaikan di dalam aplikasi — jika Anda biasanya masuk seperti itu, buat dulu kata sandi GOG: gog.com → Sign in → Password reset.</string>
+    <string name="gog_disclaimer_title">Penafian</string>
+    <string name="gog_disclaimer_text">Zomdroid tidak pernah melihat kata sandi Anda — Anda mengetiknya di halaman GOG sendiri. Token akses hanya disimpan di memori dan hilang saat aplikasi ditutup; cookie masuk tetap ada di penyimpanan privat aplikasi ini agar tidak ditanya setiap kali, dan keluar dari akun menghapus keduanya.</string>
+    <string name="gog_login_finishing">Menyelesaikan proses masuk…</string>
+    <string name="gog_login_ok">Berhasil masuk ke GOG</string>
+    <string name="gog_login_failed">Gagal masuk: %1$s</string>
+    <string name="gog_user_id">ID pengguna: %1$s</string>
+    <string name="gog_check_library">Periksa pustaka</string>
+    <string name="gog_sign_out">Keluar</string>
+    <string name="gog_checking">Membaca pustaka…</string>
+    <string name="gog_probe_failed">Gagal membaca pustaka: %1$s</string>
+    <string name="gog_scanning">Memeriksa pustaka Anda — %1$d dari %2$d</string>
+    <string name="gog_no_game">Tidak ada Project Zomboid di akun ini — menampilkan semua game yang punya installer Linux.</string>
+    <string name="gog_nothing_linux">Tidak ada game di akun ini yang punya installer Linux.</string>
+    <string name="gog_download">Unduh</string>
+    <string name="gog_queued">Dalam antrean</string>
+    <string name="gog_downloading">Mengunduh…</string>
+    <string name="gog_percent">%1$d%%</string>
+    <string name="gog_create_instance">Buat instance</string>
+    <string name="gog_item_installer">%1$s · %2$s</string>
+    <string name="gog_keepalive">Mengunduh dari GOG — Anda bisa beralih ke aplikasi lain</string>
+    <string name="gog_download_interrupted">Unduhan terputus. Ketuk “%1$s” lagi untuk melanjutkan.</string>
+    <string name="gog_download_failed">Unduhan gagal: %1$s</string>
+    <string name="gog_extracting">Membongkar installer GOG…</string>
+</resources>

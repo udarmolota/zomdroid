@@ -41,6 +41,10 @@ import java.util.regex.Pattern;
  * {@link SteamDownloadState}, so leaving and returning keeps the log and "still downloading" state.
  */
 public class SteamDownloadFragment extends Fragment implements SteamDownloadState.View {
+    public static final String ARG_MACOS_INSTANCE = "macos_instance";
+    public static final String ARG_MP_INSTANCE = "mp_instance";
+    private String macosInstanceName;
+    private String mpInstanceName;
 
     private EditText etUser, etPass, etManifest, etModsIds;
     private Button btnStart, btnModsStart, btnCancel;
@@ -59,6 +63,8 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
         appCtx = requireContext().getApplicationContext();
+        macosInstanceName = getArguments() == null ? null : getArguments().getString(ARG_MACOS_INSTANCE);
+        mpInstanceName = getArguments() == null ? null : getArguments().getString(ARG_MP_INSTANCE);
         etUser = v.findViewById(R.id.et_dl_user);
         etPass = v.findViewById(R.id.et_dl_pass);
         etManifest = v.findViewById(R.id.et_dl_manifest);
@@ -89,6 +95,22 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
 
         buildToggle = v.findViewById(R.id.toggle_dl_build);
         buildToggle.check(R.id.btn_build_41);   // legacy41 is the default selection
+        if (macosInstanceName != null || mpInstanceName != null) {
+            toggle.setVisibility(View.GONE);
+            buildToggle.setVisibility(View.GONE);
+            etManifest.setVisibility(View.GONE);
+            v.findViewById(R.id.tv_slow_warning).setVisibility(View.GONE);
+            ((TextView) v.findViewById(R.id.tv_login_note)).setText(getString(
+                    mpInstanceName != null ? R.string.mp_libs_login : R.string.macos_libs_login,
+                    mpInstanceName != null ? mpInstanceName : macosInstanceName));
+            // Hide the Linux manifest instructions while retaining the shared login/progress UI.
+            ViewGroup gameControls = (ViewGroup) btnStart.getParent();
+            for (int i = 0; i < gameControls.getChildCount(); i++) {
+                View child = gameControls.getChildAt(i);
+                if (child != btnStart) child.setVisibility(View.GONE);
+            }
+            btnStart.setText(R.string.macos_libs_download);
+        }
 
         // A pinned manifest fully determines what gets downloaded (see parseManifestId /
         // parseBranchOverride below), so the toggle is redundant — and potentially misleading,
@@ -162,7 +184,7 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
         if (SteamDownloadState.get().isDownloading()) return;
         if (text(etUser).isEmpty()) { etUser.setError(getString(R.string.steam_dl_required)); return; }
         if (etPass.getText().toString().isEmpty()) { etPass.setError(getString(R.string.steam_dl_required)); return; }
-        if (!ensureAllFilesAccess()) return;
+        if (macosInstanceName == null && mpInstanceName == null && !ensureAllFilesAccess()) return;
 
         String manifestText = text(etManifest);
         long manifestId = parseManifestId(manifestText);
@@ -193,6 +215,26 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
         SteamDownloadState st = SteamDownloadState.get();
         SteamGameDownloader dl = new SteamGameDownloader(text(etUser), etPass.getText().toString(),
                 manifestId, branch, buildLabel, st);
+        if (macosInstanceName != null) {
+            com.zomdroid.game.GameInstance instance = com.zomdroid.game.GameInstanceManager.requireSingleton()
+                    .getInstanceByName(macosInstanceName);
+            if (instance == null || !instance.isBuild4220Plus()) {
+                Toast.makeText(appCtx, R.string.macos_libs_invalid_instance, Toast.LENGTH_LONG).show();
+                return;
+            }
+            dl = SteamGameDownloader.macos(text(etUser), etPass.getText().toString(),
+                    new java.io.File(instance.getGamePath()), st);
+        }
+        if (mpInstanceName != null) {
+            com.zomdroid.game.GameInstance instance = com.zomdroid.game.GameInstanceManager.requireSingleton()
+                    .getInstanceByName(mpInstanceName);
+            if (instance == null || !"Build 41".equals(instance.getPresetName())) {
+                Toast.makeText(appCtx, R.string.mp_libs_invalid_instance, Toast.LENGTH_LONG).show();
+                return;
+            }
+            dl = SteamGameDownloader.libraries(text(etUser), etPass.getText().toString(),
+                    new java.io.File(instance.getGamePath()), com.zomdroid.steam.LibraryPack.B41_MULTIPLAYER, st);
+        }
         Thread th = new Thread(dl, "zd-download");
         st.begin(appCtx);
         st.setActive(dl, th);

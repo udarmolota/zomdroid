@@ -24,7 +24,7 @@
         android:layout_gravity="top|center_horizontal"
         android:layout_marginTop="45dp"
         android:alpha="0.92"
-        android:text="VKBD"
+        android:text="@string/controls_editor_layout_dialog_title"
         android:textStyle="bold"
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
 
@@ -214,7 +214,7 @@
                         android:textColor="?attr/colorPrimary"
                         android:textSize="13sp"
                         android:gravity="start|center_vertical"
-                        android:text="Toggle" />
+                        android:text="@string/control_element_toggle" />
 
                 </LinearLayout>
 

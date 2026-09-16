@@ -156,8 +156,14 @@ static void monitor_stdio_and_memory() {
             long rss_mb = -1, swap_mb = -1;
             get_self_mem_mb(&rss_mb, &swap_mb);
             if (rss_mb >= 0) {
-                printf("[ZMEM] rss=%ldMB swap=%ldMB avail=%ldMB\n",
-                       rss_mb, swap_mb, get_mem_available_mb());
+                if (getenv("ZOMDROID_COOP_OUTPUT")) {
+                    // fd 1 carries CoopSlave protocol; diagnostics must not enter it.
+                    LOGI("[ZMEM] rss=%ldMB swap=%ldMB avail=%ldMB",
+                         rss_mb, swap_mb, get_mem_available_mb());
+                } else {
+                    printf("[ZMEM] rss=%ldMB swap=%ldMB avail=%ldMB\n",
+                           rss_mb, swap_mb, get_mem_available_mb());
+                }
             }
         }
 
@@ -319,12 +325,14 @@ static int init_zomdroid_namespace(const char* ld_library_path) {
     return 0;
 }
 
+static void (*prepare_macho_pathfind)(void);
 static int load_linker_hook() {
     void* zomdroid_linker = linkernsbypass_namespace_dlopen("libzomdroidlinker.so", RTLD_LOCAL, zomdroid_ns);
     if (!zomdroid_linker) {
         LOGE("%s", dlerror());
         return -1;
     }
+    prepare_macho_pathfind = dlsym(zomdroid_linker, "zomdroid_linker_prepare_pathfind");
     void (*zomdroid_linker_set_proc_addrs)(void*, void*, void*) =
             dlsym(zomdroid_linker, "zomdroid_linker_set_proc_addrs");
     int (*zomdroid_linker_init)() =
@@ -464,7 +472,8 @@ static void zomdroid_crash_handler(int sig, siginfo_t* si, void* uctx) {
 }
 
 static void install_crash_handler(const char* game_dir_path) {
-    snprintf(g_crash_path, sizeof(g_crash_path), "%s/crash.txt", game_dir_path);
+    snprintf(g_crash_path, sizeof(g_crash_path), "%s/%s", game_dir_path,
+             getenv("ZOMDROID_SERVER_PROBE") ? "server-crash.txt" : "crash.txt");
     // Drop any stale dump from a previous run so an old crash isn't exported as fresh.
     unlink(g_crash_path);
 
@@ -495,7 +504,10 @@ void zomdroid_start_game(const char* game_dir_path, const char* library_dir_path
 
     // Persist native stdout/stderr to <game>/native.log so box64/NG diagnostic output
     // survives crashes and restarts and reaches the exported Bug Report.
-    snprintf(g_native_log_path, sizeof(g_native_log_path), "%s/native.log", game_dir_path);
+    snprintf(g_native_log_path, sizeof(g_native_log_path), "%s/%s", game_dir_path,
+             getenv("ZOMDROID_SERVER_PROBE") ? "server-native.log" : "native.log");
+    const char* coop_output = getenv("ZOMDROID_COOP_OUTPUT");
+    if (coop_output) snprintf(g_native_log_path, sizeof(g_native_log_path), "%s", coop_output);
 
     pthread_t logging_thread;
     if (pthread_create(&logging_thread, NULL, (void *(*)(void *)) &monitor_stdio_and_memory, NULL) != 0) {
@@ -518,6 +530,7 @@ void zomdroid_start_game(const char* game_dir_path, const char* library_dir_path
         LOGE("Failed to change cwd with error: %s", strerror(errno));
         return;
     }
+    if (prepare_macho_pathfind) prepare_macho_pathfind();
 
     // We keep our SIGABRT dialog; clear other handlers possibly set by box64.
     // DIAG: leave SIGSEGV at its DEFAULT disposition (do NOT set SIG_IGN). Previously

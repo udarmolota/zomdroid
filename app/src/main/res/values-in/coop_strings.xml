@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_multiplayer_title">Multiplayer</string>
+    <string name="settings_coop_hosting">Izinkan hosting server</string>
+    <string name="settings_coop_hosting_short">Fitur eksperimental, mungkin ada bug. Jalankan seperti biasa, lalu pilih Host di dalam game.</string>
+    <string name="settings_coop_hosting_hint">Jalankan seperti biasa, lalu pilih Host di dalam game. Server hanya berjalan saat Anda membuatnya.&lt;br&gt;&lt;br&gt;Di Build 42, beri server minimal 2 GB memori saat membuatnya. Itu hanya bagian untuk server: game sendiri membutuhkan memori tambahan di luar itu, jadi hosting membutuhkan ponsel yang kuat dengan RAM besar.&lt;br&gt;&lt;br&gt;Hosting memakai profil terpisah: simpanan, mod, dan pengaturan game Anda yang biasa tidak terlihat selama sakelar ini aktif dan akan kembali saat Anda mematikannya. Game mendapat batas memori 2 GB dan berjalan tanpa mode debug. Hosting di latar belakang tidak dijamin.</string>
+    <string name="coop_b41_libraries_required">Server di Build 41 membutuhkan dua pustaka: libRakNet64.so dan libZNetNoSteam64.so. Keduanya diambil dari folder android versi 42.12. Anda bisa mengunduhnya dari Steam jika game dibeli di sana, atau memuatnya dari file arsip jika sudah diunduh sebelumnya.</string>
+    <string name="coop_internet_title">Hosting lewat internet</string>
+    <string name="coop_internet_pending">Internet: memeriksa router</string>
+    <string name="coop_internet_mapped">Internet: port terbuka</string>
+    <string name="coop_internet_failed">Internet: gagal membuka port</string>
+    <string name="coop_internet_no_gateway">Internet: router UPnP tidak ditemukan</string>
+    <string name="coop_internet_unknown">Internet: status port tidak diketahui</string>
+    <string name="coop_internet_pending_detail">Menunggu game menyelesaikan pemeriksaan UPnP.</string>
+    <string name="coop_internet_mapped_detail">Router menerima pemetaan port UDP dari game. Teman di luar Wi-Fi Anda bisa mencoba alamat eksternal dan port di bawah.</string>
+    <string name="coop_internet_failed_detail">Game tidak dapat membuka port UDP. Periksa pengaturan UPnP router atau teruskan port secara manual ke alamat Wi-Fi ponsel.</string>
+    <string name="coop_internet_no_gateway_detail">Game tidak menemukan router yang menyediakan pemetaan port UPnP. Aktifkan UPnP di router atau teruskan port UDP secara manual ke alamat Wi-Fi ponsel.</string>
+    <string name="coop_internet_unknown_detail">Server berjalan tanpa hasil UPnP yang tercatat. UPnP mungkin dinonaktifkan di pengaturan server. Periksa log server atau atur penerusan port secara manual.</string>
+    <string name="coop_internet_unavailable_detail">Pustaka game ini tidak menyediakan fungsi UPnP yang diperlukan. Atur penerusan port UDP secara manual di router.</string>
+    <string name="coop_internet_addresses">Port UDP: %1$s\nAlamat eksternal router: %2$s\nAlamat Wi-Fi ponsel: %3$s</string>
+    <string name="coop_internet_address_unknown">tidak tersedia</string>
+    <string name="coop_internet_port_unknown">lihat pengaturan server</string>
+    <string name="coop_internet_double_nat">Router melaporkan alamat non-publik. Mungkin ada router lain atau NAT dari penyedia internet. Penerusan di router ini saja mungkin tidak cukup; periksa penerusan di perangkat sebelumnya, IP publik, atau jaringan VPN bersama.</string>
+    <string name="coop_internet_unverified">Akses dari internet belum diverifikasi. Pastikan dengan menyambung dari jaringan lain, misalnya data seluler.</string>
+    <string name="coop_internet_copy">Salin detail</string>
+    <string name="coop_internet_close">Tutup</string>
+</resources>

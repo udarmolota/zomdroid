@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="macos_libs_title">原生 macOS 库</string>
+    <string name="macos_libs_hint">为了运行游戏，部分库通过 box64 模拟运行。在这里可以下载并安装 macOS 版游戏的原生库，它们无需模拟。这样可以降低内存和处理器的负载。如果你拥有该游戏，可直接从 Steam 获取；如果之前已经下载过，也可以加载现成的压缩包。</string>
+    <string name="macos_libs_short">用 macOS 版的原生 ARM64 库替换游戏中被模拟的部分。CPU 和内存负载更低，游戏更流畅。Build 42.20+，实验性。</string>
+    <string name="macos_libs_download">从 Steam</string>
+    <string name="macos_libs_missing">库尚未下载或不完整，将使用常规库。</string>
+    <string name="macos_libs_login">为“%1$s”下载原生库。需要登录拥有游戏的 Steam 账户；不会下载完整 macOS 游戏。</string>
+    <string name="macos_libs_invalid_instance">此实例不可用或不支持此功能。</string>
+    <string name="native_fmod_title">FMOD</string>
+    <string name="native_fmod_hint">不是来自 macOS 版：这是游戏自带的 Android ARM64 声音库，用来代替通过 box64 运行的 x86_64 版本。无需下载。</string>
+    <string name="macos_libs_import">从文件</string>
+    <string name="macos_libs_import_title">加载 macOS 库</string>
+    <string name="macos_libs_import_hint">选择包含 libLighting.dylib、libPZPathFind.dylib 和 libPZPopMan.dylib 的 ZIP（来自 macOS 版 Project Zomboid）。压缩包内的文件夹结构无关紧要。文件将放入所选实例的 game/macos。</string>
+    <string name="macos_libs_ready">macOS 库已安装</string>
+    <string name="macos_libs_installing">正在安装 macOS 库…</string>
+    <string name="macos_libs_installed">macOS 库已安装</string>
+    <string name="macos_libs_modules">使用中的库</string>
+    <string name="macos_libs_modules_hint">默认启用所有库。可按需逐个关闭：关闭的库将使用其常规版本。</string>
+    <string name="macos_libs_missing_files">压缩包中缺少：%1$s</string>
+    <string name="macos_libs_bad_file">不是 macOS 库：%1$s</string>
+</resources>

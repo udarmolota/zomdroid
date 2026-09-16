@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="macos_libs_title">Нативные библиотеки macOS</string>
+    <string name="macos_libs_hint">Для запуска игры часть библиотек эмулируется через box64. Здесь можно скачать и установить нативные («родные») библиотеки из macOS-версии игры, которым эмуляция не нужна. Это снижает нагрузку на оперативную память и процессор. Библиотеки можно скачать напрямую из Steam, если игра у вас куплена, или загрузить готовый архив, если вы скачали их раньше.</string>
+    <string name="macos_libs_short">Заменяет эмулируемые части игры нативными ARM64-библиотеками из macOS-версии. Меньше нагрузка на процессор и память, игра идёт плавнее. Build 42.20+, экспериментально.</string>
+    <string name="macos_libs_download">Из Steam</string>
+    <string name="macos_libs_missing">Библиотеки не скачаны или неполны. Будут использованы обычные библиотеки.</string>
+    <string name="macos_libs_login">Скачивание нативных библиотек для «%1$s». Нужен вход в Steam и владение игрой; вся macOS-игра скачиваться не будет.</string>
+    <string name="macos_libs_invalid_instance">Инстанс недоступен или не поддерживает эту функцию.</string>
+    <string name="native_fmod_title">FMOD</string>
+    <string name="native_fmod_hint">Не из macOS-версии: собственная ARM64-библиотека звука игры для Android вместо x86_64 через box64. Скачивать ничего не нужно.</string>
+    <string name="macos_libs_import">Из файла</string>
+    <string name="macos_libs_import_title">Загрузка библиотек macOS</string>
+    <string name="macos_libs_import_hint">Выберите ZIP с libLighting.dylib, libPZPathFind.dylib и libPZPopMan.dylib из macOS-версии Project Zomboid. Папки внутри архива не важны. Файлы попадут в game/macos выбранного инстанса.</string>
+    <string name="macos_libs_ready">Библиотеки macOS установлены</string>
+    <string name="macos_libs_installing">Установка библиотек macOS…</string>
+    <string name="macos_libs_installed">Библиотеки macOS установлены</string>
+    <string name="macos_libs_modules">Используемые библиотеки</string>
+    <string name="macos_libs_modules_hint">По умолчанию все библиотеки включены. При необходимости выключайте их по одной: выключенная библиотека использует свою обычную версию.</string>
+    <string name="macos_libs_missing_files">В архиве нет: %1$s</string>
+    <string name="macos_libs_bad_file">Не библиотека macOS: %1$s</string>
+</resources>

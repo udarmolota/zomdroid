@@ -29,7 +29,9 @@ public class ZomdroidApplication extends Application {
             @Override
             public void onActivityCreated(@NonNull Activity activity, Bundle savedInstanceState) {
                 currentActivity = activity;
-                if (!inited) init();
+                // The debug server owns its initialization. In particular it must not rotate
+                // the main process's logcat files or update shared launcher preferences.
+                if (!inited && !getProcessName().endsWith(":server")) init();
             }
 
             @Override

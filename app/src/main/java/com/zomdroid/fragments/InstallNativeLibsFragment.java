@@ -38,6 +38,12 @@ import java.util.Objects;
 public class InstallNativeLibsFragment extends Fragment {
 
     private static final String LOG_TAG = InstallNativeLibsFragment.class.getName();
+    /** Set by Settings: import macOS dylibs into this instance's game/macos instead of Build 41
+     *  libraries into android/arm64-v8a. The instance is fixed, the files and the task differ. */
+    public static final String ARG_MACOS_INSTANCE = "macos_instance";
+    /** Set by a Build 41 instance's Settings: the same multiplayer import as always, instance fixed. */
+    public static final String ARG_MP_INSTANCE = "mp_instance";
+    private String macosInstanceName;
 
     private FragmentInstallNativeLibsBinding binding;
     private TaskProgressDialogBinding taskProgressDialogBinding;
@@ -161,6 +167,18 @@ public class InstallNativeLibsFragment extends Fragment {
                 });
 
         if (instances.size() == 1) binding.nativeLibsInstanceSpinner.setSelection(0);
+        macosInstanceName = getArguments() == null ? null : getArguments().getString(ARG_MACOS_INSTANCE);
+        String mpInstanceName = getArguments() == null ? null : getArguments().getString(ARG_MP_INSTANCE);
+        if (macosInstanceName != null) binding.nativeLibsHintTv.setText(R.string.macos_libs_import_hint);
+        String fixedInstance = macosInstanceName != null ? macosInstanceName : mpInstanceName;
+        if (fixedInstance != null) {
+            for (int i = 0; i < instances.size(); i++) {
+                if (!fixedInstance.equals(instances.get(i).getName())) continue;
+                binding.nativeLibsInstanceSpinner.setSelection(instances.size() > 1 ? i + 1 : i);
+                break;
+            }
+            binding.nativeLibsInstanceSpinner.setEnabled(false);
+        }
 
         binding.nativeLibsBrowseIb.setOnClickListener(v -> zipLauncher.launch(ZIP_MIME));
 
@@ -183,7 +201,8 @@ public class InstallNativeLibsFragment extends Fragment {
 
             Intent installerIntent = new Intent(requireContext(), InstallerService.class);
             installerIntent.putExtra(InstallerService.EXTRA_COMMAND,
-                    InstallerService.Task.INSTALL_NATIVE_LIBS.ordinal());
+                    (macosInstanceName != null ? InstallerService.Task.INSTALL_MACOS_LIBS
+                                               : InstallerService.Task.INSTALL_NATIVE_LIBS).ordinal());
             installerIntent.putExtra(InstallerService.EXTRA_GAME_INSTANCE_NAME,
                     selectedInstance.getName());
             installerIntent.putExtra(InstallerService.EXTRA_NATIVE_LIBS_URI, archiveUri);

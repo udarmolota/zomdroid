@@ -117,6 +117,7 @@
 
                     <TextView
                         android:id="@+id/settings_renderer_tv"
+                    android:textStyle="bold"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="?attr/textAppearanceBodySmall"
@@ -130,8 +131,8 @@
                         android:layout_marginStart="8dp"
                         android:scaleType="centerInside"
                         android:src="@drawable/mt_icon_help"/>
-                </LinearLayout>
-
+                        </LinearLayout>
+                        
                 <Spinner
                     android:id="@+id/settings_renderer_s"
                     android:layout_width="wrap_content"
@@ -140,6 +141,7 @@
 
                 <TextView
                     android:id="@+id/settings_vulkan_driver_tv"
+                    android:textStyle="bold"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
@@ -154,6 +156,7 @@
 
                 <TextView
                     android:id="@+id/settings_resolution_scale_tv"
+                    android:textStyle="bold"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
@@ -184,18 +187,88 @@
 
                 </LinearLayout>
 
-                <!-- NG_GL4ES and both ZINKs: the renderers with an ETC2 path. Switch first, then
-                     the cache it fills. The label carries the size, which also makes "shared"
-                     self-evident - the number is identical in every instance. -->
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/settings_texture_compression_switch"
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Group 1b: Texture compression. Everything that trades texture memory for quality:
+             the ETC2 switch for the renderers that have an encoder (NG_GL4ES, both ZINKs), the
+             cache it fills - folded, the size on the fold - and the GL4ES/NG_GL4ES shrink
+             presets that used to hide under Advanced. Rows show only for the renderer that
+             uses them, so nobody on GL4ES stares at a greyed-out ETC2 switch. -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/settings_texture_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="12dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="4dp"
+                    android:text="@string/settings_group_texture"
+                    android:textAppearance="?attr/textAppearanceLabelSmall"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="13sp"/>
+
+                <!-- Title with the "?" glued to it, toggle at the right edge. A ConstraintLayout so a long
+                     title (Russian) wraps instead of pushing the toggle off the screen. -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/settings_texture_compression_row"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
                     android:visibility="gone"
-                    tools:visibility="visible"
-                    android:textAppearance="?attr/textAppearanceBodySmall"
-                    android:text="@string/settings_texture_compression"/>
+                    tools:visibility="visible">
+
+                    <TextView
+                        android:id="@+id/settings_texture_compression_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:text="@string/settings_texture_compression"
+                        app:layout_constrainedWidth="true"
+                        app:layout_constraintHorizontal_chainStyle="packed"
+                        app:layout_constraintHorizontal_bias="0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/settings_texture_compression_info"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                    <ImageButton
+                        android:id="@+id/settings_texture_compression_info"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginStart="8dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/mt_icon_help"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/settings_texture_compression"
+                        app:layout_constraintStart_toEndOf="@id/settings_texture_compression_title"
+                        app:layout_constraintEnd_toStartOf="@id/settings_texture_compression_switch"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/settings_texture_compression_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <TextView
                     android:id="@+id/settings_texture_compression_hint_tv"
@@ -205,25 +278,56 @@
                     android:visibility="gone"
                     tools:visibility="visible"
                     android:textAppearance="?attr/textAppearanceBodySmall"
-                    android:text="@string/settings_texture_compression_hint"/>
+                    android:text="@string/settings_texture_compression_short"/>
 
+                <!-- The cache, folded: the header carries the size, the fold holds the button
+                     and the explanation. -->
                 <LinearLayout
                     android:id="@+id/settings_etc2_cache_row"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
+                    android:layout_marginTop="12dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:visibility="gone"
                     tools:visibility="visible">
 
                     <TextView
                         android:id="@+id/settings_etc2_cache_label_tv"
+                    android:textStyle="bold"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:textAppearance="?attr/textAppearanceBodySmall"
                         tools:text="Texture cache: 879 MB"/>
+
+                    <ImageView
+                        android:id="@+id/settings_etc2_cache_expand_iv"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/mt_icon_expand_more"
+                        android:scaleType="fitCenter"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/settings_etc2_cache_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <TextView
+                        android:id="@+id/settings_etc2_cache_hint_tv"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:text="@string/settings_etc2_cache_hint"/>
 
                     <!-- Tonal, like every other secondary button on this screen; the filled
                          primary colour is reserved for the preset buttons at the top. -->
@@ -232,20 +336,62 @@
                         style="@style/Widget.Material3.Button.TonalButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
+                        android:layout_marginTop="4dp"
                         android:text="@string/settings_etc2_cache_clear"/>
 
                 </LinearLayout>
 
-                <TextView
-                    android:id="@+id/settings_etc2_cache_hint_tv"
+                <!-- Texture shrink presets (GL4ES / NG_GL4ES only). The value lands in the env
+                     field under Advanced rather than behind a hidden switch, so the player can
+                     see what was turned on, edit it, and reach the modes we do not offer. -->
+                <LinearLayout
+                    android:id="@+id/settings_texture_shrink_section"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
+                    android:layout_marginTop="12dp"
+                    android:orientation="vertical"
                     android:visibility="gone"
-                    tools:visibility="visible"
-                    android:textAppearance="?attr/textAppearanceBodySmall"
-                    android:text="@string/settings_etc2_cache_hint"/>
+                    tools:visibility="visible">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/settings_texture_shrink_title"
+                            android:textStyle="bold"
+                            android:textAppearance="?attr/textAppearanceBodySmall"/>
+
+                        <ImageButton
+                            android:id="@+id/settings_texture_shrink_info"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_marginStart="8dp"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/mt_icon_help"
+                            android:background="?android:attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="@string/settings_texture_shrink_title"/>
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp"
+                        android:text="@string/settings_texture_shrink_desc"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:textSize="11sp"/>
+
+                    <Spinner
+                        android:id="@+id/settings_texture_shrink_spinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+                </LinearLayout>
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -280,11 +426,232 @@
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/settings_backup_switch"
-                    android:layout_width="wrap_content"
+                    android:textStyle="bold"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:textAppearance="?attr/textAppearanceBodySmall"
                     android:text="@string/settings_backup_switch"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Group: Multiplayer -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="12dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:text="@string/settings_multiplayer_title"
+                    android:textAppearance="?attr/textAppearanceLabelSmall"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="13sp"/>
+
+                <!-- Title with the "?" glued to it, toggle at the right edge. A ConstraintLayout so a long
+                     title (Russian) wraps instead of pushing the toggle off the screen. -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/settings_coop_hosting_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:text="@string/settings_coop_hosting"
+                        app:layout_constrainedWidth="true"
+                        app:layout_constraintHorizontal_chainStyle="packed"
+                        app:layout_constraintHorizontal_bias="0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/settings_coop_hosting_info"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                    <ImageButton
+                        android:id="@+id/settings_coop_hosting_info"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginStart="8dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/mt_icon_help"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/settings_coop_hosting"
+                        app:layout_constraintStart_toEndOf="@id/settings_coop_hosting_title"
+                        app:layout_constraintEnd_toStartOf="@id/settings_coop_hosting_switch"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/settings_coop_hosting_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:text="@string/settings_coop_hosting_short"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/settings_macos_card"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp" app:cardCornerRadius="12dp"
+            app:strokeWidth="0dp" app:cardBackgroundColor="?attr/colorSurfaceContainerHigh">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:padding="12dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:text="@string/additional_libraries_title"
+                    android:textAppearance="?attr/textAppearanceLabelSmall"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="13sp" />
+                <TextView android:id="@+id/settings_mp_title"
+                    android:textStyle="bold"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:text="@string/mp_libs_title" android:visibility="gone" />
+                <!-- Title with the "?" glued to it, toggle at the right edge. A ConstraintLayout so a long
+                     title (Russian) wraps instead of pushing the toggle off the screen. -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/settings_macos_row"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp">
+
+                    <TextView
+                        android:id="@+id/settings_macos_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:text="@string/macos_libs_title"
+                        app:layout_constrainedWidth="true"
+                        app:layout_constraintHorizontal_chainStyle="packed"
+                        app:layout_constraintHorizontal_bias="0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/settings_macos_info"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                    <ImageButton
+                        android:id="@+id/settings_macos_info"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginStart="8dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/mt_icon_help"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/macos_libs_title"
+                        app:layout_constraintStart_toEndOf="@id/settings_macos_title"
+                        app:layout_constraintEnd_toStartOf="@id/settings_macos_switch"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/settings_macos_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+                <TextView android:id="@+id/settings_libraries_hint" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/macos_libs_short" android:textAppearance="?attr/textAppearanceBodySmall" />
+                <TextView android:id="@+id/settings_macos_status"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp" android:textAppearance="?attr/textAppearanceBodySmall" />
+                <!-- No style attribute, like the preset buttons: the theme's filled orange. These
+                     are the actions of this card, not secondary tools. -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:orientation="horizontal">
+                    <com.google.android.material.button.MaterialButton android:id="@+id/settings_macos_download"
+                        android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/macos_libs_download" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/settings_macos_import"
+                        android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/macos_libs_import" />
+                </LinearLayout>
+
+                <!-- The three libraries, folded. All on by default; one can be turned off to send
+                     that library back to its regular path without losing the other two. -->
+                <LinearLayout android:id="@+id/settings_macos_modules_header"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal" android:gravity="center_vertical"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true" android:focusable="true">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textStyle="bold"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:text="@string/macos_libs_modules" />
+                    <ImageView android:id="@+id/settings_macos_modules_expand_iv"
+                        android:layout_width="20dp" android:layout_height="20dp"
+                        android:src="@drawable/mt_icon_expand_more" android:scaleType="fitCenter" />
+                </LinearLayout>
+                <LinearLayout android:id="@+id/settings_macos_modules_content"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:visibility="gone" tools:visibility="visible">
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:text="@string/macos_libs_modules_hint" />
+                    <androidx.appcompat.widget.SwitchCompat android:id="@+id/settings_macos_lighting_switch"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:text="@string/macos_module_lighting" />
+                    <androidx.appcompat.widget.SwitchCompat android:id="@+id/settings_macos_pathfind_switch"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:text="@string/macos_module_pathfind" />
+                    <androidx.appcompat.widget.SwitchCompat android:id="@+id/settings_macos_popman_switch"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:text="@string/macos_module_popman" />
+                    <!-- Not a macOS library: the game's own Android ARM64 build, in this list
+                         because the card is "additional libraries", not "macOS libraries". -->
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/settings_native_fmod_switch"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:text="@string/native_fmod_title" />
+                    <TextView android:id="@+id/settings_native_fmod_hint"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:textSize="11sp"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:text="@string/native_fmod_hint" />
+                </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -351,10 +718,11 @@
 
                         <TextView
                             android:id="@+id/settings_jargs_tv"
-                            android:layout_width="wrap_content"
+                    android:textStyle="bold"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:textAppearance="?attr/textAppearanceBodySmall"
-                            android:text="JVM arguments"/>
+                            android:text="@string/settings_jvm_args_title"/>
 
                         <ImageButton
                             android:id="@+id/settings_jargs_info"
@@ -414,13 +782,31 @@
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
 
-                        <TextView
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="@string/settings_jvm_args_b42_recommendation"
-                            android:textAppearance="?attr/textAppearanceBodySmall"
-                            android:textSize="11sp"/>
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textStyle="bold"
+                                android:text="@string/settings_jvm_args_b42_preset_title"
+                                android:textAppearance="?attr/textAppearanceBodySmall"/>
+
+                            <ImageButton
+                        android:id="@+id/settings_jargs_b42_info"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginStart="8dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/mt_icon_help"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/settings_jvm_args_b42_preset_title"/>
+
+                        </LinearLayout>
 
                         <Button
                             android:id="@+id/settings_jargs_apply_b42_btn"
@@ -449,6 +835,7 @@
 
                         <TextView
                             android:id="@+id/settings_env_vars_tv"
+                    android:textStyle="bold"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textAppearance="?attr/textAppearanceBodySmall"
@@ -496,48 +883,6 @@
 
                     </LinearLayout>
 
-                    <!-- Texture shrink presets. The value lands in the env field above rather than
-                         behind a hidden switch, so the player can see what was turned on, edit it,
-                         and reach the modes we do not offer. -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/settings_texture_shrink_title"
-                            android:textAppearance="?attr/textAppearanceBodySmall"/>
-
-                        <ImageButton
-                            android:id="@+id/settings_texture_shrink_info"
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:layout_marginStart="8dp"
-                            android:scaleType="centerInside"
-                            android:src="@drawable/mt_icon_help"
-                            android:background="?android:attr/selectableItemBackgroundBorderless"
-                            android:contentDescription="@string/settings_texture_shrink_title"/>
-
-                    </LinearLayout>
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="4dp"
-                        android:text="@string/settings_texture_shrink_desc"
-                        android:textAppearance="?attr/textAppearanceBodySmall"
-                        android:textSize="11sp"/>
-
-                    <Spinner
-                        android:id="@+id/settings_texture_shrink_spinner"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"/>
-
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
@@ -547,7 +892,8 @@
 
                     <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/settings_debug_switch"
-                        android:layout_width="wrap_content"
+                    android:textStyle="bold"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:textAppearance="?attr/textAppearanceBodySmall"
@@ -555,7 +901,8 @@
 
                     <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/settings_memory_saver_switch"
-                        android:layout_width="wrap_content"
+                    android:textStyle="bold"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:textAppearance="?attr/textAppearanceBodySmall"
@@ -609,14 +956,16 @@
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/touch_controls_switch"
-                    android:layout_width="wrap_content"
+                    android:textStyle="bold"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textAppearance="?attr/textAppearanceBodySmall"
                     android:text="@string/touch_controls_switch_label"/>
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/vibrate_on_touch_switch"
-                    android:layout_width="wrap_content"
+                    android:textStyle="bold"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:textAppearance="?attr/textAppearanceBodySmall"

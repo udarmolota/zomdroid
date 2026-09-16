@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="macos_libs_title">Pustaka macOS native</string>
+    <string name="macos_libs_hint">Untuk menjalankan game, sebagian pustakanya diemulasi melalui box64. Di sini Anda bisa mengunduh dan memasang pustaka native dari game versi macOS yang tidak memerlukan emulasi. Ini mengurangi beban memori dan prosesor. Ambil langsung dari Steam jika Anda memiliki game-nya, atau muat arsip siap pakai jika sudah pernah mengunduhnya.</string>
+    <string name="macos_libs_short">Mengganti bagian game yang diemulasi dengan pustaka ARM64 native dari versi macOS. Beban CPU dan memori lebih rendah, permainan lebih lancar. Build 42.20+, eksperimental.</string>
+    <string name="macos_libs_download">Dari Steam</string>
+    <string name="macos_libs_missing">Pustaka belum diunduh atau tidak lengkap. Pustaka biasa akan digunakan.</string>
+    <string name="macos_libs_login">Unduh pustaka native untuk “%1$s”. Memerlukan login Steam dan kepemilikan game; game macOS lengkap tidak akan diunduh.</string>
+    <string name="macos_libs_invalid_instance">Instans ini tidak tersedia atau tidak mendukung fitur ini.</string>
+    <string name="native_fmod_title">FMOD</string>
+    <string name="native_fmod_hint">Bukan dari versi macOS: pustaka suara ARM64 Android milik game, dipakai sebagai ganti versi x86_64 melalui box64. Tidak perlu mengunduh.</string>
+    <string name="macos_libs_import">Dari file</string>
+    <string name="macos_libs_import_title">Muat pustaka macOS</string>
+    <string name="macos_libs_import_hint">Pilih ZIP berisi libLighting.dylib, libPZPathFind.dylib, dan libPZPopMan.dylib dari Project Zomboid versi macOS. Folder di dalam arsip tidak penting. File akan disalin ke game/macos instance yang dipilih.</string>
+    <string name="macos_libs_ready">Pustaka macOS terpasang</string>
+    <string name="macos_libs_installing">Memasang pustaka macOS…</string>
+    <string name="macos_libs_installed">Pustaka macOS terpasang</string>
+    <string name="macos_libs_modules">Pustaka yang digunakan</string>
+    <string name="macos_libs_modules_hint">Semua pustaka aktif secara default. Matikan satu per satu bila perlu: pustaka yang dimatikan memakai versi biasanya.</string>
+    <string name="macos_libs_missing_files">Tidak ada di arsip: %1$s</string>
+    <string name="macos_libs_bad_file">Bukan pustaka macOS: %1$s</string>
+</resources>

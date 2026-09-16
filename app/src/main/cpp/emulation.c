@@ -15,6 +15,9 @@
 #include "box64/src/include/box64stack.h"
 #include "box64/src/include/librarian.h"
 #include "box64/src/include/callback.h"
+#include "box64/src/include/zomdroid_jni_stats.h"
+#include <pthread.h>
+#include <unistd.h>
 #include "box64/src/include/box32.h"
 
 #define LOG_TAG "zomdroid-emu"
@@ -385,12 +388,8 @@ static void assemble_box64_jni_trampoline(uint32_t** code, int* code_size, const
 #undef ENSURE_CAPACITY
 }
 
-void* zomdroid_emulation_bridge_jni_symbol(EmulatedLib *lib, uint64_t fn, const char* arg_types, char ret_type) {
-    uint32_t* code = NULL;
-    int code_size = 0;
-    assemble_box64_jni_trampoline(&code, &code_size, arg_types, ret_type, fn);
-
-    if (!code) return NULL;
+void* zomdroid_emulation_install_code(EmulatedLib* lib, const uint32_t* code, int code_size) {
+    if (!code || code_size <= 0 || code_size > page_size) return NULL;
 
     pthread_mutex_lock(&g_jni_lib_mutex);
 
@@ -408,7 +407,6 @@ void* zomdroid_emulation_bridge_jni_symbol(EmulatedLib *lib, uint64_t fn, const 
         mem = mmap(NULL, page_size, PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
         if (mem == MAP_FAILED) {
             LOGE("Failed to mmap memory: %s", strerror(errno));
-            free(code);
             pthread_mutex_unlock(&g_jni_lib_mutex);
             return NULL;
         }
@@ -420,7 +418,6 @@ void* zomdroid_emulation_bridge_jni_symbol(EmulatedLib *lib, uint64_t fn, const 
             munmap(mem, page_size);
             if (new_mapped_pages) lib->mapped_pages = new_mapped_pages;
             if (new_page_code_size) lib->page_code_size = new_page_code_size;
-            free(code);
             pthread_mutex_unlock(&g_jni_lib_mutex);
             return NULL;
         }
@@ -431,9 +428,18 @@ void* zomdroid_emulation_bridge_jni_symbol(EmulatedLib *lib, uint64_t fn, const 
         lib->page_count = new_page_count;
     }
     memcpy(mem, code, code_size);
-    free(code);
     pthread_mutex_unlock(&g_jni_lib_mutex);
     __builtin___clear_cache(mem, mem + code_size);
+    return mem;
+}
+
+void* zomdroid_emulation_bridge_jni_symbol(EmulatedLib *lib, uint64_t fn, const char* arg_types, char ret_type) {
+    uint32_t* code = NULL;
+    int code_size = 0;
+    assemble_box64_jni_trampoline(&code, &code_size, arg_types, ret_type, fn);
+    if (!code) return NULL;
+    void* mem = zomdroid_emulation_install_code(lib, code, code_size);
+    free(code);
     return mem;
 }
 
@@ -495,8 +501,34 @@ void init_box64() {
     thread_set_emu(emu);
 }
 
+// ZOMDROID_JNI_STATS=1 in the instance's env vars: count and time every emulated JNI call and
+// print a summary to stdout - i.e. into native.log, next to the [ZMEM] samples - every 30 s.
+// A diagnostic for "which emulated library is eating the frame"; costs nothing when unset.
+static void* zomdroid_jni_stats_thread(void* arg) {
+    (void)arg;
+    for (;;) {
+        sleep(30);
+        zomdroid_jni_stats_dump();
+    }
+    return NULL;
+}
+
+static void zomdroid_jni_stats_maybe_start(void) {
+    const char* e = getenv("ZOMDROID_JNI_STATS");
+    if (!e || strcmp(e, "1") != 0) return;
+    zomdroid_jni_stats_enable();
+    pthread_t t;
+    pthread_attr_t a;
+    pthread_attr_init(&a);
+    pthread_attr_setdetachstate(&a, PTHREAD_CREATE_DETACHED);
+    if (pthread_create(&t, &a, zomdroid_jni_stats_thread, NULL) == 0)
+        LOGI("[JNISTAT] armed: emulated JNI call stats every 30 s");
+    pthread_attr_destroy(&a);
+}
+
 int zomdroid_emulation_init() {
     init_box64();
+    zomdroid_jni_stats_maybe_start();
 
     box64_load_gnu_libc();
 

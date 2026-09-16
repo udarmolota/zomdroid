@@ -82,9 +82,28 @@ public class SteamGameDownloader implements Runnable, Cancellable {
 
     private final String username, password;
     private final long manifestId;       // 0 = latest build on the branch; >0 = pin this build
-    private final String branch;         // Steam branch: "public" = Build 41, "unstable" = Build 42
+    private final String branch;         // Current branches: public = stable B42, legacy41 = B41.
     private final String buildLabel;     // "41" or "42" — for the output folder name only
     private final Listener listener;
+    private File librariesGameDir;
+    private LibraryPack libraryPack;
+
+    public static SteamGameDownloader macos(String username, String password, File gameDir, Listener listener) {
+        return libraries(username, password, gameDir, LibraryPack.MACOS, listener);
+    }
+
+    public static SteamGameDownloader libraries(String username, String password, File gameDir,
+                                                LibraryPack pack, Listener listener) {
+        SteamGameDownloader downloader = new SteamGameDownloader(username, password, pack.manifest, pack.branch, "42", listener);
+        downloader.librariesGameDir = gameDir;
+        downloader.libraryPack = pack;
+        return downloader;
+    }
+
+    private String outputRelative(FileData file) {
+        return libraryPack == null ? sanitizeRel(file.getFileName())
+                : libraryPack.selectedName(file.getFileName());
+    }
 
     private SteamClient steamClient;
     private CallbackManager manager;
@@ -150,11 +169,13 @@ public class SteamGameDownloader implements Runnable, Cancellable {
             Log.i(TAG, "Download loop ended");
             // Safety net: never leave the UI stuck in "downloading" if the loop ended without
             // a terminal result.
-            if (!finished) done("Stopped before finishing — please try again.");
+            // Once started, download() owns completion, including draining cancelled workers.
+            if (!finished && !started) done("Stopped before finishing — please try again.");
         } catch (Throwable t) {
             if (running) {   // a real crash, not our cancel/stop
                 Log.e(TAG, "SteamGameDownloader crashed", t);
-                done("crash: " + t);
+                cancel();
+                if (!started) done("crash: " + t);
             } else {
                 Log.i(TAG, "Callback loop stopped: " + t);
             }
@@ -240,8 +261,13 @@ public class SteamGameDownloader implements Runnable, Cancellable {
     /** Resolved Linux depot id + manifest GID + build id from PICS. */
     private static final class DepotInfo { int depot = -1; long gid = 0L; long buildId = 0L; }
 
-    private DepotInfo resolveLinuxDepot() {
+    private DepotInfo resolveDepot(String targetOs) {
         DepotInfo out = new DepotInfo();
+        if (libraryPack != null && libraryPack.manifest != 0) {
+            out.depot = libraryPack.depot;
+            out.gid = libraryPack.manifest;
+            return out;
+        }
         try {
             SteamApps apps = steamClient.getHandler(SteamApps.class);
             long appToken = 0L;
@@ -279,7 +305,7 @@ public class SteamGameDownloader implements Runnable, Cancellable {
                     try { depotId = Integer.parseInt(depot.getName()); }
                     catch (NumberFormatException e) { continue; }     // skip "branches" etc.
                     String os = depot.get("config").get("oslist").asString();
-                    if (os == null || !os.contains("linux")) continue;
+                    if (os == null || !java.util.Arrays.asList(os.split(",")).contains(targetOs)) continue;
 
                     // A manually pinned manifest (e.g. an old build id copied from SteamDB, for a
                     // version no branch currently points at — 42.15 and the like) needs only the
@@ -296,7 +322,7 @@ public class SteamGameDownloader implements Runnable, Cancellable {
 
                     String gid = depot.get("manifests").get(branch).get("gid").asString();
                     if (gid == null || gid.isEmpty()) {
-                        Log.i(TAG, "Linux depot " + depotId + " has no manifest override for branch '"
+                        Log.i(TAG, targetOs + " depot " + depotId + " has no manifest override for branch '"
                                 + branch + "'");
                         continue;
                     }
@@ -308,20 +334,23 @@ public class SteamGameDownloader implements Runnable, Cancellable {
                 }
             }
         } catch (Throwable t) {
-            Log.w(TAG, "resolveLinuxDepot failed", t);
+            Log.w(TAG, "resolveDepot(" + targetOs + ") failed", t);
         }
         return out;
     }
 
     private void download() {
         try {
-            progress("Resolving Linux depot...");
-            DepotInfo info = resolveLinuxDepot();
-            if (info.depot <= 0) { done("Could not find the Linux depot for Project Zomboid."); running = false; return; }
+            String targetOs = libraryPack == null ? "linux" : libraryPack.os;
+            progress("Resolving " + targetOs + " depot...");
+            DepotInfo info = resolveDepot(targetOs);
+            if (info.depot <= 0) { done("Could not find the " + targetOs + " depot for Project Zomboid."); running = false; return; }
+            if (libraryPack != null && info.depot != libraryPack.depot)
+                throw new java.io.IOException("Unexpected depot for " + libraryPack.id + ": " + info.depot);
 
             long gid = manifestId > 0 ? manifestId : info.gid;
             if (gid == 0L) { done("Could not resolve a manifest to download."); running = false; return; }
-            long buildId = manifestId > 0 ? manifestId : info.buildId;
+            long buildId = manifestId > 0 ? 0 : info.buildId;
 
             int appId = PROJECT_ZOMBOID_APP_ID;
             int depot = info.depot;
@@ -331,7 +360,24 @@ public class SteamGameDownloader implements Runnable, Cancellable {
             if (depotKey == null) { done("No depot key (is the game owned on this account?)."); running = false; return; }
 
             File outDir = new File(getDownloadsDir(),
-                    "ProjectZomboid_B" + buildLabel + "_" + (buildId > 0 ? buildId : "latest"));
+                    "ProjectZomboid_B" + buildLabel + "_" + (manifestId > 0
+                            ? Long.toUnsignedString(manifestId) : buildId > 0 ? Long.toString(buildId) : "latest"));
+            if (libraryPack != null) {
+                if (!librariesGameDir.isDirectory()) throw new java.io.IOException("Instance no longer exists");
+                if (libraryPack == LibraryPack.MACOS) MacosLibraries.recover(librariesGameDir);
+                else MultiplayerLibraries.recover(librariesGameDir);
+                outDir = new File(librariesGameDir, "." + libraryPack.id + "-download-" + depot + "-" + Long.toUnsignedString(gid));
+                if (java.nio.file.Files.isSymbolicLink(outDir.toPath())
+                        || !outDir.getCanonicalFile().getParentFile().equals(librariesGameDir.getCanonicalFile()))
+                    throw new java.io.IOException("Unsafe library staging directory");
+                if (outDir.isDirectory()) {
+                    File[] children = outDir.listFiles();
+                    if (children == null) throw new java.io.IOException("Cannot inspect library staging directory");
+                    for (File child : children)
+                        if (java.nio.file.Files.isSymbolicLink(child.toPath()))
+                            throw new java.io.IOException("Symlink in library staging directory: " + child.getName());
+                }
+            }
             if (!outDir.exists() && !outDir.mkdirs()) {
                 done("Cannot create download folder: " + outDir + " (grant All-files access?)");
                 running = false; return;
@@ -366,6 +412,17 @@ public class SteamGameDownloader implements Runnable, Cancellable {
             if (manifest == null) { done("Manifest download failed: " + describe(lastErr)); running = false; return; }
 
             List<FileData> files = manifest.getFiles();
+            if (libraryPack != null) {
+                Map<String, FileData> selected = new java.util.LinkedHashMap<>();
+                for (FileData f : files) {
+                    String name = outputRelative(f);
+                    if (name == null || f.getFlags().contains(EDepotFileFlag.Directory)) continue;
+                    if (selected.put(name, f) != null) throw new java.io.IOException("Ambiguous depot basename: " + name);
+                }
+                if (!selected.keySet().equals(libraryPack.names))
+                    throw new java.io.IOException("Missing " + libraryPack.id + " libraries; found " + selected.keySet());
+                files = new java.util.ArrayList<>(selected.values());
+            }
             long totalBytes = 0;
             for (FileData f : files) {
                 if (!f.getFlags().contains(EDepotFileFlag.Directory)) totalBytes += f.getTotalSize();
@@ -373,7 +430,7 @@ public class SteamGameDownloader implements Runnable, Cancellable {
             progress("Manifest OK: " + files.size() + " files, " + (totalBytes / (1024 * 1024)) + " MB. Downloading...");
 
             // Resume: skip files already fully downloaded in a previous run of this same build.
-            File doneListFile = new File(outDir, ".zomdroid_complete");
+            File doneListFile = new File(outDir, ".zomdroid_complete_" + depot + "_" + Long.toUnsignedString(gid));
             java.util.Set<String> doneSet = loadDoneSet(doneListFile);
             if (!doneSet.isEmpty()) progress("Resuming — " + doneSet.size() + " files already downloaded.");
 
@@ -401,12 +458,13 @@ public class SteamGameDownloader implements Runnable, Cancellable {
 
             final List<FileData> pending = new java.util.ArrayList<>();
             for (FileData f : files) {
-                String rel = sanitizeRel(f.getFileName());
+                String rel = outputRelative(f);
                 if (rel == null) continue;
                 File outFile = new File(outDir, rel);
                 if (f.getFlags().contains(EDepotFileFlag.Directory)) { outFile.mkdirs(); continue; }
                 // Already complete on a previous run -> skip (count toward progress).
-                if (doneSet.contains(rel) && outFile.isFile() && outFile.length() == f.getTotalSize()) {
+                if (doneSet.contains(rel) && outFile.isFile() && outFile.length() == f.getTotalSize()
+                        && (libraryPack == null || matchesManifestHash(outFile, f))) {
                     doneBytes.addAndGet(f.getTotalSize());
                     continue;
                 }
@@ -460,6 +518,12 @@ public class SteamGameDownloader implements Runnable, Cancellable {
                 // instead of after its remaining 10 seconds.
                 running = false;
                 for (Thread t : pool) t.interrupt();
+                // Do not release the download UI/resume directory while workers still write it.
+                boolean drained = false;
+                while (!drained) {
+                    try { latch.await(); drained = true; }
+                    catch (InterruptedException ignored) { /* cancellation is already recorded */ }
+                }
                 done("Download cancelled.");
                 return;
             }
@@ -468,7 +532,35 @@ public class SteamGameDownloader implements Runnable, Cancellable {
             Throwable workerError = firstError.get();
             if (workerError != null) throw workerError;
 
-            done("Game downloaded to " + fOutDir.getAbsolutePath());
+            org.json.JSONObject metadata = new org.json.JSONObject();
+            // A manually pinned GID is not an app build ID.
+            metadata.put("appBuildId", manifestId > 0 ? 0 : info.buildId);
+            metadata.put("depotId", depot);
+            metadata.put("manifestGid", Long.toUnsignedString(gid));
+            metadata.put("branch", branch);
+            if (libraryPack != null) {
+                org.json.JSONObject entries = new org.json.JSONObject();
+                for (FileData f : files) {
+                    File file = new File(fOutDir, outputRelative(f));
+                    if (file.length() != f.getTotalSize() || !matchesManifestHash(file, f))
+                        throw new java.io.IOException("Verification failed: " + file.getName());
+                    if (libraryPack == LibraryPack.B41_MULTIPLAYER) MultiplayerLibraries.verifyArm64(file);
+                    org.json.JSONObject entry = new org.json.JSONObject();
+                    entry.put("size", file.length());
+                    entry.put("sha256", MacosLibraries.hash(file, "SHA-256"));
+                    entries.put(file.getName(), entry);
+                }
+                metadata.put("files", entries);
+                metadata.put("pack", libraryPack.id);
+                java.nio.file.Files.write(new File(fOutDir, libraryPack.metadataName).toPath(), metadata.toString(2).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                if (!running) { done("Download cancelled."); return; }
+                if (libraryPack == LibraryPack.MACOS) MacosLibraries.publish(librariesGameDir, fOutDir);
+                else MultiplayerLibraries.publish(librariesGameDir, fOutDir);
+                done(libraryPack.id + " libraries installed, manifest " + Long.toUnsignedString(gid));
+            } else {
+                java.nio.file.Files.write(new File(fOutDir, MacosLibraries.LINUX_METADATA).toPath(), metadata.toString(2).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                done("Game downloaded to " + fOutDir.getAbsolutePath());
+            }
         } catch (Throwable t) {
             if (!running) {
                 done("Download cancelled.");
@@ -507,14 +599,14 @@ public class SteamGameDownloader implements Runnable, Cancellable {
                                  java.util.concurrent.atomic.AtomicLong doneBytes, long totalBytes,
                                  java.util.concurrent.atomic.AtomicInteger lastPct,
                                  java.util.concurrent.atomic.AtomicLong lastEmit) throws Exception {
-        String rel = sanitizeRel(f.getFileName());
+        String rel = outputRelative(f);
         if (rel == null) return;
         File outFile = new File(outDir, rel);
         File parent = outFile.getParentFile();
         if (parent != null) parent.mkdirs();
 
         try (RandomAccessFile raf = new RandomAccessFile(outFile, "rw")) {
-            if (f.getTotalSize() > 0) raf.setLength(f.getTotalSize());
+            raf.setLength(f.getTotalSize());
             for (ChunkData chunk : f.getChunks()) {
                 if (!running) return;
                 byte[] dest = new byte[Math.max(chunk.getCompressedLength(), chunk.getUncompressedLength())];
@@ -565,7 +657,17 @@ public class SteamGameDownloader implements Runnable, Cancellable {
         }
         // File fully written — record it so a restart of this build can skip it. Only reached when
         // every chunk landed, so a half-written file is never marked complete.
-        if (running) appendDone(doneListFile, rel);
+        if (running) {
+            if (libraryPack != null && !matchesManifestHash(outFile, f))
+                throw new java.io.IOException("File hash mismatch: " + rel);
+            appendDone(doneListFile, rel);
+        }
+    }
+
+    private static boolean matchesManifestHash(File file, FileData data) throws Exception {
+        StringBuilder expected = new StringBuilder();
+        for (byte b : data.getFileHash()) expected.append(String.format(java.util.Locale.ROOT, "%02x", b & 255));
+        return expected.toString().equals(MacosLibraries.hash(file, "SHA-1"));
     }
 
     private String cdnTokenFor(SteamContent content, int appId, int depot, Server s, Map<String, String> cache) {

@@ -40,6 +40,99 @@ public class SettingsFragment extends Fragment {
     // warning fires only for a deliberate change by the user.
     private boolean rendererSelectionRestored = false;
 
+    private void setUpMacosLibraries() {
+        com.zomdroid.game.GameInstance instance = instanceName == null ? null
+                : com.zomdroid.game.GameInstanceManager.requireSingleton().getInstanceByName(instanceName);
+        boolean multiplayer = instance != null && "Build 41".equals(instance.getPresetName());
+        boolean supported = instance != null && (instance.isBuild4220Plus() || multiplayer);
+        binding.settingsMacosCard.setVisibility(supported ? View.VISIBLE : View.GONE);
+        if (!supported) return;
+        binding.settingsMacosRow.setVisibility(multiplayer ? View.GONE : View.VISIBLE);
+        binding.settingsMpTitle.setVisibility(multiplayer ? View.VISIBLE : View.GONE);
+        binding.settingsLibrariesHint.setText(multiplayer ? R.string.mp_libs_hint : R.string.macos_libs_short);
+        binding.settingsMacosInfo.setOnClickListener(view -> showHelp(R.string.macos_libs_title, R.string.macos_libs_hint));
+        binding.settingsMacosSwitch.setChecked(settings.isMacosLibrariesEnabled());
+        binding.settingsMacosSwitch.setOnCheckedChangeListener((view, enabled) -> settings.setMacosLibrariesEnabled(enabled));
+        binding.settingsNativeFmodSwitch.setVisibility(multiplayer ? View.GONE : View.VISIBLE);
+        binding.settingsNativeFmodHint.setVisibility(multiplayer ? View.GONE : View.VISIBLE);
+        binding.settingsNativeFmodSwitch.setChecked(settings.isNativeFmodEnabled());
+        binding.settingsNativeFmodSwitch.setOnCheckedChangeListener((view, enabled) -> settings.setNativeFmodEnabled(enabled));
+        binding.settingsMacosDownload.setOnClickListener(view -> openLibraries(view, multiplayer, false));
+        binding.settingsMacosImport.setOnClickListener(view -> openLibraries(view, multiplayer, true));
+        binding.settingsMacosModulesHeader.setVisibility(multiplayer ? View.GONE : View.VISIBLE);
+        if (multiplayer) binding.settingsMacosModulesContent.setVisibility(View.GONE);
+        setupCollapsible(binding.settingsMacosModulesHeader, binding.settingsMacosModulesContent,
+                binding.settingsMacosModulesExpandIv);
+        bindMacosModule(binding.settingsMacosLightingSwitch, "lighting");
+        bindMacosModule(binding.settingsMacosPathfindSwitch, "pathfind");
+        bindMacosModule(binding.settingsMacosPopmanSwitch, "popman");
+        refreshMacosStatus();
+    }
+
+    private void bindMacosModule(androidx.appcompat.widget.SwitchCompat sw, String module) {
+        sw.setChecked(settings.isMacosModuleEnabled(module));
+        sw.setOnCheckedChangeListener((view, enabled) -> settings.setMacosModuleEnabled(module, enabled));
+    }
+
+    // "From Steam" / "From file" with this instance fixed. Build 41 installs its two multiplayer
+    // libraries into android/arm64-v8a (the import that used to sit in the side menu), 42.20+ its
+    // macOS libraries into game/macos. Shared by the card buttons and the Build 41 hosting dialog.
+    private void openLibraries(View view, boolean multiplayer, boolean fromFile) {
+        Bundle args = new Bundle();
+        if (fromFile) {
+            args.putString(multiplayer ? InstallNativeLibsFragment.ARG_MP_INSTANCE
+                                       : InstallNativeLibsFragment.ARG_MACOS_INSTANCE, instanceName);
+            Navigation.findNavController(view).navigate(
+                    multiplayer ? R.id.install_native_libs_fragment : R.id.install_macos_libs_fragment, args);
+        } else {
+            args.putString(multiplayer ? SteamDownloadFragment.ARG_MP_INSTANCE
+                                       : SteamDownloadFragment.ARG_MACOS_INSTANCE, instanceName);
+            Navigation.findNavController(view).navigate(R.id.steam_download_fragment, args);
+        }
+    }
+
+    /** Hosting on Build 41 needs its two multiplayer libraries; Build 42 ships them itself. */
+    private boolean hostingLibrariesPresent() {
+        com.zomdroid.game.GameInstance instance = instanceName == null ? null
+                : com.zomdroid.game.GameInstanceManager.requireSingleton().getInstanceByName(instanceName);
+        if (instance == null || !"Build 41".equals(instance.getPresetName())) return true;
+        // Presence is enough: libraries a player copied in by hand work as well as ours.
+        return com.zomdroid.steam.MultiplayerLibraries.hasFiles(new File(instance.getGamePath()));
+    }
+
+    private void showHostingLibrariesDialog(View anchor) {
+        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle(R.string.settings_coop_hosting)
+                .setMessage(R.string.coop_b41_libraries_required)
+                .setPositiveButton(R.string.macos_libs_download, (d, w) -> openLibraries(anchor, true, false))
+                .setNeutralButton(R.string.macos_libs_import, (d, w) -> openLibraries(anchor, true, true))
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void refreshMacosStatus() {
+        if (binding == null || instanceName == null) return;
+        com.zomdroid.game.GameInstance instance =
+                com.zomdroid.game.GameInstanceManager.requireSingleton().getInstanceByName(instanceName);
+        if (instance == null) return;
+        File game = new File(instance.getGamePath());
+        if ("Build 41".equals(instance.getPresetName())) {
+            boolean ready = com.zomdroid.steam.MultiplayerLibraries.isReady(game);
+            binding.settingsMacosStatus.setText(ready ? R.string.mp_libs_ready
+                    : com.zomdroid.steam.MultiplayerLibraries.hasFiles(game) ? R.string.mp_libs_manual : R.string.macos_libs_missing);
+            return;
+        }
+        // Installed or not - that is all a player can act on. The build number the manifest
+        // carries meant nothing to anyone (an instance keeps the build it was created with).
+        binding.settingsMacosStatus.setText(com.zomdroid.steam.MacosLibraries.isReady(game)
+                ? R.string.macos_libs_ready : R.string.macos_libs_missing);
+    }
+
+    @Override public void onResume() {
+        super.onResume();
+        refreshMacosStatus();
+    }
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentSettingsBinding.inflate(inflater, container, false);
@@ -54,15 +147,24 @@ public class SettingsFragment extends Fragment {
 
         setUpPresetCard();
         setUpEtc2CacheRow();
+        setUpMacosLibraries();
 
         // Renderer
         ArrayAdapter<LauncherPreferences.Renderer> rendererArrayAdapter = new ArrayAdapter<>(
             requireContext(),
             R.layout.spinner_item,
-            LauncherPreferences.Renderer.values());
+            java.util.Arrays.stream(LauncherPreferences.Renderer.values())
+                    .filter(renderer -> renderer != LauncherPreferences.Renderer.MOBILEGLUES_EXPERIMENTAL)
+                    .toArray(LauncherPreferences.Renderer[]::new));
         rendererArrayAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         binding.settingsRendererS.setAdapter(rendererArrayAdapter);
-        binding.settingsRendererS.setSelection(rendererArrayAdapter.getPosition(settings.getRenderer()));
+        int rendererPosition = rendererArrayAdapter.getPosition(settings.getRenderer());
+        // An existing experimental selection is hidden too; keep the spinner on a valid item.
+        if (rendererPosition < 0) {
+            settings.setRenderer(LauncherPreferences.Renderer.NG_GL4ES);
+            rendererPosition = rendererArrayAdapter.getPosition(settings.getRenderer());
+        }
+        binding.settingsRendererS.setSelection(rendererPosition);
         binding.settingsRendererS.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -311,6 +413,18 @@ public class SettingsFragment extends Fragment {
 
         setUpTextureShrinkSpinner();
 
+        binding.settingsCoopHostingSwitch.setChecked(settings.isCoopHostingEnabled());
+        binding.settingsCoopHostingSwitch.setOnCheckedChangeListener((v, checked) -> {
+            // Build 41 ships no ARM64 RakNet/ZNet of its own: without the two multiplayer
+            // libraries the server cannot start, so the switch stays off and says where to get them.
+            if (checked && !hostingLibrariesPresent()) {
+                v.setChecked(false);
+                showHostingLibrariesDialog(v);
+                return;
+            }
+            settings.setCoopHostingEnabled(checked);
+        });
+
         binding.settingsMemorySaverSwitch.setChecked(settings.isMemorySaver());
         binding.settingsMemorySaverSwitch.setOnCheckedChangeListener((v, isChecked) ->
                 settings.setMemorySaver(isChecked));
@@ -361,6 +475,13 @@ public class SettingsFragment extends Fragment {
                     .setPositiveButton(getString(R.string.dialog_button_ok), null)
                     .show();
         });
+        // The "?" next to a title opens the long explanation; the line under the title stays short.
+        binding.settingsJargsB42Info.setOnClickListener(v ->
+                showHelp(R.string.settings_jvm_args_b42_preset_title, R.string.settings_jvm_args_b42_recommendation));
+        binding.settingsTextureCompressionInfo.setOnClickListener(v ->
+                showHelp(R.string.settings_texture_compression, R.string.settings_texture_compression_hint));
+        binding.settingsCoopHostingInfo.setOnClickListener(v ->
+                showHelp(R.string.settings_coop_hosting, R.string.settings_coop_hosting_hint));
 
         binding.settingsEnvVarsInfo.setOnClickListener(v -> {
             new androidx.appcompat.app.AlertDialog.Builder(requireContext())
@@ -389,7 +510,7 @@ public class SettingsFragment extends Fragment {
                     .setMessage(getString(R.string.settings_render_hint))
                     .setPositiveButton(getString(R.string.dialog_button_ok), null)
                     .setNeutralButton(getString(R.string.dialog_button_wiki), (dialog, which) -> {
-                        Navigation.findNavController(v).navigate(R.id.wiki_fragment);
+                        Navigation.findNavController(v).navigate(R.id.wiki_fragment, WikiFragment.section("renderers"));
                     })
                     .show();
         });
@@ -399,6 +520,14 @@ public class SettingsFragment extends Fragment {
                 binding.settingsAdvancedHeader,
                 binding.settingsAdvancedContent,
                 binding.settingsAdvancedExpandIv);
+    }
+
+    private void showHelp(int titleRes, int messageRes) {
+        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle(getString(titleRes))
+                .setMessage(android.text.Html.fromHtml(getString(messageRes), android.text.Html.FROM_HTML_MODE_LEGACY))
+                .setPositiveButton(getString(R.string.dialog_button_ok), null)
+                .show();
     }
 
     private void setupCollapsible(android.view.View header, android.view.View content,
@@ -468,6 +597,9 @@ public class SettingsFragment extends Fragment {
      * it misses, at a cost of seconds on the next load, and nothing here touches saves.
      */
     private void setUpEtc2CacheRow() {
+        // The cache fold: header = size, content = explanation + clear button.
+        setupCollapsible(binding.settingsEtc2CacheRow, binding.settingsEtc2CacheContent,
+                binding.settingsEtc2CacheExpandIv);
         binding.settingsTextureCompressionSwitch.setChecked(settings.isTextureCompression());
         binding.settingsTextureCompressionSwitch.setOnCheckedChangeListener((v, isChecked) ->
                 settings.setTextureCompression(isChecked));
@@ -498,19 +630,24 @@ public class SettingsFragment extends Fragment {
         updateEtc2CacheRow(settings.getRenderer());
     }
 
-    /** Shows the row for the renderers that write the cache, and refreshes its size off the main thread. */
+    /** Shows the rows of the Texture compression card that apply to the renderer, and refreshes
+     *  the cache size off the main thread. */
     private void updateEtc2CacheRow(LauncherPreferences.Renderer renderer) {
         if (binding == null) return;
+        // Shrinking is a GL4ES/NG_GL4ES thing (LIBGL_SHRINK); ZINK has no such knob.
+        boolean shrink = renderer == LauncherPreferences.Renderer.GL4ES
+                || renderer == LauncherPreferences.Renderer.NG_GL4ES;
+        binding.settingsTextureShrinkSection.setVisibility(shrink ? View.VISIBLE : View.GONE);
         // NG_GL4ES and both ZINK variants write this cache (same encoder, same store); plain
-        // GL4ES has no ETC2 path, so the row would only raise questions there.
+        // GL4ES has no ETC2 path, so the rows would only raise questions there.
         boolean visible = renderer == LauncherPreferences.Renderer.NG_GL4ES
                 || renderer == LauncherPreferences.Renderer.ZINK_ZFA
                 || renderer == LauncherPreferences.Renderer.ZINK_OSMESA;
         int visibility = visible ? View.VISIBLE : View.GONE;
-        binding.settingsTextureCompressionSwitch.setVisibility(visibility);
+        binding.settingsTextureCompressionRow.setVisibility(visibility);
         binding.settingsTextureCompressionHintTv.setVisibility(visibility);
         binding.settingsEtc2CacheRow.setVisibility(visibility);
-        binding.settingsEtc2CacheHintTv.setVisibility(visibility);
+        if (!visible) binding.settingsEtc2CacheContent.setVisibility(View.GONE);
         if (!visible) return;
 
         // Sizing walks thousands of files, so the label starts empty and fills in when the walk

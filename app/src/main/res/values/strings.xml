@@ -16,6 +16,7 @@
     <string name="settings_etc2_cache_cleared">Texture cache cleared</string>
     <string name="settings_texture_compression">Texture compression (ETC2)</string>
     <string name="settings_texture_compression_hint">Compresses large textures with a minimal loss of quality for phone and even tablet screens. Comes with a cache you can clear yourself. The first launch builds the cache and may take a little longer. The cache is shared by ZINK and NG_GL4ES. <b>Note:</b> with ETC2 enabled the LIBGL_SHRINK variable becomes almost pointless, and no tile grid is drawn on textures.</string>
+    <string name="settings_texture_compression_short">Compresses large textures with minimal quality loss. Keeps a cache you can clear.</string>
     <string name="app_settings_instance_hint">Renderer, driver, Java arguments, resolution and the on-screen controls belong to a game instance. Open them with the gear button on an instance card.</string>
     <string name="game_instance_settings">Instance settings</string>
     <string name="fragment_label_controls_editor">Controls editor</string>
@@ -291,8 +292,9 @@
     <string name="settings_memory_saver">Memory saver (NG_GL4ES)</string>
     <string name="settings_memory_saver_hint">Lowers texture detail when memory runs low. Helps avoid crashes on devices with 8 GB RAM or less; not needed with 12 GB. Applies to the NG_GL4ES renderer on Build 42.</string>
 
-    <!-- Quick Save (the F10 backup): opt-in, priced honestly. The feature is called Quick Save in
-         every language; zh-rCN carries its own translated name. See BackupManager and the agent. -->
+    <!-- Quick Save (the F10 backup): opt-in, priced honestly. The settings switch is called Quick
+         Save (F10) and is translated; the instance menu item and the dialogs say F10, which keeps
+         the short labels language-neutral. See BackupManager and the agent. -->
     <!-- Shown once after an update, then recorded. The body is DELIBERATELY in strings.xml, not
          fetched from GitHub: a once-only dialog that needs the network up at exactly the right
          moment is a dialog most people never see. Rewrite the body as part of every release. -->
@@ -302,7 +304,7 @@
     <string name="settings_features_title">Features</string>
     <string name="settings_backup_switch">Quick Save (F10)</string>
     <string name="backup_warning_title">Before you turn this on</string>
-    <string name="backup_warning_message">Pressing F10 makes a full copy of your world — a point you can return to after a crash or a death.\n\nThe bigger your save (the longer your character has lived), the longer the copy takes. Find a couple of safe minutes before pressing F10: the game may look frozen while the copy is written — it is not. Just wait and do not close it.\n\nThe F10 button is part of the new control layouts. If you keep your own layout from an earlier version, add the button yourself in the controls editor: input type MNK, binding KEY_F10.\n\nOne copy is kept per world; each new one replaces the last. Build 41 and 42, single player only.</string>
+    <string name="backup_warning_message">Pressing F10 makes a full copy of your world — a point you can return to after a crash or a death.\n\nThe bigger your save (the longer your character has lived), the longer the copy takes. Find a couple of safe minutes before pressing F10: the game may look frozen while the copy is written — it is not. Just wait and do not close it.\n\nThe F10 button is part of the new control layouts. If you keep your own layout from an earlier version, add the button yourself in the controls editor: input type Keyboard &amp; mouse, binding F10.\n\nOne copy is kept per world; each new one replaces the last. Build 41 and 42, single player only.</string>
     <string name="backup_restore_title">Previous session crashed</string>
     <string name="backup_restore_message">There is a backup of “%1$s” from %2$s (%3$d MB) — the moment you pressed F10.\n\nReturning to it will erase everything that happened after it was made.</string>
     <string name="backup_restore_continue">Continue as is</string>
@@ -310,7 +312,7 @@
     <string name="backup_restoring">Restoring the backup…</string>
     <string name="backup_restore_done">Backup restored</string>
     <string name="backup_restore_failed">Restore failed: %1$s</string>
-    <string name="game_instance_restore_backup">Restore Quick Save backup…</string>
+    <string name="game_instance_restore_backup">Restore F10 backup</string>
     <string name="backup_manual_restore_message">There is a backup of “%1$s” from %2$s (%3$d MB).\n\nRestoring it will replace your current progress in that world with the state at the moment the backup was made. This cannot be undone.</string>
     <string name="bug_report_pick_instance">Which game is this report about?</string>
     <string name="backup_none_found">No backup found for the last played world</string>
@@ -430,6 +432,7 @@
 
     <!-- Settings groups -->
     <string name="settings_group_rendering">Rendering</string>
+    <string name="settings_group_texture">Texture compression</string>
     <string name="settings_group_appearance">Appearance</string>
     <string name="settings_theme">Launcher theme</string>
     <string name="settings_group_advanced">Advanced</string>
@@ -449,7 +452,8 @@
         \u00A0\u00A0Project Zomboid/\n
         \u00A0\u00A0\u00A0\u00A0ProjectZomboid64.json\n
         \u00A0\u00A0\u00A0\u00A0java/\n
-        \u00A0\u00A0\u00A0\u00A0...
+        \u00A0\u00A0\u00A0\u00A0...\n\n
+        A GOG Linux installer (.sh) works too: put it into a .zip archive on its own.
     </string>
     <string name="game_instance_files_help_title">Game files ZIP structure</string>
 
@@ -518,6 +522,7 @@
     <string name="settings_jvm_args_reset">Reset to default</string>
     <string name="settings_jvm_args_clear">Clear</string>
     <string name="settings_jvm_args_b42_recommendation">Recommended for Build 42: caps the Java heap and returns memory to the system, which leaves room for the renderer. In some cases the game may fail to start without some of these parameters. Not for Build 41 — on 4 GB devices it does more harm than good.</string>
+    <string name="settings_jvm_args_b42_preset_title">Preset for Build 42 (recommended)</string>
     <string name="settings_jvm_args_apply">Apply</string>
     <string name="renderer_ng_build42_only_title">NG_GL4ES is for Build 42</string>
     <string name="renderer_ng_build42_only_message">This renderer was written for Build 42 and does not work on Build 41 — the game will not start. On Build 41 choose GL4ES.\n\nTexture shrinking has been enabled with it, which is what keeps the framerate steady. Build 42 also wants its own Java arguments — the suggested preset sets everything at once: Settings → Suggested presets.</string>
@@ -677,4 +682,8 @@
     <string name="native_libs_installed">Native libraries installed</string>
 
     <string name="control_element_opacity_all">To all</string>
+    <string name="settings_jvm_args_title">JVM arguments</string>
+    <string name="launcher_empty_title">Getting started</string>
+    <string name="launcher_empty_body">To start playing, create an instance — an installed copy of Project Zomboid. Add your game files with the + at the top, or download the game from Steam or GOG in the side menu. A Steam download must be packed into a .zip first; from GOG, tap “Create an instance” once the download is done.</string>
+    <string name="launcher_empty_quick_start">Quick start</string>
 </resources>

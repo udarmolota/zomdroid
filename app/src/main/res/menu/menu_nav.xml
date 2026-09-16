@@ -32,11 +32,6 @@
             android:icon="@drawable/mt_icon_save"
             app:showAsAction="never"/>
         <item
-            android:id="@+id/action_install_native_libs"
-            android:title="@string/native_libs_menu"
-            android:icon="@drawable/ic_native_libs"
-            app:showAsAction="never"/>
-        <item
             android:id="@+id/action_install_driver"
             android:title="@string/install_driver_menu"
             android:icon="@drawable/mt_icon_driver"
@@ -63,6 +58,11 @@
             android:id="@+id/action_download_steam"
             android:title="@string/steam_dl_menu"
             android:icon="@drawable/ic_steam"
+            app:showAsAction="never"/>
+        <item
+            android:id="@+id/action_download_gog"
+            android:title="@string/gog_dl_menu"
+            android:icon="@drawable/ic_gog"
             app:showAsAction="never"/>
     </group>
 

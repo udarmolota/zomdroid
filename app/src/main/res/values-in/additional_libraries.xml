@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="additional_libraries_title">Library tambahan</string>
+    <string name="mp_libs_title">Multiplayer untuk Build 41</string>
+    <string name="mp_libs_hint">Mengunduh dua library ARM64 dari Linux B42.12 melalui akun Steam Anda. Library diaktifkan otomatis setelah pemasangan. Library multiplayer lama diganti dengan cadangan tetap disimpan. File native lainnya dipertahankan.</string>
+    <string name="mp_libs_ready">Library multiplayer B42.12 terpasang</string>
+    <string name="mp_libs_manual">Library dipasang manual; versi sumber tidak diketahui</string>
+    <string name="mp_libs_login">Unduh dua library multiplayer B42.12 untuk %1$s. Masuk dengan akun Steam yang memiliki Project Zomboid.</string>
+    <string name="mp_libs_invalid_instance">Unduhan library multiplayer hanya tersedia untuk instans Build 41.</string>
+</resources>

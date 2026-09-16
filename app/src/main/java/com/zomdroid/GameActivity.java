@@ -47,11 +47,24 @@ import org.fmod.FMOD;
  */
 public class GameActivity extends AppCompatActivity implements GamepadManager.GamepadListener, KeyboardManager.KeyboardListener {
     public static final String EXTRA_GAME_INSTANCE_NAME = "com.zomdroid.GameActivity.EXTRA_GAME_INSTANCE_NAME";
+    public static final String EXTRA_SERVER_PROBE_CLIENT = "com.zomdroid.SERVER_PROBE_CLIENT";
+    public static final String EXTRA_COOP_HOST_TEST = "com.zomdroid.COOP_HOST_TEST";
+    private AutoCloseable coopHostBridge;
+    private boolean serverProbeBound;
+    private final android.content.ServiceConnection serverProbeConnection = new android.content.ServiceConnection() {
+        @Override public void onServiceConnected(android.content.ComponentName name, android.os.IBinder service) {
+            Log.i("ServerProbeClient", "Bound to server process");
+        }
+        @Override public void onServiceDisconnected(android.content.ComponentName name) {
+            Log.w("ServerProbeClient", "Server process disconnected");
+        }
+    };
     private static final String LOG_TAG = GameActivity.class.getName();
 
     private ActivityGameBinding binding;
     private Surface gameSurface;
     private static boolean isGameStarted = false;
+    static boolean hasGameJvm() { return isGameStarted; }
 
     // Handles all gamepad connection/disconnection and input events
     private GamepadManager gamepadManager;
@@ -81,6 +94,23 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (DedicatedServerService.active(this)) {
+            android.widget.Toast.makeText(this, R.string.ds_busy, android.widget.Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
+
+        final boolean serverProbeClient = BuildConfig.DEBUG
+                && getIntent().getBooleanExtra(EXTRA_SERVER_PROBE_CLIENT, false);
+        if (serverProbeClient) {
+            android.content.Intent server = new android.content.Intent().setClassName(this,
+                    "com.zomdroid.ServerProbeBindingService");
+            serverProbeBound = bindService(server, serverProbeConnection,
+                    Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT);
+            if (!serverProbeBound) {
+                throw new IllegalStateException("Could not bind the server test process");
+            }
+        }
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -164,6 +194,16 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         if (gameInstance == null)
             throw new RuntimeException("Game instance with name " + gameInstanceName + " not found");
 
+        final String coopBridgePath;
+        if (new com.zomdroid.game.InstanceSettings(gameInstanceName).isCoopHostingEnabled()
+                || (BuildConfig.DEBUG && getIntent().getBooleanExtra(EXTRA_COOP_HOST_TEST, false))) {
+            try {
+                CoopHostBridge bridge = CoopHostBridge.start(this, gameInstance);
+                coopHostBridge = bridge;
+                coopBridgePath = bridge.getPath();
+            } catch (java.io.IOException e) { throw new IllegalStateException("Cannot prepare COOP bridge", e); }
+        } else coopBridgePath = null;
+
         // Build 42.20 binds trigger actions to thresholds that assume a real pad's axis range,
         // e.g. "Melee > -0.80" on the left trigger. A released trigger has to read as -1 for that
         // to mean "not pressed"; sending 0 like we do everywhere else leaves Melee permanently on.
@@ -207,7 +247,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
                 if (!isGameStarted) {
                     Thread thread = new Thread(() -> {
                         try {
-                            GameLauncher.launch(gameInstance);
+                            GameLauncher.launch(gameInstance, serverProbeClient, coopBridgePath);
                         } catch (ErrnoException e) {
                             throw new RuntimeException(e);
                         }
@@ -358,6 +398,14 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     @Override
     protected void onDestroy() {
       super.onDestroy();
+      if (coopHostBridge != null) {
+          try { coopHostBridge.close(); }
+          catch (Exception e) { Log.e("CoopHostBridge", "Cannot close bridge", e); }
+      }
+      if (serverProbeBound) {
+          unbindService(serverProbeConnection);
+          serverProbeBound = false;
+      }
       // Unregister GamepadManager to avoid leaks
       if (gamepadManager != null) {
           gamepadManager.unregister();
@@ -570,12 +618,15 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
      */
     private void hideSystemPointerIfGameDrawsItsOwn(GameInstance gameInstance) {
         if (!readsLockCursorToWindow(gameInstance)) return;
+        // Same rule for the on-screen mouse: the game's cursor follows it, so its own arrow goes.
+        binding.inputControlsV.gameDrawsCursor = true;
+        binding.inputControlsV.invalidate();
         PointerIcon none = PointerIcon.getSystemIcon(this, PointerIcon.TYPE_NULL);
         // Both views: the pointer is resolved from the view under it, so the controls overlay
         // would bring the arrow back over itself.
         binding.gameSv.setPointerIcon(none);
         binding.inputControlsV.setPointerIcon(none);
-        Log.i(LOG_TAG, "Lock cursor to window is on - hiding the system pointer, the game draws its own");
+        Log.i(LOG_TAG, "Lock cursor to window is on - hiding the system pointer and the on-screen mouse arrow, the game draws its own");
     }
 
     /** {@code lockCursorToWindow=true} in the instance's Zomboid/options.ini. Absent file = false. */

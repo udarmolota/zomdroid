@@ -131,13 +131,13 @@ public class LauncherActivity extends AppCompatActivity {
                 binding.drawerLayout.close();
                 navController.navigate(R.id.action_open_optimization);
                 return true;
-            } else if (item.getItemId() == R.id.action_install_native_libs) {
-                binding.drawerLayout.close();
-                navController.navigate(R.id.action_install_native_libs);
-                return true;
             } else if (item.getItemId() == R.id.action_download_steam) {
                 binding.drawerLayout.close();
                 navController.navigate(R.id.action_download_steam);
+                return true;
+            } else if (item.getItemId() == R.id.action_download_gog) {
+                binding.drawerLayout.close();
+                navController.navigate(R.id.action_download_gog);
                 return true;
             } else if (item.getItemId() == R.id.action_bug_report) {
                 binding.drawerLayout.close();

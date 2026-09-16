@@ -26,12 +26,15 @@ public final class PathfindingWorkaround {
     private PathfindingWorkaround() {}
 
     public static void forceJavaPathfinderFor4212Plus(GameInstance gameInstance) {
+        forceJavaPathfinderFor4212Plus(gameInstance, new File(gameInstance.getHomePath(), "Zomboid"));
+    }
+
+    public static void forceJavaPathfinderFor4212Plus(GameInstance gameInstance, File zomboidDir) {
         if (!"42".equals(gameInstance.getBuildVersion())
                 || !new File(gameInstance.getGamePath(), "projectzomboid.jar").isFile()) {
             return;
         }
 
-        File zomboidDir = new File(gameInstance.getHomePath(), "Zomboid");
         File optionsFile = new File(zomboidDir, "debug-options.ini");
         List<String> lines = new ArrayList<>();
 

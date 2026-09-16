@@ -15,5 +15,8 @@ typedef struct  {
 
 int zomdroid_emulation_init();
 void* zomdroid_emulation_bridge_jni_symbol(EmulatedLib *lib, uint64_t fn, const char* arg_types, char ret_type);
+/* Copies code_size bytes of AArch64 code into an executable page owned by lib and returns the
+ * address to call. Shared by the box64 trampolines and the Mach-O bridges (macho_bridge.c). */
+void* zomdroid_emulation_install_code(EmulatedLib* lib, const uint32_t* code, int code_size);
 
 #endif //ZOMDROID_EMULATION_H

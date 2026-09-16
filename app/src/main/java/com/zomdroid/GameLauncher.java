@@ -15,9 +15,22 @@ import java.util.ArrayList;
 
 public class GameLauncher {
     public static void launch(GameInstance gameInstance) throws ErrnoException {
+        launch(gameInstance, false);
+    }
+
+    public static void launch(GameInstance gameInstance, boolean serverProbeClient) throws ErrnoException {
+        launch(gameInstance, serverProbeClient, null);
+    }
+    public static void launch(GameInstance gameInstance, boolean serverProbeClient, String coopBridgePath) throws ErrnoException {
+        serverProbeClient = BuildConfig.DEBUG && serverProbeClient;
+        boolean coopHostTest = coopBridgePath != null;
         // Everything the launch path used to read from the global preferences now belongs to this
         // instance. Read once: InstanceSettings is a view over shared prefs, not a snapshot.
         final com.zomdroid.game.InstanceSettings settings = gameInstance.settings();
+        if ("Build 41".equals(gameInstance.getPresetName())) {
+            try { com.zomdroid.steam.MultiplayerLibraries.recover(new File(gameInstance.getGamePath())); }
+            catch (java.io.IOException e) { Log.w("GameLauncher", "Could not recover MP library backup", e); }
+        }
 
         // B42: make sure ShaderUnit.class carries the combineShaderSources patch (needed by
         // NG_GL4ES). Normally done at instance creation; doing it here too picks up instances
@@ -45,10 +58,14 @@ public class GameLauncher {
         com.zomdroid.patch.MainScreenStatePatchApplier.applyIfNeeded(gameInstance);
         // Select safe native implementations after the class-level patches are known to be ready.
         com.zomdroid.patch.NativeLibraryWorkarounds.disableIncompleteNativeLibraries(gameInstance);
+        boolean bulletDiagnostic = !serverProbeClient && !coopHostTest
+                && com.zomdroid.patch.NativeLibraryWorkarounds.prepareBulletDiagnostic(gameInstance);
+        Os.setenv("ZOMDROID_BULLET_DIAGNOSTIC", bulletDiagnostic ? "1" : "0", true);
         // Build 42.12+'s ARM64 PathFind implementation is under test after reports of characters
         // choosing incorrect interaction routes. Use PZ's own Java fallback without affecting
         // Build 41 or the older pre-fat-jar Build 42 releases.
-        com.zomdroid.patch.PathfindingWorkaround.forceJavaPathfinderFor4212Plus(gameInstance);
+        com.zomdroid.patch.PathfindingWorkaround.forceJavaPathfinderFor4212Plus(gameInstance,
+                new File(gameInstance.getHomePath(), coopHostTest ? "coop-probe" : serverProbeClient ? "client-probe" : "Zomboid"));
         // Re-apply the 42.13 case workaround against where this instance lives right now. The mod
         // aliases and the doubled path spell out an absolute location, so they go stale when an
         // instance is renamed or copied; this also reaches mods installed before any of it existed,
@@ -248,6 +265,13 @@ public class GameLauncher {
             }
         }
 
+        File macosGame = new File(gameInstance.getGamePath());
+        try {
+            com.zomdroid.steam.MacosLibraries.recover(macosGame);
+        } catch (java.io.IOException e) {
+            Log.w("Zomdroid", "Cannot recover macOS library set", e);
+        }
+
         // Environment variables from user settings
         String rawEnvVars = settings.getEnvVars();
         if (rawEnvVars != null && !rawEnvVars.trim().isEmpty()) {
@@ -257,6 +281,18 @@ public class GameLauncher {
                     Os.setenv(parts[0].trim(), parts[1].trim(), true);
                 }
             }
+        }
+
+        // The native-library switches, set AFTER the user's env vars on purpose: a leftover
+        // ZOMDROID_MACHO_LIBS=1 typed during testing kept the macOS libraries on with the switch
+        // off (2026-09-12, twice), so the switches are the only authority for these two names.
+        NativeLibraryEnvironment.applyMacos(gameInstance, new File(gameInstance.getHomePath(),
+                coopHostTest ? "coop-probe" : serverProbeClient ? "client-probe" : "Zomboid"));
+        Os.setenv("ZOMDROID_NATIVE_FMOD", settings.isNativeFmodEnabled() ? "1" : "0", true);
+        // Debug builds always carry the emulated-JNI statistics ([JNISTAT] in native.log); a user
+        // value of 0 still turns them off.
+        if (BuildConfig.DEBUG && Os.getenv("ZOMDROID_JNI_STATS") == null) {
+            Os.setenv("ZOMDROID_JNI_STATS", "1", true);
         }
 
         jvmArgs.add("-Dorg.lwjgl.opengl.libname=" + settings.getRenderer().libName);
@@ -291,6 +327,33 @@ public class GameLauncher {
 
 
         ArrayList<String> args = gameInstance.getArgsAsList();
+        if (serverProbeClient || coopHostTest) {
+            File clientCache = new File(gameInstance.getHomePath(), coopHostTest ? "coop-probe" : "client-probe");
+            if (!clientCache.isDirectory() && !clientCache.mkdirs()) {
+                throw new IllegalStateException("Cannot create " + clientCache);
+            }
+            jvmArgs.removeIf(arg -> arg.startsWith("-Xmx") || arg.startsWith("-Xms")
+                    || arg.startsWith("-Duser.home=") || arg.startsWith("-Dzomboid.steam=")
+                    || arg.startsWith("-Dzomdroid.backup"));
+            jvmArgs.add("-Xms256m");
+            jvmArgs.add("-Xmx2048m");
+            jvmArgs.add("-Duser.home=" + clientCache.getAbsolutePath());
+            jvmArgs.add("-Dzomboid.steam=0");
+            jvmArgs.add("-Dzomdroid.backup=off");
+            args.clear();
+            args.add("-cachedir=" + clientCache.getAbsolutePath());
+            args.add("-nosteam");
+            if (serverProbeClient) {
+                args.add("+connect");
+                args.add("127.0.0.1:16261");
+            }
+            if (coopHostTest) {
+                jvmArgs.add("-Dzomdroid.coop.bridge=" + coopBridgePath);
+                jvmArgs.add("-javaagent:" + coopBridgePath + "/coop-agent.jar");
+            }
+            Log.i("ServerProbeClient", (coopHostTest ? "COOP hosting enabled" : "Connecting to loopback server")
+                    + "; isolated cache=" + clientCache);
+        }
         if (BuildConfig.DEBUG) {
             //args.add("-debug");
             //args.add("-debuglog=Shader");
@@ -298,7 +361,9 @@ public class GameLauncher {
         Log.i("Zomdroid", "JVM ARGS: " + jvmArgs);
         Log.i("Zomdroid", "GAME ARGS: " + args);
 
-        if (BuildConfig.DEBUG || settings.isDebug()) {
+        // PZ servers reject game debug clients by default. Keep launcher diagnostics,
+        // but use the ordinary game mode for the local server connection experiment.
+        if (!serverProbeClient && !coopHostTest && (BuildConfig.DEBUG || settings.isDebug())) {
             args.add("-debug");
         }
 

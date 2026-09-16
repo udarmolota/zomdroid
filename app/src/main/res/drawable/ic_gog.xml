@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- GOG wordmark, circle omitted (it collapses to a grey ring at 24dp and the letters inside it
+     become mush). Reconstructed from the logo's geometry rather than traced: the face is built from
+     rounded rectangles, so each glyph here is an outer rounded rect with a rounded hole punched out
+     (evenOdd), which is close to the original at icon sizes. Black fill on purpose - the drawer
+     tints it from the theme, the same way ic_steam works. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+
+    <!-- row 1: g -->
+    <path
+        android:fillColor="#000000"
+        android:fillType="evenOdd"
+        android:pathData="M6,7 H12 A3,3 0 0 1 15,10 V16 A3,3 0 0 1 12,19 H6 A3,3 0 0 1 3,16 V10 A3,3 0 0 1 6,7 Z M7,10 A1,1 0 0 0 6,11 V15 A1,1 0 0 0 7,16 H11 A1,1 0 0 0 12,15 V11 A1,1 0 0 0 11,10 Z" />
+    <path android:fillColor="#000000" android:pathData="M12,19 H15 V25 H12 Z" />
+    <path android:fillColor="#000000" android:pathData="M3,22 H15 V25 H3 Z" />
+
+    <!-- row 1: o -->
+    <path
+        android:fillColor="#000000"
+        android:fillType="evenOdd"
+        android:pathData="M21,7 H27 A3,3 0 0 1 30,10 V16 A3,3 0 0 1 27,19 H21 A3,3 0 0 1 18,16 V10 A3,3 0 0 1 21,7 Z M22,10 A1,1 0 0 0 21,11 V15 A1,1 0 0 0 22,16 H26 A1,1 0 0 0 27,15 V11 A1,1 0 0 0 26,10 Z" />
+
+    <!-- row 1: g -->
+    <path
+        android:fillColor="#000000"
+        android:fillType="evenOdd"
+        android:pathData="M36,7 H42 A3,3 0 0 1 45,10 V16 A3,3 0 0 1 42,19 H36 A3,3 0 0 1 33,16 V10 A3,3 0 0 1 36,7 Z M37,10 A1,1 0 0 0 36,11 V15 A1,1 0 0 0 37,16 H41 A1,1 0 0 0 42,15 V11 A1,1 0 0 0 41,10 Z" />
+    <path android:fillColor="#000000" android:pathData="M42,19 H45 V25 H42 Z" />
+    <path android:fillColor="#000000" android:pathData="M33,22 H45 V25 H33 Z" />
+
+    <!-- row 2: c -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M15,28 H6 A3,3 0 0 0 3,31 V37 A3,3 0 0 0 6,40 H15 V37 H7 A1,1 0 0 1 6,36 V32 A1,1 0 0 1 7,31 H15 Z" />
+
+    <!-- row 2: o -->
+    <path
+        android:fillColor="#000000"
+        android:fillType="evenOdd"
+        android:pathData="M21,28 H27 A3,3 0 0 1 30,31 V37 A3,3 0 0 1 27,40 H21 A3,3 0 0 1 18,37 V31 A3,3 0 0 1 21,28 Z M22,31 A1,1 0 0 0 21,32 V36 A1,1 0 0 0 22,37 H26 A1,1 0 0 0 27,36 V32 A1,1 0 0 0 26,31 Z" />
+
+    <!-- row 2: m: a rounded top bar carrying three stems -->
+    <path android:fillColor="#000000" android:pathData="M36,28 H42 A3,3 0 0 1 45,31 H33 A3,3 0 0 1 36,28 Z" />
+    <path android:fillColor="#000000" android:pathData="M33,31 H36 V40 H33 Z" />
+    <path android:fillColor="#000000" android:pathData="M37.5,31 H40.5 V40 H37.5 Z" />
+    <path android:fillColor="#000000" android:pathData="M42,31 H45 V40 H42 Z" />
+
+</vector>

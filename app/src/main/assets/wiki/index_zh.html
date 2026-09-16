@@ -28,224 +28,403 @@
         .details-content {
             padding-top: 0.5em;
         }
+
+        code {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        li {
+            margin-bottom: 0.3em;
+        }
     </style>
 </head>
 <body>
 <ul>
+    <li><a href="#quick-start">快速开始</a></li>
     <li>
-        <a href="#how-to-get-game-files">如何获取游戏文件？</a>
+        <a href="#get-game-files">获取游戏文件</a>
         <ol>
-            <li><a href="#download-game-files">从官方渠道下载游戏文件</a></li>
-            <li><a href="#add-files-to-archive">将文件添加到 .zip 压缩包</a></li>
-            <li><a href="#copy-archive-to-device">将 .zip 压缩包复制到手机</a></li>
+            <li><a href="#steam-pc">在电脑上用 DepotDownloader（最快）</a></li>
+            <li><a href="#steam-in-app">在应用内：从 Steam 下载</a></li>
+            <li><a href="#zip-archive">将文件打包为 .zip</a></li>
         </ol>
     </li>
+    <li><a href="#native-libraries">Build 41 联机库</a></li>
+    <li><a href="#renderers">渲染器与驱动</a></li>
+    <li><a href="#controls">操作</a></li>
+    <li><a href="#quick-save">快速存档（F10）</a></li>
+    <li><a href="#mods">模组</a></li>
     <li>
-        <a href="#native-libraries">原生库（Build 41 联机）</a>
+        <a href="#multiplayer">联机与开服</a>
+        <ol>
+            <li><a href="#host-in-game">在游戏中开服</a></li>
+            <li><a href="#dedicated-server">专用服务器</a></li>
+            <li><a href="#host-network">让玩家加入</a></li>
+        </ol>
     </li>
-    <li>
-        <a href="#renderers">渲染器与驱动</a>
-    </li>
-    <li>
-        <a href="#known-issues">已知问题</a>
-    </li>
+    <li><a href="#additional-libraries">附加库（Build 42.20+）</a></li>
+    <li><a href="#known-issues">已知问题</a></li>
+    <li><a href="#report">报告问题</a></li>
 </ul>
 
 <hr>
 
-<section id="how-to-get-game-files">
-    <h2>如何获取游戏文件？</h2>
-    <section id="download-game-files">
-        <h3>1. 从官方渠道下载游戏文件</h3>
+<section id="quick-start">
+    <h2>快速开始</h2>
+    <p>
+        Zomdroid 是一个启动器：它在安卓上运行<b>你自己拥有的</b> Project Zomboid。应用本身不包含游戏。
+    </p>
+    <ol>
+        <li>你需要在 <b>Steam 上拥有 Project Zomboid</b>。</li>
+        <li>获取 <b>Linux</b> 版游戏文件。最快的方式是在电脑上使用 DepotDownloader；没有电脑时，
+            使用侧边菜单中的<b>从 Steam 下载</b>。参见<a href="#get-game-files">获取游戏文件</a>。</li>
+        <li>将文件打包为 <b>.zip</b> 压缩包，游戏文件要位于压缩包的顶层。参见<a href="#zip-archive">打包文件</a>。</li>
+        <li>在主界面点击 <b>+</b>，输入名称，选择与你的游戏版本相符的预设，然后选择该 .zip。
+            Build 41 需要 4 GB 以上内存，Build 42 至少 6 GB，Build 42.12 及更新版本至少 8 GB。</li>
+        <li>Zomdroid 会自动为你的手机选择渲染器和驱动。如果你改过设置后出了问题，打开实例设置
+            （齿轮图标）并点击 <b>Suggested preset</b>。</li>
+        <li>点击启动按钮 <b>▶</b>。首次启动时游戏要生成缓存，会比平时慢。</li>
+    </ol>
+    <p>遇到问题？参见<a href="#report">报告问题</a>。</p>
+</section>
+
+<hr>
+
+<section id="get-game-files">
+    <h2>获取游戏文件</h2>
+    <p>
+        Zomdroid 需要 Project Zomboid 的 <b>Linux 版本</b>，并且你需要在 Steam 或 GOG 上拥有该游戏。
+        选择下面任一方式获取；从 Steam 下载的文件之后还需打包为 .zip。
+    </p>
+
+    <section id="steam-pc">
+        <h3>1. 在电脑上用 DepotDownloader（最快）</h3>
+        <p>
+            <b>DepotDownloader</b> 可以直接从 Steam 下载游戏的任意版本。在电脑上下载比在手机上快得多。
+        </p>
         <details>
             <summary>DepotDownloader 使用指南</summary>
             <div class="details-content">
-                <p>Zomdroid 需要 Linux 版本的《僵尸毁灭工程》文件才能运行。在 Windows 上获取这些文件最简单的方式是使用 <b>DepotDownloader</b> —— 一个可以直接从 Steam 下载指定版本的工具。</p>
-                <p>下载前您需要在 Steam 上拥有《僵尸毁灭工程》。</p>
                 <ol>
-                    <li>下载 <a href="https://github.com/SteamRE/DepotDownloader/releases/tag/DepotDownloader_3.4.0" target="_blank">DepotDownloader</a>。
-                        Windows 用户请选择 <b>DepotDownloader-windows-x64.zip</b>。</li>
+                    <li>下载 <a href="https://github.com/SteamRE/DepotDownloader/releases" target="_blank">DepotDownloader</a>。
+                        Windows 用户请下载 <b>DepotDownloader-windows-x64.zip</b>。</li>
                     <li>解压到任意位置，例如：<b>C:\DepotDownloader</b></li>
-                    <li>打开文件夹，右键单击 → <b>在终端/CMD中打开</b></li>
-                    <li>使用以下命令作为基础，将 <b>YOURUSERNAME</b> 和
-                        <b>YOURPASSWORD</b> 替换为您的 Steam 账号信息：
+                    <li>打开该文件夹，右键 → <b>在终端 / CMD 中打开</b></li>
+                    <li>下载<b>最新公开版本</b>只需要 <code>-app</code> 和 <code>-depot</code>，不需要
+                        manifest 或 beta。将 <b>YOURUSERNAME</b> 和 <b>YOURPASSWORD</b> 替换为你的 Steam
+                        账号信息：
                         <br><br>
-                        <i>./DepotDownloader -app 108600 -depot 108603 -manifest MANIFESTNUMBER -username YOURUSERNAME -password YOURPASSWORD</i>
+                        <code>./DepotDownloader -app 108600 -depot 108603 -username YOURUSERNAME -password YOURPASSWORD</code>
                         <br><br>
-                        包含 manifest 编号和可选 <code>-beta</code> 标志
-                        （例如 <code>-beta unstable</code> 或 <code>-beta legacy_42_12</code>）的完整命令
-                        可直接从 <a href="https://steamdb.info/depot/108603/manifests/" target="_blank">SteamDB</a> 复制
-                        —— 在「Copy format」下拉菜单中选择 <b>DepotDownloader</b>，然后点击所需版本旁边的复制图标。
-                        可能需要通过 Steam 手机端进行验证。
+                        如需<b>旧版本或测试版</b>，请加上 <code>-manifest MANIFESTNUMBER</code>，必要时再加
+                        <code>-beta</code> 参数（例如 <code>-beta unstable</code> 或
+                        <code>-beta legacy_42_12</code>）。完整命令可以从
+                        <a href="https://steamdb.info/depot/108603/manifests/" target="_blank">SteamDB</a>
+                        复制：在 "Copy format" 菜单中选择 <b>DepotDownloader</b>，然后点击目标版本旁的复制图标。
+                        可能需要通过 Steam 手机应用验证。
                     </li>
+                    <li>下载完成后，控制台会显示文件所在的文件夹。按<a href="#zip-archive">打包文件</a>中的说明打包，
+                        并把 .zip 复制到手机上。</li>
                 </ol>
             </div>
         </details>
     </section>
 
-    <section id="add-files-to-archive">
-        <h3>2. 将文件添加到 .zip 压缩包</h3>
-        <p>Zomdroid 要求 .zip 压缩包的根目录直接包含游戏文件 —— 不能放在子文件夹内。</p>
+    <section id="steam-in-app">
+        <h3>2. 在应用内：从 Steam 下载</h3>
+        <p>无需电脑，但在手机上下载更慢。</p>
+        <ol>
+            <li>打开侧边菜单，点击<b>从 Steam 下载</b>，选择<b>游戏</b>标签。</li>
+            <li>选择 <b>Build 41</b> 或 <b>Build 42</b>，并登录你的 Steam 账号。你的登录信息只发送给
+                Steam，不会被保存。请在 Steam 应用中批准登录，或输入 Steam 令牌验证码。</li>
+            <li>出现提示时，允许<b>访问所有文件</b>：游戏会保存到公共的 <b>Downloads/zomdroid</b> 文件夹。</li>
+            <li>等待下载完成。Build 41 约 6–7 GB，Build 42 约 10–11 GB。如果下载中断，再次启动同一版本即可继续。</li>
+        </ol>
+        <p>
+            如果想下载旧版本而不是最新版，在
+            <a href="https://steamdb.info/depot/108603/manifests/" target="_blank">SteamDB</a>
+            上找到它，复制它的 <b>DepotDownloader</b> 命令行，把整行粘贴到 manifest 输入框中。
+        </p>
+        <p>
+            文件会保存在 <b>Downloads/zomdroid/ProjectZomboid_B41_…</b> 或 <b>…_B42_…</b>。里面有三项：
+            <b>projectzomboid</b> 文件夹、<b>.zomdroid_complete…</b> 文件和 <b>projectzomboid.sh</b>。
+            Zomdroid 暂时不能直接用这个文件夹创建实例：请先把 <b>projectzomboid</b> 里面的内容打包为 .zip，见下文。
+        </p>
+    </section>
+
+    <section id="gog">
+        <h3>3. 从 GOG 获取</h3>
+        <p>GOG 上的 Project Zomboid 没有 DRM，其 Linux 版本是一个安装程序文件 (.sh)。</p>
+        <ol>
+            <li>打开侧边菜单，点击<b>从 GOG 下载</b>。在 GOG 自己的页面上用 GOG 的邮箱和密码登录：Zomdroid 不会看到你的密码。</li>
+            <li>通过关联账号（例如 Google）登录无法在应用内完成。如果你平时是这样登录的，请先设置 GOG 密码：gog.com → Sign in → Password reset。</li>
+            <li>点击<b>检查游戏库</b>。Project Zomboid 会显示为一张卡片。</li>
+            <li>点击<b>下载</b>。安装程序会保存到公共的 <b>Downloads/zomdroid</b> 文件夹；系统询问时请授予<b>所有文件访问权限</b>。下载期间可以切换到其他应用。如果下载中断，再次点击按钮即可继续。</li>
+            <li>下载完成后，按钮会变为<b>创建实例</b>：打开新建实例界面时安装程序已被选中，不需要 .zip。</li>
+        </ol>
         <details>
-            <summary>Steam 使用指南</summary>
+            <summary>在电脑上</summary>
             <div class="details-content">
-                <p>进入包含游戏文件的文件夹（含 ProjectZomboid64 可执行文件的文件夹）。
-                Linux 系统通常位于 <i>~/.local/share/Steam/steamapps/common/ProjectZomboid/projectzomboid</i>。
-                Windows 或 macOS 用户请记录上一步的 depot 下载目录
-                （下载完成后会显示在控制台中）。Windows 上通常为
-                <i>C:\Program Files (x86)\Steam\steamapps\content\app_108600\depot_108603\projectzomboid</i>。
-                全选所有文件（Ctrl + A 或 macOS 上的 Command + A），然后添加到 .zip 压缩包中。</p>
+                <p>在 gog.com 的游戏库中下载 <b>Linux</b> 安装程序（.sh 文件）。把它单独打包成一个 <b>.zip</b>，复制到手机，创建实例时选择这个 .zip。之所以需要 .zip，是因为文件管理器不一定能把单独的 .sh 文件交给应用。</p>
             </div>
         </details>
     </section>
-    <section id="copy-archive-to-device">
-        <h3>3. 将 .zip 压缩包复制到手机</h3>
-        <p>将上一步创建的 .zip 压缩包复制到手机上的任意文件夹。之后可以用该文件创建新的游戏实例。游戏实例创建完成后，可以删除 .zip 压缩包以释放空间。</p>
+
+    <section id="zip-archive">
+        <h3>4. 将文件打包为 .zip</h3>
+        <p>
+            .zip 压缩包中的游戏文件必须位于<b>顶层</b>，而不是在某个文件夹里：
+            <code>ProjectZomboid64.json</code>、<code>java/</code>、<code>natives/</code> 等都必须直接位于压缩包内。
+        </p>
+        <p>
+            <b>在手机上：</b>用文件管理器打开 <b>Downloads/zomdroid/ProjectZomboid_…</b>，再进入其中的
+            <b>projectzomboid</b> 文件夹。选中该文件夹<b>里面</b>的所有内容，压缩为 <b>ZIP</b> 格式：
+            不要用 7z 或 rar，也不要从外面压缩整个文件夹。压缩包还需要额外几 GB 的可用空间。
+        </p>
+        <details>
+            <summary>在电脑上</summary>
+            <div class="details-content">
+                <p>打开游戏文件所在的文件夹（包含 ProjectZomboid64 可执行文件的那个）。在 Linux 上通常是
+                <i>~/.local/share/Steam/steamapps/common/ProjectZomboid/projectzomboid</i>。
+                使用 DepotDownloader 时，就是下载完成后控制台显示的文件夹，例如 Windows 上的
+                <i>C:\Program Files (x86)\Steam\steamapps\content\app_108600\depot_108603\projectzomboid</i>。
+                选中所有文件（Ctrl + A，macOS 上为 Command + A），添加到 .zip 压缩包。</p>
+            </div>
+        </details>
+        <p>
+            把 .zip 放在方便的位置，创建实例时选择它。之后可以删除下载的文件夹：它们占用很多空间。
+            保留 .zip 不是必须的，但以后重装或创建同一版本的另一个实例时会很方便，
+            例如一个使用虚拟键盘而不是手柄布局的实例。
+        </p>
     </section>
 </section>
+
 <hr>
 
 <section id="native-libraries">
-    <h2>原生库（Build 41 联机）</h2>
-
+    <h2>Build 41 联机库</h2>
     <p>
-        在 <b>Build 41</b> 中使用联机功能需要额外的原生库。
-        这些库由《僵尸毁灭工程》开发者作为
-        <b>Build 42.12（Linux 版本）</b> 的一部分官方发布。
+        <b>Build 41</b> 的联机功能（加入服务器和开服）需要两个额外的库：
     </p>
-
-    <p>
-        ⚠️<b>重要：</b>所需文件仅位于 <b>android</b> 文件夹中。
-        只能使用该文件夹中的文件——其他文件不被视为本地库。
-    </p>
-
-    <p>
-        只需要<b>两个原生库</b>：
-    </p>
-
     <ul>
         <li><code>libRakNet64.so</code></li>
         <li><code>libZNetNoSteam64.so</code></li>
     </ul>
-
     <p>
-        从 Linux Build 42.12 发行版中下载这两个文件，
-        将它们放入一个 <code>.zip</code> 压缩包，
-        并在创建新游戏实例时上传该压缩包。
+        游戏开发者将它们放在 Linux 版 <b>Build 42.12</b> 的 <b>android</b> 文件夹中。该文件夹里只需要这两个文件。
     </p>
-
     <p>
-        <code>.zip</code> 压缩包应将两个 <code>.so</code> 文件
-        直接放在根目录（不在文件夹内）。
+        在实例设置的<b>附加库</b>卡片中安装：
     </p>
-
+    <ul>
+        <li><b>从 Steam</b>：用你的 Steam 账号只下载这两个文件。</li>
+        <li><b>从文件</b>：使用你事先准备好的 .zip，两个 .so 文件位于压缩包顶层。创建实例时也可以添加这个 .zip。</li>
+    </ul>
     <p>
-        在创建新游戏实例时，可以将原生库压缩包与主游戏文件一起
-        上传到对应字段中。
+        没有这些库，Build 41 无法开启服务器功能。Build 42 已自带这两个库。
     </p>
 </section>
+
 <hr>
 
 <section id="renderers">
     <h2>渲染器与驱动</h2>
-
     <p>
-        Zomdroid 使用渲染器将《僵尸毁灭工程》的桌面端图形
-        转换为与 Android 设备兼容的图形。
+        渲染器负责把游戏的电脑版图形转换为安卓可用的图形。创建实例时，Zomdroid 会为你的手机选择一个；
+        你可以在实例设置中更改。
     </p>
-
-    <p>
-        启动器提供两种渲染方案：
-    </p>
-
-    <ul>
-        <li><b>GL4ES</b></li>
-        <li><b>ZINK</b>（<code>ZINK_ZFA</code> / <code>ZINK_OSMESA</code>）</li>
-    </ul>
 
     <h3>GL4ES</h3>
     <p>
-        GL4ES 是 <b>Build 41</b> 最稳定的渲染器。
-        但在 <b>Build 42</b> 中，它常常产生图形瑕疵，
-        因为它无法完全转换游戏更新后的渲染管线。
+        <b>Build 41</b> 最稳定的渲染器。在 <b>Build 42</b> 上经常出现图形错误。
     </p>
 
-    <h3>ZINK</h3>
+    <h3>NG_GL4ES</h3>
     <p>
-        ZINK 在 <b>Build 42</b> 上效果最佳，
-        通常能消除 GL4ES 产生的图形瑕疵。
+        适用于任何 GPU 上的 <b>Build 42</b>，无需驱动。在没有骁龙（Adreno）GPU 的手机上，Zomdroid 会选择它。
+        如果你为了尝试 ZINK 开启过 ANGLE 驱动，使用 NG_GL4ES 时请关闭它：开启 ANGLE 会使帧率大幅下降。
     </p>
 
+    <h3>ZINK (ZINK_ZFA, ZINK_OSMESA)</h3>
     <p>
-        ZINK 提供以下几种 Vulkan 驱动：
+        在配备<b>骁龙（Adreno）GPU</b> 的手机上，<b>Build 42</b> 画面效果最好。ZINK 需要 Vulkan 驱动；
+        在 Adreno 上，Zomdroid 会选择 ZINK_ZFA 并搭配适合你 GPU 的驱动。在其他 GPU 上，ZINK 只能通过
+        ANGLE 运行且难以设置，因此请使用 NG_GL4ES。
     </p>
 
+    <h3>纹理压缩 (ETC2)</h3>
+    <p>
+        NG_GL4ES 和 ZINK 默认开启。它以极小的画质损失压缩大纹理，可以节省大量内存。首次启动需要生成缓存，
+        耗时更长；缓存可以在实例设置中清除。
+    </p>
+
+    <h3>ZINK 的 Vulkan 驱动</h3>
+    <p>
+        Freedreno 和 Turnip 都是面向 Adreno GPU 的同一个开源 Mesa 驱动的不同构建，针对不同代的 GPU 做了调整。
+        如果画面不正常，请尝试其他驱动。
+    </p>
     <ul>
-        <li><b>系统 Vulkan 驱动</b></li>
-        <li><b>Freedreno</b></li>
-        <li><b>Turnip</b></li>
-    </ul>
-    <p>
-        上述所有 Freedreno 和 Turnip 驱动都是同一款开源
-        Mesa Vulkan 驱动（适用于 Adreno GPU）的不同版本。<b>Turnip</b> 是
-        Mesa Freedreno 驱动栈中 Vulkan 组件的正式名称 —— 这两个名称有时可互换使用。
-        不同版本针对不同的骁龙处理器代进行了优化，
-        这也是为什么启动器提供多个驱动选项。
-    </p>
-    <p>
-        ZINK 主要适用于<b>骁龙设备（Adreno GPU）</b>。在联发科 Dimensity 上，
-        ZINK 可通过 ANGLE 图形驱动工作，但在 Dimensity 设备上启用 ANGLE 往往并不简单 ——
-        仅靠开发者选项很少能直接成功，可能需要第三方工具。联发科 Helio 不支持 ZINK，
-        但部分 Helio 设备可能能够通过 GL4ES 运行较早、要求较低的 Build 42 版本（如 42.6）——
-        目前尚无可靠方案，但未来情况可能改变。
-        对于其他处理器（Exynos、麒麟等），相关信息较少 ——
-        ZINK 通常无法正常工作或可能崩溃。
-    </p>
-
-    <p>
-        <b>Build 41</b> 的推荐配置为 <b>GL4ES</b>。
-        <b>Build 42</b> 的推荐配置为 <b>ZINK + Freedreno 驱动</b>。
-        Freedreno 驱动仅支持搭载 Adreno GPU 的骁龙设备。
-        不同驱动版本适用于不同的硬件代：
-    </p>
-
-    <ul>
-        <li><b>Freedreno</b> —— 稳定版，推荐用于 Adreno 6xx 和 7xx（骁龙 7 Gen 1 及以下）</li>
-        <li><b>Freedreno 8xx</b> —— 实验性，适用于 Adreno 8xx（骁龙 8 Gen 3 / Gen 4 / Gen 5 / Elite）</li>
-        <li><b>Freedreno 830/840</b> —— 实验性，专为 Adreno 830/840（骁龙 8 Elite / Elite 2，如 Galaxy S25/S26 系列）</li>
+        <li><b>Freedreno</b>：Adreno 7xx（骁龙 7 系列）的默认驱动；在部分 6xx 上也可能可用。</li>
+        <li><b>Freedreno 8xx</b>：Adreno 8xx（骁龙 8 Gen 3 / Gen 4 / Gen 5 / Elite、7 Gen 3）。</li>
+        <li><b>Freedreno 830/840</b>：Adreno 830/840（骁龙 8 Gen 5 / Elite，例如 Galaxy S25/S26）。</li>
+        <li><b>TURNIP 740</b>：Adreno 740（骁龙 8 Gen 2）。修复 HyperOS 3 / One UI 更新后的闪烁问题。</li>
+        <li><b>TURNIP 7xx</b>：Adreno 7xx（骁龙 7 系列）。</li>
+        <li><b>TURNIP 710</b>：Adreno 710（骁龙 7 Gen 1）。</li>
+        <li><b>System default</b>：手机自带的 Vulkan 驱动。</li>
+        <li><b>自定义驱动</b>：在侧边菜单的<b>导入/导出自定义驱动</b>中导入。</li>
     </ul>
 </section>
+
 <hr>
+
+<section id="controls">
+    <h2>操作</h2>
+    <ul>
+        <li>屏幕按键显示在游戏画面上方。在侧边菜单的<b>控制编辑器</b>中修改：添加、移动和调整按钮、摇杆、
+            触控板和轮盘菜单的大小，并设置每个按键对应的输入。</li>
+        <li>编辑器中的<b>布局</b>按钮会打开菜单：加载虚拟键鼠布局，或重置为默认手柄布局。
+            侧边菜单中的<b>导入/导出按键布局</b>可以将布局作为 .zip 文件分享。</li>
+        <li>支持实体<b>手柄</b>；可在侧边菜单的<b>手柄映射器</b>中重新映射按键。</li>
+        <li>也支持实体<b>鼠标和键盘</b>。如果想看到游戏自己的光标而不是安卓箭头，请在游戏的显示选项中开启
+            <b>将光标锁定在窗口</b>。屏幕虚拟鼠标也遵循同样的规则。</li>
+    </ul>
+</section>
+
+<hr>
+
+<section id="quick-save">
+    <h2>快速存档（F10）</h2>
+    <p>
+        在实例设置中开启<b>快速存档（F10）</b>。之后在游戏中按 <b>F10</b> 会完整备份你的世界：
+        这是崩溃或死亡后可以返回的节点。
+    </p>
+    <ul>
+        <li>存档较大时，备份需要一段时间，游戏可能看起来像卡住了。其实没有：请等待，不要关闭游戏。</li>
+        <li>每个世界只保留一份备份，新的备份会替换旧的。仅限单人游戏，适用于 Build 41 和 42。</li>
+        <li>崩溃后，Zomdroid 会提示你返回备份。你也可以在实例的 ⋮ 菜单中选择<b>恢复 F10 备份</b>。</li>
+        <li>F10 按钮已包含在新的操作布局中。如果你使用自己的旧布局，请在控制编辑器中添加：
+            输入类型 <b>键盘和鼠标</b>，绑定 <b>F10</b>。</li>
+    </ul>
+</section>
+
+<hr>
+
+<section id="mods">
+    <h2>模组</h2>
+    <ul>
+        <li><b>从 Steam 下载</b>的<b>模组</b>标签可以按 ID 下载创意工坊模组：ID 是创意工坊链接末尾的数字
+            （<i>…/filedetails/?id=数字</i>）。无需登录 Steam；多个 ID 可以用空格分隔。每个模组会以 .zip
+            保存在 <b>Downloads/zomdroid</b> 中。</li>
+        <li>在侧边菜单的<b>导入模组</b>中安装。智能导入可以在任何 .zip 结构中找到模组文件夹，并自动修复安卓上的路径问题。</li>
+        <li>侧边菜单中的<b>优化</b>为性能模组 BetterFPS 和 Render Less Zombie 提供了现成的设置。</li>
+        <li>部分图形模组可能无法正常显示，参见<a href="#known-issues">已知问题</a>。</li>
+    </ul>
+</section>
+
+<hr>
+
+<section id="multiplayer">
+    <h2>联机与开服</h2>
+    <p>
+        <b>加入服务器。</b>Build 42 可以直接联机。Build 41 需要<a href="#native-libraries">联机库</a>。
+        服务器会拒绝以调试模式运行游戏的玩家。
+    </p>
+    <p>
+        手机可以用两种方式开服：一边玩一边在游戏中开服，或者作为无人游玩的专用服务器。两者都处于实验阶段。
+    </p>
+
+    <section id="host-in-game">
+        <h3>1. 在游戏中开服</h3>
+        <p>
+            在实例设置中开启<b>允许创建服务器</b>，照常启动游戏，然后在游戏中选择<b>建立服务器</b>。
+        </p>
+        <ul>
+            <li>开服使用独立的配置档：开关开启期间，你平时的存档、模组和游戏设置都不会显示，关闭开关后会恢复。</li>
+            <li>在 Build 42 上，创建服务器时请至少为它分配 2 GB 内存。这是在游戏本身所需内存之外的额外占用，
+                因此需要一台内存充足的高性能手机。</li>
+            <li>开服期间请保持游戏打开、屏幕常亮。</li>
+        </ul>
+    </section>
+
+    <section id="dedicated-server">
+        <h3>2. 专用服务器</h3>
+        <p>
+            手机只运行服务器，全部性能都用于世界运行，玩家用自己的手机加入。打开实例的 ⋮ 菜单，
+            点击<b>启动服务器</b>。
+        </p>
+        <ul>
+            <li><b>配置名称：</b>从输入框旁的列表中选择一个配置，它的世界会继续。输入新名称会创建新世界：
+                输入框下方的一行会提示是哪种情况，并且 Zomdroid 在创建新世界前会先询问你。
+                如果你手动输入名称，请点击<b>加载配置</b>。</li>
+            <li><b>模组、沙盒和出生点</b>最方便在游戏自己的<b>建立服务器</b>界面中设置：开启<b>允许创建服务器</b>后，
+                在那里创建服务器设置，退出游戏，然后在这里选择该配置。</li>
+            <li>设置服务器内存（默认 2048 MB）、UDP 端口、最大玩家数、世界自动保存间隔、可选的连接密码和管理员密码。
+                通过 ID 启用模组，并按加载顺序列出地图，两者都用 <b>;</b> 分隔。
+                <b>编辑 PZ 配置文件</b>可以打开完整的服务器设置。</li>
+            <li>你可以关闭面板并关闭屏幕：服务器会带着通知继续运行。要关闭服务器，请点击<b>保存并停止</b>并等待其完成。</li>
+            <li>启动服务器前请先退出这台手机上的游戏；服务器运行期间无法启动游戏。
+                Build 41 需要<a href="#native-libraries">联机库</a>。</li>
+        </ul>
+    </section>
+
+    <section id="host-network">
+        <h3>3. 让玩家加入</h3>
+        <ul>
+            <li><b>同一 Wi-Fi：</b>朋友通过开服手机的 Wi-Fi 地址加入。</li>
+            <li><b>通过互联网：</b>路由器必须把服务器的 <b>UDP 端口</b>（默认 16261）转发到开服手机。
+                在路由器上启用 UPnP，或手动设置端口转发。状态栏会显示端口是否已打开以及你的外部地址；点击可查看详情。</li>
+            <li><b>使用移动数据时</b>，运营商不允许外部连接进入，因此互联网上的玩家无法直接连接到服务器。
+                连接到开服手机 Wi-Fi 热点的玩家可以通过它在该网络中的地址加入。其他地方的玩家需要在其他应用中额外设置：
+                在每部手机上使用共享的虚拟网络，例如 ZeroTier 或 Tailscale。</li>
+        </ul>
+    </section>
+</section>
+
+<hr>
+
+<section id="additional-libraries">
+    <h2>附加库（Build 42.20+）</h2>
+    <p>
+        游戏的部分库通过 box64 模拟运行。在实例设置的<b>附加库</b>卡片中，你可以改为安装来自游戏 macOS 版的
+        原生 ARM64 库：它们无需模拟，因此手机在这部分上消耗的内存和 CPU 更少。实验性功能。
+    </p>
+    <ul>
+        <li><b>从 Steam</b>：如果你拥有游戏即可下载；<b>从文件</b>：使用你之前下载的压缩包。</li>
+        <li>默认启用所有库。如果出现问题，可以在<b>使用中的库</b>中逐个关闭：关闭的库会使用其常规版本。</li>
+        <li>同一列表中的 <b>FMOD</b> 是游戏自带的安卓声音库，不是来自 macOS 版。无需下载。</li>
+    </ul>
+</section>
+
+<hr>
+
 <section id="known-issues">
     <h2>已知问题</h2>
 
-    <h3>Build 42.12+ —— 创建世界时崩溃</h3>
+    <h3>下雨时帧率下降</h3>
     <p>
-        从大约 <b>Build 42.12</b> 开始，游戏可能在创建世界时崩溃 ——
-        具体发生在创建角色后加载游戏的阶段。
-        这似乎是游戏本身的问题，与设备或驱动无关，
-        因为在多种不同设备和配置上均有发现。
-    </p>
-    <p>
-        <b>这不是永久性故障。</b> 如果游戏在此阶段崩溃，
-        只需重启 Zomdroid 再试一次。大多数用户需要 <b>2–4 次尝试</b>
-        才能成功首次加载世界。世界创建完成后，
-        后续加载同一存档通常会很稳定。
+        在部分中端手机上，下雨时帧率会明显下降。<b>解决方法：</b>在游戏选项中降低<b>动态水坑</b>设置。
     </p>
 
-    <h3>图形 MOD 兼容性</h3>
+    <h3>图形模组兼容性</h3>
     <p>
-        部分图形 MOD —— 例如服装、发型或载具的重贴图 —— 可能无法正确显示或完全无法使用。
-        这是在 Android 上运行游戏所用图形转换层的已知限制，
-        与具体设备或驱动无关。
+        部分图形模组（例如服装、头发或车辆的重制纹理）可能无法正常显示，甚至完全无法使用。
     </p>
 
-    <h3>在拆解车辆附近 GUI 消失</h3>
+    <h3>拆解车辆附近界面消失（GL4ES）</h3>
     <p>
-        如果附近有被拆除了 <b>3 个或更多车轮</b> 的载具，游戏界面可能会消失。
-        原因是载具状态触发的渲染问题。
-        <b>解决方法：</b>避免从同一辆载具上拆除超过 2 个车轮。
-        如果界面已经消失，远离该载具或重新加载存档应该能恢复。
+        使用 <b>GL4ES</b> 时，如果附近有一辆<b>拆下 3 个或更多车轮</b>的车辆，游戏界面可能会消失。
+        <b>规避方法：</b>不要从同一辆车上拆下超过 2 个车轮。如果界面已经消失，离开该车辆或重新加载存档应可恢复。
+    </p>
+</section>
+
+<hr>
+
+<section id="report">
+    <h2>报告问题</h2>
+    <p>
+        打开侧边菜单，点击<b>报告错误</b>。它会把日志和你的设置打包为 .zip，并打开一封发给我们的邮件：
+        选择你的邮件应用（例如 Gmail），填写问题描述，然后点击<b>发送</b>。<b>导出游戏日志</b>只保存游戏本身的日志。
     </p>
 </section>
 </body>

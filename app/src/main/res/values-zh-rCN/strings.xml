@@ -337,6 +337,7 @@
 
     <!-- Settings groups -->
     <string name="settings_group_rendering">渲染</string>
+    <string name="settings_group_texture">纹理压缩</string>
     <string name="settings_group_advanced">高级</string>
     <string name="settings_group_controls">控制</string>
     <string name="settings_group_audio">音频</string>
@@ -354,7 +355,8 @@
         \u00A0\u00A0Project Zomboid/\n
         \u00A0\u00A0\u00A0\u00A0ProjectZomboid64.json\n
         \u00A0\u00A0\u00A0\u00A0java/\n
-        \u00A0\u00A0\u00A0\u00A0...
+        \u00A0\u00A0\u00A0\u00A0...\n\n
+        GOG 的 Linux 安装程序 (.sh) 也可以：把它单独放进一个 .zip 压缩包。
     </string>
     <string name="game_instance_files_help_title">游戏文件ZIP结构</string>
 
@@ -391,6 +393,7 @@
     <string name="settings_jvm_args_reset">恢复默认</string>
     <string name="settings_jvm_args_clear">清空</string>
     <string name="settings_jvm_args_b42_recommendation">推荐用于 Build 42：限制 Java 堆并把内存交还系统，为渲染器留出空间。在某些情况下，缺少其中一些参数游戏可能无法启动。不适用于 Build 41——在 4 GB 设备上得不偿失。</string>
+    <string name="settings_jvm_args_b42_preset_title">Build 42 预设（推荐）</string>
     <string name="settings_jvm_args_apply">应用</string>
     <string name="renderer_ng_build42_only_title">NG_GL4ES 仅适用于 Build 42</string>
     <string name="renderer_ng_build42_only_message">该渲染器是为 Build 42 编写的，在 Build 41 上无法工作——游戏不会启动。\n\n如果你玩 Build 41，请选择 ZINK 或 GL4ES。\n\nBuild 42 还需要推荐的 JVM 参数：设置 → 高级 → JVM 参数。</string>
@@ -591,7 +594,18 @@
     <!-- NG_GL4ES renderer offer dialog -->
     <string name="settings_features_title">功能</string>
     <string name="settings_backup_switch">快速存档（F10）</string>
-    <string name="game_instance_restore_backup">恢复快速存档备份…</string>
+    <string name="game_instance_restore_backup">恢复 F10 备份</string>
+    <string name="backup_warning_title">开启前请注意</string>
+    <string name="backup_warning_message">按下 F10 会完整备份你的世界，作为崩溃或死亡后可以返回的节点。\n\n存档越大，也就是角色存活越久，备份所需的时间越长。按 F10 前请留出几分钟安全的时间：写入备份时游戏可能看起来像卡住了，其实没有。请耐心等待，不要关闭游戏。\n\nF10 按钮已包含在新的操作布局中。如果你沿用旧版本的自定义布局，请在操作编辑器中自行添加该按钮：输入类型“键盘和鼠标”，绑定 F10。\n\n每个世界只保留一份备份，新的备份会替换旧的。适用于 Build 41 和 42，仅限单人游戏。</string>
+    <string name="backup_restore_title">上次会话崩溃了</string>
+    <string name="backup_restore_message">有一份“%1$s”的备份，时间为 %2$s（%3$d MB），即你按下 F10 的时刻。\n\n返回该备份将清除之后发生的一切。</string>
+    <string name="backup_restore_continue">按原样继续</string>
+    <string name="backup_restore_do">返回备份</string>
+    <string name="backup_restoring">正在恢复备份…</string>
+    <string name="backup_restore_done">备份已恢复</string>
+    <string name="backup_restore_failed">恢复失败：%1$s</string>
+    <string name="backup_manual_restore_message">有一份“%1$s”的备份，时间为 %2$s（%3$d MB）。\n\n恢复后，该世界的当前进度将被替换为备份创建时的状态。此操作无法撤销。</string>
+    <string name="backup_none_found">未找到最近游玩世界的备份</string>
     <!-- Appended to the Build 42 compatibility preset dialog. -->
     <string name="preset_confirm_compat_note">\n\n将渲染器设置为 NG_GL4ES：无需挑选驱动，兼容所有已知的 GPU。</string>
     <string name="preset_confirm_title">应用 %1$s？</string>
@@ -607,4 +621,16 @@
     <string name="preset_applied">已应用预设：%1$s</string>
     <string name="preset_dialog_gpu_ng">检测到 %1$s。已设置 NG_GL4ES 渲染器——它可在任何 GPU 上运行，无需驱动。纹理以 ETC2 全分辨率压缩，因此在不损失画质的情况下节省内存。</string>
     <string name="preset_dialog_gpu_ng_unnamed">已设置 NG_GL4ES 渲染器——它可在任何 GPU 上运行，无需驱动。纹理以 ETC2 全分辨率压缩，因此在不损失画质的情况下节省内存。</string>
+    <string name="preset_card_title">推荐预设</string>
+    <string name="preset_card_subtitle">渲染器、纹理缩小、Java 参数和分辨率，一次为你设好</string>
+    <string name="preset_name_b41">Build 41</string>
+    <string name="preset_name_b42">Build 42</string>
+    <string name="settings_etc2_cache_clear">清除</string>
+    <string name="settings_etc2_cache_hint">所有实例共用。随时可以清除：渲染器会重新压缩所需内容，下次加载多花几秒。</string>
+    <string name="settings_texture_compression">纹理压缩 (ETC2)</string>
+    <string name="settings_texture_compression_short">以极小的画质损失压缩大纹理。会保留一个可清除的缓存。</string>
+    <string name="settings_jvm_args_title">JVM 参数</string>
+    <string name="launcher_empty_title">如何开始</string>
+    <string name="launcher_empty_body">要开始游戏，请先创建一个实例——也就是已安装的一份 Project Zomboid。用顶部的 + 添加游戏文件，或在侧边菜单中从 Steam 或 GOG 下载游戏。Steam 的下载需要先打包成 .zip；GOG 的下载完成后，点击“创建实例”即可。</string>
+    <string name="launcher_empty_quick_start">快速开始</string>
 </resources>

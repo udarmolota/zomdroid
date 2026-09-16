@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ctl_type_stick">Стик (геймпад)</string>
+    <string name="ctl_type_stick_wasd">Стик (клавиши WASD)</string>
+    <string name="ctl_type_stick_mouse">Стик (мышь)</string>
+    <string name="ctl_type_dpad">Крестовина</string>
+    <string name="ctl_type_button_rect">Кнопка (прямоугольная)</string>
+    <string name="ctl_type_button_circle">Кнопка (круглая)</string>
+    <string name="ctl_type_touchpad">Тачпад (мышь)</string>
+    <string name="ctl_type_scroll_bar">Полоса прокрутки (колесо мыши)</string>
+    <string name="ctl_type_radial_menu">Радиальное меню</string>
+    <string name="ctl_input_mnk">Клавиатура и мышь</string>
+    <string name="ctl_input_gamepad">Геймпад</string>
+    <string name="ctl_icon_none">Без иконки</string>
+    <string name="ctl_style_outline">Контур</string>
+    <string name="ctl_style_filled">Заливка</string>
+    <string name="ctl_style_glass">Стекло</string>
+    <string name="ctl_key_space">Пробел</string>
+    <string name="ctl_key_left">Левый %1$s</string>
+    <string name="ctl_key_right">Правый %1$s</string>
+    <string name="ctl_mouse_left">Левая кнопка мыши</string>
+    <string name="ctl_mouse_right">Правая кнопка мыши</string>
+    <string name="ctl_mouse_middle">Средняя кнопка мыши</string>
+    <string name="ctl_mouse_button">Кнопка мыши %1$s</string>
+    <string name="ctl_mouse_wheel_up">Колесо вверх</string>
+    <string name="ctl_mouse_wheel_down">Колесо вниз</string>
+    <string name="ctl_ui_toggle_overlay">Показать/скрыть экранные кнопки</string>
+    <string name="ctl_ui_toggle_keyboard">Показать/скрыть клавиатуру</string>
+    <string name="ctl_pad_left_stick">Левый стик</string>
+    <string name="ctl_pad_right_stick">Правый стик</string>
+    <string name="ctl_pad_left_stick_press">Нажатие левого стика (L3)</string>
+    <string name="ctl_pad_right_stick_press">Нажатие правого стика (R3)</string>
+    <string name="ctl_pad_axis">%1$s (ось)</string>
+    <string name="ctl_pad_dpad">Крестовина %1$s</string>
+    <string name="control_element_toggle">Фиксация</string>
+</resources>

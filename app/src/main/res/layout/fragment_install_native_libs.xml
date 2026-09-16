@@ -57,6 +57,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:id="@+id/native_libs_hint_tv"
                     android:text="@string/native_libs_hint"
                     android:textSize="13sp"
                     android:textColor="?attr/colorOnSurfaceVariant"/>

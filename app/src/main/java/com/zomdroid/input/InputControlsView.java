@@ -41,6 +41,12 @@ public class InputControlsView extends View {
     AbstractControlElement selectedElement;
     AbstractControlElement pointerOverElement;
     public float pixelScale = 1.f;
+    /**
+     * Set when the game draws its own cursor ("Lock cursor to window" in its options). The
+     * on-screen mouse elements then skip their arrow: the game's cursor already follows them,
+     * so the player sees one cursor, as with a real mouse.
+     */
+    public boolean gameDrawsCursor = false;
     GestureDetector gestureDetector;
     private Gson gson = new Gson();
     private SharedPreferences sharedPreferences;
@@ -115,6 +121,7 @@ public class InputControlsView extends View {
                     @Override
                     public android.view.View getView(int position, android.view.View convertView, android.view.ViewGroup parent) {
                         android.view.View view = super.getView(position, convertView, parent);
+                        ((android.widget.TextView) view).setText(ControlLabels.type(getContext(), getItem(position)));
                         view.setPadding(
                                 (int)(16 * getContext().getResources().getDisplayMetrics().density),
                                 view.getPaddingTop(),

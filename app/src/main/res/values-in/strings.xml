@@ -84,6 +84,18 @@
     <string name="control_element_icon">Ikon</string>
 
     <string name="game_instance_manage_storage">Kelola penyimpanan</string>
+    <string name="game_instance_restore_backup">Pulihkan salinan F10</string>
+    <string name="backup_warning_title">Sebelum Anda mengaktifkannya</string>
+    <string name="backup_warning_message">Menekan F10 membuat salinan penuh dunia Anda, titik untuk kembali setelah crash atau kematian.\n\nSemakin besar simpanan Anda, yaitu semakin lama karakter Anda hidup, semakin lama salinan dibuat. Luangkan beberapa menit yang aman sebelum menekan F10: game mungkin terlihat macet saat salinan ditulis, padahal tidak. Tunggu saja dan jangan menutupnya.\n\nTombol F10 ada di tata letak kontrol yang baru. Jika Anda tetap memakai tata letak sendiri dari versi sebelumnya, tambahkan tombol itu sendiri di editor kontrol: jenis input Keyboard &amp; mouse, binding F10.\n\nSatu salinan disimpan untuk setiap dunia; salinan baru menggantikan yang lama. Build 41 dan 42, hanya pemain tunggal.</string>
+    <string name="backup_restore_title">Sesi sebelumnya crash</string>
+    <string name="backup_restore_message">Ada salinan “%1$s” dari %2$s (%3$d MB), dibuat saat Anda menekan F10.\n\nKembali ke salinan itu akan menghapus semua yang terjadi setelahnya.</string>
+    <string name="backup_restore_continue">Lanjutkan apa adanya</string>
+    <string name="backup_restore_do">Kembali ke salinan</string>
+    <string name="backup_restoring">Memulihkan salinan…</string>
+    <string name="backup_restore_done">Salinan dipulihkan</string>
+    <string name="backup_restore_failed">Pemulihan gagal: %1$s</string>
+    <string name="backup_manual_restore_message">Ada salinan “%1$s” dari %2$s (%3$d MB).\n\nMemulihkannya akan mengganti progres Anda saat ini di dunia itu dengan kondisi saat salinan dibuat. Ini tidak bisa dibatalkan.</string>
+    <string name="backup_none_found">Tidak ada salinan untuk dunia yang terakhir dimainkan</string>
     <string name="game_instance_delete">Hapus</string>
 
     <string name="donate_message">Enjoying the app and want to support us? \n\nMaintained and Developed by: ko-fi.com/udarmolota, \ncreator: ko-fi.com/liamelui.  \n\nContributors: \nshimux0, Wakort, LeHiepDuy, deadgamer182, Liko, Willing-Run-8987.</string>
@@ -344,6 +356,7 @@
 
     <!-- Settings groups -->
     <string name="settings_group_rendering">Rendering</string>
+    <string name="settings_group_texture">Kompresi tekstur</string>
     <string name="settings_group_advanced">Lanjutan</string>
     <string name="settings_group_controls">Kontrol</string>
     <string name="settings_group_audio">Audio</string>
@@ -361,7 +374,8 @@
         \u00A0\u00A0Project Zomboid/\n
         \u00A0\u00A0\u00A0\u00A0ProjectZomboid64.json\n
         \u00A0\u00A0\u00A0\u00A0java/\n
-        \u00A0\u00A0\u00A0\u00A0...
+        \u00A0\u00A0\u00A0\u00A0...\n\n
+        Installer Linux dari GOG (.sh) juga bisa: masukkan file itu sendirian ke dalam arsip .zip.
     </string>
     <string name="game_instance_files_help_title">Game files ZIP structure</string>
 
@@ -398,6 +412,7 @@
     <string name="settings_jvm_args_reset">Kembalikan bawaan</string>
     <string name="settings_jvm_args_clear">Hapus</string>
     <string name="settings_jvm_args_b42_recommendation">Disarankan untuk Build 42: membatasi heap Java dan mengembalikan memori ke sistem, sehingga ada ruang untuk renderer. Dalam beberapa kasus, game bisa gagal dimulai tanpa beberapa parameter ini. Bukan untuk Build 41 — pada perangkat 4 GB lebih banyak merugikan daripada membantu.</string>
+    <string name="settings_jvm_args_b42_preset_title">Preset untuk Build 42 (disarankan)</string>
     <string name="settings_jvm_args_apply">Terapkan</string>
     <string name="renderer_ng_build42_only_title">NG_GL4ES hanya untuk Build 42</string>
     <string name="renderer_ng_build42_only_message">Renderer ini dibuat untuk Build 42 dan tidak bekerja pada Build 41 — gamenya tidak akan berjalan.\n\nJika Anda memainkan Build 41, pilih ZINK atau GL4ES.\n\nBuild 42 juga memerlukan argumen JVM yang disarankan: Pengaturan → Lanjutan → Argumen JVM.</string>
@@ -611,4 +626,18 @@
     <string name="preset_applied">Preset diterapkan: %1$s</string>
     <string name="preset_dialog_gpu_ng">%1$s terdeteksi. Renderer NG_GL4ES telah diatur — berjalan di GPU apa pun dan tidak perlu driver. Tekstur dikompresi dengan ETC2 pada resolusi penuh, sehingga memori tetap hemat tanpa mengurangi kualitas gambar.</string>
     <string name="preset_dialog_gpu_ng_unnamed">Renderer NG_GL4ES telah diatur — berjalan di GPU apa pun dan tidak perlu driver. Tekstur dikompresi dengan ETC2 pada resolusi penuh, sehingga memori tetap hemat tanpa mengurangi kualitas gambar.</string>
+    <string name="preset_card_title">Preset yang disarankan</string>
+    <string name="preset_card_subtitle">Renderer, pengecilan tekstur, argumen Java, dan resolusi, diatur sekaligus untuk Anda</string>
+    <string name="preset_name_b41">Build 41</string>
+    <string name="preset_name_b42">Build 42</string>
+    <string name="settings_backup_switch">Simpan cepat (F10)</string>
+    <string name="settings_etc2_cache_clear">Bersihkan</string>
+    <string name="settings_etc2_cache_hint">Dipakai bersama oleh semua instance. Aman dibersihkan kapan saja: renderer akan mengompresi ulang yang diperlukan, memakan beberapa detik saat pemuatan berikutnya.</string>
+    <string name="settings_features_title">Fitur</string>
+    <string name="settings_texture_compression">Kompresi tekstur (ETC2)</string>
+    <string name="settings_texture_compression_short">Mengompresi tekstur besar dengan sedikit penurunan kualitas. Menyimpan cache yang bisa dibersihkan.</string>
+    <string name="settings_jvm_args_title">Argumen JVM</string>
+    <string name="launcher_empty_title">Cara memulai</string>
+    <string name="launcher_empty_body">Untuk mulai bermain, buat instance — salinan Project Zomboid yang terpasang. Tambahkan file game dengan tombol + di atas, atau unduh game dari Steam atau GOG lewat menu samping. Unduhan dari Steam harus dikemas dulu ke .zip; dari GOG, ketuk “Buat instance” setelah unduhan selesai.</string>
+    <string name="launcher_empty_quick_start">Mulai cepat</string>
 </resources>

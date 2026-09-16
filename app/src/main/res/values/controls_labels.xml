@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Readable names for the controls editor: element types, input types, icons, styles and the
+     words inside binding names (see ControlLabels). Layouts keep storing the enum names; only the
+     labels change. Keys, symbols and gamepad button names stay as printed on the hardware. -->
+<resources>
+    <string name="ctl_type_stick">Stick (gamepad)</string>
+    <string name="ctl_type_stick_wasd">Stick (WASD keys)</string>
+    <string name="ctl_type_stick_mouse">Stick (mouse)</string>
+    <string name="ctl_type_dpad">D-pad</string>
+    <string name="ctl_type_button_rect">Button (rectangle)</string>
+    <string name="ctl_type_button_circle">Button (round)</string>
+    <string name="ctl_type_touchpad">Touchpad (mouse)</string>
+    <string name="ctl_type_scroll_bar">Scroll bar (mouse wheel)</string>
+    <string name="ctl_type_radial_menu">Radial menu</string>
+    <string name="ctl_input_mnk">Keyboard &amp; mouse</string>
+    <string name="ctl_input_gamepad">Gamepad</string>
+    <string name="ctl_icon_none">No icon</string>
+    <string name="ctl_style_outline">Outline</string>
+    <string name="ctl_style_filled">Filled</string>
+    <string name="ctl_style_glass">Glass</string>
+    <string name="ctl_key_space">Space</string>
+    <string name="ctl_key_left">Left %1$s</string>
+    <string name="ctl_key_right">Right %1$s</string>
+    <string name="ctl_mouse_left">Left click</string>
+    <string name="ctl_mouse_right">Right click</string>
+    <string name="ctl_mouse_middle">Middle click</string>
+    <string name="ctl_mouse_button">Mouse button %1$s</string>
+    <string name="ctl_mouse_wheel_up">Wheel up</string>
+    <string name="ctl_mouse_wheel_down">Wheel down</string>
+    <string name="ctl_ui_toggle_overlay">Show/hide on-screen controls</string>
+    <string name="ctl_ui_toggle_keyboard">Show/hide keyboard</string>
+    <string name="ctl_pad_left_stick">Left stick</string>
+    <string name="ctl_pad_right_stick">Right stick</string>
+    <string name="ctl_pad_left_stick_press">Left stick press (L3)</string>
+    <string name="ctl_pad_right_stick_press">Right stick press (R3)</string>
+    <string name="ctl_pad_axis">%1$s (axis)</string>
+    <string name="ctl_pad_dpad">D-pad %1$s</string>
+    <string name="control_element_toggle">Toggle</string>
+</resources>

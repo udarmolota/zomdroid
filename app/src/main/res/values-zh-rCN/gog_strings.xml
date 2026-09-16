@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gog_dl_menu">从 GOG 下载</string>
+    <string name="gog_login_note">使用 GOG 的邮箱和密码登录。通过关联账号登录无法在应用内完成——如果你平时是这样登录的，请先设置 GOG 密码：gog.com → Sign in → Password reset。</string>
+    <string name="gog_disclaimer_title">免责声明</string>
+    <string name="gog_disclaimer_text">Zomdroid 不会看到你的密码——你是在 GOG 自己的页面上输入的。访问令牌只保存在内存中，应用关闭后即消失；登录 Cookie 保存在本应用的私有存储中，这样不必每次都登录，退出账号会同时清除两者。</string>
+    <string name="gog_login_finishing">正在完成登录…</string>
+    <string name="gog_login_ok">已登录 GOG</string>
+    <string name="gog_login_failed">登录失败：%1$s</string>
+    <string name="gog_user_id">用户 ID：%1$s</string>
+    <string name="gog_check_library">检查游戏库</string>
+    <string name="gog_sign_out">退出登录</string>
+    <string name="gog_checking">正在读取游戏库…</string>
+    <string name="gog_probe_failed">读取游戏库失败：%1$s</string>
+    <string name="gog_scanning">正在检查你的游戏库——第 %1$d 个，共 %2$d 个</string>
+    <string name="gog_no_game">此账号中没有 Project Zomboid——显示所有带 Linux 安装程序的游戏。</string>
+    <string name="gog_nothing_linux">此账号中没有任何游戏带 Linux 安装程序。</string>
+    <string name="gog_download">下载</string>
+    <string name="gog_queued">排队中</string>
+    <string name="gog_downloading">下载中…</string>
+    <string name="gog_percent">%1$d%%</string>
+    <string name="gog_create_instance">创建实例</string>
+    <string name="gog_item_installer">%1$s · %2$s</string>
+    <string name="gog_keepalive">正在从 GOG 下载——可以切换到其他应用</string>
+    <string name="gog_download_interrupted">下载已中断。再次点击“%1$s”继续。</string>
+    <string name="gog_download_failed">下载失败：%1$s</string>
+    <string name="gog_extracting">正在解压 GOG 安装程序…</string>
+</resources>

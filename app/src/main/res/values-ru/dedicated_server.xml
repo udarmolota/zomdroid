@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ds_start">Запуск сервера</string>
+    <string name="ds_title">Выделенный сервер</string>
+    <string name="ds_installing">Дождитесь завершения установки или проверки зависимостей.</string>
+    <string name="ds_close_game">Выйдите из игры перед запуском выделенного сервера на этом телефоне.</string>
+    <string name="ds_need_libraries">Сначала скачайте библиотеки мультиплеера B41 в разделе дополнительных библиотек.</string>
+    <string name="ds_description">Работает без игрока на этом телефоне. Панель можно закрыть и погасить экран; для завершения нажмите «Сохранить и остановить». Выберите существующий профиль Host, чтобы продолжить его мир, или новое имя для нового мира. Файлы настроек: coop-probe/Server. Установленные моды подключаются, если папка модов хостинга пуста; укажите их ID ниже. Длительные сессии и число игроков ещё тестируются.</string>
+    <string name="ds_profile">Имя профиля (латиница, цифры, _ или -)</string>
+    <string name="ds_load">Загрузить профиль</string>
+    <string name="ds_load_first">Сначала загрузите выбранный профиль.</string>
+    <string name="ds_heap">Java-память сервера (МБ)</string>
+    <string name="ds_port">UDP-порт</string>
+    <string name="ds_players">Максимум игроков</string>
+    <string name="ds_interval">Сохранять мир каждые (минуты, 1–120)</string>
+    <string name="ds_password">Пароль подключения (необязательно)</string>
+    <string name="ds_admin">Пароль администратора (при создании; существующий пароль не меняет)</string>
+    <string name="ds_mods">ID включённых модов через ;</string>
+    <string name="ds_map">Карты в порядке загрузки через ;</string>
+    <string name="ds_advanced">Редактор настроек PZ</string>
+    <string name="ds_save_config">Сохранить файл</string>
+    <string name="ds_save">Сохранить мир</string>
+    <string name="ds_stop">Сохранить и остановить</string>
+    <string name="ds_stop_confirm">Отключить игроков, сохранить мир и остановить сервер? Дождитесь завершения остановки.</string>
+    <string name="ds_idle">Сервер остановлен</string>
+    <string name="ds_starting">Сервер запускается…</string>
+    <string name="ds_running">Сервер работает</string>
+    <string name="ds_stopping">Сохранение и остановка…</string>
+    <string name="ds_saving">Сохранение запрошено; ожидаем завершения…</string>
+    <string name="ds_stopped">Сервер штатно завершил работу</string>
+    <string name="ds_unconfirmed">Сервер остановлен. Завершение сохранения и штатная остановка не подтверждены; проверьте журнал.</string>
+    <string name="ds_failed">Ошибка сервера</string>
+    <string name="ds_busy">Остановите выделенный сервер перед запуском игры или изменением установленных файлов.</string>
+    <string name="ds_metrics">Игроки: %1$s · Java-память: %2$s / %3$s МБ</string>
+<string name="ds_force">Принудительно остановить</string>
+<string name="ds_force_confirm">Сервер ещё не завершил работу. Принудительная остановка может потерять несохранённый прогресс. Остановить немедленно, не дожидаясь сохранения?</string>
+<string name="ds_uptime">Время работы: %1$s</string>
+    <string name="ds_profile_loaded">Профиль «%1$s» загружен. Его мир продолжится.</string>
+    <string name="ds_profile_loaded_no_world">Профиль «%1$s» загружен. Мир будет создан при первом запуске.</string>
+    <string name="ds_profile_new">Профиля «%1$s» ещё нет: при запуске будет создан новый мир.</string>
+    <string name="ds_profile_changed">Имя изменено: загрузите профиль заново.</string>
+    <string name="ds_new_world_confirm">Профиля сервера с именем «%1$s» нет. При запуске будет создан новый мир с этим именем.</string>
+    <string name="ds_new_world_create">Создать мир</string>
+    <string name="ds_profiles_show">Показать серверы</string>
+</resources>

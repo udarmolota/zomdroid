@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ctl_type_stick">Analógico (gamepad)</string>
+    <string name="ctl_type_stick_wasd">Analógico (teclas WASD)</string>
+    <string name="ctl_type_stick_mouse">Analógico (mouse)</string>
+    <string name="ctl_type_dpad">Direcional</string>
+    <string name="ctl_type_button_rect">Botão (retangular)</string>
+    <string name="ctl_type_button_circle">Botão (redondo)</string>
+    <string name="ctl_type_touchpad">Touchpad (mouse)</string>
+    <string name="ctl_type_scroll_bar">Barra de rolagem (roda do mouse)</string>
+    <string name="ctl_type_radial_menu">Menu radial</string>
+    <string name="ctl_input_mnk">Teclado e mouse</string>
+    <string name="ctl_input_gamepad">Gamepad</string>
+    <string name="ctl_icon_none">Sem ícone</string>
+    <string name="ctl_style_outline">Contorno</string>
+    <string name="ctl_style_filled">Preenchido</string>
+    <string name="ctl_style_glass">Vidro</string>
+    <string name="ctl_key_space">Espaço</string>
+    <string name="ctl_key_left">%1$s esquerdo</string>
+    <string name="ctl_key_right">%1$s direito</string>
+    <string name="ctl_mouse_left">Clique esquerdo</string>
+    <string name="ctl_mouse_right">Clique direito</string>
+    <string name="ctl_mouse_middle">Clique do meio</string>
+    <string name="ctl_mouse_button">Botão do mouse %1$s</string>
+    <string name="ctl_mouse_wheel_up">Roda para cima</string>
+    <string name="ctl_mouse_wheel_down">Roda para baixo</string>
+    <string name="ctl_ui_toggle_overlay">Mostrar/ocultar controles na tela</string>
+    <string name="ctl_ui_toggle_keyboard">Mostrar/ocultar teclado</string>
+    <string name="ctl_pad_left_stick">Analógico esquerdo</string>
+    <string name="ctl_pad_right_stick">Analógico direito</string>
+    <string name="ctl_pad_left_stick_press">Clique do analógico esquerdo (L3)</string>
+    <string name="ctl_pad_right_stick_press">Clique do analógico direito (R3)</string>
+    <string name="ctl_pad_axis">%1$s (eixo)</string>
+    <string name="ctl_pad_dpad">Direcional %1$s</string>
+    <string name="control_element_toggle">Alternar</string>
+</resources>

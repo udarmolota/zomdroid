@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ds_start">Iniciar servidor</string>
+    <string name="ds_title">Servidor dedicado</string>
+    <string name="ds_installing">Aguarde a instalação ou a verificação das dependências.</string>
+    <string name="ds_close_game">Saia do jogo antes de iniciar um servidor dedicado.</string>
+    <string name="ds_need_libraries">Baixe primeiro as bibliotecas multijogador da Build 41 em Bibliotecas adicionais.</string>
+    <string name="ds_description">Funciona sem jogador local. Você pode fechar o painel e apagar a tela; use Salvar e parar para encerrar. Um perfil Host existente continua seu mundo; um nome novo cria outro. Configurações em coop-probe/Server. Os mods instalados são compartilhados se a pasta de mods da hospedagem estiver vazia. Sessões longas e capacidade ainda estão em teste.</string>
+    <string name="ds_profile">Nome do perfil (letras latinas, números, _ ou -)</string>
+    <string name="ds_load">Carregar perfil</string>
+    <string name="ds_load_first">Carregue primeiro o perfil selecionado.</string>
+    <string name="ds_heap">Memória Java do servidor (MB)</string>
+    <string name="ds_port">Porta UDP</string>
+    <string name="ds_players">Máximo de jogadores</string>
+    <string name="ds_interval">Salvar mundo a cada (minutos, 1–120)</string>
+    <string name="ds_password">Senha de conexão (opcional)</string>
+    <string name="ds_admin">Senha do administrador (primeira criação; não altera a conta existente)</string>
+    <string name="ds_mods">IDs dos mods ativos, separados por ;</string>
+    <string name="ds_map">Mapas na ordem de carregamento, separados por ;</string>
+    <string name="ds_advanced">Editar configurações do PZ</string>
+    <string name="ds_save_config">Salvar arquivo</string>
+    <string name="ds_save">Salvar mundo</string>
+    <string name="ds_stop">Salvar e parar</string>
+    <string name="ds_stop_confirm">Desconectar jogadores, salvar o mundo e parar o servidor? Aguarde a conclusão.</string>
+    <string name="ds_idle">Servidor parado</string>
+    <string name="ds_starting">Iniciando servidor…</string>
+    <string name="ds_running">Servidor em execução</string>
+    <string name="ds_stopping">Salvando e encerrando…</string>
+    <string name="ds_saving">Salvamento solicitado; aguardando conclusão…</string>
+    <string name="ds_stopped">Servidor encerrado normalmente</string>
+    <string name="ds_unconfirmed">Servidor parado. O salvamento e o encerramento normal não foram confirmados; consulte o log.</string>
+    <string name="ds_failed">Erro no servidor</string>
+    <string name="ds_busy">Pare o servidor dedicado antes de iniciar o jogo ou alterar arquivos instalados.</string>
+    <string name="ds_metrics">Jogadores: %1$s · Memória Java: %2$s / %3$s MB</string>
+<string name="ds_force">Forçar parada</string>
+<string name="ds_force_confirm">O servidor ainda não terminou. Forçar a parada pode perder progresso não salvo. Parar agora sem aguardar o salvamento?</string>
+<string name="ds_uptime">Tempo ativo: %1$s</string>
+    <string name="ds_profile_loaded">Perfil “%1$s” carregado. O mundo dele vai continuar.</string>
+    <string name="ds_profile_loaded_no_world">Perfil “%1$s” carregado. O mundo será criado na primeira inicialização.</string>
+    <string name="ds_profile_new">O perfil “%1$s” ainda não existe: iniciar vai criar um mundo novo.</string>
+    <string name="ds_profile_changed">Nome alterado: carregue o perfil de novo.</string>
+    <string name="ds_new_world_confirm">Não existe perfil de servidor chamado “%1$s”. Iniciar vai criar um mundo novo com esse nome.</string>
+    <string name="ds_new_world_create">Criar mundo</string>
+    <string name="ds_profiles_show">Mostrar servidores</string>
+</resources>

@@ -97,6 +97,7 @@ public class LauncherFragment extends Fragment {
                 String gpuVendor = installerService.getCurrentGpuVendor();
                 String newInstanceName = installerService.getCurrentInstanceName();
                 adapter.notifyDataSetChanged();
+                updateEmptyState();
                 taskProgressDialog.dismiss();
                 unbindInstallerService();
                 requireContext().stopService(new Intent(requireContext(), InstallerService.class));
@@ -107,6 +108,7 @@ public class LauncherFragment extends Fragment {
                 }
             } else if (state.isFinishedWithError) {
                 adapter.notifyDataSetChanged();
+                updateEmptyState();
                 showTaskFinishedDialog(state.title, state.message);
                 unbindInstallerService();
                 requireContext().stopService(new Intent(requireContext(), InstallerService.class));
@@ -184,7 +186,7 @@ public class LauncherFragment extends Fragment {
                                 .setMessage(R.string.game_files_missing)
                                 .setCancelable(true)
                                 .setPositiveButton(R.string.dialog_button_view_guide, (dialog, which) -> {
-                                    Navigation.findNavController(v).navigate(R.id.wiki_fragment);
+                                    Navigation.findNavController(v).navigate(R.id.wiki_fragment, WikiFragment.section("get-game-files"));
                                 })
                                 .setNegativeButton(R.string.dialog_button_close, null)
                                 .create()
@@ -196,7 +198,7 @@ public class LauncherFragment extends Fragment {
                                 .setMessage(R.string.game_files_not_for_linux)
                                 .setCancelable(true)
                                 .setPositiveButton(R.string.dialog_button_view_guide, (dialog, which) -> {
-                                    Navigation.findNavController(v).navigate(R.id.wiki_fragment);
+                                    Navigation.findNavController(v).navigate(R.id.wiki_fragment, WikiFragment.section("get-game-files"));
                                 })
                                 .setNegativeButton(R.string.dialog_button_close, null)
                                 .create()
@@ -252,10 +254,24 @@ public class LauncherFragment extends Fragment {
                 moreIb.setOnClickListener(v -> {
                     PopupMenu popupMenu = new PopupMenu(requireContext(), v);
                     popupMenu.getMenuInflater().inflate(R.menu.menu_game_instance, popupMenu.getMenu());
+                    if (gameInstance.isInstallationFinished()) {
+                        popupMenu.getMenu().add(R.string.ds_start)
+                                .setOnMenuItemClickListener(item -> {
+                                    Intent probe = new Intent().setClassName(requireContext(),
+                                            "com.zomdroid.DedicatedServerActivity");
+                                    probe.putExtra(GameActivity.EXTRA_GAME_INSTANCE_NAME, gameInstance.getName());
+                                    startActivity(probe);
+                                    return true;
+                                });
+                    }
 
                     popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                         @Override
                         public boolean onMenuItemClick(MenuItem item) {
+                            if (com.zomdroid.DedicatedServerService.active(requireContext())) {
+                                Toast.makeText(requireContext(), R.string.ds_busy, Toast.LENGTH_LONG).show();
+                                return true;
+                            }
                             int itemId = item.getItemId();
                             if (itemId == R.id.action_game_instance_restore_backup) {
                                 BackupManager.Backup backup = BackupManager.find(gameInstance);
@@ -315,6 +331,11 @@ public class LauncherFragment extends Fragment {
         };
         binding.gameInstancesRv.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.gameInstancesRv.setAdapter(adapter);
+        binding.launcherEmptyQuickStartBtn.setOnClickListener(v -> Navigation.findNavController(v)
+                .navigate(R.id.action_open_wiki_fragment, WikiFragment.section("quick-start")));
+        binding.launcherEmptyDownloadBtn.setOnClickListener(v ->
+                Navigation.findNavController(v).navigate(R.id.action_download_steam));
+        updateEmptyState();
 
         binding.gameInstancesRv.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
             @NonNull
@@ -345,6 +366,10 @@ public class LauncherFragment extends Fragment {
                     Navigation.findNavController(view).navigate(R.id.new_game_instance_fragment);
                     return true;
                 }
+                if (menuItem.getItemId() == R.id.action_open_wiki_help) {
+                    Navigation.findNavController(view).navigate(R.id.action_open_wiki_fragment);
+                    return true;
+                }
                 return false;
             }
         }, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
@@ -359,6 +384,7 @@ public class LauncherFragment extends Fragment {
         taskProgressDialogBinding.progressDialogOkMb.setOnClickListener(v -> {
             taskProgressDialog.dismiss();
             adapter.notifyDataSetChanged();
+            updateEmptyState();
         });
 
         taskProgressReceiver = new BroadcastReceiver() {
@@ -637,9 +663,17 @@ public class LauncherFragment extends Fragment {
         }
     }
 
+    /** The first-steps card shows only while there is no instance yet. */
+    private void updateEmptyState() {
+        if (binding == null) return;
+        boolean empty = GameInstanceManager.requireSingleton().getInstances().isEmpty();
+        binding.launcherEmptyCard.setVisibility(empty ? View.VISIBLE : View.GONE);
+    }
+
     @Override
     public void onResume() {
         super.onResume();
+        updateEmptyState();
 
         bindInstallerService();
 

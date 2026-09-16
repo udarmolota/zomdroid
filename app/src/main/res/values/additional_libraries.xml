@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="additional_libraries_title">Additional libraries</string>
+    <string name="mp_libs_title">Multiplayer for Build 41</string>
+    <string name="mp_libs_hint">Downloads two ARM64 libraries from Linux B42.12 using your Steam account. They are connected automatically after installation. Existing MP libraries are replaced; a backup is retained. Other native files are preserved.</string>
+    <string name="mp_libs_ready">B42.12 multiplayer libraries installed</string>
+    <string name="mp_libs_manual">Libraries installed manually; source version is unknown</string>
+    <string name="mp_libs_login">Download two B42.12 multiplayer libraries for %1$s. Sign in with a Steam account that owns Project Zomboid.</string>
+    <string name="mp_libs_invalid_instance">Multiplayer library downloads are available only for Build 41 instances.</string>
+</resources>

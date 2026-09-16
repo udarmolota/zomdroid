@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="macos_libs_title">Native macOS libraries</string>
+    <string name="macos_libs_hint">To run the game, some of its libraries are emulated through box64. Here you can download and install native libraries from the macOS version of the game, which need no emulation. This lowers the load on memory and the processor. Get them straight from Steam if you own the game, or load a ready archive if you downloaded them earlier.</string>
+    <string name="macos_libs_short">Replaces the emulated parts of the game with native ARM64 libraries from the macOS version. Less CPU and memory load, smoother play. Build 42.20+, experimental.</string>
+    <string name="macos_libs_download">From Steam</string>
+    <string name="macos_libs_missing">Libraries are not downloaded or are incomplete. The normal libraries will be used.</string>
+    <string name="macos_libs_login">Download native libraries for “%1$s”. Steam ownership and sign-in are required; the full macOS game will not be downloaded.</string>
+    <string name="macos_libs_invalid_instance">This instance is unavailable or does not support this feature.</string>
+    <string name="native_fmod_title">FMOD</string>
+    <string name="native_fmod_hint">Not from the macOS version: the game\'s own Android ARM64 sound library, used instead of the x86_64 one through box64. Nothing to download.</string>
+    <string name="macos_libs_import">From file</string>
+    <string name="macos_libs_import_title">Load macOS libraries</string>
+    <string name="macos_libs_import_hint">Select a ZIP with libLighting.dylib, libPZPathFind.dylib and libPZPopMan.dylib from the macOS version of Project Zomboid. Folders inside the archive do not matter. The files go to game/macos of the selected instance.</string>
+    <string name="macos_libs_ready">macOS libraries installed</string>
+    <string name="macos_libs_installing">Installing macOS libraries…</string>
+    <string name="macos_libs_installed">macOS libraries installed</string>
+    <string name="macos_libs_modules">Libraries in use</string>
+    <string name="macos_libs_modules_hint">All libraries are on by default. Turn off single ones as needed: a library that is off uses its regular version.</string>
+    <string name="macos_libs_missing_files">Missing in the archive: %1$s</string>
+    <string name="macos_libs_bad_file">Not a macOS library: %1$s</string>
+    <string name="macos_module_lighting" translatable="false">Lighting</string>
+    <string name="macos_module_pathfind" translatable="false">PathFind</string>
+    <string name="macos_module_popman" translatable="false">PopMan</string>
+</resources>

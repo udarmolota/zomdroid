@@ -5,57 +5,60 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/launcher_fragment">
 
+    <!-- Global actions. The drawer is reachable from every screen, and an action declared inside
+         one destination resolves only from that destination, so a drawer tap anywhere but the home
+         screen used to throw IllegalArgumentException. The ids are unchanged. -->
+    <action
+        android:id="@+id/action_open_new_game_instance_fragment"
+        app:destination="@id/new_game_instance_fragment" />
+    <action
+        android:id="@id/action_open_settings_fragment"
+        app:destination="@id/app_settings_fragment"/>
+    <action
+        android:id="@+id/action_open_instance_settings"
+        app:destination="@id/settings_fragment"/>
+    <action
+        android:id="@id/action_open_gamepad_mapper"
+        app:destination="@id/gamepad_mapper_fragment"/>
+    <action
+        android:id="@+id/action_open_wiki_fragment"
+        app:destination="@id/wiki_fragment"/>
+    <action
+        android:id="@+id/action_open_install_mod"
+        app:destination="@id/install_mod_fragment" />
+    <action
+        android:id="@+id/action_install_controls"
+        app:destination="@id/installControlsFragment" />
+    <action
+        android:id="@+id/action_install_saves"
+        app:destination="@id/install_saves_fragment" />
+    <action
+        android:id="@+id/action_install_driver"
+        app:destination="@id/install_driver_fragment" />
+    <action
+        android:id="@+id/action_export_log"
+        app:destination="@id/export_log_fragment" />
+    <action
+        android:id="@+id/action_open_optimization"
+        app:destination="@id/optimization_fragment" />
+    <action
+        android:id="@+id/action_open_controls_editor_launch"
+        app:destination="@id/controls_editor_launch_fragment" />
+    <action
+        android:id="@+id/action_game_settings"
+        app:destination="@id/game_settings_fragment" />
+    <action
+        android:id="@+id/action_download_steam"
+        app:destination="@id/steam_download_fragment" />
+    <action
+        android:id="@+id/action_download_gog"
+        app:destination="@id/gog_download_fragment" />
+
     <fragment
         android:id="@+id/launcher_fragment"
         android:name="com.zomdroid.fragments.LauncherFragment"
         android:label="@string/fragment_label_launcher"
-        tools:layout="@layout/fragment_launcher">
-        <action
-            android:id="@+id/action_open_new_game_instance_fragment"
-            app:destination="@id/new_game_instance_fragment" />
-        <action
-            android:id="@id/action_open_settings_fragment"
-            app:destination="@id/app_settings_fragment"/>
-        <action
-            android:id="@+id/action_open_instance_settings"
-            app:destination="@id/settings_fragment"/>
-        <action
-            android:id="@id/action_open_gamepad_mapper"
-            app:destination="@id/gamepad_mapper_fragment"/>
-        <action
-            android:id="@+id/action_open_wiki_fragment"
-            app:destination="@id/wiki_fragment"/>
-        <action
-            android:id="@+id/action_open_install_mod"
-            app:destination="@id/install_mod_fragment" />
-        <action
-            android:id="@+id/action_install_controls"
-            app:destination="@id/installControlsFragment" />
-        <action
-            android:id="@+id/action_install_saves"
-            app:destination="@id/install_saves_fragment" />
-        <action
-            android:id="@+id/action_install_driver"
-            app:destination="@id/install_driver_fragment" />
-        <action
-            android:id="@+id/action_export_log"
-            app:destination="@id/export_log_fragment" />
-        <action
-            android:id="@+id/action_open_optimization"
-            app:destination="@id/optimization_fragment" />
-        <action
-            android:id="@+id/action_open_controls_editor_launch"
-            app:destination="@id/controls_editor_launch_fragment" />
-        <action
-            android:id="@+id/action_game_settings"
-            app:destination="@id/game_settings_fragment" />
-        <action
-            android:id="@+id/action_install_native_libs"
-            app:destination="@id/install_native_libs_fragment" />
-        <action
-            android:id="@+id/action_download_steam"
-            app:destination="@id/steam_download_fragment" />
-    </fragment>
+        tools:layout="@layout/fragment_launcher" />
 
     <fragment
         android:id="@+id/new_game_instance_fragment"
@@ -149,8 +152,18 @@
         android:label="@string/native_libs_menu" />
 
     <fragment
+        android:id="@+id/install_macos_libs_fragment"
+        android:name="com.zomdroid.fragments.InstallNativeLibsFragment"
+        android:label="@string/macos_libs_import_title" />
+
+    <fragment
         android:id="@+id/steam_download_fragment"
         android:name="com.zomdroid.fragments.SteamDownloadFragment"
         android:label="@string/steam_dl_menu" />
+
+    <fragment
+        android:id="@+id/gog_download_fragment"
+        android:name="com.zomdroid.fragments.GogDownloadFragment"
+        android:label="@string/gog_dl_menu" />
 
 </navigation>

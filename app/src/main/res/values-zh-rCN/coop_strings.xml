@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_multiplayer_title">多人游戏</string>
+    <string name="settings_coop_hosting">允许创建服务器</string>
+    <string name="settings_coop_hosting_short">实验性功能，可能存在错误。正常启动游戏，然后在游戏中选择 Host。</string>
+    <string name="settings_coop_hosting_hint">正常启动游戏，然后在游戏中选择 Host。只有在你创建服务器时它才会运行。&lt;br&gt;&lt;br&gt;在 Build 42 上，创建服务器时请至少为它分配 2 GB 内存。这只是服务器的份额：游戏本身还需要额外的内存，因此开服需要一台内存充足的高性能手机。&lt;br&gt;&lt;br&gt;开服使用独立的配置档：开关开启期间，你平时的存档、模组和游戏设置都不会显示，关闭开关后会恢复。游戏内存上限为 2 GB，并且不启用调试模式。不保证后台开服。</string>
+    <string name="coop_b41_libraries_required">在 Build 41 上开服需要两个库：libRakNet64.so 和 libZNetNoSteam64.so。它们来自 42.12 版本的 android 文件夹。如果你在 Steam 购买了游戏，可以从 Steam 下载；如果之前已经下载过压缩包，也可以从文件导入。</string>
+    <string name="coop_internet_title">通过互联网开服</string>
+    <string name="coop_internet_pending">互联网：正在检查路由器</string>
+    <string name="coop_internet_mapped">互联网：端口已映射</string>
+    <string name="coop_internet_failed">互联网：端口映射失败</string>
+    <string name="coop_internet_no_gateway">互联网：未找到 UPnP 路由器</string>
+    <string name="coop_internet_unknown">互联网：端口状态未知</string>
+    <string name="coop_internet_pending_detail">正在等待游戏完成 UPnP 检查。</string>
+    <string name="coop_internet_mapped_detail">路由器已接受游戏的 UDP 端口映射。不在你 Wi-Fi 中的朋友可以尝试下方的外部地址和端口。</string>
+    <string name="coop_internet_failed_detail">游戏无法打开 UDP 端口。请检查路由器的 UPnP 设置，或手动将端口转发到手机的 Wi-Fi 地址。</string>
+    <string name="coop_internet_no_gateway_detail">游戏没有找到提供 UPnP 端口映射的路由器。请在路由器上启用 UPnP，或手动将 UDP 端口转发到手机的 Wi-Fi 地址。</string>
+    <string name="coop_internet_unknown_detail">服务器已启动，但没有记录到 UPnP 结果。服务器设置中可能关闭了 UPnP。请查看服务器日志或手动配置端口转发。</string>
+    <string name="coop_internet_unavailable_detail">此游戏库不提供所需的 UPnP 功能。请在路由器上手动配置 UDP 端口转发。</string>
+    <string name="coop_internet_addresses">UDP 端口：%1$s\n路由器外部地址：%2$s\n手机 Wi-Fi 地址：%3$s</string>
+    <string name="coop_internet_address_unknown">不可用</string>
+    <string name="coop_internet_port_unknown">见服务器设置</string>
+    <string name="coop_internet_double_nat">路由器报告的是非公网地址。前面可能还有另一台路由器，或运营商在做 NAT。仅在这台路由器上转发可能不够；请检查上一级设备的转发、公网 IP，或使用共享的 VPN 网络。</string>
+    <string name="coop_internet_unverified">尚未验证能否从互联网访问。请从其他网络连接来确认，例如移动数据。</string>
+    <string name="coop_internet_copy">复制详情</string>
+    <string name="coop_internet_close">关闭</string>
+</resources>

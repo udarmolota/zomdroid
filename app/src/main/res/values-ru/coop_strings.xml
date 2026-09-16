@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="coop_internet_title">Сервер через интернет</string>
+    <string name="coop_internet_pending">Интернет: проверяем роутер</string>
+    <string name="coop_internet_mapped">Интернет: порт проброшен</string>
+    <string name="coop_internet_failed">Интернет: не удалось пробросить порт</string>
+    <string name="coop_internet_no_gateway">Интернет: UPnP-роутер не найден</string>
+    <string name="coop_internet_unknown">Интернет: состояние порта неизвестно</string>
+    <string name="coop_internet_pending_detail">Ожидаем завершения проверки UPnP самой игрой.</string>
+    <string name="coop_internet_mapped_detail">Роутер принял проброс UDP-порта игры. Друзья из другой сети могут попробовать подключиться по внешнему адресу и порту ниже.</string>
+    <string name="coop_internet_failed_detail">Игра не смогла открыть UDP-порт. Проверьте UPnP на роутере или настройте проброс вручную на Wi-Fi-адрес телефона.</string>
+    <string name="coop_internet_no_gateway_detail">Игра не нашла роутер с доступным пробросом портов через UPnP. Включите UPnP на роутере или пробросьте UDP-порт вручную на Wi-Fi-адрес телефона.</string>
+    <string name="coop_internet_unknown_detail">Сервер запустился, но результат UPnP не записан. Возможно, UPnP отключён в настройках сервера. Проверьте серверный лог или настройте проброс вручную.</string>
+    <string name="coop_internet_unavailable_detail">В этой игровой библиотеке нет нужных функций UPnP. Настройте проброс UDP-порта вручную на роутере.</string>
+    <string name="coop_internet_addresses">UDP-порт: %1$s\nВнешний адрес роутера: %2$s\nWi-Fi-адрес телефона: %3$s</string>
+    <string name="coop_internet_address_unknown">не определён</string>
+    <string name="coop_internet_port_unknown">см. настройки сервера</string>
+    <string name="coop_internet_double_nat">Роутер сообщает непубличный адрес. За ним может быть ещё один роутер или NAT провайдера. Одного проброса здесь может не хватить: проверьте вышестоящий роутер, публичный IP или общую VPN-сеть.</string>
+    <string name="coop_internet_unverified">Доступность из интернета ещё не проверена. Подтвердите её подключением из другой сети, например через мобильный интернет.</string>
+    <string name="coop_internet_copy">Копировать</string>
+    <string name="coop_internet_close">Закрыть</string>
+    <string name="settings_coop_hosting">Разрешить создание сервера</string>
+    <string name="settings_coop_hosting_hint">Запустите игру обычной кнопкой и выберите «Создать сервер» (Host). Сам переключатель сервер не запускает.&lt;br&gt;&lt;br&gt;На Build 42 при создании сервера выделите ему не меньше 2 ГБ памяти. Это память только для сервера: самой игре нужна своя память сверх этого, поэтому для хостинга нужен мощный телефон с большим объёмом RAM.&lt;br&gt;&lt;br&gt;Хостинг работает в отдельном профиле: пока переключатель включён, ваши обычные сохранения, моды и настройки игры не видны. Они никуда не денутся и вернутся, когда вы его выключите. Самой игре выделяется 2 ГБ памяти, отладочный режим отключён. Работа в фоне не гарантируется.</string>
+    <string name="coop_b41_libraries_required">Для сервера на Build 41 нужны две библиотеки: libRakNet64.so и libZNetNoSteam64.so. Они берутся из папки android версии 42.12. Их можно скачать из Steam, если игра куплена там, или загрузить из файла с архивом, если он уже скачан.</string>
+    <string name="settings_coop_hosting_short">Экспериментальная функция, возможны баги. Запустите игру как обычно и выберите «Создать сервер» (Host) в игре.</string>
+    <string name="settings_multiplayer_title">Мультиплеер</string>
+</resources>

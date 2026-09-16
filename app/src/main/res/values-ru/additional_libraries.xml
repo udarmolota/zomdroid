@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="additional_libraries_title">Дополнительные библиотеки</string>
+    <string name="mp_libs_title">Мультиплеер для Build 41</string>
+    <string name="mp_libs_hint">Скачивает две ARM64-библиотеки из Linux B42.12 через ваш Steam-аккаунт. После установки подключаются автоматически. Прежние МП-библиотеки заменяются с сохранением резервной копии. Остальные нативные файлы сохраняются.</string>
+    <string name="mp_libs_ready">МП-библиотеки B42.12 установлены</string>
+    <string name="mp_libs_manual">Библиотеки установлены вручную; исходная версия неизвестна</string>
+    <string name="mp_libs_login">Скачать две МП-библиотеки B42.12 для %1$s. Войдите в Steam-аккаунт, владеющий Project Zomboid.</string>
+    <string name="mp_libs_invalid_instance">Скачивание МП-библиотек доступно только для инстансов Build 41.</string>
+</resources>

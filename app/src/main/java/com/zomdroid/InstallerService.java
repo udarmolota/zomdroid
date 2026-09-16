@@ -29,6 +29,10 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.zomdroid.game.GameInstance;
 import com.zomdroid.game.GameInstanceManager;
+import com.zomdroid.game.InstallationPreset;
+import com.zomdroid.game.PresetManager;
+import com.zomdroid.game.SuggestedPreset;
+import com.zomdroid.gog.GogInstallerExtractor;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -79,6 +83,8 @@ public class InstallerService extends Service implements TaskProgressListener {
     public static final String EXTRA_RLZ_LEVEL = "com.zomdroid.InstallerService.EXTRA_RLZ_LEVEL";
     public static final String EXTRA_INSTALL_PRESET_NAME = "com.zomdroid.InstallerService.EXTRA_INSTALL_PRESET_NAME";
     public static final String EXTRA_GPU_VENDOR = "com.zomdroid.InstallerService.EXTRA_GPU_VENDOR";
+    /** One of the GogInstallerExtractor.KIND_* values; a missing extra means the usual game ZIP. */
+    public static final String EXTRA_ARCHIVE_KIND = "com.zomdroid.InstallerService.EXTRA_ARCHIVE_KIND";
 
     private final IBinder binder = new LocalBinder();
     private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -96,6 +102,8 @@ public class InstallerService extends Service implements TaskProgressListener {
     // True between the start of a user-initiated task and its finish/error state. Guards against
     // the launch-time dependency re-check taking the service over mid-install; see onStartCommand.
     private volatile boolean userTaskRunning;
+    private static volatile boolean taskRunning;
+    public static boolean isTaskRunning() { return taskRunning; }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -106,6 +114,14 @@ public class InstallerService extends Service implements TaskProgressListener {
         notificationManager.createNotificationChannel(channel);
 
         Task task = Task.values()[intent.getIntExtra(EXTRA_COMMAND, 0)];
+        if (DedicatedServerService.active(this) && task != Task.EXPORT_LOG) {
+            startForeground(NOTIFICATION_ID, buildNotification(getString(R.string.ds_busy)));
+            if (task == Task.INSTALL_DEPENDENCIES) {
+                // Opening the launcher while hosting triggers this automatically; defer it.
+                finish(getString(R.string.ds_title), getString(R.string.ds_busy));
+            } else finishWithError(getString(R.string.ds_title), getString(R.string.ds_busy));
+            return START_NOT_STICKY;
+        }
 
         // The dependency re-check runs on every launcher start, including the moment we navigate
         // back from instance creation — right while CREATE_GAME_INSTANCE is still working. Letting
@@ -129,6 +145,7 @@ public class InstallerService extends Service implements TaskProgressListener {
         }
 
         currentTask = task;
+        taskRunning = true;
         userTaskRunning = task != Task.INSTALL_DEPENDENCIES;
         // Only overwrite when the intent actually carries them. Every task shares this service,
         // and returning to the launcher fires updateDependencies() — an INSTALL_DEPENDENCIES
@@ -212,6 +229,9 @@ public class InstallerService extends Service implements TaskProgressListener {
             case INSTALL_NATIVE_LIBS:
                 doInstallNativeLibs(intent);
                 break;
+            case INSTALL_MACOS_LIBS:
+                doInstallMacosLibs(intent);
+                break;
         }
 
         return START_NOT_STICKY;
@@ -245,13 +265,18 @@ public class InstallerService extends Service implements TaskProgressListener {
             return;
         }
 
+        String archiveKind = intent.getStringExtra(EXTRA_ARCHIVE_KIND);
         executorService.submit(() -> {
             try {
-                installGameFromZip(gameInstance, gameFilesArchiveUri);
+                installGameFiles(gameInstance, gameFilesArchiveUri, archiveKind);
                 // Users often zip the game inside one or more wrapper folders. Drill down to the
                 // real game root (folder holding ProjectZomboid64/projectzomboid.jar/zombie) and
                 // lift it up to gamePath, so nothing downstream cares about the extra nesting.
                 flattenGameRootIfWrapped(new File(gameInstance.getGamePath()));
+                // The preset was chosen from the archive index before anything was unpacked, and
+                // a GOG installer hides the game behind a shell script. The files are on disk now:
+                // let them have the last word.
+                reconcilePresetWithGameFiles(gameInstance);
                 // Build 42.20+ moved all Linux libraries under natives/ and the bundled Android
                 // libraries under natives/android/arm64-v8a/. Normalize that layout back to the
                 // structure Zomdroid uses so the existing Java, box64 and linker paths stay valid.
@@ -1018,6 +1043,29 @@ public class InstallerService extends Service implements TaskProgressListener {
             // Original log files, verbatim — each kept whole in its own entry
             addFileToZip(zos, crashFile, "crash.txt");
             addFileToZip(zos, nativeLog, "native.log");
+            if (gi != null) {
+                addFileToZip(zos, new File(gi.getGamePath(), "server-native.log"), "server-native.log");
+                addFileToZip(zos, new File(gi.getGamePath(), "server-crash.txt"), "server-crash.txt");
+                addFileToZip(zos, new File(gi.getHomePath(), "server-probe/server-console.txt"), "server-console.txt");
+                addFileToZip(zos, new File(gi.getHomePath(), "server-probe/server-exception.txt"), "server-exception.txt");
+                addFileToZip(zos, new File(gi.getHomePath(), "client-probe/console.txt"), "client-probe-console.txt");
+                addFileToZip(zos, new File(gi.getHomePath(), "coop-probe/coop-console.txt"), "coop-console.txt");
+                addFileToZip(zos, new File(gi.getHomePath(), "coop-probe/server-exception.txt"), "coop-server-exception.txt");
+                addFileToZip(zos, new File(gi.getHomePath(), "coop-probe/hosting-internet.properties"), "hosting-internet.properties");
+                addFileToZip(zos, new File(gi.getHomePath(), "coop-probe/dedicated-state"), "dedicated-state.txt");
+                addFileToZip(zos, new File(gi.getHomePath(), "coop-probe/dedicated-error.txt"), "dedicated-error.txt");
+                addFileToZip(zos, new File(gi.getHomePath(), "coop-probe/dedicated-telemetry.properties"), "dedicated-telemetry.properties");
+                File[] coopJvmCrashes = new File(gi.getHomePath(), "coop-probe")
+                        .listFiles((dir, name) -> name.startsWith("hs_err_pid") && name.endsWith(".log"));
+                if (coopJvmCrashes != null) {
+                    for (File file : coopJvmCrashes) addFileToZip(zos, file, "coop/" + file.getName());
+                }
+                File[] serverJvmCrashes = new File(gi.getHomePath(), "server-probe")
+                        .listFiles((dir, name) -> name.startsWith("hs_err_pid") && name.endsWith(".log"));
+                if (serverJvmCrashes != null) {
+                    for (File file : serverJvmCrashes) addFileToZip(zos, file, "server/" + file.getName());
+                }
+            }
             addFileToZip(zos, failedShaders, "failed_shaders.txt");
             addFileToZip(zos, glTrace, "gl_trace.txt");
             addFileToZip(zos, consoleFile, "console.txt");
@@ -1025,6 +1073,9 @@ public class InstallerService extends Service implements TaskProgressListener {
             addFileToZip(zos, lastLauncherLog, "lastlog.txt");
             addFileToZip(zos, debugLog, "debuglog.txt");
             addFileToZip(zos, prevDebugLog, "debuglog_prev.txt");
+            // The game's own graphics options (texture filter, upscaling, shadow quality...) live
+            // only here; without it every "bad FPS" report meant asking the player what they set.
+            addFileToZip(zos, gi == null ? null : new File(gi.getHomePath() + "/Zomboid/options.ini"), "options.ini");
         }
     }
 
@@ -1832,11 +1883,13 @@ public class InstallerService extends Service implements TaskProgressListener {
     // -------------------- TASK STATE / NOTIFICATION --------------------
 
     private void finish(String title, String message) {
+        taskRunning = false;
         userTaskRunning = false;
         this.taskState.postValue(new TaskState(title, message, -1, 0, true, false));
     }
 
     private void finishWithError(String title, String error) {
+        taskRunning = false;
         Log.e(LOG_TAG, error);
         userTaskRunning = false;
         this.taskState.postValue(new TaskState(title, error, -1, 0, false, true));
@@ -1859,6 +1912,68 @@ public class InstallerService extends Service implements TaskProgressListener {
             announceExtraction();
             FileUtils.extractZipToDisk(inputStream, gameInstance.getGamePath(), this, fileSize);
         }
+    }
+
+    // The game files come in three shapes: the usual ZIP of the Linux build, GOG's Linux installer
+    // (a shell script with the game ZIP appended, handed over by path from the GOG downloader), or
+    // a ZIP wrapping such installers, which is what a file picker can deliver. The kind is decided
+    // by the new-instance screen from the archive index and passed along; nothing here re-sniffs a
+    // multi-gigabyte stream.
+    private void installGameFiles(GameInstance gameInstance, Uri archiveUri, String kind) throws IOException {
+        File gameDir = new File(gameInstance.getGamePath());
+        File cache = new File(getCacheDir(), "gog-install");
+        if (GogInstallerExtractor.KIND_INSTALLER.equals(kind)) {
+            File installer = "file".equals(archiveUri.getScheme()) ? new File(archiveUri.getPath()) : null;
+            File spooled = null;
+            try {
+                if (installer == null) {
+                    // A content provider gives a stream; the ZIP reader needs random access.
+                    if (!cache.isDirectory() && !cache.mkdirs()) throw new IOException("Failed to create " + cache);
+                    spooled = new File(cache, "installer.sh");
+                    onProgressUpdate(getString(R.string.gog_extracting), -1, 0);
+                    try (InputStream in = getContentResolver().openInputStream(archiveUri)) {
+                        GogInstallerExtractor.spool(in, archiveSize(archiveUri), spooled, this);
+                    }
+                    installer = spooled;
+                }
+                onProgressUpdate(getString(R.string.gog_extracting), -1, 0);
+                GogInstallerExtractor.extractInstaller(installer, gameDir, this);
+            } finally {
+                if (spooled != null) FileUtils.deleteDirectory(cache);
+            }
+        } else if (GogInstallerExtractor.KIND_BUNDLE.equals(kind)) {
+            try (InputStream in = getContentResolver().openInputStream(archiveUri)) {
+                onProgressUpdate(getString(R.string.gog_extracting), -1, 0);
+                GogInstallerExtractor.extractBundle(in, archiveSize(archiveUri), gameDir, cache, this);
+            } finally {
+                FileUtils.deleteDirectory(cache);
+            }
+        } else {
+            installGameFromZip(gameInstance, archiveUri);
+        }
+    }
+
+    // The size behind a URI, or -1: a content provider may not say, and a file:// URI has no
+    // provider to ask.
+    private long archiveSize(Uri uri) {
+        if ("file".equals(uri.getScheme())) return new File(uri.getPath()).length();
+        try {
+            return FileUtils.queryFileSize(getContentResolver(), uri);
+        } catch (RuntimeException e) {
+            return -1;
+        }
+    }
+
+    private void reconcilePresetWithGameFiles(GameInstance gameInstance) {
+        InstallationPreset detected = PresetManager.detectFromGameDir(new File(gameInstance.getGamePath()));
+        if (detected == null || detected.name.equals(gameInstance.getPresetName())) return;
+        Log.i(LOG_TAG, "Game files are " + detected.name + ", instance was created as "
+                + gameInstance.getPresetName() + " - switching preset");
+        gameInstance.applyPreset(detected);
+        // The post-install dialog reads these; keep them in step with the preset it will describe.
+        currentInstallPresetName = detected.name;
+        String vendor = "42".equals(detected.buildVersion) ? SuggestedPreset.detectGpuVendor() : null;
+        currentGpuVendor = vendor == null ? "UNKNOWN" : vendor;
     }
 
     // -------------------- GAME ROOT DRILL / UNWRAP --------------------
@@ -2657,6 +2772,103 @@ public class InstallerService extends Service implements TaskProgressListener {
         });
     }
 
+    // -------------------- INSTALL MACOS LIBS (from a ZIP) --------------------
+    /**
+     * The "Load from file" twin of the Steam download: takes a ZIP the player got elsewhere, picks
+     * the three dylibs out of it wherever they sit in the archive, checks they are Mach-O files,
+     * writes the same manifest.json the downloader writes, and publishes the set into game/macos
+     * through MacosLibraries.publish(), so a half-done import can never replace a working set.
+     */
+    private void doInstallMacosLibs(Intent intent) {
+        String taskTitle = getString(R.string.macos_libs_installing);
+        startForeground(NOTIFICATION_ID, buildNotification(taskTitle));
+        taskState.postValue(new TaskState(taskTitle, null, -1, 0, false, false));
+        String gameInstanceName = intent.getStringExtra(EXTRA_GAME_INSTANCE_NAME);
+        if (gameInstanceName == null) { finishWithError(taskTitle, "Game instance name is missing"); return; }
+        GameInstance gameInstance = GameInstanceManager.requireSingleton().getInstanceByName(gameInstanceName);
+        if (gameInstance == null) { finishWithError(taskTitle, "Game instance not found: " + gameInstanceName); return; }
+        Uri archiveUri = intent.getParcelableExtra(EXTRA_NATIVE_LIBS_URI);
+        if (archiveUri == null) { finishWithError(taskTitle, "Archive URI is missing"); return; }
+        executorService.submit(() -> {
+            File game = new File(gameInstance.getGamePath());
+            File stage = new File(game, ".macos-download-import");
+            try {
+                if (stage.exists()) FileUtils.deleteDirectory(stage);
+                if (!stage.mkdirs()) throw new IOException("Cannot create " + stage);
+                try (InputStream is = getContentResolver().openInputStream(archiveUri)) {
+                    if (is == null) throw new IllegalStateException("openInputStream returned null");
+                    announceExtraction();
+                    FileUtils.extractZipToDisk(is, stage.getPath(), this,
+                            FileUtils.queryFileSize(getContentResolver(), archiveUri));
+                }
+                // The wanted files come up to the stage root, whatever folders the archive had.
+                java.util.Map<String, File> found = new java.util.HashMap<>();
+                collectMacosLibraries(stage, found);
+                java.util.List<String> missing = new java.util.ArrayList<>();
+                for (String name : com.zomdroid.steam.MacosLibraries.NAMES)
+                    if (!found.containsKey(name)) missing.add(name);
+                if (!missing.isEmpty())
+                    throw new IOException(getString(R.string.macos_libs_missing_files, String.join(", ", missing)));
+                org.json.JSONObject entries = new org.json.JSONObject();
+                for (String name : com.zomdroid.steam.MacosLibraries.NAMES) {
+                    File target = new File(stage, name);
+                    File source = found.get(name);
+                    if (!source.getCanonicalFile().equals(target.getCanonicalFile()))
+                        java.nio.file.Files.move(source.toPath(), target.toPath(),
+                                java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                    if (!isMachO(target)) throw new IOException(getString(R.string.macos_libs_bad_file, name));
+                    org.json.JSONObject entry = new org.json.JSONObject();
+                    entry.put("size", target.length());
+                    entry.put("sha256", com.zomdroid.steam.MacosLibraries.hash(target, "SHA-256"));
+                    entries.put(name, entry);
+                }
+                // Everything else the archive carried is not ours to keep.
+                File[] leftovers = stage.listFiles();
+                if (leftovers != null) for (File f : leftovers) {
+                    if (com.zomdroid.steam.MacosLibraries.NAMES.contains(f.getName())) continue;
+                    if (f.isDirectory()) FileUtils.deleteDirectory(f);
+                    else java.nio.file.Files.delete(f.toPath());
+                }
+                org.json.JSONObject metadata = new org.json.JSONObject();
+                metadata.put("appBuildId", 0);
+                metadata.put("pack", "macos");
+                metadata.put("source", "zip");
+                metadata.put("files", entries);
+                java.nio.file.Files.write(new File(stage, "manifest.json").toPath(),
+                        metadata.toString(2).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                com.zomdroid.steam.MacosLibraries.publish(game, stage);
+                Log.i(LOG_TAG, "macOS libraries installed from a ZIP into " + new File(game, "macos"));
+                finish(getString(R.string.macos_libs_installed), null);
+            } catch (Exception e) {
+                try { if (stage.exists()) FileUtils.deleteDirectory(stage); } catch (Exception ignored) { }
+                finishWithError(taskTitle, e.getMessage() != null ? e.getMessage() : e.toString());
+            }
+        });
+    }
+
+    private static void collectMacosLibraries(File dir, java.util.Map<String, File> found) {
+        File[] children = dir.listFiles();
+        if (children == null) return;
+        for (File f : children) {
+            if (java.nio.file.Files.isSymbolicLink(f.toPath())) continue;
+            if (f.isDirectory()) collectMacosLibraries(f, found);
+            else if (com.zomdroid.steam.MacosLibraries.NAMES.contains(f.getName()) && !found.containsKey(f.getName()))
+                found.put(f.getName(), f);
+        }
+    }
+
+    /** A fat binary (CAFEBABE, big-endian) or a plain 64-bit Mach-O (FEEDFACF, little-endian). */
+    private static boolean isMachO(File f) {
+        try (InputStream in = java.nio.file.Files.newInputStream(f.toPath())) {
+            byte[] m = new byte[4];
+            if (in.read(m) != 4) return false;
+            int be = ((m[0] & 255) << 24) | ((m[1] & 255) << 16) | ((m[2] & 255) << 8) | (m[3] & 255);
+            return be == 0xCAFEBABE || be == 0xCFFAEDFE;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
     private Notification buildNotification(String title) {
         Intent notificationIntent = new Intent(this, LauncherActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
@@ -2762,6 +2974,7 @@ public class InstallerService extends Service implements TaskProgressListener {
         IMPORT_GAME_SETTINGS,
         EXPORT_GAME_SETTINGS,
         INSTALL_NATIVE_LIBS,
+        INSTALL_MACOS_LIBS,
         INSTALL_RENDER_LESS_ZOMBIE
     }
 

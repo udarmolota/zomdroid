@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ds_start">Jalankan Server</string>
+    <string name="ds_title">Server khusus</string>
+    <string name="ds_installing">Tunggu instalasi atau pemeriksaan dependensi selesai.</string>
+    <string name="ds_close_game">Keluar dari game sebelum memulai server khusus.</string>
+    <string name="ds_need_libraries">Unduh pustaka multipemain Build 41 di Pustaka tambahan terlebih dahulu.</string>
+    <string name="ds_description">Berjalan tanpa pemain lokal. Panel dapat ditutup dan layar dimatikan; gunakan Simpan dan hentikan untuk keluar. Profil Host yang sudah ada melanjutkan dunianya. Nama baru membuat dunia baru. Konfigurasi ada di coop-probe/Server. Mod terpasang dibagikan jika folder mod hosting kosong. Sesi panjang dan kapasitas masih diuji.</string>
+    <string name="ds_profile">Nama profil (huruf Latin, angka, _ atau -)</string>
+    <string name="ds_load">Muat profil</string>
+    <string name="ds_load_first">Muat profil yang dipilih terlebih dahulu.</string>
+    <string name="ds_heap">Memori Java server (MB)</string>
+    <string name="ds_port">Port UDP</string>
+    <string name="ds_players">Pemain maksimum</string>
+    <string name="ds_interval">Simpan dunia setiap (menit, 1–120)</string>
+    <string name="ds_password">Kata sandi koneksi (opsional)</string>
+    <string name="ds_admin">Kata sandi admin (pembuatan pertama; tidak mengubah akun lama)</string>
+    <string name="ds_mods">ID mod aktif, dipisahkan ;</string>
+    <string name="ds_map">Peta sesuai urutan muat, dipisahkan ;</string>
+    <string name="ds_advanced">Edit konfigurasi PZ</string>
+    <string name="ds_save_config">Simpan berkas</string>
+    <string name="ds_save">Simpan dunia</string>
+    <string name="ds_stop">Simpan dan hentikan</string>
+    <string name="ds_stop_confirm">Putuskan pemain, simpan dunia, lalu hentikan server? Tunggu hingga selesai.</string>
+    <string name="ds_idle">Server berhenti</string>
+    <string name="ds_starting">Memulai server…</string>
+    <string name="ds_running">Server berjalan</string>
+    <string name="ds_stopping">Menyimpan dan menghentikan…</string>
+    <string name="ds_saving">Penyimpanan diminta; menunggu selesai…</string>
+    <string name="ds_stopped">Server selesai dimatikan</string>
+    <string name="ds_unconfirmed">Server berhenti. Penyimpanan dan penghentian normal belum dikonfirmasi; periksa log.</string>
+    <string name="ds_failed">Kesalahan server</string>
+    <string name="ds_busy">Hentikan server khusus sebelum menjalankan game atau mengubah berkas terpasang.</string>
+    <string name="ds_metrics">Pemain: %1$s · Memori Java: %2$s / %3$s MB</string>
+<string name="ds_force">Paksa berhenti</string>
+<string name="ds_force_confirm">Server belum selesai. Menghentikan paksa dapat menghilangkan progres yang belum tersimpan. Hentikan sekarang tanpa menunggu penyimpanan?</string>
+<string name="ds_uptime">Waktu aktif: %1$s</string>
+    <string name="ds_profile_loaded">Profil “%1$s” dimuat. Dunianya akan dilanjutkan.</string>
+    <string name="ds_profile_loaded_no_world">Profil “%1$s” dimuat. Dunianya akan dibuat saat pertama kali dijalankan.</string>
+    <string name="ds_profile_new">Profil “%1$s” belum ada: menjalankan server akan membuat dunia baru.</string>
+    <string name="ds_profile_changed">Nama berubah: muat ulang profilnya.</string>
+    <string name="ds_new_world_confirm">Tidak ada profil server bernama “%1$s”. Menjalankan server akan membuat dunia baru dengan nama ini.</string>
+    <string name="ds_new_world_create">Buat dunia</string>
+    <string name="ds_profiles_show">Tampilkan server</string>
+</resources>

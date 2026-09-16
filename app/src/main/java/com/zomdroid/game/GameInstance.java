@@ -52,6 +52,27 @@ public class GameInstance {
         this.presetName = preset.name;
     }
 
+    /**
+     * Re-points this instance at another preset. Used once the game files are on disk and say
+     * which build they are, when the archive could not: a GOG installer is a ZIP behind a shell
+     * script, and a ZIP of installers shows nothing but .sh names. The same fields the constructor
+     * takes from the preset; the name and the folders stay.
+     */
+    public void applyPreset(InstallationPreset preset) {
+        this.buildVersion = preset.buildVersion;
+        this.classPath = preset.classPathArray;
+        this.extraClassPath = preset.extraJars;
+        this.libraryPath = preset.libraryPathArray;
+        this.libraryPathForEmulation = preset.libraryPathForEmulationArray;
+        this.fmodLibraryPath = preset.fmodLibraryPath;
+        this.extraJvmArgs = preset.extraJvmArgs;
+        this.args = preset.args;
+        this.mainClassName = preset.mainClassName;
+        this.javaAgentPath = preset.javaAgentPath;
+        this.javaAgentArgs = preset.javaAgentArgs;
+        this.presetName = preset.name;
+    }
+
     private static String buildHomePath(String name) {
         return AppStorage.requireSingleton().getHomePath() + "/" + INSTANCES_ROOT_DIR_NAME + "/" + name;
     }

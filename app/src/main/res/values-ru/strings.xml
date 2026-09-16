@@ -85,6 +85,18 @@
     <string name="control_element_icon">Иконка</string>
 
     <string name="game_instance_manage_storage">Управление хранилищем</string>
+    <string name="game_instance_restore_backup">Вернуть копию F10</string>
+    <string name="backup_warning_title">Прежде чем включить</string>
+    <string name="backup_warning_message">Нажатие F10 делает полную копию вашего мира — точку, к которой можно вернуться после вылета или смерти.\n\nЧем больше сохранение, то есть чем дольше живёт персонаж, тем дольше создаётся копия. Перед нажатием F10 найдите пару спокойных минут: пока копия записывается, игра может казаться зависшей, но это не так. Просто подождите и не закрывайте её.\n\nКнопка F10 есть в новых раскладках управления. Если вы оставили свою раскладку из прошлой версии, добавьте кнопку сами в редакторе управления: тип ввода «Клавиатура и мышь», привязка F10.\n\nДля каждого мира хранится одна копия, каждая новая заменяет предыдущую. Build 41 и 42, только одиночная игра.</string>
+    <string name="backup_restore_title">Прошлая сессия завершилась вылетом</string>
+    <string name="backup_restore_message">Есть копия мира «%1$s» от %2$s (%3$d МБ), сделанная, когда вы нажали F10.\n\nЕсли вернуться к ней, всё, что произошло после, будет стёрто.</string>
+    <string name="backup_restore_continue">Продолжить как есть</string>
+    <string name="backup_restore_do">Вернуться к копии</string>
+    <string name="backup_restoring">Восстанавливаем копию…</string>
+    <string name="backup_restore_done">Копия восстановлена</string>
+    <string name="backup_restore_failed">Не удалось восстановить: %1$s</string>
+    <string name="backup_manual_restore_message">Есть копия мира «%1$s» от %2$s (%3$d МБ).\n\nВосстановление заменит текущий прогресс в этом мире состоянием на момент создания копии. Отменить это будет нельзя.</string>
+    <string name="backup_none_found">Копия для последнего мира не найдена</string>
     <string name="game_instance_delete">Удалить</string>
 
     <string name="donate_message">Нравится приложение и хотите поддержать нас? \n\nРазвитие и поддержка: ko-fi.com/udarmolota, автор: ko-fi.com/liamelui. \n\nДругие участники: \nshimux0, Wakort, LeHiepDuy, deadgamer182, Liko, Willing-Run-8987.</string>
@@ -343,6 +355,7 @@
 
     <!-- Settings groups -->
     <string name="settings_group_rendering">Рендеринг</string>
+    <string name="settings_group_texture">Сжатие текстур</string>
     <string name="settings_group_advanced">Дополнительно</string>
     <string name="settings_group_controls">Управление</string>
     <string name="settings_group_audio">Звук</string>
@@ -360,7 +373,8 @@
         \u00A0\u00A0Project Zomboid/\n
         \u00A0\u00A0\u00A0\u00A0ProjectZomboid64.json\n
         \u00A0\u00A0\u00A0\u00A0java/\n
-        \u00A0\u00A0\u00A0\u00A0...
+        \u00A0\u00A0\u00A0\u00A0...\n\n
+        Подойдёт и Linux-установщик GOG (.sh): положите его одного в .zip-архив.
     </string>
     <string name="game_instance_files_help_title">Структура ZIP с файлами игры</string>
 
@@ -397,6 +411,7 @@
     <string name="settings_jvm_args_reset">Сбросить по умолчанию</string>
     <string name="settings_jvm_args_clear">Очистить</string>
     <string name="settings_jvm_args_b42_recommendation">Рекомендуется для Build 42: ограничивает кучу Java и возвращает память системе, оставляя место рендереру. В некоторых случаях игра может упасть на старте без некоторых из этих параметров. Не для Build 41 — на устройствах с 4 ГБ вреда больше, чем пользы.</string>
+    <string name="settings_jvm_args_b42_preset_title">Пресет для Build 42 (рекомендуется)</string>
     <string name="settings_jvm_args_apply">Применить</string>
     <string name="renderer_ng_build42_only_title">NG_GL4ES — только для Build 42</string>
     <string name="renderer_ng_build42_only_message">Этот рендерер сделан для Build 42 и на Build 41 не работает — игра не запустится.\n\nЕсли вы играете в Build 41, выберите ZINK или GL4ES.\n\nДля Build 42 нужны ещё и рекомендуемые аргументы JVM: Настройки → Дополнительно → Аргументы JVM.</string>
@@ -596,6 +611,7 @@
 
     <!-- NG_GL4ES renderer offer dialog -->
     <string name="settings_texture_compression_hint">Сжимает большие текстуры с минимальной потерей качества для экранов смартфонов и даже таблетов. Включает в себя систему кэша, которую можно очищать самостоятельно. Первый заход в игру создаёт кэш и может быть чуть дольше. Кэш общий для ZINK и NG_GL4ES. <b>Примечание:</b> включённая ETC2 делает почти бесполезным включение переменной LIBGL_SHRINK и не рисует «решётку» на текстурах.</string>
+    <string name="settings_texture_compression_short">Сжимает большие текстуры почти без потери качества. Держит кэш, который можно очистить.</string>
     <string name="settings_texture_compression">Сжатие текстур (ETC2)</string>
     <!-- Appended to the Build 42 compatibility preset dialog. -->
     <string name="preset_confirm_compat_note">\n\nВыставляет рендерер NG_GL4ES: ему не нужно подбирать драйвер, и он совместим со всеми известными GPU.</string>
@@ -612,4 +628,16 @@
     <string name="preset_applied">Пресет применён: %1$s</string>
     <string name="preset_dialog_gpu_ng">Обнаружено: %1$s. Выставлен рендерер NG_GL4ES — он работает на любом GPU и не требует драйвера. Текстуры сжимаются через ETC2 в полном разрешении, поэтому память экономится без потери качества картинки.</string>
     <string name="preset_dialog_gpu_ng_unnamed">Выставлен рендерер NG_GL4ES — он работает на любом GPU и не требует драйвера. Текстуры сжимаются через ETC2 в полном разрешении, поэтому память экономится без потери качества картинки.</string>
+    <string name="preset_card_title">Рекомендуемые пресеты</string>
+    <string name="preset_card_subtitle">Рендерер, ужатие текстур, аргументы Java и разрешение, выставленные за вас разом</string>
+    <string name="preset_name_b41">Build 41</string>
+    <string name="preset_name_b42">Build 42</string>
+    <string name="settings_backup_switch">Быстрое сохранение (F10)</string>
+    <string name="settings_etc2_cache_clear">Очистить</string>
+    <string name="settings_etc2_cache_hint">Общий для всех инстансов. Очищать можно в любой момент: рендерер заново сожмёт нужное, это займёт несколько секунд при следующей загрузке.</string>
+    <string name="settings_features_title">Функции</string>
+    <string name="settings_jvm_args_title">Аргументы JVM</string>
+    <string name="launcher_empty_title">С чего начать</string>
+    <string name="launcher_empty_body">Чтобы начать играть, создайте инстанс — установленную копию Project Zomboid. Добавьте файлы игры кнопкой + вверху или скачайте игру из Steam или GOG через боковое меню. Загрузку из Steam сначала нужно упаковать в .zip; из GOG после загрузки нажмите «Создать инстанс».</string>
+    <string name="launcher_empty_quick_start">Быстрый старт</string>
 </resources>

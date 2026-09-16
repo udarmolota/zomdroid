@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ctl_type_stick">摇杆（手柄）</string>
+    <string name="ctl_type_stick_wasd">摇杆（WASD 键）</string>
+    <string name="ctl_type_stick_mouse">摇杆（鼠标）</string>
+    <string name="ctl_type_dpad">方向键</string>
+    <string name="ctl_type_button_rect">按钮（矩形）</string>
+    <string name="ctl_type_button_circle">按钮（圆形）</string>
+    <string name="ctl_type_touchpad">触控板（鼠标）</string>
+    <string name="ctl_type_scroll_bar">滚动条（鼠标滚轮）</string>
+    <string name="ctl_type_radial_menu">轮盘菜单</string>
+    <string name="ctl_input_mnk">键盘和鼠标</string>
+    <string name="ctl_input_gamepad">手柄</string>
+    <string name="ctl_icon_none">无图标</string>
+    <string name="ctl_style_outline">描边</string>
+    <string name="ctl_style_filled">填充</string>
+    <string name="ctl_style_glass">玻璃</string>
+    <string name="ctl_key_space">空格</string>
+    <string name="ctl_key_left">左 %1$s</string>
+    <string name="ctl_key_right">右 %1$s</string>
+    <string name="ctl_mouse_left">鼠标左键</string>
+    <string name="ctl_mouse_right">鼠标右键</string>
+    <string name="ctl_mouse_middle">鼠标中键</string>
+    <string name="ctl_mouse_button">鼠标按键 %1$s</string>
+    <string name="ctl_mouse_wheel_up">滚轮向上</string>
+    <string name="ctl_mouse_wheel_down">滚轮向下</string>
+    <string name="ctl_ui_toggle_overlay">显示/隐藏屏幕按键</string>
+    <string name="ctl_ui_toggle_keyboard">显示/隐藏键盘</string>
+    <string name="ctl_pad_left_stick">左摇杆</string>
+    <string name="ctl_pad_right_stick">右摇杆</string>
+    <string name="ctl_pad_left_stick_press">按下左摇杆 (L3)</string>
+    <string name="ctl_pad_right_stick_press">按下右摇杆 (R3)</string>
+    <string name="ctl_pad_axis">%1$s（轴）</string>
+    <string name="ctl_pad_dpad">方向键 %1$s</string>
+    <string name="control_element_toggle">切换</string>
+</resources>

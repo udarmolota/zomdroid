@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_multiplayer_title">Multijogador</string>
+    <string name="settings_coop_hosting">Permitir hospedar servidor</string>
+    <string name="settings_coop_hosting_short">Recurso experimental, pode ter bugs. Inicie normalmente e escolha Host no jogo.</string>
+    <string name="settings_coop_hosting_hint">Inicie normalmente e escolha Host no jogo. O servidor só roda quando você o cria.&lt;br&gt;&lt;br&gt;Na Build 42, dê ao servidor pelo menos 2 GB de memória ao criá-lo. Essa é só a parte do servidor: o próprio jogo precisa de memória além disso, então hospedar exige um celular potente com bastante RAM.&lt;br&gt;&lt;br&gt;A hospedagem usa um perfil separado: seus saves, mods e configurações do jogo de sempre ficam ocultos enquanto esta opção estiver ligada e voltam quando você a desligar. O jogo recebe um limite de 2 GB de memória e roda sem o modo de depuração. A hospedagem em segundo plano não é garantida.</string>
+    <string name="coop_b41_libraries_required">O servidor na Build 41 precisa de duas bibliotecas: libRakNet64.so e libZNetNoSteam64.so. Elas vêm da pasta android da versão 42.12. Você pode baixá-las do Steam, se comprou o jogo lá, ou carregá-las de um arquivo compactado, se já o baixou.</string>
+    <string name="coop_internet_title">Hospedagem pela internet</string>
+    <string name="coop_internet_pending">Internet: verificando o roteador</string>
+    <string name="coop_internet_mapped">Internet: porta aberta</string>
+    <string name="coop_internet_failed">Internet: falha ao abrir a porta</string>
+    <string name="coop_internet_no_gateway">Internet: roteador UPnP não encontrado</string>
+    <string name="coop_internet_unknown">Internet: estado da porta desconhecido</string>
+    <string name="coop_internet_pending_detail">Aguardando o jogo concluir a verificação UPnP.</string>
+    <string name="coop_internet_mapped_detail">O roteador aceitou o mapeamento da porta UDP do jogo. Amigos fora do seu Wi-Fi podem tentar o endereço externo e a porta abaixo.</string>
+    <string name="coop_internet_failed_detail">O jogo não conseguiu abrir a porta UDP. Verifique as configurações de UPnP do roteador ou redirecione a porta manualmente para o endereço Wi-Fi do celular.</string>
+    <string name="coop_internet_no_gateway_detail">O jogo não encontrou um roteador com mapeamento de portas UPnP. Ative o UPnP no roteador ou redirecione a porta UDP manualmente para o endereço Wi-Fi do celular.</string>
+    <string name="coop_internet_unknown_detail">O servidor iniciou sem um resultado de UPnP registrado. O UPnP pode estar desativado nas configurações do servidor. Verifique o log do servidor ou configure o redirecionamento manualmente.</string>
+    <string name="coop_internet_unavailable_detail">Esta biblioteca do jogo não oferece as funções de UPnP necessárias. Configure o redirecionamento da porta UDP manualmente no roteador.</string>
+    <string name="coop_internet_addresses">Porta UDP: %1$s\nEndereço externo do roteador: %2$s\nEndereço Wi-Fi do celular: %3$s</string>
+    <string name="coop_internet_address_unknown">indisponível</string>
+    <string name="coop_internet_port_unknown">veja as configurações do servidor</string>
+    <string name="coop_internet_double_nat">O roteador informa um endereço não público. Outro roteador ou o seu provedor pode estar fazendo NAT. Redirecionar só neste roteador pode não bastar; verifique o redirecionamento no equipamento anterior, um IP público ou uma rede VPN compartilhada.</string>
+    <string name="coop_internet_unverified">O acesso pela internet ainda não foi verificado. Confirme conectando de outra rede, como os dados móveis.</string>
+    <string name="coop_internet_copy">Copiar detalhes</string>
+    <string name="coop_internet_close">Fechar</string>
+</resources>
