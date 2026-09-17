@@ -31,6 +31,10 @@ jobs:
 
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
+      with:
+        # The default is "tools platform-tools", and Google removed the legacy tools package
+        # from the SDK repository on 2026-09-14: the step fails without this.
+        packages: 'platform-tools'
 
     - name: Install NDK
       run: |
