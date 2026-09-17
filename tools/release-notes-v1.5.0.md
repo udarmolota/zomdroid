@@ -1,5 +1,11 @@
 📢 Version v1.5.0 - Server hosting, dedicated server, native macOS libraries, GOG
 
+### 🙏 Special thanks
+**Willing-Upstairs-580** — for the idea (and the persistence) behind the native macOS libraries.
+**Wakort aka Borshch_5000** — for the help with making the server work.
+**sr_owen1** — for the idea of improving the settings.
+And to all the testers who didn't spare their time testing the launcher! 💛
+
 **🛑A clean install is always the safer choice. It avoids leftovers from old installs and possible conflicts or even crashes. Don't forget to backup before.🛑**
 
 ## 🆕 What's new
