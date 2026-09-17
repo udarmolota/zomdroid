@@ -11,7 +11,8 @@
         android:clipToPadding="false"/>
 
     <!-- First steps for a player who opens the launcher knowing nothing: shown only while there is
-         no instance, with a way into the wiki's quick start and straight into the Steam download. -->
+         no instance, with a way into the wiki's quick start and straight into the Steam or GOG
+         download. One button per row: three side by side do not fit a phone in any language. -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/launcher_empty_card"
         android:layout_width="0dp"
@@ -46,27 +47,24 @@
                 android:text="@string/launcher_empty_body"
                 android:textAppearance="?attr/textAppearanceBodyMedium"/>
 
-            <LinearLayout
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/launcher_empty_quick_start_btn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:orientation="horizontal">
+                android:text="@string/launcher_empty_quick_start"/>
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/launcher_empty_quick_start_btn"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/launcher_empty_quick_start"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/launcher_empty_download_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/steam_dl_menu"/>
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/launcher_empty_download_btn"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:text="@string/steam_dl_menu"/>
-            </LinearLayout>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/launcher_empty_gog_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/gog_dl_menu"/>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 

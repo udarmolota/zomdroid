@@ -23,6 +23,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.tabs.TabLayout;
 import com.zomdroid.InstallerService;
 import com.zomdroid.R;
 import com.zomdroid.databinding.FragmentGameSettingsBinding;
@@ -47,6 +48,8 @@ public class GameSettingsFragment extends Fragment {
     private boolean isInstallerServiceBound = false;
 
     private Uri importIniUri = null;
+    /** The selected tab: one of InstallerService.GAME_FILES_*, in tab order. */
+    private int gameFilesKind = InstallerService.GAME_FILES_OPTIONS;
     private List<GameInstance> instances;
 
     private final ServiceConnection installerServiceConnection = new ServiceConnection() {
@@ -88,7 +91,12 @@ public class GameSettingsFragment extends Fragment {
             registerForActivityResult(new ActivityResultContracts.OpenDocument(), uri -> {
                 if (uri == null) return;
                 String name = extractFileName(uri);
-                if (name != null && name.toLowerCase().endsWith(".ini")) {
+                String lower = name == null ? "" : name.toLowerCase(Locale.ROOT);
+                // Everything travels as .zip; a bare options.ini or .cfg is taken as well.
+                boolean accepted = lower.endsWith(".zip")
+                        || (gameFilesKind == InstallerService.GAME_FILES_OPTIONS && lower.endsWith(".ini"))
+                        || (gameFilesKind == InstallerService.GAME_FILES_SANDBOX && lower.endsWith(".cfg"));
+                if (accepted) {
                     importIniUri = uri;
                     binding.gameSettingsImportPathEt.setText(name);
                 } else {
@@ -100,7 +108,7 @@ public class GameSettingsFragment extends Fragment {
 
     // File creator for export
     private final ActivityResultLauncher<String> exportIniLauncher =
-            registerForActivityResult(new ActivityResultContracts.CreateDocument("application/octet-stream"), outUri -> {
+            registerForActivityResult(new ActivityResultContracts.CreateDocument("application/zip"), outUri -> {
                 if (outUri == null) return;
 
                 GameInstance selectedInstance = getSelectedInstanceOrNull();
@@ -112,6 +120,7 @@ public class GameSettingsFragment extends Fragment {
                 installerIntent.putExtra(InstallerService.EXTRA_GAME_INSTANCE_NAME,
                         selectedInstance.getName());
                 installerIntent.putExtra(InstallerService.EXTRA_OUTPUT_URI, outUri);
+                installerIntent.putExtra(InstallerService.EXTRA_GAME_FILES_KIND, gameFilesKind);
 
                 requireContext().startForegroundService(installerIntent);
                 bindInstallerService();
@@ -137,6 +146,23 @@ public class GameSettingsFragment extends Fragment {
 
         // Default banner
         binding.gameSettingsBannerIv.setImageResource(R.drawable.banner_default);
+
+        // Three kinds of the game's own files share this screen; the tab picks the kind.
+        TabLayout tabs = binding.gameSettingsTabs;
+        tabs.addTab(tabs.newTab().setText(R.string.game_settings_tab_options));
+        tabs.addTab(tabs.newTab().setText(R.string.game_settings_tab_sandbox));
+        tabs.addTab(tabs.newTab().setText(R.string.game_settings_tab_builds));
+        tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override public void onTabSelected(TabLayout.Tab tab) {
+                gameFilesKind = tab.getPosition();
+                importIniUri = null;
+                binding.gameSettingsImportPathEt.setText(getString(R.string.game_instance_no_file_selected));
+                updateGameFilesHints();
+            }
+            @Override public void onTabUnselected(TabLayout.Tab tab) {}
+            @Override public void onTabReselected(TabLayout.Tab tab) {}
+        });
+        updateGameFilesHints();
 
         instances = GameInstanceManager.requireSingleton().getInstances();
 
@@ -206,6 +232,7 @@ public class GameSettingsFragment extends Fragment {
             installerIntent.putExtra(InstallerService.EXTRA_GAME_INSTANCE_NAME,
                     selectedInstance.getName());
             installerIntent.putExtra(InstallerService.EXTRA_ARCHIVE_URI, importIniUri);
+            installerIntent.putExtra(InstallerService.EXTRA_GAME_FILES_KIND, gameFilesKind);
 
             importIniUri = null;
             binding.gameSettingsImportPathEt.setText(getString(R.string.game_instance_no_file_selected));
@@ -220,9 +247,22 @@ public class GameSettingsFragment extends Fragment {
             if (selectedInstance == null) return;
 
             String ts = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.US).format(new Date());
-            String defaultName = "options_" + ts + ".ini";
-            exportIniLauncher.launch(defaultName);
+            String prefix = gameFilesKind == InstallerService.GAME_FILES_SANDBOX ? "sandbox_presets_"
+                    : gameFilesKind == InstallerService.GAME_FILES_BUILDS ? "character_builds_" : "options_";
+            exportIniLauncher.launch(prefix + ts + ".zip");
         });
+    }
+
+    private void updateGameFilesHints() {
+        int kind = gameFilesKind;
+        binding.gameSettingsImportHintTv.setText(kind == InstallerService.GAME_FILES_SANDBOX
+                ? R.string.game_settings_import_hint_sandbox
+                : kind == InstallerService.GAME_FILES_BUILDS ? R.string.game_settings_import_hint_builds
+                : R.string.game_settings_import_hint);
+        binding.gameSettingsExportHintTv.setText(kind == InstallerService.GAME_FILES_SANDBOX
+                ? R.string.game_settings_export_hint_sandbox
+                : kind == InstallerService.GAME_FILES_BUILDS ? R.string.game_settings_export_hint_builds
+                : R.string.game_settings_export_hint);
     }
 
     private GameInstance getSelectedInstanceOrNull() {

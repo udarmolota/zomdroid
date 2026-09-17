@@ -530,15 +530,25 @@
     <!-- ===== Game Settings strings ===== -->
     <string name="game_settings_menu">Impor/Ekspor Pengaturan Game</string>
     <string name="game_settings_import_title">Impor</string>
-    <string name="game_settings_import_hint">Pilih file options.ini untuk diimpor. File akan disimpan sebagai options.ini di folder Zomboid instans yang dipilih.</string>
+    <string name="game_settings_import_hint">Pilih .zip berisi options.ini (file options.ini saja juga bisa). File ini menggantikan pengaturan game pada instance yang dipilih.</string>
     <string name="game_settings_export_title">Ekspor</string>
-    <string name="game_settings_export_hint">Menyimpan file options.ini saat ini dari instans yang dipilih. File akan diberi nama dengan tanggal dan waktu saat ini.</string>
+    <string name="game_settings_export_hint">Menyimpan options.ini dari instance yang dipilih ke .zip dengan tanggal dan waktu saat ini pada namanya.</string>
     <string name="game_settings_importing">Mengimpor pengaturan game…</string>
     <string name="game_settings_imported">Pengaturan game diimpor</string>
     <string name="game_settings_exporting">Mengekspor pengaturan game…</string>
     <string name="game_settings_exported">Pengaturan game diekspor</string>
     <string name="game_settings_not_found">options.ini tidak ditemukan. Game mungkin belum pernah dijalankan.</string>
-    <string name="game_settings_wrong_format">Silakan pilih file .ini</string>
+    <string name="game_settings_wrong_format">Pilih file .zip</string>
+    <string name="game_settings_tab_options">Pengaturan</string>
+    <string name="game_settings_tab_sandbox">Sandbox</string>
+    <string name="game_settings_tab_builds">Build</string>
+    <string name="game_settings_import_hint_sandbox">Pilih .zip berisi preset sandbox (file .cfg). Preset akan ditambahkan ke preset instance yang dipilih; preset dengan nama yang sama akan diganti.</string>
+    <string name="game_settings_export_hint_sandbox">Menyimpan semua preset sandbox dari instance yang dipilih ke satu .zip.</string>
+    <string name="game_settings_import_hint_builds">Pilih .zip berisi saved_builds.txt dan saved_outfits.txt. Build dan pakaian karakter di dalamnya akan ditambahkan ke milik instance yang dipilih; yang bernama sama akan diganti.</string>
+    <string name="game_settings_export_hint_builds">Menyimpan build dan pakaian karakter dari instance yang dipilih ke .zip.</string>
+    <string name="game_settings_zip_empty">Tidak ada yang diimpor: file tidak berisi %1$s.</string>
+    <string name="game_settings_sandbox_not_found">Preset sandbox tidak ditemukan. Simpan preset di game terlebih dahulu.</string>
+    <string name="game_settings_builds_not_found">Build atau pakaian karakter tersimpan tidak ditemukan. Simpan terlebih dahulu di game.</string>
     <string name="import_label">Impor</string>
     <string name="export_label">Ekspor</string>
 

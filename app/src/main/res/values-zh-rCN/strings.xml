@@ -511,15 +511,25 @@
     <!-- ===== Game Settings strings ===== -->
     <string name="game_settings_menu">导入/导出游戏设置</string>
     <string name="game_settings_import_title">导入</string>
-    <string name="game_settings_import_hint">选择要导入的 options.ini 文件。它将作为 options.ini 保存到所选实例的 Zomboid 文件夹中。</string>
+    <string name="game_settings_import_hint">选择包含 options.ini 的 .zip（单独的 options.ini 也可以）。它会替换所选实例的游戏设置。</string>
     <string name="game_settings_export_title">导出</string>
-    <string name="game_settings_export_hint">保存所选实例当前的 options.ini 文件。文件名将包含当前日期和时间。</string>
+    <string name="game_settings_export_hint">将所选实例的 options.ini 保存为 .zip，文件名包含当前日期和时间。</string>
     <string name="game_settings_importing">正在导入游戏设置…</string>
     <string name="game_settings_imported">游戏设置已导入</string>
     <string name="game_settings_exporting">正在导出游戏设置…</string>
     <string name="game_settings_exported">游戏设置已导出</string>
     <string name="game_settings_not_found">未找到 options.ini。游戏可能尚未运行过。</string>
-    <string name="game_settings_wrong_format">请选择 .ini 文件</string>
+    <string name="game_settings_wrong_format">请选择 .zip 文件</string>
+    <string name="game_settings_tab_options">设置</string>
+    <string name="game_settings_tab_sandbox">沙盒</string>
+    <string name="game_settings_tab_builds">角色构建</string>
+    <string name="game_settings_import_hint_sandbox">选择包含沙盒预设（.cfg 文件）的 .zip。它们会添加到所选实例的预设中；同名预设将被替换。</string>
+    <string name="game_settings_export_hint_sandbox">将所选实例的所有沙盒预设保存到一个 .zip 中。</string>
+    <string name="game_settings_import_hint_builds">选择包含 saved_builds.txt 和 saved_outfits.txt 的 .zip。其中的角色构建和服装会添加到所选实例中；同名的将被替换。</string>
+    <string name="game_settings_export_hint_builds">将所选实例的角色构建和服装保存为 .zip。</string>
+    <string name="game_settings_zip_empty">没有可导入的内容：文件中没有 %1$s。</string>
+    <string name="game_settings_sandbox_not_found">未找到沙盒预设。请先在游戏中保存一个预设。</string>
+    <string name="game_settings_builds_not_found">未找到已保存的角色构建或服装。请先在游戏中保存。</string>
     <string name="import_label">导入</string>
     <string name="export_label">导出</string>
 

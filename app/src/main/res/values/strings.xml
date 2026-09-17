@@ -641,15 +641,25 @@
     <!-- ===== Game Settings strings ===== -->
     <string name="game_settings_menu">Import/Export Game Settings</string>
     <string name="game_settings_import_title">Import</string>
-    <string name="game_settings_import_hint">Select an options.ini file to import. It will be saved as options.ini in the Zomboid folder of the selected instance.</string>
+    <string name="game_settings_import_hint">Select a .zip with options.ini (a bare options.ini also works). It replaces the game settings of the selected instance.</string>
     <string name="game_settings_export_title">Export</string>
-    <string name="game_settings_export_hint">Saves the current options.ini file from the selected instance. The file will be named with the current date and time.</string>
+    <string name="game_settings_export_hint">Saves options.ini of the selected instance into a .zip named with the current date and time.</string>
     <string name="game_settings_importing">Importing game settings…</string>
     <string name="game_settings_imported">Game settings imported</string>
     <string name="game_settings_exporting">Exporting game settings…</string>
     <string name="game_settings_exported">Game settings exported</string>
     <string name="game_settings_not_found">options.ini not found. The game may not have run yet.</string>
-    <string name="game_settings_wrong_format">Please select an .ini file</string>
+    <string name="game_settings_wrong_format">Please select a .zip file</string>
+    <string name="game_settings_tab_options">Settings</string>
+    <string name="game_settings_tab_sandbox">Sandbox</string>
+    <string name="game_settings_tab_builds">Builds</string>
+    <string name="game_settings_import_hint_sandbox">Select a .zip with sandbox presets (.cfg files). They are added to the presets of the selected instance; a preset with the same name is replaced.</string>
+    <string name="game_settings_export_hint_sandbox">Saves all sandbox presets of the selected instance into one .zip.</string>
+    <string name="game_settings_import_hint_builds">Select a .zip with saved_builds.txt and saved_outfits.txt. Its character builds and outfits are added to those of the selected instance; one with the same name is replaced.</string>
+    <string name="game_settings_export_hint_builds">Saves the character builds and outfits of the selected instance into a .zip.</string>
+    <string name="game_settings_zip_empty">Nothing to import: the file has no %1$s.</string>
+    <string name="game_settings_sandbox_not_found">No sandbox presets found. Save a preset in the game first.</string>
+    <string name="game_settings_builds_not_found">No saved character builds or outfits found. Save one in the game first.</string>
     <string name="import_label">Import</string>
     <string name="export_label">Export</string>
 

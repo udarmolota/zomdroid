@@ -81,6 +81,11 @@ public class InstallerService extends Service implements TaskProgressListener {
     public static final String EXTRA_BUILD_VERSION = "com.zomdroid.InstallerService.EXTRA_BUILD_VERSION";
     public static final String EXTRA_BETTERFPS_MODE = "com.zomdroid.InstallerService.EXTRA_BETTERFPS_MODE";
     public static final String EXTRA_RLZ_LEVEL = "com.zomdroid.InstallerService.EXTRA_RLZ_LEVEL";
+    /** Which game files IMPORT/EXPORT_GAME_SETTINGS carry: one of the GAME_FILES_* kinds. */
+    public static final String EXTRA_GAME_FILES_KIND = "com.zomdroid.InstallerService.EXTRA_GAME_FILES_KIND";
+    public static final int GAME_FILES_OPTIONS = 0;
+    public static final int GAME_FILES_SANDBOX = 1;
+    public static final int GAME_FILES_BUILDS = 2;
     public static final String EXTRA_INSTALL_PRESET_NAME = "com.zomdroid.InstallerService.EXTRA_INSTALL_PRESET_NAME";
     public static final String EXTRA_GPU_VENDOR = "com.zomdroid.InstallerService.EXTRA_GPU_VENDOR";
     /** One of the GogInstallerExtractor.KIND_* values; a missing extra means the usual game ZIP. */
@@ -1076,6 +1081,10 @@ public class InstallerService extends Service implements TaskProgressListener {
             // The game's own graphics options (texture filter, upscaling, shadow quality...) live
             // only here; without it every "bad FPS" report meant asking the player what they set.
             addFileToZip(zos, gi == null ? null : new File(gi.getHomePath() + "/Zomboid/options.ini"), "options.ini");
+            // Hosting runs the game on its own profile (coop-probe) with its own options.ini. Without
+            // it a hosting session showed the normal profile's options - the vivo cursor report
+            // (2026-09-17) said lockCursorToWindow=false while that game had it on.
+            addFileToZip(zos, gi == null ? null : new File(gi.getHomePath() + "/coop-probe/options.ini"), "coop-options.ini");
         }
     }
 
@@ -2695,9 +2704,18 @@ public class InstallerService extends Service implements TaskProgressListener {
         }
     }
 
-    // -------------------- IMPORT GAME SETTINGS --------------------
-    // Imports options.ini from user-selected file into Zomboid/ folder of the instance.
-    // File is always saved as options.ini regardless of original name.
+    // -------------------- IMPORT / EXPORT GAME FILES --------------------
+    // The "Import/Export Game Settings" screen carries three kinds of the game's own files, each in
+    // a .zip: options.ini (Zomboid/), the sandbox presets (Zomboid/Sandbox Presets/*.cfg, any name)
+    // and the character creation files in Zomboid/Lua: saved builds (saved_builds.txt, one
+    // "Name:profession;trait;...;" per line on 42.20) and saved outfits (saved_outfits.txt). A bare
+    // options.ini or .cfg is still accepted: options used to be exported as a plain .ini.
+    private static final String SANDBOX_PRESETS_DIR = "Sandbox Presets";
+    // 42.20 writes saved_builds.txt; the .ini is carried too in case another build names it that way.
+    private static final String[] CHARACTER_FILE_NAMES = {"saved_builds.txt", "saved_builds.ini", "saved_outfits.txt"};
+    private static final int GAME_FILE_MAX_BYTES = 16 * 1024 * 1024;
+    private static final int GAME_FILES_MAX_ENTRIES = 4096;
+
     private void doImportGameSettings(Intent intent) {
         String taskTitle = getString(R.string.game_settings_importing);
         startForeground(NOTIFICATION_ID, buildNotification(taskTitle));
@@ -2708,23 +2726,24 @@ public class InstallerService extends Service implements TaskProgressListener {
         GameInstance gameInstance = GameInstanceManager.requireSingleton().getInstanceByName(gameInstanceName);
         if (gameInstance == null) { finishWithError(taskTitle, "Game instance not found: " + gameInstanceName); return; }
 
-        Uri iniUri = intent.getParcelableExtra(EXTRA_ARCHIVE_URI);
-        if (iniUri == null) { finishWithError(taskTitle, "File URI is missing"); return; }
+        Uri fileUri = intent.getParcelableExtra(EXTRA_ARCHIVE_URI);
+        if (fileUri == null) { finishWithError(taskTitle, "File URI is missing"); return; }
+        int kind = intent.getIntExtra(EXTRA_GAME_FILES_KIND, GAME_FILES_OPTIONS);
 
         executorService.submit(() -> {
             try {
-                // Ensure Zomboid/ folder exists
                 File zomboidDir = new File(gameInstance.getHomePath(), "Zomboid");
-                zomboidDir.mkdirs();
-
-                File destFile = new File(zomboidDir, "options.ini");
-                try (InputStream is = getContentResolver().openInputStream(iniUri);
-                     OutputStream os = new FileOutputStream(destFile, false)) {
-                    if (is == null) throw new IllegalStateException("openInputStream returned null");
-                    byte[] buf = new byte[64 * 1024]; int r;
-                    while ((r = is.read(buf)) != -1) os.write(buf, 0, r);
+                java.util.Map<String, byte[]> files = readGameFilesDocument(fileUri);
+                int imported = kind == GAME_FILES_SANDBOX ? importSandboxPresets(zomboidDir, files)
+                        : kind == GAME_FILES_BUILDS ? importCharacterBuilds(zomboidDir, files)
+                        : importOptionsIni(zomboidDir, files);
+                if (imported == 0) {
+                    String what = kind == GAME_FILES_SANDBOX ? ".cfg"
+                            : kind == GAME_FILES_BUILDS ? "saved_builds.txt / saved_outfits.txt" : "options.ini";
+                    finishWithError(taskTitle, getString(R.string.game_settings_zip_empty, what));
+                    return;
                 }
-                Log.d("GameSettings", "Imported options.ini to: " + destFile.getAbsolutePath());
+                Log.i(LOG_TAG, "Imported " + imported + " game file item(s) of kind " + kind + " into " + zomboidDir);
                 finish(getString(R.string.game_settings_imported), null);
             } catch (Exception e) {
                 finishWithError(taskTitle, e.toString());
@@ -2732,8 +2751,6 @@ public class InstallerService extends Service implements TaskProgressListener {
         });
     }
 
-    // -------------------- EXPORT GAME SETTINGS --------------------
-    // Exports options.ini from Zomboid/ folder to user-selected output file.
     private void doExportGameSettings(Intent intent) {
         String taskTitle = getString(R.string.game_settings_exporting);
         startForeground(NOTIFICATION_ID, buildNotification(taskTitle));
@@ -2741,32 +2758,187 @@ public class InstallerService extends Service implements TaskProgressListener {
 
         String gameInstanceName = intent.getStringExtra(EXTRA_GAME_INSTANCE_NAME);
         Uri outUri = intent.getParcelableExtra(EXTRA_OUTPUT_URI);
-
         if (gameInstanceName == null) { finishWithError(taskTitle, "Game instance name is missing"); return; }
         if (outUri == null) { finishWithError(taskTitle, "Output URI is missing"); return; }
-
         GameInstance gameInstance = GameInstanceManager.requireSingleton().getInstanceByName(gameInstanceName);
         if (gameInstance == null) { finishWithError(taskTitle, "Game instance not found: " + gameInstanceName); return; }
+        int kind = intent.getIntExtra(EXTRA_GAME_FILES_KIND, GAME_FILES_OPTIONS);
 
         executorService.submit(() -> {
             try {
-                File iniFile = new File(gameInstance.getHomePath(), "Zomboid/options.ini");
-                if (!iniFile.exists()) {
-                    finishWithError(taskTitle, getString(R.string.game_settings_not_found));
+                File zomboidDir = new File(gameInstance.getHomePath(), "Zomboid");
+                java.util.List<File> files = new ArrayList<>();
+                if (kind == GAME_FILES_SANDBOX) {
+                    File[] presets = new File(zomboidDir, SANDBOX_PRESETS_DIR).listFiles();
+                    if (presets != null) for (File f : presets)
+                        if (f.isFile() && f.getName().toLowerCase(java.util.Locale.ROOT).endsWith(".cfg")) files.add(f);
+                } else if (kind == GAME_FILES_BUILDS) {
+                    for (String name : CHARACTER_FILE_NAMES) {
+                        File f = new File(zomboidDir, "Lua/" + name);
+                        if (f.isFile() && f.length() > 0) files.add(f);
+                    }
+                } else {
+                    File f = new File(zomboidDir, "options.ini");
+                    if (f.isFile()) files.add(f);
+                }
+                if (files.isEmpty()) {
+                    finishWithError(taskTitle, getString(kind == GAME_FILES_SANDBOX ? R.string.game_settings_sandbox_not_found
+                            : kind == GAME_FILES_BUILDS ? R.string.game_settings_builds_not_found
+                            : R.string.game_settings_not_found));
                     return;
                 }
-                try (InputStream is = new java.io.FileInputStream(iniFile);
-                     OutputStream os = getContentResolver().openOutputStream(outUri)) {
+                try (OutputStream os = getContentResolver().openOutputStream(outUri)) {
                     if (os == null) throw new IllegalStateException("openOutputStream returned null");
-                    byte[] buf = new byte[64 * 1024]; int r;
-                    while ((r = is.read(buf)) != -1) os.write(buf, 0, r);
+                    try (ZipOutputStream zos = new ZipOutputStream(os)) {
+                        for (File f : files) addFileToZip(zos, f, f.getName());
+                    }
                 }
-                Log.d("GameSettings", "Exported options.ini");
+                Log.i(LOG_TAG, "Exported " + files.size() + " game file(s) of kind " + kind);
                 finish(getString(R.string.game_settings_exported), null);
             } catch (Exception e) {
                 finishWithError(taskTitle, e.toString());
             }
         });
+    }
+
+    /** Every file the picked document carries, by base name: the entries of a .zip, or the file itself. */
+    private java.util.Map<String, byte[]> readGameFilesDocument(Uri uri) throws IOException {
+        java.util.Map<String, byte[]> files = new java.util.LinkedHashMap<>();
+        try (InputStream raw = getContentResolver().openInputStream(uri)) {
+            if (raw == null) throw new IOException("openInputStream returned null");
+            java.io.BufferedInputStream in = new java.io.BufferedInputStream(raw);
+            in.mark(8);
+            byte[] magic = new byte[4];
+            int got = 0;
+            while (got < 4) {
+                int r = in.read(magic, got, 4 - got);
+                if (r < 0) break;
+                got += r;
+            }
+            in.reset();
+            if (got == 4 && magic[0] == 'P' && magic[1] == 'K' && magic[2] == 3 && magic[3] == 4) {
+                java.util.zip.ZipInputStream zip = new java.util.zip.ZipInputStream(in);
+                java.util.zip.ZipEntry entry;
+                while ((entry = zip.getNextEntry()) != null && files.size() < GAME_FILES_MAX_ENTRIES) {
+                    if (entry.isDirectory() || entry.getName().startsWith("__MACOSX/")) continue;
+                    // Only base names are ever used, so nothing in the archive can point outside
+                    // the folders we write into.
+                    String name = gameFileBaseName(entry.getName());
+                    if (name.isEmpty() || files.containsKey(name)) continue;
+                    files.put(name, readGameFileLimited(zip));
+                }
+            } else {
+                String name = queryGameFileDisplayName(uri);
+                if (name != null) files.put(gameFileBaseName(name), readGameFileLimited(in));
+            }
+        }
+        return files;
+    }
+
+    private String queryGameFileDisplayName(Uri uri) {
+        if ("file".equals(uri.getScheme()) && uri.getPath() != null) return new File(uri.getPath()).getName();
+        try (android.database.Cursor c = getContentResolver().query(uri,
+                new String[]{android.provider.OpenableColumns.DISPLAY_NAME}, null, null, null)) {
+            if (c != null && c.moveToFirst()) {
+                int idx = c.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME);
+                if (idx >= 0) return c.getString(idx);
+            }
+        } catch (Exception ignored) { }
+        return null;
+    }
+
+    private static String gameFileBaseName(String path) {
+        return path.substring(Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\')) + 1);
+    }
+
+    private static byte[] readGameFileLimited(InputStream in) throws IOException {
+        java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
+        byte[] buf = new byte[64 * 1024];
+        int r;
+        while ((r = in.read(buf)) != -1) {
+            if (out.size() + r > GAME_FILE_MAX_BYTES) throw new IOException("File too large for a game settings file");
+            out.write(buf, 0, r);
+        }
+        return out.toByteArray();
+    }
+
+    private static void writeGameFile(File target, byte[] data) throws IOException {
+        File parent = target.getParentFile();
+        if (parent != null && !parent.isDirectory() && !parent.mkdirs()) throw new IOException("Cannot create " + parent);
+        java.nio.file.Files.write(target.toPath(), data);
+    }
+
+    private static int importOptionsIni(File zomboidDir, java.util.Map<String, byte[]> files) throws IOException {
+        byte[] ini = null;
+        for (java.util.Map.Entry<String, byte[]> e : files.entrySet())
+            if (e.getKey().equalsIgnoreCase("options.ini")) { ini = e.getValue(); break; }
+        // A bare file from the old export, named options_<date>.ini.
+        if (ini == null && files.size() == 1) {
+            java.util.Map.Entry<String, byte[]> only = files.entrySet().iterator().next();
+            String lower = only.getKey().toLowerCase(java.util.Locale.ROOT);
+            if (lower.startsWith("options") && lower.endsWith(".ini")) ini = only.getValue();
+        }
+        if (ini == null) return 0;
+        writeGameFile(new File(zomboidDir, "options.ini"), ini);
+        return 1;
+    }
+
+    private static int importSandboxPresets(File zomboidDir, java.util.Map<String, byte[]> files) throws IOException {
+        File dir = new File(zomboidDir, SANDBOX_PRESETS_DIR);
+        int count = 0;
+        for (java.util.Map.Entry<String, byte[]> e : files.entrySet()) {
+            if (!e.getKey().toLowerCase(java.util.Locale.ROOT).endsWith(".cfg")) continue;
+            // A preset of the same name is replaced; the others stay.
+            writeGameFile(new File(dir, e.getKey()), e.getValue());
+            count++;
+        }
+        return count;
+    }
+
+    private static int importCharacterBuilds(File zomboidDir, java.util.Map<String, byte[]> files) throws IOException {
+        int count = 0;
+        for (String name : CHARACTER_FILE_NAMES) {
+            byte[] incoming = null;
+            for (java.util.Map.Entry<String, byte[]> e : files.entrySet())
+                if (e.getKey().equalsIgnoreCase(name)) { incoming = e.getValue(); break; }
+            if (incoming == null) continue;
+            File target = new File(zomboidDir, "Lua/" + name);
+            java.util.LinkedHashMap<String, String> added =
+                    parseCharacterBuilds(new String(incoming, java.nio.charset.StandardCharsets.UTF_8));
+            if (added != null && target.isFile()) {
+                java.util.LinkedHashMap<String, String> merged = parseCharacterBuilds(new String(
+                        java.nio.file.Files.readAllBytes(target.toPath()), java.nio.charset.StandardCharsets.UTF_8));
+                if (merged != null) {
+                    // What is already on the phone stays; an entry of the same name is replaced.
+                    merged.putAll(added);
+                    StringBuilder out = new StringBuilder();
+                    for (java.util.Map.Entry<String, String> b : merged.entrySet())
+                        out.append(b.getKey()).append(':').append(b.getValue()).append('\n');
+                    writeGameFile(target, out.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                    count += added.size();
+                    continue;
+                }
+            }
+            // No file yet, or a shape we do not know: take the archive's file, keeping the old one.
+            if (target.isFile()) java.nio.file.Files.copy(target.toPath(), new File(target.getPath() + ".bak").toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            writeGameFile(target, incoming);
+            count += added != null ? added.size() : 1;
+        }
+        return count;
+    }
+
+    /** "Name:..." per line, as 42.20 writes saved_builds.txt ("Name:profession;trait;...;"); outfits are
+     *  assumed to share the shape. null for anything else, which is then replaced with a .bak kept. */
+    private static java.util.LinkedHashMap<String, String> parseCharacterBuilds(String text) {
+        java.util.LinkedHashMap<String, String> builds = new java.util.LinkedHashMap<>();
+        for (String line : text.split("\r?\n")) {
+            if (line.trim().isEmpty()) continue;
+            int colon = line.indexOf(':');
+            if (colon <= 0) return null;
+            builds.put(line.substring(0, colon), line.substring(colon + 1));
+        }
+        return builds;
     }
 
     // -------------------- INSTALL NATIVE LIBS --------------------

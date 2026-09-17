@@ -529,15 +529,25 @@
     <!-- ===== Game Settings strings ===== -->
     <string name="game_settings_menu">Importar/Exportar Configurações do Jogo</string>
     <string name="game_settings_import_title">Importar</string>
-    <string name="game_settings_import_hint">Selecione um arquivo options.ini para importar. Ele será salvo como options.ini na pasta Zomboid da instância selecionada.</string>
+    <string name="game_settings_import_hint">Selecione um .zip com options.ini (o options.ini sozinho também serve). Ele substitui as configurações do jogo na instância selecionada.</string>
     <string name="game_settings_export_title">Exportar</string>
-    <string name="game_settings_export_hint">Salva o arquivo options.ini atual da instância selecionada. O arquivo será nomeado com a data e hora atuais.</string>
+    <string name="game_settings_export_hint">Salva o options.ini da instância selecionada em um .zip com a data e a hora atuais no nome.</string>
     <string name="game_settings_importing">Importando configurações do jogo…</string>
     <string name="game_settings_imported">Configurações do jogo importadas</string>
     <string name="game_settings_exporting">Exportando configurações do jogo…</string>
     <string name="game_settings_exported">Configurações do jogo exportadas</string>
     <string name="game_settings_not_found">options.ini não encontrado. O jogo pode ainda não ter sido executado.</string>
-    <string name="game_settings_wrong_format">Por favor, selecione um arquivo .ini</string>
+    <string name="game_settings_wrong_format">Selecione um arquivo .zip</string>
+    <string name="game_settings_tab_options">Configurações</string>
+    <string name="game_settings_tab_sandbox">Sandbox</string>
+    <string name="game_settings_tab_builds">Builds</string>
+    <string name="game_settings_import_hint_sandbox">Selecione um .zip com presets de sandbox (arquivos .cfg). Eles são adicionados aos presets da instância selecionada; um preset com o mesmo nome é substituído.</string>
+    <string name="game_settings_export_hint_sandbox">Salva todos os presets de sandbox da instância selecionada em um único .zip.</string>
+    <string name="game_settings_import_hint_builds">Selecione um .zip com saved_builds.txt e saved_outfits.txt. As builds e roupas de personagem dele são adicionadas às da instância selecionada; as de mesmo nome são substituídas.</string>
+    <string name="game_settings_export_hint_builds">Salva as builds e roupas de personagem da instância selecionada em um .zip.</string>
+    <string name="game_settings_zip_empty">Nada para importar: o arquivo não contém %1$s.</string>
+    <string name="game_settings_sandbox_not_found">Nenhum preset de sandbox encontrado. Salve um preset no jogo primeiro.</string>
+    <string name="game_settings_builds_not_found">Nenhuma build ou roupa de personagem salva encontrada. Salve uma no jogo primeiro.</string>
     <string name="import_label">Importar</string>
     <string name="export_label">Exportar</string>
 

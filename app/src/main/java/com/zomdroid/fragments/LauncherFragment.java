@@ -339,6 +339,8 @@ public class LauncherFragment extends Fragment {
                 .navigate(R.id.action_open_wiki_fragment, WikiFragment.section("quick-start")));
         binding.launcherEmptyDownloadBtn.setOnClickListener(v ->
                 Navigation.findNavController(v).navigate(R.id.action_download_steam));
+        binding.launcherEmptyGogBtn.setOnClickListener(v ->
+                Navigation.findNavController(v).navigate(R.id.action_download_gog));
         updateEmptyState();
 
         binding.gameInstancesRv.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {

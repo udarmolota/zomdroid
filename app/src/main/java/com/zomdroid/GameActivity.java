@@ -211,7 +211,11 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         // so they keep the exact code path they have today and need no retesting.
         GamepadManager.setBipolarTriggers(gameInstance.isBuild4220Plus());
 
-        hideSystemPointerIfGameDrawsItsOwn(gameInstance);
+        // The game keeps its options in the profile it runs on: hosting and the server test client
+        // get their own cache folders (GameLauncher), so their options.ini is not Zomboid's.
+        cursorOptionsFile = new java.io.File(gameInstance.getHomePath(), (coopBridgePath != null
+                ? "coop-probe" : serverProbeClient ? "client-probe" : "Zomboid") + "/options.ini");
+        followGameCursorOption();
 
         System.loadLibrary("zomdroid");
 
@@ -594,14 +598,32 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         super.onResume();
         if (gamepadManager != null)  gamepadManager.register();
         if (keyboardManager != null) keyboardManager.register();
+        if (cursorOptionsFile != null) {
+            cursorHandler.removeCallbacks(cursorOptionCheck);
+            cursorHandler.postDelayed(cursorOptionCheck, CURSOR_OPTION_CHECK_MS);
+        }
     }
 
     @Override
     protected void onPause() {
         if (gamepadManager != null)  gamepadManager.unregister();
         if (keyboardManager != null) keyboardManager.unregister();
+        cursorHandler.removeCallbacks(cursorOptionCheck);
         super.onPause();
     }
+
+    /** The options.ini of the profile this session runs on; null until onCreate picks it. */
+    private java.io.File cursorOptionsFile;
+    private long cursorOptionsModified = Long.MIN_VALUE;
+    private Boolean gameDrawsCursorApplied; // null = not applied yet
+    private static final long CURSOR_OPTION_CHECK_MS = 2000;
+    private final android.os.Handler cursorHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private final Runnable cursorOptionCheck = new Runnable() {
+        @Override public void run() {
+            followGameCursorOption();
+            cursorHandler.postDelayed(this, CURSOR_OPTION_CHECK_MS);
+        }
+    };
 
     /**
      * With a mouse attached Android draws its own pointer on top of the game. The game has a
@@ -611,27 +633,38 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
      * ({@code _glfwSetCursorMode} is a NOOP, {@code _glfwCreateCursor} returns false), and the
      * game never calls them anyway.
      *
-     * <p>So we hide the system pointer here - but only when the game's option is actually on.
-     * Hiding it unconditionally would leave a player who never enabled that option with no cursor
-     * at all, which is worse than two. The option lives in the instance's own options.ini, so this
-     * follows the game's setting with nothing to configure on our side.
+     * <p>So we hide the system pointer - but only while the game's option is actually on. Hiding
+     * it unconditionally would leave a player who never enabled that option with no cursor at all,
+     * which is worse than two. The option lives in the profile's options.ini. It used to be read
+     * once at launch, from Zomboid/ only: switching it in the game's settings gave two cursors (or
+     * none) until a restart, and on the hosting profile it was never seen at all (vivo report,
+     * 2026-09-17). Now the file's modification time is checked every two seconds while the game is
+     * in front - one stat call - and the file is read only when the game has saved it.
      */
-    private void hideSystemPointerIfGameDrawsItsOwn(GameInstance gameInstance) {
-        if (!readsLockCursorToWindow(gameInstance)) return;
+    private void followGameCursorOption() {
+        java.io.File ini = cursorOptionsFile;
+        if (ini == null) return;
+        long modified = ini.lastModified(); // 0 when the file does not exist yet
+        if (modified == cursorOptionsModified && gameDrawsCursorApplied != null) return;
+        cursorOptionsModified = modified;
+        boolean gameDraws = readsLockCursorToWindow(ini);
+        if (gameDrawsCursorApplied != null && gameDrawsCursorApplied == gameDraws) return;
+        gameDrawsCursorApplied = gameDraws;
         // Same rule for the on-screen mouse: the game's cursor follows it, so its own arrow goes.
-        binding.inputControlsV.gameDrawsCursor = true;
+        binding.inputControlsV.gameDrawsCursor = gameDraws;
         binding.inputControlsV.invalidate();
-        PointerIcon none = PointerIcon.getSystemIcon(this, PointerIcon.TYPE_NULL);
         // Both views: the pointer is resolved from the view under it, so the controls overlay
-        // would bring the arrow back over itself.
-        binding.gameSv.setPointerIcon(none);
-        binding.inputControlsV.setPointerIcon(none);
-        Log.i(LOG_TAG, "Lock cursor to window is on - hiding the system pointer and the on-screen mouse arrow, the game draws its own");
+        // would bring the arrow back over itself. null restores the default arrow.
+        PointerIcon icon = gameDraws ? PointerIcon.getSystemIcon(this, PointerIcon.TYPE_NULL) : null;
+        binding.gameSv.setPointerIcon(icon);
+        binding.inputControlsV.setPointerIcon(icon);
+        Log.i(LOG_TAG, gameDraws
+                ? "Lock cursor to window is on - hiding the system pointer and the on-screen mouse arrow, the game draws its own"
+                : "Lock cursor to window is off - the system pointer and the on-screen mouse arrow are shown");
     }
 
-    /** {@code lockCursorToWindow=true} in the instance's Zomboid/options.ini. Absent file = false. */
-    private static boolean readsLockCursorToWindow(GameInstance gameInstance) {
-        java.io.File ini = new java.io.File(gameInstance.getHomePath(), "Zomboid/options.ini");
+    /** {@code lockCursorToWindow=true} in the given options.ini. Absent file = false. */
+    private static boolean readsLockCursorToWindow(java.io.File ini) {
         if (!ini.isFile()) return false;
         try {
             for (String line : java.nio.file.Files.readAllLines(ini.toPath(),

@@ -529,15 +529,25 @@
     <!-- ===== Game Settings strings ===== -->
     <string name="game_settings_menu">Импорт/Экспорт настроек игры</string>
     <string name="game_settings_import_title">Импорт</string>
-    <string name="game_settings_import_hint">Выберите файл options.ini для импорта. Он будет сохранён как options.ini в папке Zomboid выбранного инстанса.</string>
+    <string name="game_settings_import_hint">Выберите .zip с options.ini (подойдёт и сам options.ini). Он заменит настройки игры в выбранном инстансе.</string>
     <string name="game_settings_export_title">Экспорт</string>
-    <string name="game_settings_export_hint">Сохраняет текущий файл options.ini из выбранного инстанса. Файл будет назван с текущей датой и временем.</string>
+    <string name="game_settings_export_hint">Сохраняет options.ini выбранного инстанса в .zip с текущими датой и временем в названии.</string>
     <string name="game_settings_importing">Импорт настроек игры…</string>
     <string name="game_settings_imported">Настройки игры импортированы</string>
     <string name="game_settings_exporting">Экспорт настроек игры…</string>
     <string name="game_settings_exported">Настройки игры экспортированы</string>
     <string name="game_settings_not_found">options.ini не найден. Возможно, игра ещё не запускалась.</string>
-    <string name="game_settings_wrong_format">Пожалуйста, выберите файл .ini</string>
+    <string name="game_settings_wrong_format">Выберите файл .zip</string>
+    <string name="game_settings_tab_options">Настройки</string>
+    <string name="game_settings_tab_sandbox">Песочница</string>
+    <string name="game_settings_tab_builds">Билды</string>
+    <string name="game_settings_import_hint_sandbox">Выберите .zip с пресетами песочницы (файлы .cfg). Они добавятся к пресетам выбранного инстанса; пресет с тем же названием будет заменён.</string>
+    <string name="game_settings_export_hint_sandbox">Сохраняет все пресеты песочницы выбранного инстанса в один .zip.</string>
+    <string name="game_settings_import_hint_builds">Выберите .zip с saved_builds.txt и saved_outfits.txt. Билды и наряды персонажа из него добавятся к билдам и нарядам выбранного инстанса; одноимённые будут заменены.</string>
+    <string name="game_settings_export_hint_builds">Сохраняет билды и наряды персонажа выбранного инстанса в .zip.</string>
+    <string name="game_settings_zip_empty">Нечего импортировать: в файле нет %1$s.</string>
+    <string name="game_settings_sandbox_not_found">Пресеты песочницы не найдены. Сначала сохраните пресет в игре.</string>
+    <string name="game_settings_builds_not_found">Сохранённые билды и наряды персонажа не найдены. Сначала сохраните их в игре.</string>
     <string name="import_label">Импорт</string>
     <string name="export_label">Экспорт</string>
 
