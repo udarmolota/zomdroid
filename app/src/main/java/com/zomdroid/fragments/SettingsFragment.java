@@ -36,6 +36,9 @@ public class SettingsFragment extends Fragment {
      */
     private com.zomdroid.game.InstanceSettings settings;
     private String instanceName;
+    // Build 41: the player turned hosting on, had no multiplayer libraries and was sent to get them.
+    // Coming back with the libraries finishes the switch instead of leaving it off (2026-09-17).
+    private boolean hostingEnablePending;
     // Set once the renderer spinner has delivered its initial restore callback, so the NG_GL4ES
     // warning fires only for a deliberate change by the user.
     private boolean rendererSelectionRestored = false;
@@ -109,7 +112,8 @@ public class SettingsFragment extends Fragment {
                 .setMessage(R.string.coop_b41_libraries_required)
                 .setPositiveButton(R.string.macos_libs_download, (d, w) -> openLibraries(anchor, true, false))
                 .setNeutralButton(R.string.macos_libs_import, (d, w) -> openLibraries(anchor, true, true))
-                .setNegativeButton(android.R.string.cancel, null)
+                .setNegativeButton(android.R.string.cancel, (d, w) -> hostingEnablePending = false)
+                .setOnCancelListener(d -> hostingEnablePending = false)
                 .show();
     }
 
@@ -137,6 +141,11 @@ public class SettingsFragment extends Fragment {
     @Override public void onResume() {
         super.onResume();
         refreshMacosStatus();
+        if (hostingEnablePending && binding != null && hostingLibrariesPresent()) {
+            hostingEnablePending = false;
+            // Runs the usual enable path, separate-profile warning included.
+            binding.settingsCoopHostingSwitch.setChecked(true);
+        }
     }
 
     @Override
@@ -408,11 +417,15 @@ public class SettingsFragment extends Fragment {
 
         setUpTextureShrinkSpinner();
 
+        // No saved view state, as with the macOS module switches: a restored old position would fire
+        // the listener on the way back from another screen and overwrite the stored setting.
+        binding.settingsCoopHostingSwitch.setSaveEnabled(false);
         binding.settingsCoopHostingSwitch.setChecked(settings.isCoopHostingEnabled());
         binding.settingsCoopHostingSwitch.setOnCheckedChangeListener((v, checked) -> {
             // Build 41 ships no ARM64 RakNet/ZNet of its own: without the two multiplayer
             // libraries the server cannot start, so the switch stays off and says where to get them.
             if (checked && !hostingLibrariesPresent()) {
+                hostingEnablePending = true;
                 v.setChecked(false);
                 showHostingLibrariesDialog(v);
                 return;
