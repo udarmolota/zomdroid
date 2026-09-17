@@ -67,6 +67,10 @@ public class SettingsFragment extends Fragment {
     // Bound again on every resume: an install turns its libraries back on. A library that is not
     // installed shows off and cannot be touched, and the choice stored for it is left alone.
     private void bindMacosModule(androidx.appcompat.widget.SwitchCompat sw, String module, boolean installed) {
+        // No saved view state: coming back from the install screen, Android restored the position
+        // the switch had when the player left and fired the listener with it, writing the old "off"
+        // over what the install had just switched on. The stored setting is the only truth here.
+        sw.setSaveEnabled(false);
         sw.setOnCheckedChangeListener(null);
         sw.setChecked(installed && settings.isMacosModuleEnabled(module));
         sw.setEnabled(installed);

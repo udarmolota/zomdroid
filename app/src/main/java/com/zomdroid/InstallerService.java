@@ -109,9 +109,25 @@ public class InstallerService extends Service implements TaskProgressListener {
     private volatile boolean userTaskRunning;
     private static volatile boolean taskRunning;
     public static boolean isTaskRunning() { return taskRunning; }
+    private volatile int lastStartId;
+
+    /**
+     * Stops the service unless it has been started again since its last task began. The screens call
+     * this when they see a task finish, instead of Context.stopService(): a screen coming back to the
+     * front can still hold an observer of an earlier task, and its stale "finished" used to stop a
+     * service that had been started again a moment before - LauncherFragment re-runs the dependency
+     * check every time it is shown - before that start reached startForeground(). Android then kills
+     * the whole app with ForegroundServiceDidNotStartInTimeException (S25, 2026-09-17, after two
+     * exports in a row and a return to the home screen). stopSelfResult() compares the start ID with
+     * the newest one the system has handed out, so a pending start keeps the service alive.
+     */
+    public void stopUnlessRestarted() {
+        stopSelfResult(lastStartId);
+    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        lastStartId = startId;
         NotificationChannel channel = new NotificationChannel(
                 CHANNEL_ID, "GameInstallerServiceChannel", NotificationManager.IMPORTANCE_LOW);
 

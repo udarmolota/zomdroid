@@ -100,7 +100,7 @@ public class LauncherFragment extends Fragment {
                 updateEmptyState();
                 taskProgressDialog.dismiss();
                 unbindInstallerService();
-                requireContext().stopService(new Intent(requireContext(), InstallerService.class));
+                if (installerService != null) installerService.stopUnlessRestarted();
                 if (finishedTask == InstallerService.Task.CREATE_GAME_INSTANCE
                         && !postInstallDialogShown) {
                     postInstallDialogShown = true;
@@ -111,7 +111,7 @@ public class LauncherFragment extends Fragment {
                 updateEmptyState();
                 showTaskFinishedDialog(state.title, state.message);
                 unbindInstallerService();
-                requireContext().stopService(new Intent(requireContext(), InstallerService.class));
+                if (installerService != null) installerService.stopUnlessRestarted();
             } else {
                 if (installerService.getCurrentTask() == InstallerService.Task.CREATE_GAME_INSTANCE) {
                     postInstallDialogShown = false;

@@ -49,6 +49,8 @@ public class InstallNativeLibsFragment extends Fragment {
     private TaskProgressDialogBinding taskProgressDialogBinding;
     private AlertDialog taskProgressDialog;
     private boolean isInstallerServiceBound = false;
+    // Kept so a finished task stops the service it ran in, not whatever is started later.
+    private InstallerService installerService;
 
     private final String ZIP_MIME = "application/zip";
     private Uri archiveUri = null;
@@ -58,7 +60,7 @@ public class InstallNativeLibsFragment extends Fragment {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
             InstallerService.LocalBinder binder = (InstallerService.LocalBinder) service;
-            InstallerService installerService = binder.getService();
+            installerService = binder.getService();
             isInstallerServiceBound = true;
             handleTaskState(installerService.getTaskState().getValue());
             installerService.getTaskState().observe(InstallNativeLibsFragment.this, InstallNativeLibsFragment.this::handleTaskState);
@@ -77,12 +79,12 @@ public class InstallNativeLibsFragment extends Fragment {
         if (state.isFinished) {
             taskProgressDialog.dismiss();
             unbindInstallerService();
-            requireContext().stopService(new Intent(requireContext(), InstallerService.class));
+            if (installerService != null) installerService.stopUnlessRestarted();
             Toast.makeText(requireContext(), state.title, Toast.LENGTH_SHORT).show();
         } else if (state.isFinishedWithError) {
             showTaskFinishedWithErrorDialog(state.title, state.message);
             unbindInstallerService();
-            requireContext().stopService(new Intent(requireContext(), InstallerService.class));
+            if (installerService != null) installerService.stopUnlessRestarted();
         } else {
             showTaskProgressDialog(state.title, state.message, state.progress, state.progressMax);
         }

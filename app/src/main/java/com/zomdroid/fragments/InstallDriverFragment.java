@@ -44,6 +44,8 @@ public class InstallDriverFragment extends Fragment {
     private TaskProgressDialogBinding taskProgressDialogBinding;
     private AlertDialog taskProgressDialog;
     private boolean isInstallerServiceBound = false;
+    // Kept so a finished task stops the service it ran in, not whatever is started later.
+    private InstallerService installerService;
 
     private Uri driverSoUri = null;
 
@@ -51,7 +53,7 @@ public class InstallDriverFragment extends Fragment {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
             InstallerService.LocalBinder binder = (InstallerService.LocalBinder) service;
-            InstallerService installerService = binder.getService();
+            installerService = binder.getService();
             isInstallerServiceBound = true;
 
             handleTaskState(installerService.getTaskState().getValue());
@@ -71,13 +73,13 @@ public class InstallDriverFragment extends Fragment {
         if (state.isFinished) {
             taskProgressDialog.dismiss();
             unbindInstallerService();
-            requireContext().stopService(new Intent(requireContext(), InstallerService.class));
+            if (installerService != null) installerService.stopUnlessRestarted();
             Toast.makeText(requireContext(), state.title, Toast.LENGTH_SHORT).show();
             updateExportButtonState();
         } else if (state.isFinishedWithError) {
             showTaskFinishedWithErrorDialog(state.title, state.message);
             unbindInstallerService();
-            requireContext().stopService(new Intent(requireContext(), InstallerService.class));
+            if (installerService != null) installerService.stopUnlessRestarted();
         } else {
             showTaskProgressDialog(state.title, state.message, state.progress, state.progressMax);
         }
