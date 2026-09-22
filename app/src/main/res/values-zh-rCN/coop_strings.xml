@@ -8,11 +8,13 @@
     <string name="coop_internet_title">通过互联网开服</string>
     <string name="coop_internet_pending">互联网：正在检查路由器</string>
     <string name="coop_internet_mapped">互联网：端口已映射</string>
+    <string name="coop_internet_no_public_ip">互联网：没有公网 IP 地址</string>
     <string name="coop_internet_failed">互联网：端口映射失败</string>
     <string name="coop_internet_no_gateway">互联网：未找到 UPnP 路由器</string>
     <string name="coop_internet_unknown">互联网：端口状态未知</string>
     <string name="coop_internet_pending_detail">正在等待游戏完成 UPnP 检查。</string>
     <string name="coop_internet_mapped_detail">路由器已接受游戏的 UDP 端口映射。不在你 Wi-Fi 中的朋友可以尝试下方的外部地址和端口。</string>
+    <string name="coop_internet_no_public_ip_detail">UPnP 已在你的路由器上打开端口，但路由器本身使用的是私有地址。你位于另一台路由器或运营商 CGNAT 之后，因此互联网中的朋友无法通过下方地址直接连接。请向运营商申请公网 IP、在上一级路由器上配置端口转发，或使用 ZeroTier 等共享 VPN 网络。</string>
     <string name="coop_internet_failed_detail">游戏无法打开 UDP 端口。请检查路由器的 UPnP 设置，或手动将端口转发到手机的 Wi-Fi 地址。</string>
     <string name="coop_internet_no_gateway_detail">游戏没有找到提供 UPnP 端口映射的路由器。请在路由器上启用 UPnP，或手动将 UDP 端口转发到手机的 Wi-Fi 地址。</string>
     <string name="coop_internet_unknown_detail">服务器已启动，但没有记录到 UPnP 结果。服务器设置中可能关闭了 UPnP。请查看服务器日志或手动配置端口转发。</string>
@@ -20,7 +22,6 @@
     <string name="coop_internet_addresses">UDP 端口：%1$s\n路由器外部地址：%2$s\n手机 Wi-Fi 地址：%3$s</string>
     <string name="coop_internet_address_unknown">不可用</string>
     <string name="coop_internet_port_unknown">见服务器设置</string>
-    <string name="coop_internet_double_nat">路由器报告的是非公网地址。前面可能还有另一台路由器，或运营商在做 NAT。仅在这台路由器上转发可能不够；请检查上一级设备的转发、公网 IP，或使用共享的 VPN 网络。</string>
     <string name="coop_internet_unverified">尚未验证能否从互联网访问。请从其他网络连接来确认，例如移动数据。</string>
     <string name="coop_internet_copy">复制详情</string>
     <string name="coop_internet_close">关闭</string>

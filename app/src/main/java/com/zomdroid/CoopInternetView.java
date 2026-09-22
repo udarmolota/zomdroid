@@ -30,12 +30,16 @@ final class CoopInternetView {
         if (activity.isFinishing() || activity.isDestroyed()) return;
         String state = status.getProperty("state", "pending");
         String external = status.getProperty("externalAddress", "");
+        boolean nonPublicAddress = isNonPublicIpv4(external);
         String port = status.getProperty("port", "0");
         if (!port.matches("[0-9]{1,5}") || Integer.parseInt(port) < 1 || Integer.parseInt(port) > 65535)
             port = activity.getString(R.string.coop_internet_port_unknown);
         int title;
         int detail;
-        if (state.equals("mapped")) {
+        if (state.equals("mapped") && nonPublicAddress) {
+            title = R.string.coop_internet_no_public_ip;
+            detail = R.string.coop_internet_no_public_ip_detail;
+        } else if (state.equals("mapped")) {
             title = R.string.coop_internet_mapped;
             detail = R.string.coop_internet_mapped_detail;
         } else if (state.equals("mapping_failed")) {
@@ -57,8 +61,8 @@ final class CoopInternetView {
         String shownAddress = external.isEmpty() ? activity.getString(R.string.coop_internet_address_unknown) : external;
         message = activity.getString(detail) + "\n\n" + activity.getString(R.string.coop_internet_addresses,
                 port, shownAddress, lanAddress(activity.getString(R.string.coop_internet_address_unknown)));
-        if (isNonPublicIpv4(external)) message += "\n\n" + activity.getString(R.string.coop_internet_double_nat);
-        if (state.equals("mapped")) message += "\n\n" + activity.getString(R.string.coop_internet_unverified);
+        if (state.equals("mapped") && !nonPublicAddress)
+            message += "\n\n" + activity.getString(R.string.coop_internet_unverified);
         if (label == null) {
             int pad = Math.round(8 * activity.getResources().getDisplayMetrics().density);
             // Text and close button share one background. Closing hides the strip only until the

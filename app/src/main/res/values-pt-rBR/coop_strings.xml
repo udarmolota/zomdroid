@@ -8,11 +8,13 @@
     <string name="coop_internet_title">Hospedagem pela internet</string>
     <string name="coop_internet_pending">Internet: verificando o roteador</string>
     <string name="coop_internet_mapped">Internet: porta aberta</string>
+    <string name="coop_internet_no_public_ip">Internet: sem endereço IP público</string>
     <string name="coop_internet_failed">Internet: falha ao abrir a porta</string>
     <string name="coop_internet_no_gateway">Internet: roteador UPnP não encontrado</string>
     <string name="coop_internet_unknown">Internet: estado da porta desconhecido</string>
     <string name="coop_internet_pending_detail">Aguardando o jogo concluir a verificação UPnP.</string>
     <string name="coop_internet_mapped_detail">O roteador aceitou o mapeamento da porta UDP do jogo. Amigos fora do seu Wi-Fi podem tentar o endereço externo e a porta abaixo.</string>
+    <string name="coop_internet_no_public_ip_detail">O UPnP abriu a porta no seu roteador, mas o próprio roteador usa um endereço privado. Você está atrás de outro roteador ou do CGNAT da operadora, portanto amigos na internet não conseguem se conectar diretamente ao endereço abaixo. Peça um endereço IP público à operadora, configure o redirecionamento no roteador anterior ou use uma rede VPN compartilhada, como o ZeroTier.</string>
     <string name="coop_internet_failed_detail">O jogo não conseguiu abrir a porta UDP. Verifique as configurações de UPnP do roteador ou redirecione a porta manualmente para o endereço Wi-Fi do celular.</string>
     <string name="coop_internet_no_gateway_detail">O jogo não encontrou um roteador com mapeamento de portas UPnP. Ative o UPnP no roteador ou redirecione a porta UDP manualmente para o endereço Wi-Fi do celular.</string>
     <string name="coop_internet_unknown_detail">O servidor iniciou sem um resultado de UPnP registrado. O UPnP pode estar desativado nas configurações do servidor. Verifique o log do servidor ou configure o redirecionamento manualmente.</string>
@@ -20,7 +22,6 @@
     <string name="coop_internet_addresses">Porta UDP: %1$s\nEndereço externo do roteador: %2$s\nEndereço Wi-Fi do celular: %3$s</string>
     <string name="coop_internet_address_unknown">indisponível</string>
     <string name="coop_internet_port_unknown">veja as configurações do servidor</string>
-    <string name="coop_internet_double_nat">O roteador informa um endereço não público. Outro roteador ou o seu provedor pode estar fazendo NAT. Redirecionar só neste roteador pode não bastar; verifique o redirecionamento no equipamento anterior, um IP público ou uma rede VPN compartilhada.</string>
     <string name="coop_internet_unverified">O acesso pela internet ainda não foi verificado. Confirme conectando de outra rede, como os dados móveis.</string>
     <string name="coop_internet_copy">Copiar detalhes</string>
     <string name="coop_internet_close">Fechar</string>

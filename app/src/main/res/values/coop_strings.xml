@@ -3,11 +3,13 @@
     <string name="coop_internet_title">Hosting over the internet</string>
     <string name="coop_internet_pending">Internet: checking router</string>
     <string name="coop_internet_mapped">Internet: port mapped</string>
+    <string name="coop_internet_no_public_ip">Internet: no public IP address</string>
     <string name="coop_internet_failed">Internet: port mapping failed</string>
     <string name="coop_internet_no_gateway">Internet: UPnP router not found</string>
     <string name="coop_internet_unknown">Internet: port status unknown</string>
     <string name="coop_internet_pending_detail">Waiting for the game to finish its UPnP check.</string>
     <string name="coop_internet_mapped_detail">The router accepted the game’s UDP port mapping. Friends outside your Wi-Fi can try the external address and port below.</string>
+    <string name="coop_internet_no_public_ip_detail">UPnP opened the port on your router, but the router itself has a private address. You are behind another router or your provider’s CGNAT, so friends on the internet cannot connect directly with the address below. Ask your provider for a public IP address, configure port forwarding on the upstream router, or use a shared VPN network such as ZeroTier.</string>
     <string name="coop_internet_failed_detail">The game could not open the UDP port. Check the router’s UPnP settings or forward the port manually to the phone’s Wi-Fi address.</string>
     <string name="coop_internet_no_gateway_detail">The game did not find a router offering UPnP port mapping. Enable UPnP on the router or forward the UDP port manually to the phone’s Wi-Fi address.</string>
     <string name="coop_internet_unknown_detail">The server started without a recorded UPnP result. UPnP may be disabled in its settings. Check the server log or configure forwarding manually.</string>
@@ -15,7 +17,6 @@
     <string name="coop_internet_addresses">UDP port: %1$s\nRouter external address: %2$s\nPhone Wi-Fi address: %3$s</string>
     <string name="coop_internet_address_unknown">unavailable</string>
     <string name="coop_internet_port_unknown">see server settings</string>
-    <string name="coop_internet_double_nat">The router reports a non-public address. Another router or your provider may be doing NAT. Forwarding on this router alone may not be enough; check upstream forwarding, a public IP, or a shared VPN network.</string>
     <string name="coop_internet_unverified">Internet access has not been verified. Confirm by connecting from another network, such as mobile data.</string>
     <string name="coop_internet_copy">Copy details</string>
     <string name="coop_internet_close">Close</string>

@@ -3,11 +3,13 @@
     <string name="coop_internet_title">Сервер через интернет</string>
     <string name="coop_internet_pending">Интернет: проверяем роутер</string>
     <string name="coop_internet_mapped">Интернет: порт проброшен</string>
+    <string name="coop_internet_no_public_ip">Интернет: нет публичного IP-адреса</string>
     <string name="coop_internet_failed">Интернет: не удалось пробросить порт</string>
     <string name="coop_internet_no_gateway">Интернет: UPnP-роутер не найден</string>
     <string name="coop_internet_unknown">Интернет: состояние порта неизвестно</string>
     <string name="coop_internet_pending_detail">Ожидаем завершения проверки UPnP самой игрой.</string>
     <string name="coop_internet_mapped_detail">Роутер принял проброс UDP-порта игры. Друзья из другой сети могут попробовать подключиться по внешнему адресу и порту ниже.</string>
+    <string name="coop_internet_no_public_ip_detail">UPnP открыл порт на вашем роутере, но сам роутер получил частный адрес. Вы находитесь за другим роутером или CGNAT провайдера, поэтому друзья из интернета не смогут подключиться напрямую по указанному ниже адресу. Запросите у провайдера публичный IP-адрес, настройте проброс на вышестоящем роутере или используйте общую VPN-сеть, например ZeroTier.</string>
     <string name="coop_internet_failed_detail">Игра не смогла открыть UDP-порт. Проверьте UPnP на роутере или настройте проброс вручную на Wi-Fi-адрес телефона.</string>
     <string name="coop_internet_no_gateway_detail">Игра не нашла роутер с доступным пробросом портов через UPnP. Включите UPnP на роутере или пробросьте UDP-порт вручную на Wi-Fi-адрес телефона.</string>
     <string name="coop_internet_unknown_detail">Сервер запустился, но результат UPnP не записан. Возможно, UPnP отключён в настройках сервера. Проверьте серверный лог или настройте проброс вручную.</string>
@@ -15,7 +17,6 @@
     <string name="coop_internet_addresses">UDP-порт: %1$s\nВнешний адрес роутера: %2$s\nWi-Fi-адрес телефона: %3$s</string>
     <string name="coop_internet_address_unknown">не определён</string>
     <string name="coop_internet_port_unknown">см. настройки сервера</string>
-    <string name="coop_internet_double_nat">Роутер сообщает непубличный адрес. За ним может быть ещё один роутер или NAT провайдера. Одного проброса здесь может не хватить: проверьте вышестоящий роутер, публичный IP или общую VPN-сеть.</string>
     <string name="coop_internet_unverified">Доступность из интернета ещё не проверена. Подтвердите её подключением из другой сети, например через мобильный интернет.</string>
     <string name="coop_internet_copy">Копировать</string>
     <string name="coop_internet_close">Закрыть</string>

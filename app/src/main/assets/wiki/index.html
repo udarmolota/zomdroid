@@ -429,6 +429,13 @@
                 internet cannot reach the server directly. Players connected to the host phone's Wi-Fi
                 hotspot can join at its address in that network. Players elsewhere need extra setup in
                 another app: a shared virtual network such as ZeroTier or Tailscale on every phone.</li>
+            <li><b>If friends outside your Wi-Fi still cannot connect</b> although the port was
+                mapped, your provider is probably keeping you behind its own router, which is called
+                CGNAT: your phone never gets a public address, and no port forwarding on your own
+                router can change that. PC players hosting servers hit the same wall, so there are
+                plenty of guides about it. The simplest way around it is an app that puts you and
+                your friends on one virtual network, such as ZeroTier. The launcher says so in the
+                hosting status window when it detects this case.</li>
         </ul>
     </section>
 </section>

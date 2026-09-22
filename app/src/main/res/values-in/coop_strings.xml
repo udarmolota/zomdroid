@@ -8,11 +8,13 @@
     <string name="coop_internet_title">Hosting lewat internet</string>
     <string name="coop_internet_pending">Internet: memeriksa router</string>
     <string name="coop_internet_mapped">Internet: port terbuka</string>
+    <string name="coop_internet_no_public_ip">Internet: tidak ada alamat IP publik</string>
     <string name="coop_internet_failed">Internet: gagal membuka port</string>
     <string name="coop_internet_no_gateway">Internet: router UPnP tidak ditemukan</string>
     <string name="coop_internet_unknown">Internet: status port tidak diketahui</string>
     <string name="coop_internet_pending_detail">Menunggu game menyelesaikan pemeriksaan UPnP.</string>
     <string name="coop_internet_mapped_detail">Router menerima pemetaan port UDP dari game. Teman di luar Wi-Fi Anda bisa mencoba alamat eksternal dan port di bawah.</string>
+    <string name="coop_internet_no_public_ip_detail">UPnP membuka port pada router Anda, tetapi router itu sendiri memakai alamat privat. Anda berada di belakang router lain atau CGNAT penyedia internet, sehingga teman dari internet tidak dapat tersambung langsung ke alamat di bawah. Minta alamat IP publik dari penyedia, atur penerusan port pada router di atasnya, atau gunakan jaringan VPN bersama seperti ZeroTier.</string>
     <string name="coop_internet_failed_detail">Game tidak dapat membuka port UDP. Periksa pengaturan UPnP router atau teruskan port secara manual ke alamat Wi-Fi ponsel.</string>
     <string name="coop_internet_no_gateway_detail">Game tidak menemukan router yang menyediakan pemetaan port UPnP. Aktifkan UPnP di router atau teruskan port UDP secara manual ke alamat Wi-Fi ponsel.</string>
     <string name="coop_internet_unknown_detail">Server berjalan tanpa hasil UPnP yang tercatat. UPnP mungkin dinonaktifkan di pengaturan server. Periksa log server atau atur penerusan port secara manual.</string>
@@ -20,7 +22,6 @@
     <string name="coop_internet_addresses">Port UDP: %1$s\nAlamat eksternal router: %2$s\nAlamat Wi-Fi ponsel: %3$s</string>
     <string name="coop_internet_address_unknown">tidak tersedia</string>
     <string name="coop_internet_port_unknown">lihat pengaturan server</string>
-    <string name="coop_internet_double_nat">Router melaporkan alamat non-publik. Mungkin ada router lain atau NAT dari penyedia internet. Penerusan di router ini saja mungkin tidak cukup; periksa penerusan di perangkat sebelumnya, IP publik, atau jaringan VPN bersama.</string>
     <string name="coop_internet_unverified">Akses dari internet belum diverifikasi. Pastikan dengan menyambung dari jaringan lain, misalnya data seluler.</string>
     <string name="coop_internet_copy">Salin detail</string>
     <string name="coop_internet_close">Tutup</string>
