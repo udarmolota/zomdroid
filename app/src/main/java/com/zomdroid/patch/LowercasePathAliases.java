@@ -130,7 +130,27 @@ public final class LowercasePathAliases {
         if (!instanceDir.isDirectory()) return;
 
         removeInstanceAliases(instanceDir);
-        repairInstalledMods(new File(instanceDir, "Zomboid/mods"));
+        File installed = new File(instanceDir, "Zomboid/mods");
+        repairInstalledMods(installed);
+
+        // Hosting reaches the same mods through the coop-probe/mods link (HostingProfileMods), and
+        // the game lowercases the path it sees - coop-probe/mods/<mod> - so that spelling needs a
+        // chain of its own. It lives in the shared folder under the same scaffolding directory.
+        File hostingMods = new File(instanceDir, "coop-probe/mods");
+        if (Files.isSymbolicLink(hostingMods.toPath())) repairProfileView(installed, hostingMods);
+    }
+
+    /** Form 2 for every installed mod as seen through another profile's link to the folder. */
+    private static void repairProfileView(File modsDir, File seenModsDir) {
+        File[] entries = modsDir.listFiles();
+        if (entries == null) return;
+        String scaffolding = doubledRootName(modsDir);
+        for (File modDir : entries) {
+            if (!modDir.isDirectory()) continue;
+            if (Files.isSymbolicLink(modDir.toPath())) continue;
+            if (modDir.getName().equals(scaffolding)) continue;
+            linkDoubledPath(modDir, new File(seenModsDir, modDir.getName()), seenModsDir);
+        }
     }
 
     /**
@@ -214,8 +234,22 @@ public final class LowercasePathAliases {
         // build with a different applicationId (a .test build reported paths under
         // com.zomdroie.test, so nothing under the doubled path ever resolved and every modded
         // server join failed). Instance name, data-dir location and package all come along for free.
-        String doubled = stripLeadingSlashes(modDir.getAbsolutePath().toLowerCase(Locale.US));
-        File modLink = new File(modsDir, doubled);
+        linkDoubledPath(modDir, modDir, modsDir);
+
+        // Negative means the kill switch is off and that many stale aliases were swept instead.
+        if (aliases > 0) Log.i(LOG_TAG, "Case workaround for " + modDir.getName() + ": " + aliases + " alias(es)");
+        else if (aliases < 0) Log.i(LOG_TAG, "Case workaround DISABLED for " + modDir.getName()
+                + ": removed " + (-aliases) + " per-entry alias(es)");
+    }
+
+    /**
+     * Materialise "&lt;seen mods root&gt;/&lt;lowercased absolute path of seenModDir&gt;" as a link to
+     * the real mod. seenModDir is the mod as the game addresses it: the real folder for normal
+     * play, or the same folder through coop-probe/mods for hosting.
+     */
+    private static void linkDoubledPath(File modDir, File seenModDir, File seenModsDir) {
+        String doubled = stripLeadingSlashes(seenModDir.getAbsolutePath().toLowerCase(Locale.US));
+        File modLink = new File(seenModsDir, doubled);
         File inceptionDir = modLink.getParentFile();
         if (inceptionDir != null) inceptionDir.mkdirs();
         // Rebuilt rather than kept: an existing link can point at the mod folder of the instance
@@ -229,11 +263,6 @@ public final class LowercasePathAliases {
         } catch (IOException | UnsupportedOperationException e) {
             Log.w(LOG_TAG, "Failed to link " + modLink + " -> " + modDir, e);
         }
-
-        // Negative means the kill switch is off and that many stale aliases were swept instead.
-        if (aliases > 0) Log.i(LOG_TAG, "Case workaround for " + modDir.getName() + ": " + aliases + " alias(es)");
-        else if (aliases < 0) Log.i(LOG_TAG, "Case workaround DISABLED for " + modDir.getName()
-                + ": removed " + (-aliases) + " per-entry alias(es)");
     }
 
     /** Give every entry whose name is not already lowercase a lowercase alias beside it. */

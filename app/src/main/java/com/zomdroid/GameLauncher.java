@@ -67,6 +67,15 @@ public class GameLauncher {
         // aliases and the doubled path spell out an absolute location, so they go stale when an
         // instance is renamed or copied; this also reaches mods installed before any of it existed,
         // and sweeps the instance-level aliases b39a80a briefly shipped.
+        // Hosting sees the same mods as normal play; linked first so the repair below also builds
+        // the routes the game will look up through coop-probe/mods.
+        if (coopHostTest) {
+            try {
+                HostingProfileMods.link(gameInstance);
+            } catch (java.io.IOException e) {
+                Log.w("Zomdroid", "Hosting profile keeps its own mods folder", e);
+            }
+        }
         com.zomdroid.patch.LowercasePathAliases.repair(gameInstance);
         // Retire our bundled jassimp (built from Assimp 5.4.3) by taking it off java.library.path.
         // Each game version ships the importer its models were authored against - B41's x86_64 is

@@ -79,17 +79,10 @@ final class DedicatedServerProfile {
     }
 
     void prepareMods(GameInstance instance) throws Exception {
-        File installed = new File(instance.getHomePath(), "Zomboid/mods");
-        if (!installed.isDirectory() && !installed.mkdirs()) throw new IOException("Cannot create mod directory");
-        File mods = new File(root, "mods");
-        if (!root.isDirectory() && !root.mkdirs()) throw new IOException("Cannot create server directory");
-        // Older probes made an empty directory. Preserve any actual hosting mods.
-        if (mods.isDirectory() && !Files.isSymbolicLink(mods.toPath())) {
-            String[] children = mods.list();
-            if (children != null && children.length == 0 && !mods.delete()) throw new IOException("Cannot prepare mods");
-        }
-        if (!Files.exists(mods.toPath(), java.nio.file.LinkOption.NOFOLLOW_LINKS))
-            Os.symlink(installed.getAbsolutePath(), mods.getAbsolutePath());
+        HostingProfileMods.link(instance);
+        // No game runs alongside a dedicated server, so the case workaround can be rebuilt here:
+        // a mod installed since the last game launch has no route through coop-probe/mods yet.
+        com.zomdroid.patch.LowercasePathAliases.repair(instance);
     }
 
     static void write(File file, byte[] bytes) throws IOException {
