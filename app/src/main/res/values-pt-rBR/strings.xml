@@ -74,7 +74,7 @@
     <string name="settings_resolution_scale">Escala de resolução</string>
     <string name="settings_hud">Exibição no jogo</string>
     <string name="settings_hud_off">Desligado</string>
-    <string name="settings_hud_fps">FPS</string>
+    <string name="settings_hud_fps">Apenas FPS</string>
     <string name="settings_hud_full">Painel de info</string>
     <string name="settings_hud_hint">O Painel de info mostra uma barra no topo: uso da GPU e da CPU, memória, consumo de energia, temperatura e um gráfico de FPS. Ajuda a ver o que deixa o jogo lento.</string>
     <string name="settings_audio_api">API de áudio</string>

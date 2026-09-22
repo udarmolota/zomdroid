@@ -83,7 +83,7 @@
     <string name="settings_resolution_scale">Resolution scale</string>
     <string name="settings_hud">In-game display</string>
     <string name="settings_hud_off">Off</string>
-    <string name="settings_hud_fps">FPS</string>
+    <string name="settings_hud_fps">Only FPS</string>
     <string name="settings_hud_full">Full info</string>
     <string name="settings_hud_hint">Full info shows a bar at the top: GPU and CPU load, memory, power draw, temperature and an FPS graph. Handy to see what slows the game down.</string>
     <string name="settings_audio_api">Audio API</string>

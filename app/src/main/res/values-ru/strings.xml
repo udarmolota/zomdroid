@@ -74,7 +74,7 @@
     <string name="settings_resolution_scale">Масштаб разрешения</string>
     <string name="settings_hud">Показ в игре</string>
     <string name="settings_hud_off">Выкл</string>
-    <string name="settings_hud_fps">FPS</string>
+    <string name="settings_hud_fps">Только FPS</string>
     <string name="settings_hud_full">Инфо-панель</string>
     <string name="settings_hud_hint">«Инфо-панель» — плашка сверху: загрузка видеочипа и процессора, память, потребление, температура и график FPS. Помогает понять, что тормозит игру.</string>
     <string name="settings_audio_api">Аудио API</string>

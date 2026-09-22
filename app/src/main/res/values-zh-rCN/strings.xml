@@ -74,7 +74,7 @@
     <string name="settings_resolution_scale">分辨率缩放</string>
     <string name="settings_hud">游戏内显示</string>
     <string name="settings_hud_off">关闭</string>
-    <string name="settings_hud_fps">FPS</string>
+    <string name="settings_hud_fps">仅 FPS</string>
     <string name="settings_hud_full">完整信息</string>
     <string name="settings_hud_hint">“完整信息”会在顶部显示一条信息栏：GPU 和 CPU 占用、内存、功耗、温度以及 FPS 曲线，便于找出拖慢游戏的原因。</string>
     <string name="settings_audio_api">音频 API</string>
