@@ -37,6 +37,12 @@ ZomdroidSurface g_zomdroid_surface = {.mutex = PTHREAD_MUTEX_INITIALIZER,
 
 Renderer g_zomdroid_renderer;
 
+atomic_ullong g_zomdroid_presented_frames;
+
+unsigned long long zomdroid_presented_frames() {
+    return atomic_load_explicit(&g_zomdroid_presented_frames, memory_order_relaxed);
+}
+
 ZomdroidEventQueue g_zomdroid_event_queue;
 
 static long get_mem_available_mb() {

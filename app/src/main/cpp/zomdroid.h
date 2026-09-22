@@ -24,4 +24,6 @@ void zomdroid_event_joystick_button(int button, bool is_pressed);
 void zomdroid_event_joystick_connected();
 void zomdroid_event_char(unsigned int codepoint);
 
+unsigned long long zomdroid_presented_frames();
+
 #endif //ZOMDROID_ZOMDROID_H

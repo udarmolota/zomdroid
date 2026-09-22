@@ -66,6 +66,11 @@ Java_com_zomdroid_GameLauncher_startGame(JNIEnv *env, jobject clazz, jstring j_g
     }
 }
 
+JNIEXPORT jlong JNICALL
+Java_com_zomdroid_GameLauncher_getPresentedFrameCount(JNIEnv *env, jclass clazz) {
+    return (jlong) zomdroid_presented_frames();
+}
+
 JNIEXPORT void JNICALL
 Java_com_zomdroid_GameLauncher_destroyZomdroidWindow(JNIEnv *env, jobject clazz) {
     zomdroid_deinit();

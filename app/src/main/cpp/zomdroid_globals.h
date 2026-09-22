@@ -134,4 +134,7 @@ typedef struct {
 } ZomdroidSurface;
 extern ZomdroidSurface g_zomdroid_surface;
 
+/** Frames the game has presented (glfwSwapBuffers), for the in-game FPS display. */
+extern atomic_ullong g_zomdroid_presented_frames;
+
 #endif //ZOMDROID_ZOMDROID_GLOBALS_H

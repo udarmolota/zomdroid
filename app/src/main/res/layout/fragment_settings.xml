@@ -187,6 +187,27 @@
 
                 </LinearLayout>
 
+                <!-- In-game overlay: off / the classic FPS counter / the full performance bar. -->
+                <TextView
+                    android:textStyle="bold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:text="@string/settings_hud"/>
+
+                <Spinner
+                    android:id="@+id/settings_hud_s"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:text="@string/settings_hud_hint"/>
+
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

@@ -357,6 +357,25 @@ public class SettingsFragment extends Fragment {
 
         binding.settingsResolutionScaleSb.setProgress((int) (settings.getRenderScale() * 100));
 
+        // In-game overlay; the spinner position is the mode (HUD_OFF / HUD_FPS / HUD_FULL).
+        ArrayAdapter<String> hudAdapter = new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_spinner_item, new String[]{
+                getString(R.string.settings_hud_off),
+                getString(R.string.settings_hud_fps),
+                getString(R.string.settings_hud_full)});
+        hudAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        binding.settingsHudS.setAdapter(hudAdapter);
+        binding.settingsHudS.setSelection(settings.getHudMode());
+        binding.settingsHudS.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                settings.setHudMode(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
         // The Audio API selector is gone: OpenSL ES is retired and AAudio is the only backend now.
         // See LauncherPreferences.getAudioAPI() for why.
 

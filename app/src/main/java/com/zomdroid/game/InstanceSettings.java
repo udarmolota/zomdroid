@@ -221,4 +221,16 @@ public class InstanceSettings {
     public void setTextureCompression(boolean enabled) {
         prefs.edit().putBoolean(keyPrefix + "texture_compression", enabled).apply();
     }
+
+    // In-game overlay: off, the classic "FPS: XX" counter, or the full performance bar
+    // (PerfOverlayView: API, GPU, CPU, RAM, power, heat, FPS + graph). Off by default.
+    public static final int HUD_OFF = 0, HUD_FPS = 1, HUD_FULL = 2;
+
+    public int getHudMode() {
+        return prefs.getInt(keyPrefix + "hud_mode", HUD_OFF);
+    }
+
+    public void setHudMode(int mode) {
+        prefs.edit().putInt(keyPrefix + "hud_mode", mode).apply();
+    }
 }

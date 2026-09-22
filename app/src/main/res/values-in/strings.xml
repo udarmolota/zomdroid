@@ -71,6 +71,11 @@
     <string name="settings_renderer">Renderer</string>
     <string name="settings_vulkan_driver">Driver Vulkan</string>
     <string name="settings_resolution_scale">Skala resolusi</string>
+    <string name="settings_hud">Tampilan dalam game</string>
+    <string name="settings_hud_off">Mati</string>
+    <string name="settings_hud_fps">FPS</string>
+    <string name="settings_hud_full">Info lengkap</string>
+    <string name="settings_hud_hint">Info lengkap menampilkan bilah di atas: beban GPU dan CPU, memori, daya, suhu, dan grafik FPS. Membantu melihat apa yang memperlambat game.</string>
     <string name="settings_audio_api">API Audio</string>
     <string name="settings_render_hint">Build 41 → GL4ES, Build 42 → ZINK (Dimensity: aktifkan ANGLE)</string>
 

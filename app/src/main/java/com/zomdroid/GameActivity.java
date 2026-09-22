@@ -90,6 +90,16 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     // with a null name it reads the global values, which is the same thing it did before.
     private com.zomdroid.game.InstanceSettings instanceSettings;
 
+    // In-game overlay (instance setting, see InstanceSettings.getHudMode): the classic counter or the
+    // performance bar ported from ValDroid. Both count real presented frames (glfwSwapBuffers).
+    private android.widget.TextView fpsText;            // classic "FPS: XX", top-left
+    private long fpsLastCount = 0, fpsLastTimeMs = 0;
+    private PerfOverlayView perfView;                   // full performance bar, top-centre
+    private PerfSampler perfSampler;                    // its numbers, sampled off the UI thread
+    private android.os.HandlerThread perfThread;
+    private android.os.Handler perfHandler;
+    private final android.os.Handler hudHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+
     @SuppressLint({"UnsafeDynamicallyLoadedCode", "ClickableViewAccessibility"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,6 +151,8 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
 
         // Initializing the cursor calsulation pos helper
         renderScale = instanceSettings.getRenderScale();
+
+        setUpHud(instanceSettings.getHudMode());
 
         // Initialize and register GamepadManager for gamepad hotplug and input events
         try {
@@ -399,9 +411,69 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
       });
     }
 
+    /** Adds the chosen in-game overlay on top of the game surface and the on-screen controls. */
+    private void setUpHud(int mode) {
+        android.widget.FrameLayout root = (android.widget.FrameLayout) binding.getRoot();
+        final float dp = getResources().getDisplayMetrics().density;
+        if (mode == com.zomdroid.game.InstanceSettings.HUD_FPS) {
+            fpsText = new android.widget.TextView(this);
+            fpsText.setText("FPS: --");
+            fpsText.setTextColor(0xFF00FF66);                 // green, readable over any scene
+            fpsText.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 11);
+            fpsText.setShadowLayer(4f, 0f, 0f, 0xFF000000);   // outline so it reads on light scenes
+            android.widget.FrameLayout.LayoutParams lp = new android.widget.FrameLayout.LayoutParams(
+                    android.widget.FrameLayout.LayoutParams.WRAP_CONTENT,
+                    android.widget.FrameLayout.LayoutParams.WRAP_CONTENT,
+                    android.view.Gravity.TOP | android.view.Gravity.START);
+            int m = Math.round(8 * dp);
+            lp.setMargins(m, m, 0, 0);
+            root.addView(fpsText, lp);
+        } else if (mode == com.zomdroid.game.InstanceSettings.HUD_FULL) {
+            // First segment names the graphics path: VK = ZINK (OpenGL on Vulkan), GL = the GLES
+            // translators (GL4ES, NG_GL4ES, MobileGlues).
+            LauncherPreferences.Renderer renderer = instanceSettings.getRenderer();
+            String api = renderer == LauncherPreferences.Renderer.ZINK_OSMESA
+                    || renderer == LauncherPreferences.Renderer.ZINK_ZFA ? "VK" : "GL";
+            perfView = new PerfOverlayView(this, api);
+            android.widget.FrameLayout.LayoutParams lp = new android.widget.FrameLayout.LayoutParams(
+                    android.widget.FrameLayout.LayoutParams.WRAP_CONTENT,
+                    android.widget.FrameLayout.LayoutParams.WRAP_CONTENT,
+                    android.view.Gravity.TOP | android.view.Gravity.CENTER_HORIZONTAL);
+            lp.setMargins(0, Math.round(4 * dp), 0, 0);
+            root.addView(perfView, lp);   // not clickable: touches reach the controls underneath
+            perfSampler = new PerfSampler(this);
+            perfThread = new android.os.HandlerThread("PerfOverlay");
+            perfThread.start();
+            perfHandler = new android.os.Handler(perfThread.getLooper());
+        }
+    }
+
+    private final Runnable fpsTextTick = new Runnable() {
+        @Override public void run() {
+            if (fpsText == null) return;
+            long now = android.os.SystemClock.elapsedRealtime();
+            long count = GameLauncher.getPresentedFrameCount();
+            if (fpsLastTimeMs != 0 && now > fpsLastTimeMs)
+                fpsText.setText("FPS: " + Math.round((count - fpsLastCount) * 1000.0 / (now - fpsLastTimeMs)));
+            fpsLastCount = count;
+            fpsLastTimeMs = now;
+            hudHandler.postDelayed(this, 1000);
+        }
+    };
+
+    private final Runnable perfTick = new Runnable() {
+        @Override public void run() {
+            if (perfView == null || perfSampler == null || perfHandler == null) return;
+            final PerfSampler.Stats stats = perfSampler.sample(GameLauncher.getPresentedFrameCount());
+            hudHandler.post(() -> { if (perfView != null) perfView.setStats(stats); });
+            perfHandler.postDelayed(this, 1000);
+        }
+    };
+
     @Override
     protected void onDestroy() {
       super.onDestroy();
+      if (perfThread != null) { perfThread.quitSafely(); perfThread = null; perfHandler = null; }
       if (coopHostBridge != null) {
           try { coopHostBridge.close(); }
           catch (Exception e) { Log.e("CoopHostBridge", "Cannot close bridge", e); }
@@ -602,6 +674,15 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
             cursorHandler.removeCallbacks(cursorOptionCheck);
             cursorHandler.postDelayed(cursorOptionCheck, CURSOR_OPTION_CHECK_MS);
         }
+        if (fpsText != null) {
+            fpsLastTimeMs = 0;                          // the first interval after a pause is not a rate
+            hudHandler.removeCallbacks(fpsTextTick);
+            hudHandler.postDelayed(fpsTextTick, 1000);
+        }
+        if (perfHandler != null) {
+            perfHandler.removeCallbacks(perfTick);
+            perfHandler.post(perfTick);                 // the first sample only primes the deltas
+        }
     }
 
     @Override
@@ -609,6 +690,8 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         if (gamepadManager != null)  gamepadManager.unregister();
         if (keyboardManager != null) keyboardManager.unregister();
         cursorHandler.removeCallbacks(cursorOptionCheck);
+        hudHandler.removeCallbacks(fpsTextTick);
+        if (perfHandler != null) perfHandler.removeCallbacks(perfTick);
         super.onPause();
     }
 
