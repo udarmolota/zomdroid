@@ -91,6 +91,13 @@ public class LauncherFragment extends Fragment {
         private void handleTaskState(InstallerService.TaskState state) {
             if (state == null)
                 return;
+            // Detached fragment: every branch below needs a context (dialogs, unbinding), and
+            // requireContext() throws rather than returning null - that crashed the app for a
+            // player whose activity was being recreated when the installer reported an error
+            // (2026-09-23). Dropping the state is safe: the observer is bound to this fragment's
+            // lifecycle, so the same value arrives again once it is attached and started.
+            if (!isAdded() || getContext() == null)
+                return;
             if (state.isFinished) {
                 InstallerService.Task finishedTask = installerService.getCurrentTask();
                 String presetName = installerService.getCurrentInstallPresetName();
@@ -664,7 +671,10 @@ public class LauncherFragment extends Fragment {
 
     private void unbindInstallerService() {
         if (this.isInstallerServiceBound) {
-            requireContext().unbindService(this.installerServiceConnection);
+            // Without a context there is nothing to unbind from: Android drops the binding with
+            // the activity it belonged to.
+            Context context = getContext();
+            if (context != null) context.unbindService(this.installerServiceConnection);
             isInstallerServiceBound = false;
         }
     }
