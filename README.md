@@ -29,9 +29,9 @@
 
 ## Roadmap
 
-Planned features in order of priority:
+Both roadmap goals are done: device compatibility (v1.4.x) and full multiplayer (v1.5.0).
 
-- [ ] Expand GPU and device compatibility
+- [x] Expand GPU and device compatibility
 - [x] Add full multiplayer support (v1.5.0)
 
 ## Prebuilt binaries and JARs
