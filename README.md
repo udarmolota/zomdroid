@@ -18,7 +18,7 @@
 - ✔️ Supports **Project Zomboid Build 42**
 - ✔️ Supports **Gamepad support** 
 - ✔️ Supports **Lua mods** 
-- ⭕ Currently **MultiPlayer JOIN only**
+- ✔️ Supports **multiplayer: join, host a game, run a dedicated server** (v1.5.0)
 - ✔️ Supports **Keyboard + mouse support**
 
 ## System requirements 
@@ -32,7 +32,7 @@
 Planned features in order of priority:
 
 - [ ] Expand GPU and device compatibility
-- [ ] Add full multiplayer support
+- [x] Add full multiplayer support (v1.5.0)
 
 ## Prebuilt binaries and JARs
 
