@@ -114,7 +114,7 @@ public class SteamModDownloader implements Runnable, Cancellable {
     private volatile boolean running;
     private volatile boolean started;       // anonymous logon succeeded → real work began
     private int connectAttempts = 0;
-    private static final int MAX_CONNECT_ATTEMPTS = 5;
+    private static final int MAX_CONNECT_ATTEMPTS = 10;
     private volatile String lastTitle;
     private volatile Thread workerThread;   // the thread running downloadAll()
     private volatile boolean finished;      // ensure done() fires once
@@ -176,12 +176,16 @@ public class SteamModDownloader implements Runnable, Cancellable {
 
     private void onDisconnected(DisconnectedCallback cb) {
         if (!running) return;
-        // Steam often drops the first connect attempt before logon — retry a few times before
-        // giving up, otherwise a transient drop kills the whole download.
+        // Steam often drops the first connect attempts before logon — five was not enough, four or
+        // five drops in a row happen on an ordinary home connection, so the whole download used to
+        // die on a run of them (2026-09-27).
         if (!started && connectAttempts < MAX_CONNECT_ATTEMPTS) {
             connectAttempts++;
             progress("Connection dropped — retrying (" + connectAttempts + "/" + MAX_CONNECT_ATTEMPTS + ")...");
-            try { Thread.sleep(2000L); } catch (InterruptedException ignored) {}
+            // Backing off instead of hammering: a Steam CM that just dropped us rarely takes the
+            // next connect two seconds later either. 2, 3, 4 ... seconds, capped at 10.
+            long backoffMs = Math.min(10000L, 1000L + connectAttempts * 1000L);
+            try { Thread.sleep(backoffMs); } catch (InterruptedException ignored) {}
             if (!running) return;   // cancelled while waiting to reconnect
             steamClient.connect();
             return;
@@ -283,7 +287,7 @@ public class SteamModDownloader implements Runnable, Cancellable {
 
         DepotManifest manifest = null;
         Exception lastErr = null;
-        Map<String, String> tokenCache = new HashMap<>();
+        Map<String, String> tokenCache = new java.util.concurrent.ConcurrentHashMap<>();
         int firstGood = -1;
         for (int i = 0; i < servers.size(); i++) {
             Server s = servers.get(i);
@@ -311,11 +315,22 @@ public class SteamModDownloader implements Runnable, Cancellable {
         progress("manifest OK: " + files.size() + " entries, "
                 + (totalBytes / (1024 * 1024)) + " MB — downloading...");
 
-        int serverIdx = Math.max(firstGood, 0);
-        long doneBytes = 0;
-        int lastPct = -1;
+        // Files go through a small pool instead of one at a time, the same way the game downloader
+        // works (SteamGameDownloader): the wall clock here is CDN round-trips, not disk or CPU, so
+        // a few files in flight multiply the throughput of a mod made of many small files - maps
+        // and texture packs above all. Peak memory stays at one chunk buffer per worker.
+        // Parallel by FILE, never by chunk inside a file: all chunks of a file are written through
+        // one RandomAccessFile, so no two threads ever touch the same handle.
+        final int workers = Math.max(2, Math.min(4, Runtime.getRuntime().availableProcessors()));
+        final java.util.concurrent.atomic.AtomicInteger serverCursor =
+                new java.util.concurrent.atomic.AtomicInteger(Math.max(firstGood, 0));
+        final java.util.concurrent.atomic.AtomicLong doneBytes = new java.util.concurrent.atomic.AtomicLong(0);
+        final java.util.concurrent.atomic.AtomicInteger lastPct = new java.util.concurrent.atomic.AtomicInteger(-1);
+        final java.util.concurrent.atomic.AtomicReference<Throwable> firstError =
+                new java.util.concurrent.atomic.AtomicReference<>();
+
+        final List<FileData> pending = new java.util.ArrayList<>();
         for (FileData f : files) {
-            if (!running) return false;
             String rel = sanitizeRel(f.getFileName());
             if (rel == null) continue;
             File out = new File(work, rel);
@@ -327,53 +342,127 @@ public class SteamModDownloader implements Runnable, Cancellable {
             File parent = out.getParentFile();
             if (parent != null) //noinspection ResultOfMethodCallIgnored
                 parent.mkdirs();
+            pending.add(f);
+        }
 
-            try (RandomAccessFile raf = new RandomAccessFile(out, "rw")) {
-                if (f.getTotalSize() > 0) raf.setLength(f.getTotalSize());
-                for (ChunkData chunk : f.getChunks()) {
-                    if (!running) return false;
-                    byte[] dest = new byte[Math.max(chunk.getCompressedLength(), chunk.getUncompressedLength())];
-                    int written = -1;
-                    Exception chunkErr = null;
-                    int tries = Math.min(Math.max(servers.size(), 4), 8);
-                    for (int t = 0; t < tries && written < 0; t++) {
-                        Server s = servers.get(serverIdx % servers.size());
+        final long fTotalBytes = totalBytes;
+        final int fDepot = depot, fAppId = appId;
+        final byte[] fDepotKey = depotKey;
+        final List<Server> fServers = servers;
+        final Client fCdn = cdn;
+        final SteamContent fContent = content;
+        final Map<String, String> fTokenCache = tokenCache;
+        final File fWork = work;
+
+        final java.util.concurrent.ConcurrentLinkedQueue<FileData> queue =
+                new java.util.concurrent.ConcurrentLinkedQueue<>(pending);
+        final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(workers);
+        final List<Thread> pool = new java.util.ArrayList<>(workers);
+        for (int w = 0; w < workers; w++) {
+            Thread t = new Thread(() -> {
+                try {
+                    FileData f;
+                    while (running && firstError.get() == null && (f = queue.poll()) != null) {
                         try {
-                            written = cdn.downloadDepotChunkFuture(depot, chunk, s, dest, depotKey, null,
-                                    cdnTokenFor(content, appId, depot, s, tokenCache)).get(180, TimeUnit.SECONDS);
-                        } catch (Exception e) {
-                            chunkErr = e;
-                            Log.w(TAG, "chunk via " + s.getHost() + " failed (try " + (t + 1) + "): " + describe(e));
-                            serverIdx++;
-                            Thread.sleep(400);
+                            downloadOneFile(f, fWork, fCdn, fContent, fServers, fAppId, fDepot,
+                                    fDepotKey, fTokenCache, serverCursor, doneBytes, fTotalBytes, lastPct);
+                        } catch (Throwable e) {
+                            firstError.compareAndSet(null, e);
+                            return;
                         }
                     }
-                    if (written < 0) {
-                        throw chunkErr != null ? chunkErr : new java.io.IOException("chunk download failed");
-                    }
-                    raf.seek(chunk.getOffset());
-                    raf.write(dest, 0, written);
-                    doneBytes += written;
-                    int pct = totalBytes > 0 ? (int) (doneBytes * 100 / totalBytes) : 0;
-                    if (pct != lastPct) { percent(pct); lastPct = pct; }
+                } finally {
+                    latch.countDown();
                 }
+            }, "zd-mod-dl-" + w);
+            t.setDaemon(true);
+            pool.add(t);
+            t.start();
+        }
+
+        try {
+            latch.await();
+        } catch (InterruptedException cancelled) {
+            // cancel() interrupts the download thread; wake the workers too so none sits out its
+            // retry backoff, and do not return while they still write into the work directory.
+            running = false;
+            for (Thread t : pool) t.interrupt();
+            boolean drained = false;
+            while (!drained) {
+                try { latch.await(); drained = true; }
+                catch (InterruptedException ignored) { /* cancellation is already recorded */ }
+            }
+            return false;
+        }
+
+        if (!running) return false;
+        Throwable workerError = firstError.get();
+        if (workerError != null) {
+            if (workerError instanceof Exception) throw (Exception) workerError;
+            throw new java.io.IOException(workerError);
+        }
+
+        progress("content fetched (" + (doneBytes.get() / (1024 * 1024)) + " MB)");
+        return true;
+    }
+
+    /** One file: its chunks in order, each retried across CDN servers. Runs on a pool thread. */
+    private void downloadOneFile(FileData f, File work, Client cdn, SteamContent content,
+                                 List<Server> servers, int appId, int depot, byte[] depotKey,
+                                 Map<String, String> tokenCache,
+                                 java.util.concurrent.atomic.AtomicInteger serverCursor,
+                                 java.util.concurrent.atomic.AtomicLong doneBytes, long totalBytes,
+                                 java.util.concurrent.atomic.AtomicInteger lastPct) throws Exception {
+        String rel = sanitizeRel(f.getFileName());
+        if (rel == null) return;
+        File out = new File(work, rel);
+        try (RandomAccessFile raf = new RandomAccessFile(out, "rw")) {
+            if (f.getTotalSize() > 0) raf.setLength(f.getTotalSize());
+            for (ChunkData chunk : f.getChunks()) {
+                if (!running) return;
+                byte[] dest = new byte[Math.max(chunk.getCompressedLength(), chunk.getUncompressedLength())];
+                int written = -1;
+                Exception chunkErr = null;
+                int tries = Math.min(Math.max(servers.size(), 4), 8);
+                for (int t = 0; t < tries && written < 0; t++) {
+                    Server s = servers.get(Math.floorMod(serverCursor.get(), servers.size()));
+                    try {
+                        written = cdn.downloadDepotChunkFuture(depot, chunk, s, dest, depotKey, null,
+                                cdnTokenFor(content, appId, depot, s, tokenCache)).get(180, TimeUnit.SECONDS);
+                    } catch (Exception e) {
+                        chunkErr = e;
+                        Log.w(TAG, "chunk via " + s.getHost() + " failed (try " + (t + 1) + "): " + describe(e));
+                        // Move every worker off a server that just failed, not only this one.
+                        serverCursor.incrementAndGet();
+                        Thread.sleep(400);
+                    }
+                }
+                if (written < 0) {
+                    throw chunkErr != null ? chunkErr : new java.io.IOException("chunk download failed");
+                }
+                raf.seek(chunk.getOffset());
+                raf.write(dest, 0, written);
+                long done = doneBytes.addAndGet(written);
+                int pct = totalBytes > 0 ? (int) (done * 100 / totalBytes) : 0;
+                if (pct != lastPct.getAndSet(pct)) percent(pct);
             }
         }
-        progress("content fetched (" + (doneBytes / (1024 * 1024)) + " MB)");
-        return true;
     }
 
     private String cdnTokenFor(SteamContent content, int appId, int depot, Server s, Map<String, String> cache) {
         String host = s.getHost() != null ? s.getHost() : s.getVHost();
         if (host == null) return null;
-        if (cache.containsKey(host)) return cache.get(host);
+        // A ConcurrentHashMap cannot hold a null value, so a host with no token is remembered as
+        // the empty string - asking Steam again for every chunk would cost more than no token does.
+        String cached = cache.get(host);
+        if (cached != null) return cached.isEmpty() ? null : cached;
         String token = null;
         try {
             CDNAuthToken tok = awaitDeferred(
                     content.getCDNAuthToken(appId, depot, host, GlobalScope.INSTANCE), 15000);
             if (tok != null && tok.getResult() == EResult.OK) token = tok.getToken();
         } catch (Throwable ignored) {}
-        cache.put(host, token);
+        cache.put(host, token == null ? "" : token);
         return token;
     }
 

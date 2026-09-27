@@ -120,7 +120,7 @@ public class SteamGameDownloader implements Runnable, Cancellable {
     private volatile boolean running;
     private volatile boolean started;
     private int connectAttempts = 0;
-    private static final int MAX_CONNECT_ATTEMPTS = 5;
+    private static final int MAX_CONNECT_ATTEMPTS = 10;
     private volatile Thread workerThread;   // the thread running download()
     private volatile boolean finished;      // ensure done() fires once
 
@@ -223,11 +223,15 @@ public class SteamGameDownloader implements Runnable, Cancellable {
     private void onDisconnected(DisconnectedCallback cb) {
         if (!running) return;
         // Before the download starts, a disconnect means the connection/auth dropped — Steam often
-        // drops the first connect attempt, so retry a few times before giving up.
+        // drops the first connect attempts. Five was not enough: four or five drops in a row happen
+        // on an ordinary home connection, and the whole download died on a run of them (2026-09-27).
         if (!started && connectAttempts < MAX_CONNECT_ATTEMPTS) {
             connectAttempts++;
             progress("Connection dropped — retrying (" + connectAttempts + "/" + MAX_CONNECT_ATTEMPTS + ")...");
-            try { Thread.sleep(2000L); } catch (InterruptedException ignored) {}
+            // Backing off instead of hammering: a Steam CM that just dropped us rarely takes the
+            // next connect two seconds later either. 2, 3, 4 ... seconds, capped at 10.
+            long backoffMs = Math.min(10000L, 1000L + connectAttempts * 1000L);
+            try { Thread.sleep(backoffMs); } catch (InterruptedException ignored) {}
             if (!running) return;   // cancelled while waiting to reconnect
             steamClient.connect();
             return;
