@@ -3,8 +3,8 @@ package com.zomdroid.coop;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
-import net.bytebuddy.jar.asm.*;
-import net.bytebuddy.utility.OpenedClassReader;
+import com.zomdroid.shaded.net.bytebuddy.jar.asm.*;
+import com.zomdroid.shaded.net.bytebuddy.utility.OpenedClassReader;
 
 /** Reuses shaded ASM from the already-bundled Zomdroid agent. No game files are modified. */
 public final class CoopAgent {

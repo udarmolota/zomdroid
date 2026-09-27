@@ -2,8 +2,8 @@ package com.zomdroid.coop;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
-import net.bytebuddy.jar.asm.*;
-import net.bytebuddy.utility.OpenedClassReader;
+import com.zomdroid.shaded.net.bytebuddy.jar.asm.*;
+import com.zomdroid.shaded.net.bytebuddy.utility.OpenedClassReader;
 
 /** Observes the game's own UPnP calls; never discovers/maps ports independently. */
 public final class ServerInternetObserver implements ClassFileTransformer {

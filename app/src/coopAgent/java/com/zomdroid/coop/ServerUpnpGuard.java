@@ -2,8 +2,8 @@ package com.zomdroid.coop;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
-import net.bytebuddy.jar.asm.*;
-import net.bytebuddy.utility.OpenedClassReader;
+import com.zomdroid.shaded.net.bytebuddy.jar.asm.*;
+import com.zomdroid.shaded.net.bytebuddy.utility.OpenedClassReader;
 
 /** Server-only Build 41 guard: preserve working UPnP, tolerate missing JNI entry points. */
 public final class ServerUpnpGuard implements ClassFileTransformer {

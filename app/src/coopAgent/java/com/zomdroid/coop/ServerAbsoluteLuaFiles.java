@@ -4,8 +4,8 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.ProtectionDomain;
 import java.lang.instrument.ClassFileTransformer;
-import net.bytebuddy.jar.asm.*;
-import net.bytebuddy.utility.OpenedClassReader;
+import com.zomdroid.shaded.net.bytebuddy.jar.asm.*;
+import com.zomdroid.shaded.net.bytebuddy.utility.OpenedClassReader;
 
 /**
  * Build 42 server fix. IndieFileLoader sends absolute cachedir/Server Lua paths through
