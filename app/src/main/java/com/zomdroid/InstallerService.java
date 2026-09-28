@@ -1073,6 +1073,9 @@ public class InstallerService extends Service implements TaskProgressListener {
                 addFileToZip(zos, new File(gi.getHomePath(), "coop-probe/coop-console.txt"), "coop-console.txt");
                 addFileToZip(zos, new File(gi.getHomePath(), "coop-probe/server-exception.txt"), "coop-server-exception.txt");
                 addFileToZip(zos, new File(gi.getHomePath(), "coop-probe/hosting-internet.properties"), "hosting-internet.properties");
+                // Server heap per garbage collection, current file and the rotated one before it.
+                addFileToZip(zos, new File(gi.getHomePath(), "coop-probe/server-gc.log"), "server-gc.log");
+                addFileToZip(zos, new File(gi.getHomePath(), "coop-probe/server-gc.log.0"), "server-gc.log.0");
                 addFileToZip(zos, new File(gi.getHomePath(), "coop-probe/dedicated-state"), "dedicated-state.txt");
                 addFileToZip(zos, new File(gi.getHomePath(), "coop-probe/dedicated-error.txt"), "dedicated-error.txt");
                 addFileToZip(zos, new File(gi.getHomePath(), "coop-probe/dedicated-telemetry.properties"), "dedicated-telemetry.properties");

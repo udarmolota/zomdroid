@@ -128,6 +128,13 @@ final class ServerProbeLauncher {
         jvm.add("-Djava.awt.headless=true");
         jvm.add("-Dzomboid.steam=0");
         jvm.add("-XX:ErrorFile=" + root.getAbsolutePath() + "/hs_err_pid%p.log");
+        // One line per garbage collection: the heap the server really keeps alive, which decides
+        // how much memory a player should give it in the Host menu. The game gets the same through
+        // stderr (GameLauncher), but here fd 1 carries the CoopSlave protocol, so it goes to its
+        // own file, two 2 MB files at most. Quoted because instance names contain spaces.
+        // The server process's rss/swap is already sampled every 30 s as [ZMEM] in logcat.
+        jvm.add("-Xlog:gc:file=\"" + new File(root, "server-gc.log").getAbsolutePath()
+                + "\":uptime,level,tags:filecount=2,filesize=2m");
         String[] args = {"-cachedir=" + root.getAbsolutePath(), "-servername", "zomdroid-probe",
                 "-nosteam", "-ip", "127.0.0.1", "-adminpassword", UUID.randomUUID().toString()};
         if (dedicated != null)
