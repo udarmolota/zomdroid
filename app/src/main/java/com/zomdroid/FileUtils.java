@@ -63,7 +63,13 @@ public class FileUtils {
 
     static void extractZipToDisk(@NonNull InputStream inStream, @NonNull String destPath,
                                  TaskProgressListener taskProgressListener, long zipSize) throws IOException {
-        ZipArchiveInputStream zipArchiveInStream = new ZipArchiveInputStream(new BufferedInputStream(inStream, 1024 * 1024));
+        // allowStoredEntriesWithDataDescriptor: some mod sites (ggntw.com among them) pack files
+        // uncompressed but with the "size follows the data" flag. That is legal ZIP, yet the
+        // default refuses it and java.util.zip.ZipInputStream cannot read it at all ("only
+        // DEFLATED entries can have EXT descriptor"): such a mod unpacked to nothing and was
+        // reported as "no mod.info found" (2026-09-29).
+        ZipArchiveInputStream zipArchiveInStream = new ZipArchiveInputStream(
+                new BufferedInputStream(inStream, 1024 * 1024), "UTF-8", true, true);
         ZipArchiveEntry entry;
         while ((entry = zipArchiveInStream.getNextEntry()) != null) {
             extractArchiveEntry(zipArchiveInStream, entry, destPath);
@@ -81,6 +87,11 @@ public class FileUtils {
             throw new RuntimeException("Failed to read archive entry");
         }
         File file = new File(destPath + "/" + archiveEntry.getName());
+        // An entry named "../x" or with an absolute path would land outside destPath.
+        String root = new File(destPath).getCanonicalPath() + File.separator;
+        if (!file.getCanonicalPath().startsWith(root) && !file.getCanonicalPath().equals(root.substring(0, root.length() - 1))) {
+            throw new IOException("Archive entry outside the destination: " + archiveEntry.getName());
+        }
         if (archiveEntry.isDirectory()) {
             if (!file.isDirectory() && !file.mkdirs()) {
                 throw new IOException("Failed to create directory " + file);

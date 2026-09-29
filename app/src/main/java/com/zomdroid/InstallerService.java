@@ -1280,23 +1280,11 @@ public class InstallerService extends Service implements TaskProgressListener {
                 tmpDir.mkdirs();
 
                 // Step 1: Extract ZIP to temp (smart — handles double-wrapped archives)
-                try (InputStream is = getContentResolver().openInputStream(archiveUri);
-                     ZipInputStream zis = new ZipInputStream(is)) {
-                    ZipEntry entry;
-                    while ((entry = zis.getNextEntry()) != null) {
-                        File outFile = new File(tmpDir, entry.getName());
-                        if (entry.isDirectory()) {
-                            outFile.mkdirs();
-                        } else {
-                            outFile.getParentFile().mkdirs();
-                            try (FileOutputStream fos = new FileOutputStream(outFile)) {
-                                byte[] buf = new byte[8192];
-                                int len;
-                                while ((len = zis.read(buf)) > 0) fos.write(buf, 0, len);
-                            }
-                        }
-                        zis.closeEntry();
-                    }
+                // Commons Compress through FileUtils, not java.util.zip: it reads the archives
+                // ZipInputStream rejects (STORED entries with a data descriptor) and refuses
+                // entries that would land outside tmpDir.
+                try (InputStream is = getContentResolver().openInputStream(archiveUri)) {
+                    FileUtils.extractZipToDisk(is, tmpDir.getAbsolutePath(), null, -1);
                 }
 
                 // Step 2: Find IsoChunkMap.class for the selected mode.
@@ -1384,23 +1372,11 @@ public class InstallerService extends Service implements TaskProgressListener {
             try {
                 tmpDir.mkdirs();
 
-                try (InputStream is = getContentResolver().openInputStream(archiveUri);
-                     ZipInputStream zis = new ZipInputStream(is)) {
-                    ZipEntry entry;
-                    while ((entry = zis.getNextEntry()) != null) {
-                        File outFile = new File(tmpDir, entry.getName());
-                        if (entry.isDirectory()) {
-                            outFile.mkdirs();
-                        } else {
-                            outFile.getParentFile().mkdirs();
-                            try (FileOutputStream fos = new FileOutputStream(outFile)) {
-                                byte[] buf = new byte[8192];
-                                int len;
-                                while ((len = zis.read(buf)) > 0) fos.write(buf, 0, len);
-                            }
-                        }
-                        zis.closeEntry();
-                    }
+                // Commons Compress through FileUtils, not java.util.zip: it reads the archives
+                // ZipInputStream rejects (STORED entries with a data descriptor) and refuses
+                // entries that would land outside tmpDir.
+                try (InputStream is = getContentResolver().openInputStream(archiveUri)) {
+                    FileUtils.extractZipToDisk(is, tmpDir.getAbsolutePath(), null, -1);
                 }
 
                 File srcDir = findRenderLessZombieLevelDir(tmpDir, selectedLevel);
@@ -1508,23 +1484,11 @@ public class InstallerService extends Service implements TaskProgressListener {
             try {
                 // Step 1: Extract ZIP to temp dir
                 tmpDir.mkdirs();
-                try (InputStream is = getContentResolver().openInputStream(archiveUri);
-                     ZipInputStream zis = new ZipInputStream(is)) {
-                    ZipEntry entry;
-                    while ((entry = zis.getNextEntry()) != null) {
-                        File outFile = new File(tmpDir, entry.getName());
-                        if (entry.isDirectory()) {
-                            outFile.mkdirs();
-                        } else {
-                            outFile.getParentFile().mkdirs();
-                            try (FileOutputStream fos = new FileOutputStream(outFile)) {
-                                byte[] buf = new byte[64 * 1024];
-                                int r;
-                                while ((r = zis.read(buf)) != -1) fos.write(buf, 0, r);
-                            }
-                        }
-                        zis.closeEntry();
-                    }
+                // Commons Compress through FileUtils, not java.util.zip: it reads the archives
+                // ZipInputStream rejects (STORED entries with a data descriptor) and refuses
+                // entries that would land outside tmpDir.
+                try (InputStream is = getContentResolver().openInputStream(archiveUri)) {
+                    FileUtils.extractZipToDisk(is, tmpDir.getAbsolutePath(), null, -1);
                 }
                 Log.d("ModFix", "Step 1 done. tmpDir contents:");
                 File[] tmpContents = tmpDir.listFiles();
@@ -2135,23 +2099,11 @@ public class InstallerService extends Service implements TaskProgressListener {
 
                 // Step 1: Extract ZIP to temp
                 onProgressUpdate(getString(R.string.extracting), -1, 0);
-                try (InputStream is = getContentResolver().openInputStream(archiveUri);
-                     ZipInputStream zis = new ZipInputStream(is)) {
-                    ZipEntry entry;
-                    while ((entry = zis.getNextEntry()) != null) {
-                        File outFile = new File(tmpDir, entry.getName());
-                        if (entry.isDirectory()) {
-                            outFile.mkdirs();
-                        } else {
-                            outFile.getParentFile().mkdirs();
-                            try (FileOutputStream fos = new FileOutputStream(outFile)) {
-                                byte[] buf = new byte[8192];
-                                int len;
-                                while ((len = zis.read(buf)) > 0) fos.write(buf, 0, len);
-                            }
-                        }
-                        zis.closeEntry();
-                    }
+                // Commons Compress through FileUtils, not java.util.zip: it reads the archives
+                // ZipInputStream rejects (STORED entries with a data descriptor) and refuses
+                // entries that would land outside tmpDir.
+                try (InputStream is = getContentResolver().openInputStream(archiveUri)) {
+                    FileUtils.extractZipToDisk(is, tmpDir.getAbsolutePath(), null, -1);
                 }
 
                 // Step 2: Find mod root — folder containing mod.info, media/, or common/
@@ -2283,23 +2235,11 @@ public class InstallerService extends Service implements TaskProgressListener {
                 tmpDir.mkdirs();
 
                 // Step 1: Extract ZIP to temp
-                try (InputStream is = getContentResolver().openInputStream(archiveUri);
-                     ZipInputStream zis = new ZipInputStream(is)) {
-                    ZipEntry entry;
-                    while ((entry = zis.getNextEntry()) != null) {
-                        File outFile = new File(tmpDir, entry.getName());
-                        if (entry.isDirectory()) {
-                            outFile.mkdirs();
-                        } else {
-                            outFile.getParentFile().mkdirs();
-                            try (FileOutputStream fos = new FileOutputStream(outFile)) {
-                                byte[] buf = new byte[8192];
-                                int len;
-                                while ((len = zis.read(buf)) > 0) fos.write(buf, 0, len);
-                            }
-                        }
-                        zis.closeEntry();
-                    }
+                // Commons Compress through FileUtils, not java.util.zip: it reads the archives
+                // ZipInputStream rejects (STORED entries with a data descriptor) and refuses
+                // entries that would land outside tmpDir.
+                try (InputStream is = getContentResolver().openInputStream(archiveUri)) {
+                    FileUtils.extractZipToDisk(is, tmpDir.getAbsolutePath(), null, -1);
                 }
 
                 // Step 2: Find the right mod root.
@@ -2509,21 +2449,11 @@ public class InstallerService extends Service implements TaskProgressListener {
                 tmpDir.mkdirs();
 
                 // Extract ZIP
-                try (InputStream is = getContentResolver().openInputStream(archiveUri);
-                     ZipInputStream zis = new ZipInputStream(is)) {
-                    ZipEntry entry;
-                    while ((entry = zis.getNextEntry()) != null) {
-                        File outFile = new File(tmpDir, entry.getName());
-                        if (entry.isDirectory()) { outFile.mkdirs(); }
-                        else {
-                            outFile.getParentFile().mkdirs();
-                            try (FileOutputStream fos = new FileOutputStream(outFile)) {
-                                byte[] buf = new byte[8192]; int len;
-                                while ((len = zis.read(buf)) > 0) fos.write(buf, 0, len);
-                            }
-                        }
-                        zis.closeEntry();
-                    }
+                // Commons Compress through FileUtils, not java.util.zip: it reads the archives
+                // ZipInputStream rejects (STORED entries with a data descriptor) and refuses
+                // entries that would land outside tmpDir.
+                try (InputStream is = getContentResolver().openInputStream(archiveUri)) {
+                    FileUtils.extractZipToDisk(is, tmpDir.getAbsolutePath(), null, -1);
                 }
 
                 // Find ZombieBuddy.jar recursively
@@ -2588,21 +2518,11 @@ public class InstallerService extends Service implements TaskProgressListener {
                 tmpDir.mkdirs();
 
                 // Extract ZIP
-                try (InputStream is = getContentResolver().openInputStream(archiveUri);
-                     ZipInputStream zis = new ZipInputStream(is)) {
-                    ZipEntry entry;
-                    while ((entry = zis.getNextEntry()) != null) {
-                        File outFile = new File(tmpDir, entry.getName());
-                        if (entry.isDirectory()) { outFile.mkdirs(); }
-                        else {
-                            outFile.getParentFile().mkdirs();
-                            try (FileOutputStream fos = new FileOutputStream(outFile)) {
-                                byte[] buf = new byte[8192]; int len;
-                                while ((len = zis.read(buf)) > 0) fos.write(buf, 0, len);
-                            }
-                        }
-                        zis.closeEntry();
-                    }
+                // Commons Compress through FileUtils, not java.util.zip: it reads the archives
+                // ZipInputStream rejects (STORED entries with a data descriptor) and refuses
+                // entries that would land outside tmpDir.
+                try (InputStream is = getContentResolver().openInputStream(archiveUri)) {
+                    FileUtils.extractZipToDisk(is, tmpDir.getAbsolutePath(), null, -1);
                 }
 
                 // Find mod root

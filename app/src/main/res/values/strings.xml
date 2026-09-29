@@ -669,9 +669,9 @@
     <string name="export_label">Export</string>
 
     <!-- ===== Workshop Download strings ===== -->
-    <string name="install_mod_workshop_section">Download from Steam Workshop</string>
+    <string name="install_mod_workshop_section">Download by Workshop ID</string>
     <string name="install_mod_workshop_disclaimer">Powered by ggntw.com — third-party service, may stop working at any time.\nFirst-time use may show  many ads before download.</string>
-    <string name="install_mod_workshop_btn">Download from Workshop</string>
+    <string name="install_mod_workshop_btn">Download</string>
     <string name="install_mod_workshop_dialog_title">Steam Workshop ID</string>
     <string name="install_mod_workshop_dialog_message">Enter the Workshop ID from the mod page URL.\n\nExample: Workshop ID: 3619862853</string>
     <string name="install_mod_workshop_download">Download</string>

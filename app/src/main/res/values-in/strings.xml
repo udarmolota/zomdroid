@@ -558,9 +558,9 @@
     <string name="export_label">Ekspor</string>
 
     <!-- ===== Workshop Download strings ===== -->
-    <string name="install_mod_workshop_section">Unduh dari Steam Workshop</string>
+    <string name="install_mod_workshop_section">Unduh dengan ID Workshop</string>
     <string name="install_mod_workshop_disclaimer">Didukung oleh ggntw.com — layanan pihak ketiga, bisa berhenti berfungsi kapan saja.\nPenggunaan pertama kali mungkin menampilkan banyak iklan sebelum mengunduh.</string>
-    <string name="install_mod_workshop_btn">Unduh dari Workshop</string>
+    <string name="install_mod_workshop_btn">Unduh</string>
     <string name="install_mod_workshop_dialog_title">Steam Workshop ID</string>
     <string name="install_mod_workshop_dialog_message">Masukkan ID mod dari URL halaman mod.\n\nContoh: Workshop ID: 3619862853</string>
     <string name="install_mod_workshop_download">Unduh</string>

@@ -539,9 +539,9 @@
     <string name="export_label">导出</string>
 
     <!-- ===== Workshop Download strings ===== -->
-    <string name="install_mod_workshop_section">从 Steam Workshop 下载</string>
+    <string name="install_mod_workshop_section">通过 Workshop ID 下载</string>
     <string name="install_mod_workshop_disclaimer">由 ggntw.com 提供 — 第三方服务，随时可能停止运行。\n首次使用时，下载前可能会显示大量广告。</string>
-    <string name="install_mod_workshop_btn">从 Workshop 下载</string>
+    <string name="install_mod_workshop_btn">下载</string>
     <string name="install_mod_workshop_dialog_title">Steam Workshop ID</string>
     <string name="install_mod_workshop_dialog_message">从 mod 页面 URL 中输入 Workshop ID。\n\n示例：Workshop ID：3619862853</string>
     <string name="install_mod_workshop_download">下载</string>

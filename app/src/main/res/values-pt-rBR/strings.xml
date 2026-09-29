@@ -557,9 +557,9 @@
     <string name="export_label">Exportar</string>
 
     <!-- ===== Workshop Download strings ===== -->
-    <string name="install_mod_workshop_section">Baixar do Steam Workshop</string>
+    <string name="install_mod_workshop_section">Baixar pelo ID do Workshop</string>
     <string name="install_mod_workshop_disclaimer">Funciona via ggntw.com — serviço de terceiros, pode parar de funcionar a qualquer momento.\nNa primeira utilização, pode aparecer muita publicidade antes do download.</string>
-    <string name="install_mod_workshop_btn">Baixar do Workshop</string>
+    <string name="install_mod_workshop_btn">Baixar</string>
     <string name="install_mod_workshop_dialog_title">ID do Steam Workshop</string>
     <string name="install_mod_workshop_dialog_message">Digite o ID do mod da URL da página do mod.\n\nExemplo: Workshop ID: 3619862853</string>
     <string name="install_mod_workshop_download">Baixar</string>
