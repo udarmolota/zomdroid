@@ -56,6 +56,9 @@ public class GameLauncher {
         // draws its own static background instead of loading a Bink library that does not exist
         // for ARM64. Same deal as above — every launch, so older instances are covered too.
         com.zomdroid.patch.MainScreenStatePatchApplier.applyIfNeeded(gameInstance);
+        // Mods that pin the game build by hashing the jar zombie.core.Core came from (Project
+        // Viewpoint) need Core to come from the real projectzomboid.jar, not from the unpacked copy.
+        com.zomdroid.patch.CoreFromGameJar.apply(gameInstance);
         // Select safe native implementations after the class-level patches are known to be ready.
         com.zomdroid.patch.NativeLibraryWorkarounds.disableIncompleteNativeLibraries(gameInstance);
         // Build 42.12+'s ARM64 PathFind implementation is under test after reports of characters

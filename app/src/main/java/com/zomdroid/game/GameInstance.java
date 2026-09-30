@@ -178,7 +178,14 @@ public class GameInstance {
         for (String path : this.extraClassPath) {
             jarsJoiner.add(AppStorage.requireSingleton().getHomePath() + "/" + path);
         }
-        jvmArgsList.add("-Djava.class.path=" + String.join(":", this.classPath) + ":" + jarsJoiner);
+        String classPathArg = "-Djava.class.path=" + String.join(":", this.classPath) + ":" + jarsJoiner;
+        // Build 42.12+ ships its classes in projectzomboid.jar; we unpack it and run from the folder,
+        // which is first on the class path and stays the source of every class it holds. The jar
+        // goes last, for the one class the folder no longer has: see patch.CoreFromGameJar.
+        if (new File(getGamePath(), "projectzomboid.jar").isFile()) {
+            classPathArg += ":projectzomboid.jar";
+        }
+        jvmArgsList.add(classPathArg);
 
         jvmArgsList.addAll(Arrays.asList(this.extraJvmArgs));
 
