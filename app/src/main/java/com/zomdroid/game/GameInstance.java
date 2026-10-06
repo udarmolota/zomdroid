@@ -170,6 +170,12 @@ public class GameInstance {
         // pass and only spams "[LWJGL] [ERROR] Incompatible Java and native library versions" into
         // every session log. Disable it with LWJGL's own switch.
         jvmArgsList.add("-Dorg.lwjgl.util.NoHashChecks=true");
+        // The game ships imgui-java's native for x86_64 only, so ImGui (the -imgui debug windows,
+        // and mods that draw with it, e.g. Project Viewpoint's settings) could never load. Our
+        // libs carry an arm64 build of the same imgui-java (1.86.11-8-g3e33dde); with this
+        // property imgui-java loads that one instead of searching the library path.
+        jvmArgsList.add("-Dimgui.library.path=" + AppStorage.requireSingleton().getHomePath()
+                + "/" + C.deps.LIBS_ANDROID_ARM64_v8a);
         if (BuildConfig.DEBUG) {
             jvmArgsList.add("-Dorg.lwjgl.util.Debug=true"); // debug
             jvmArgsList.add("-Dorg.lwjgl.util.DebugLoader=true"); // debug
