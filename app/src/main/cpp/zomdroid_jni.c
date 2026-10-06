@@ -141,3 +141,8 @@ JNIEXPORT void JNICALL
 Java_com_zomdroid_input_InputNativeInterface_sendChar(JNIEnv *env, jclass clazz, jint codepoint) {
     zomdroid_event_char((unsigned int)codepoint);
 }
+
+JNIEXPORT jboolean JNICALL
+Java_com_zomdroid_input_InputNativeInterface_isMouseCaptured(JNIEnv *env, jclass clazz) {
+    return zomdroid_mouse_captured() ? JNI_TRUE : JNI_FALSE;
+}

@@ -10,4 +10,6 @@ public class InputNativeInterface {
     public static native void sendJoystickButton(int button, boolean isPressed);
     public static native void sendJoystickConnected();
     public static native void sendChar(int codepoint);
+    /** True while a first-person mod holds the mouse: the cursor must not stop at the screen edge. */
+    public static native boolean isMouseCaptured();
 }

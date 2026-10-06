@@ -24,6 +24,10 @@ public class MouseStickControlElement extends AbstractControlElement {
 
     private double cursorX = -1;
     private double cursorY = -1;
+    // The position sent to the game: the drawn cursor above, except while a first-person mod holds
+    // the mouse (see moveCursor).
+    private double freeX = -1;
+    private double freeY = -1;
 
     private final Paint cursorFill   = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint cursorStroke = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -49,6 +53,8 @@ public class MouseStickControlElement extends AbstractControlElement {
 
         cursorX = drawable.outerCenterX;
         cursorY = drawable.outerCenterY;
+        freeX = cursorX;
+        freeY = cursorY;
     }
 
     @Override
@@ -94,11 +100,8 @@ public class MouseStickControlElement extends AbstractControlElement {
                 lastX = x;
                 lastY = y;
 
-                cursorX = clamp(cursorX + dx, 0, parentView.getWidth()  - 1);
-                cursorY = clamp(cursorY + dy, 0, parentView.getHeight() - 1);
-
-                double rs = parentView.getRenderScale();
-                InputNativeInterface.sendCursorPos(cursorX * rs, cursorY * rs);
+                moveCursor(dx, dy);
+                sendCursor();
 
                 parentView.invalidate();
                 return true;
@@ -116,8 +119,7 @@ public class MouseStickControlElement extends AbstractControlElement {
                     float totalDist = dist(e.getX(actIndex), e.getY(actIndex), downX, downY);
                     long elapsed = System.currentTimeMillis() - downTime;
                     if (totalDist < TAP_SLOP && elapsed < TAP_MAX_MS) {
-                        double rs = parentView.getRenderScale();
-                        InputNativeInterface.sendCursorPos(cursorX * rs, cursorY * rs);
+                        sendCursor();
                         InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, true);
                         parentView.postDelayed(() ->
                                         InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, false),
@@ -193,6 +195,25 @@ public class MouseStickControlElement extends AbstractControlElement {
                 false,
                 sensitivity
         );
+    }
+
+    // While a first-person mod holds the mouse it turns the view by how far the cursor moves, so the
+    // position sent to the game carries on past the screen edge; the drawn cursor stays on screen.
+    private void moveCursor(double dx, double dy) {
+        cursorX = clamp(cursorX + dx, 0, parentView.getWidth()  - 1);
+        cursorY = clamp(cursorY + dy, 0, parentView.getHeight() - 1);
+        if (InputNativeInterface.isMouseCaptured()) {
+            freeX += dx;
+            freeY += dy;
+        } else {
+            freeX = cursorX;
+            freeY = cursorY;
+        }
+    }
+
+    private void sendCursor() {
+        double rs = parentView.getRenderScale();
+        InputNativeInterface.sendCursorPos(freeX * rs, freeY * rs);
     }
 
     private static double clamp(double v, double lo, double hi) {

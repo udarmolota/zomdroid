@@ -31,6 +31,10 @@ public class TouchpadControlElement extends AbstractControlElement {
     private long   downTime;
     private double cursorX = -1;
     private double cursorY = -1;
+    // The position sent to the game: the drawn cursor above, except while a first-person mod holds
+    // the mouse (see moveCursor).
+    private double freeX = -1;
+    private double freeY = -1;
 
     // Debug: draw a visible cursor dot on top of everything
     private static final boolean DEBUG_DRAW_CURSOR = true;
@@ -97,11 +101,12 @@ public class TouchpadControlElement extends AbstractControlElement {
                 if (cursorX < 0) {
                     cursorX = parentView.getWidth()  / 2.0;
                     cursorY = parentView.getHeight() / 2.0;
+                    freeX = cursorX;
+                    freeY = cursorY;
                     //Log.d(TAG, "cursor lazy-init to (" + cursorX + "," + cursorY + ")");
                 }
 
-                double rs = parentView.getRenderScale();
-                InputNativeInterface.sendCursorPos(cursorX * rs, cursorY * rs);
+                sendCursor();
                 parentView.invalidate();
                 return true;
             }
@@ -117,14 +122,12 @@ public class TouchpadControlElement extends AbstractControlElement {
                 float dy = (y - lastY) * sensitivity;
                 lastX = x;  lastY = y;
 
-                cursorX = clamp(cursorX + dx, 0, parentView.getWidth());
-                cursorY = clamp(cursorY + dy, 0, parentView.getHeight());
+                moveCursor(dx, dy);
 
                 //Log.v(TAG, "MOVE delta=(" + dx + "," + dy
                 //        + ") cursor=(" + cursorX + "," + cursorY + ")");
                 //InputNativeInterface.sendCursorPos(cursorX, cursorY);
-                double rs = parentView.getRenderScale();
-                InputNativeInterface.sendCursorPos(cursorX * rs, cursorY * rs);
+                sendCursor();
                 parentView.invalidate();
                 //Log.v(TAG, "MOVE sendCursorPos=(" + (cursorX*rs) + "," + (cursorY*rs) + "), rs=" + rs);
                 return true;
@@ -144,8 +147,7 @@ public class TouchpadControlElement extends AbstractControlElement {
                 if (isTap) {
                     //Log.d(TAG, "TAP → sendMouseButton LEFT code="
                     //        + GLFWBinding.MOUSE_BUTTON_LEFT.code);
-                    double rs = parentView.getRenderScale();
-                    InputNativeInterface.sendCursorPos(cursorX * rs, cursorY * rs);
+                    sendCursor();
                     InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, true);
                     parentView.postDelayed(() -> {
                         InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_LEFT.code, false);
@@ -234,6 +236,25 @@ public class TouchpadControlElement extends AbstractControlElement {
                 ControlElementDescription.Icon.NO_ICON, false,
                 sensitivity, ControlElementDescription.DEFAULT_STYLE, null, false,
                 tapDisabled);
+    }
+
+    // While a first-person mod holds the mouse it turns the view by how far the cursor moves, so the
+    // position sent to the game carries on past the screen edge; the drawn cursor stays on screen.
+    private void moveCursor(double dx, double dy) {
+        cursorX = clamp(cursorX + dx, 0, parentView.getWidth());
+        cursorY = clamp(cursorY + dy, 0, parentView.getHeight());
+        if (InputNativeInterface.isMouseCaptured()) {
+            freeX += dx;
+            freeY += dy;
+        } else {
+            freeX = cursorX;
+            freeY = cursorY;
+        }
+    }
+
+    private void sendCursor() {
+        double rs = parentView.getRenderScale();
+        InputNativeInterface.sendCursorPos(freeX * rs, freeY * rs);
     }
 
     private static double clamp(double v, double lo, double hi) {

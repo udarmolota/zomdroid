@@ -25,5 +25,6 @@ void zomdroid_event_joystick_connected();
 void zomdroid_event_char(unsigned int codepoint);
 
 unsigned long long zomdroid_presented_frames();
+bool zomdroid_mouse_captured();
 
 #endif //ZOMDROID_ZOMDROID_H

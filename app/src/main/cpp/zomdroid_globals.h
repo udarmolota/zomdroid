@@ -137,4 +137,8 @@ extern ZomdroidSurface g_zomdroid_surface;
 /** Frames the game has presented (glfwSwapBuffers), for the in-game FPS display. */
 extern atomic_ullong g_zomdroid_presented_frames;
 
+/** A first-person mod holds the mouse (cursor disabled + raw motion): the on-screen mouse controls
+ *  stop clamping the cursor to the screen. Written by glfw, read through JNI. */
+extern atomic_bool g_zomdroid_mouse_captured;
+
 #endif //ZOMDROID_ZOMDROID_GLOBALS_H

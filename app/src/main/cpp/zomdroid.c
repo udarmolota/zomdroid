@@ -43,6 +43,12 @@ unsigned long long zomdroid_presented_frames() {
     return atomic_load_explicit(&g_zomdroid_presented_frames, memory_order_relaxed);
 }
 
+atomic_bool g_zomdroid_mouse_captured;
+
+bool zomdroid_mouse_captured() {
+    return atomic_load_explicit(&g_zomdroid_mouse_captured, memory_order_relaxed);
+}
+
 ZomdroidEventQueue g_zomdroid_event_queue;
 
 static long get_mem_available_mb() {
