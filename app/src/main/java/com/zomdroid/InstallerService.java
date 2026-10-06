@@ -2620,27 +2620,8 @@ public class InstallerService extends Service implements TaskProgressListener {
     private void replaceZbBetterFpsJars(File modDir, boolean isBuild42) throws IOException {
         // Only replace jars in 42.x folders — the 41/ folder has its own compatible jar.
         if (!isBuild42) return;
-        File[] children = modDir.listFiles();
-        if (children == null) return;
-        for (File child : children) {
-            if (!child.isDirectory()) continue;
-            String name = child.getName();
-            boolean isB42Folder = name.equals("42") || name.startsWith("42.");
-            if (isB42Folder) {
-                File jar = findFileRecursive(child, "ZBBetterFPS.jar");
-                if (jar != null) {
-                    File backup = new File(jar.getParent(), "ZBBetterFPS.jar.ver25");
-                    jar.renameTo(backup);
-                    Log.d("ZBBetterFPS", "Backed up: " + backup.getAbsolutePath());
-                    try (InputStream assetIs = getAssets().open("patches/ZBBetterFPS.jar.ver21");
-                         FileOutputStream fos = new FileOutputStream(jar)) {
-                        byte[] buf = new byte[8192]; int len;
-                        while ((len = assetIs.read(buf)) > 0) fos.write(buf, 0, len);
-                    }
-                    Log.d("ZBBetterFPS", "Replaced with Java 21 jar: " + jar.getAbsolutePath());
-                }
-            }
-        }
+        // Same swap GameActivity re-runs at every launch for mods installed some other way.
+        com.zomdroid.patch.ZbBetterFpsJarRepair.replaceJars(this, modDir);
     }
 
     // -------------------- IMPORT / EXPORT GAME FILES --------------------

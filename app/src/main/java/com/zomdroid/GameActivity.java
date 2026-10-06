@@ -263,6 +263,9 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
                 if (!isGameStarted) {
                     Thread thread = new Thread(() -> {
                         try {
+                            // Needs the app's assets, which GameLauncher has no Context to reach.
+                            com.zomdroid.patch.ZbBetterFpsJarRepair.repair(GameActivity.this, gameInstance);
+                            com.zomdroid.patch.ViewpointSettingsSeed.seed(GameActivity.this, gameInstance);
                             GameLauncher.launch(gameInstance, serverProbeClient, coopBridgePath);
                         } catch (ErrnoException e) {
                             throw new RuntimeException(e);
