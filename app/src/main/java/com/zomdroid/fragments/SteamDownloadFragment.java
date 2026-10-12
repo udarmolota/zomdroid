@@ -43,6 +43,8 @@ import java.util.regex.Pattern;
 public class SteamDownloadFragment extends Fragment implements SteamDownloadState.View {
     public static final String ARG_MACOS_INSTANCE = "macos_instance";
     public static final String ARG_MP_INSTANCE = "mp_instance";
+    /** Open on the Mods tab (from the Import mods screen). */
+    public static final String ARG_OPEN_MODS = "open_mods";
     private String macosInstanceName;
     private String mpInstanceName;
 
@@ -91,7 +93,8 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
             sectionMods.setVisibility(game ? View.GONE : View.VISIBLE);
             blockLogin.setVisibility(game ? View.VISIBLE : View.GONE);
         });
-        toggle.check(R.id.btn_type_game);
+        boolean openMods = getArguments() != null && getArguments().getBoolean(ARG_OPEN_MODS);
+        toggle.check(openMods ? R.id.btn_type_mods : R.id.btn_type_game);
 
         buildToggle = v.findViewById(R.id.toggle_dl_build);
         buildToggle.check(R.id.btn_build_41);   // legacy41 is the default selection

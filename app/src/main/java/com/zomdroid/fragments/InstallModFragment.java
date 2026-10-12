@@ -216,6 +216,13 @@ public class InstallModFragment extends Fragment {
                 showWorkshopDownloadDialog()
         );
 
+        // Download from Steam: our own downloader screen, opened on its Mods tab
+        binding.installModDownloadSteamBtn.setOnClickListener(v -> {
+            Bundle args = new Bundle();
+            args.putBoolean(SteamDownloadFragment.ARG_OPEN_MODS, true);
+            androidx.navigation.Navigation.findNavController(v).navigate(R.id.action_download_steam, args);
+        });
+
         // Install button (ZIP)
         binding.installModInstallBtn.setOnClickListener(v -> {
             if (modZipUri == null) {

@@ -219,6 +219,15 @@
                     android:minWidth="200dp"
                     android:text="@string/install_mod_workshop_btn"/>
 
+                <Button
+                    android:id="@+id/install_mod_download_steam_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="8dp"
+                    android:minWidth="200dp"
+                    android:text="@string/install_mod_steam_btn"/>
+
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

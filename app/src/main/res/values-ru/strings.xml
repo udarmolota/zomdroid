@@ -560,6 +560,7 @@
     <string name="install_mod_workshop_section">Скачать по ID из Workshop</string>
     <string name="install_mod_workshop_disclaimer">Работает через ggntw.com — сторонний сервис, может перестать работать в любой момент.\nПри первом использовании перед скачиванием может появиться много рекламы.</string>
     <string name="install_mod_workshop_btn">Скачать</string>
+    <string name="install_mod_steam_btn">Скачать мод из Steam</string>
     <string name="install_mod_workshop_dialog_title">ID мода в Steam Workshop</string>
     <string name="install_mod_workshop_dialog_message">Введите ID мода из URL страницы мода.\n\nПример: Workshop ID: 3619862853</string>
     <string name="install_mod_workshop_download">Скачать</string>
