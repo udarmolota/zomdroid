@@ -140,6 +140,44 @@ public class SteamGameDownloader implements Runnable, Cancellable {
         return new File(dl, "zomdroid");
     }
 
+    /**
+     * The installed libraries live only inside the instance, and the next download replaces them
+     * with whatever Steam carries then - a newer game build's, which may not fit the player's game.
+     * This exact set is also kept as a ZIP in Downloads/zomdroid, named after the Steam build, so
+     * "Additional libraries" can load it again into this or any other instance. A failure here
+     * never fails the install.
+     */
+    private void archiveLibraries(File dir, String version) {
+        String date = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.ROOT)
+                .format(new java.util.Date());
+        File out = new File(getDownloadsDir(), libraryPack.id + "-libs-" + version + "-" + date + ".zip");
+        File tmp = new File(out.getPath() + ".part");
+        try {
+            File parent = out.getParentFile();
+            if (!parent.isDirectory() && !parent.mkdirs())
+                throw new java.io.IOException("Cannot create " + parent);
+            java.util.List<String> names = new java.util.ArrayList<>(libraryPack.names);
+            names.add(libraryPack.metadataName);
+            try (java.util.zip.ZipOutputStream zip =
+                         new java.util.zip.ZipOutputStream(new java.io.FileOutputStream(tmp))) {
+                for (String name : names) {
+                    File file = new File(dir, name);
+                    if (!file.isFile()) continue;
+                    zip.putNextEntry(new java.util.zip.ZipEntry(name));
+                    java.nio.file.Files.copy(file.toPath(), zip);
+                    zip.closeEntry();
+                }
+            }
+            java.nio.file.Files.move(tmp.toPath(), out.toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            progress("A copy is saved to " + out.getAbsolutePath());
+        } catch (Exception e) {
+            //noinspection ResultOfMethodCallIgnored
+            tmp.delete();
+            Log.w(TAG, "Could not save a copy of the libraries to Downloads", e);
+        }
+    }
+
     @Override
     public void cancel() {
         running = false;
@@ -562,6 +600,8 @@ public class SteamGameDownloader implements Runnable, Cancellable {
                 metadata.put("pack", libraryPack.id);
                 java.nio.file.Files.write(new File(fOutDir, libraryPack.metadataName).toPath(), metadata.toString(2).getBytes(java.nio.charset.StandardCharsets.UTF_8));
                 if (!running) { done("Download cancelled."); return; }
+                archiveLibraries(fOutDir, manifestId > 0
+                        ? "manifest" + Long.toUnsignedString(gid) : "build" + info.buildId);
                 if (libraryPack == LibraryPack.MACOS) {
                     MacosLibraries.publish(librariesGameDir, fOutDir);
                     // A download is the player's request to use what it installed (no switch above
