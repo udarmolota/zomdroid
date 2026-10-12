@@ -337,6 +337,41 @@ static int init_zomdroid_namespace(const char* ld_library_path) {
     return 0;
 }
 
+/*
+ * The private libvulkan.so copy and a custom driver load into zomdroid-ns, which sees only our own
+ * libraries and /system/lib64. Some phones' libvulkan.so needs a library from elsewhere
+ * (libgpud_sys.so on Android 16 MediaTek Xiaomi, 2026-10). Share just the library the error names
+ * with zomdroid-ns - from the default namespace and from the vendor's sphal - so nothing else
+ * box64, the JRE or the game resolve changes. Returns false when there is nothing new to share.
+ */
+static bool share_missing_library(const char* error) {
+    static char last[256];
+    const char* start = error ? strstr(error, "library \"") : NULL;
+    if (!start) return false;
+    start += strlen("library \"");
+    const char* end = strchr(start, '"');
+    if (!end || end == start || end - start >= (long) sizeof(last)) return false;
+    char name[sizeof(last)];
+    memcpy(name, start, end - start);
+    name[end - start] = '\0';
+    if (strcmp(name, last) == 0) return false; // already shared, and it did not help
+    strcpy(last, name);
+
+    static struct android_namespace_t* default_copy;
+    if (!default_copy)
+        default_copy = android_create_namespace_escape("zomdroid-default-copy", NULL, NULL,
+                                                       ANDROID_NAMESPACE_TYPE_SHARED, NULL, NULL);
+    struct android_namespace_t* sphal =
+            android_get_exported_namespace ? android_get_exported_namespace("sphal") : NULL;
+    bool shared = false;
+    if (android_link_namespaces && default_copy && android_link_namespaces(zomdroid_ns, default_copy, name))
+        shared = true;
+    if (android_link_namespaces && sphal && android_link_namespaces(zomdroid_ns, sphal, name))
+        shared = true;
+    LOGI("Vulkan: %s %s with zomdroid-ns", name, shared ? "shared" : "could not be shared");
+    return shared;
+}
+
 static void (*prepare_macho_pathfind)(void);
 static int load_linker_hook() {
     void* zomdroid_linker = linkernsbypass_namespace_dlopen("libzomdroidlinker.so", RTLD_LOCAL, zomdroid_ns);
@@ -381,20 +416,38 @@ static int load_linker_hook() {
     }
 
     if (g_zomdroid_vulkan_driver_name != NULL) {
-        void* vulkan_loader = linkernsbypass_namespace_dlopen_unique("/system/lib64/libvulkan.so",
-                                                               getenv("ZOMDROID_CACHE_DIR"), RTLD_LOCAL, zomdroid_ns);
-        if (!vulkan_loader) {
-            LOGE("%s", dlerror());
-            return -1;
+        // A library the loader or driver cannot find is shared in (share_missing_library), a few
+        // times at most, since one missing library can hide the next. If they still do not load,
+        // the game starts on the phone's own driver instead of a black screen: with no handles
+        // set, libzomdroidlinker leaves libvulkan.so and the driver lookup to the system.
+        void* vulkan_loader = NULL;
+        void* vulkan_driver = NULL;
+        for (int i = 0; i < 4 && !vulkan_loader; i++) {
+            vulkan_loader = linkernsbypass_namespace_dlopen_unique("/system/lib64/libvulkan.so",
+                                                                   getenv("ZOMDROID_CACHE_DIR"), RTLD_LOCAL, zomdroid_ns);
+            if (vulkan_loader) break;
+            const char* error = dlerror();
+            LOGW("Vulkan: private libvulkan.so did not load: %s", error);
+            if (!share_missing_library(error)) break;
         }
-        zomdroid_linker_set_vulkan_loader_handle(vulkan_loader);
-
-        void* vulkan_driver = linkernsbypass_namespace_dlopen(g_zomdroid_vulkan_driver_name, RTLD_LOCAL, zomdroid_ns);
-        if (!vulkan_driver) {
-            LOGE("%s", dlerror());
-            return -1;
+        for (int i = 0; i < 4 && vulkan_loader && !vulkan_driver; i++) {
+            vulkan_driver = linkernsbypass_namespace_dlopen(g_zomdroid_vulkan_driver_name, RTLD_LOCAL, zomdroid_ns);
+            if (vulkan_driver) break;
+            const char* error = dlerror();
+            LOGW("Vulkan: driver %s did not load: %s", g_zomdroid_vulkan_driver_name, error);
+            if (!share_missing_library(error)) break;
         }
-        zomdroid_linker_set_vulkan_driver_handle(vulkan_driver);
+        if (vulkan_driver && !dlsym(vulkan_driver, "HMI")) {
+            LOGW("Vulkan: %s has no HMI entry point, not an Android Vulkan driver", g_zomdroid_vulkan_driver_name);
+            vulkan_driver = NULL;
+        }
+        if (vulkan_loader && vulkan_driver) {
+            zomdroid_linker_set_vulkan_loader_handle(vulkan_loader);
+            zomdroid_linker_set_vulkan_driver_handle(vulkan_driver);
+        } else {
+            LOGE("Vulkan: driver %s is unusable here, falling back to the phone's own driver",
+                 g_zomdroid_vulkan_driver_name);
+        }
     }
 
     return 0;
