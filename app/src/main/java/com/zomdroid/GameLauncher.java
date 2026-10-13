@@ -189,6 +189,15 @@ public class GameLauncher {
                 Os.setenv("ZOMDROID_ETC2_CACHE_DIR",
                         AppStorage.requireSingleton().getHomePath() + "/" + C.NGG_ETC2_CACHE_DIR,
                         false);
+                // Mesa keeps its disk shader cache off on Android unless told otherwise, so
+                // without this every launch recompiled every shader and pipeline from scratch.
+                File zinkShaderCache = new File(AppStorage.requireSingleton().getHomePath(),
+                        C.ZINK_SHADER_CACHE_DIR);
+                if (zinkShaderCache.isDirectory() || zinkShaderCache.mkdirs()) {
+                    Os.setenv("MESA_SHADER_CACHE_DISABLE", "false", false);
+                    Os.setenv("MESA_SHADER_CACHE_DIR", zinkShaderCache.getAbsolutePath(), false);
+                    Os.setenv("MESA_SHADER_CACHE_MAX_SIZE", "256M", false);
+                }
                 break;
             case NG_GL4ES: {
                 //Os.setenv("LIBGL_ES", "3", true);

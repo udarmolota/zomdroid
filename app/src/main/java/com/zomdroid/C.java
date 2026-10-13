@@ -15,6 +15,13 @@ public class C {
      */
     public static final String NGG_ETC2_CACHE_DIR = "ngg_etc2cache";
 
+    /**
+     * Mesa's on-disk shader cache for both ZINK renderers (zink + turnip pipelines). Mesa keys
+     * entries by driver build and ignores stale ones itself; safe to delete while the game is
+     * closed. Relative to {@link AppStorage#getHomePath()}.
+     */
+    public static final String ZINK_SHADER_CACHE_DIR = "zink_shadercache";
+
     public static class deps {
         public static final String ROOT = "dependencies";
         // We keep multiple JRE/LIBS versions side-by-side to support different game builds.
