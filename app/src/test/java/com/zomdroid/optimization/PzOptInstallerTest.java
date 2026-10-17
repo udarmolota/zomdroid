@@ -65,6 +65,18 @@ public class PzOptInstallerTest {
     }
 
     @Test
+    public void restoreAlsoRemovesTheModsOwnClassCache() throws Exception {
+        Path zip = releaseZip(Map.of("pzopt/BuildInfo.class", bytes("build")));
+        PzOptInstaller.install(zip, game, state);
+        write(game.resolve("pzopt/aot/zombie/GameWindow.class"), "cached");
+
+        PzOptInstaller.restore(game, state);
+
+        assertFalse(Files.exists(game.resolve("pzopt")));
+        assertTrue(Files.exists(game.resolve("projectzomboid.jar")));
+    }
+
+    @Test
     public void updateRemovesFilesDroppedByTheNewRelease() throws Exception {
         Path first = releaseZip(Map.of(
                 "pzopt/BuildInfo.class", bytes("build-v1"),

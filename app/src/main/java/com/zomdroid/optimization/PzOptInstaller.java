@@ -116,6 +116,11 @@ public final class PzOptInstaller {
 
         restoreTrackedFiles(gameDir, stateDir, tracked);
         deleteTree(stateDir);
+        // The mod's own ahead-of-time class cache, written while it runs: never in the release, so
+        // never tracked, and useless without the mod. Its folder goes too once it is empty.
+        Path modDir = gameDir.resolve("pzopt");
+        deleteTree(modDir.resolve("aot"));
+        if (Files.isDirectory(modDir)) deleteEmptyParents(modDir, gameDir);
         return new Result(tracked.size(), countOriginals(tracked));
     }
 

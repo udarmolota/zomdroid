@@ -681,7 +681,7 @@
     <string name="optimization_group_pzopt">PZ Optimization（实验性）</string>
     <string name="optimization_pzopt_hint">启动器只负责安装和卸载 PZ Optimization；它的设置由你自己决定（游戏内：选项 → PZ Optimization）。</string>
     <string name="optimization_pzopt_help_title">PZ Optimization</string>
-    <string name="optimization_pzopt_help_message">启动器只负责安装和卸载 PZ Optimization；它的设置由你自己决定（游戏内：选项 → PZ Optimization）。目前已知：\n\n• 视觉效果（God Rays、镜子、反射……）可能导致 NG_GL4ES 崩溃，在它上面请保持关闭。\n• 如果改了某项设置后游戏出问题，请在这里点“还原”，然后重新安装。\n• 如果某个模组版本能配合你的游戏版本正常运行，不要急着更新：新版本可能会把一切弄坏。请保留可用版本的 ZIP，以便回退。\n\nBuild 42.20.4（Steam 清单 6267392422221692966）有一个由 Willing-Upstairs-580（又名 mepetz）为 Android 适配的模组版本。</string>
+    <string name="optimization_pzopt_help_message">启动器只负责安装和卸载 PZ Optimization；它的设置由你自己决定（游戏内：选项 → PZ Optimization）。目前已知：\n\n• 视觉效果（God Rays、镜子、反射……）可能导致 NG_GL4ES 崩溃，在它上面请保持关闭。\n• 最新版本在 MobileGlues 以外的渲染器上可能出现黑屏世界。如果遇到这种情况，请把该实例切换到 MobileGlues。\n• 如果改了某项设置后游戏出问题，请在这里点“还原”，然后重新安装。\n• 如果某个模组版本能配合你的游戏版本正常运行，不要急着更新：新版本可能会把一切弄坏。请保留可用版本的 ZIP，以便回退。\n\nBuild 42.20.4（Steam 清单 6267392422221692966）有一个由 Willing-Upstairs-580（又名 mepetz）为 Android 适配的模组版本。</string>
     <string name="optimization_pzopt_install">安装 / 更新</string>
     <string name="optimization_pzopt_restore">还原</string>
     <string name="optimization_pzopt_restore_title">还原游戏的原始文件？</string>
