@@ -3,6 +3,7 @@
      instances, and holds Sort and Import; below, a search field and one list - "Active" in load
      order, then "Inactive" by name. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -69,6 +70,27 @@
             android:layout_weight="1"
             android:text="@string/nav_menu_install_mod"
             android:textSize="12sp" />
+
+        <!-- Enable / disable every mod shown (all of them, or what the search leaves), for lists of
+             a hundred mods and more. From RimDroid. -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_mods_enable_all"
+            style="@style/Widget.Material3.Button.IconButton.Outlined"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:contentDescription="@string/mods_enable_all"
+            android:tooltipText="@string/mods_enable_all"
+            app:icon="@drawable/ic_mods_enable_all" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_mods_disable_all"
+            style="@style/Widget.Material3.Button.IconButton.Outlined"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/mods_disable_all"
+            android:tooltipText="@string/mods_disable_all"
+            app:icon="@drawable/ic_mods_disable_all" />
     </LinearLayout>
 
     <TextView

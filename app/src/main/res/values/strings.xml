@@ -99,6 +99,8 @@
     <string name="control_element_icon">Icon</string>
     <string name="control_element_style">Style</string>
     <string name="control_element_custom_icon">Custom icon…</string>
+    <string name="control_element_pack_icon">From an icon pack…</string>
+    <string name="control_element_pick_pack">Choose an icon pack</string>
     <string name="control_element_icon_no_tint">Keep original colors</string>
     <string name="control_element_icon_scale">Image size</string>
     <string name="control_element_custom_icon_select_button">Select a button first</string>
@@ -729,7 +731,7 @@
     <string name="optimization_group_pzopt">PZ Optimization (experimental)</string>
     <string name="optimization_pzopt_hint">The launcher only installs and uninstalls PZ Optimization; its settings are up to you (Options → PZ Optimization in the game).</string>
     <string name="optimization_pzopt_help_title">PZ Optimization</string>
-    <string name="optimization_pzopt_help_message">The launcher only installs and uninstalls PZ Optimization; its settings are up to you (Options → PZ Optimization in the game). What we know so far:\n\n• Visual effects (God Rays, mirrors, reflections…) can crash NG_GL4ES, so keep them off there.\n• If the game breaks after changing a setting, press Restore here and install again.\n\nFor Build 42.20.4 (Steam manifest 6267392422221692966) there\'s an Android-adapted build of the mod by Willing-Upstairs-580 (aka mepetz).</string>
+    <string name="optimization_pzopt_help_message">The launcher only installs and uninstalls PZ Optimization; its settings are up to you (Options → PZ Optimization in the game). What we know so far:\n\n• Visual effects (God Rays, mirrors, reflections…) can crash NG_GL4ES, so keep them off there.\n• If the game breaks after changing a setting, press Restore here and install again.\n• If a build of the mod works with your game version, don\'t rush to update it: a new build can break things. Keep the ZIP of the build that works, so you can go back to it.\n\nFor Build 42.20.4 (Steam manifest 6267392422221692966) there\'s an Android-adapted build of the mod by Willing-Upstairs-580 (aka mepetz).</string>
     <string name="optimization_pzopt_install">Install / Update</string>
     <string name="optimization_pzopt_restore">Restore</string>
     <string name="optimization_pzopt_restore_title">Restore the original game files?</string>
@@ -770,6 +772,10 @@
     <string name="mods_inactive">Inactive (%1$d)</string>
     <string name="mods_search">Search mods</string>
     <string name="mods_sort">Sort</string>
+    <string name="mods_enable_all">Enable all shown</string>
+    <string name="mods_disable_all">Disable all shown</string>
+    <string name="mods_enabled_n">%1$d mods enabled. Press Sort to put them in order.</string>
+    <string name="mods_disable_all_confirm">Disable all %1$d mods shown? Their load order is lost; enabling them again adds them at the end — use Sort afterwards.</string>
     <string name="mods_sort_hint">Sort orders the active mods by the rules their authors give. Drag a mod by ≡ to move it; long-press for top / bottom.</string>
     <string name="mods_sort_title">Load order</string>
     <string name="mods_sort_moved">%1$d mod(s) will move.</string>

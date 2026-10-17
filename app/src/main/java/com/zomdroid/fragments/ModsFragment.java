@@ -60,7 +60,7 @@ public class ModsFragment extends Fragment {
     private TextView tvRunning, tvUnreadable, tvEmpty;
     private EditText etSearch;
     private RecyclerView rv;
-    private View btnSort;
+    private View btnSort, btnEnableAll, btnDisableAll;
     private final List<Entry> entries = new ArrayList<>();
     private final List<Object> rows = new ArrayList<>();   // String = section header, Row = a mod
     private boolean editable;
@@ -118,6 +118,10 @@ public class ModsFragment extends Fragment {
                 Navigation.findNavController(v).navigate(R.id.action_open_install_mod));
         btnSort = v.findViewById(R.id.btn_mods_sort);
         btnSort.setOnClickListener(x -> sort());
+        btnEnableAll = v.findViewById(R.id.btn_mods_enable_all);
+        btnDisableAll = v.findViewById(R.id.btn_mods_disable_all);
+        btnEnableAll.setOnClickListener(x -> enableAllShown());
+        btnDisableAll.setOnClickListener(x -> disableAllShown());
     }
 
     @Override
@@ -202,6 +206,8 @@ public class ModsFragment extends Fragment {
             tvEmpty.setText(entries.isEmpty() ? R.string.mods_no_instances : R.string.mods_choose_hint);
             tvEmpty.setVisibility(View.VISIBLE);
             btnSort.setEnabled(false);
+            btnEnableAll.setEnabled(false);
+            btnDisableAll.setEnabled(false);
             adapter.notifyDataSetChanged();
             return;
         }
@@ -212,6 +218,8 @@ public class ModsFragment extends Fragment {
         tvUnreadable.setVisibility(order == null ? View.VISIBLE : View.GONE);
         editable = !running && order != null;
         btnSort.setEnabled(editable);
+        btnEnableAll.setEnabled(editable);
+        btnDisableAll.setEnabled(editable);
 
         String q = etSearch.getText().toString().trim().toLowerCase(Locale.ROOT);
         Set<String> activeIds = new HashSet<>();
@@ -269,6 +277,52 @@ public class ModsFragment extends Fragment {
         if (on) order.add(r.id);
         write(order);
         refresh();
+    }
+
+    /** The rows on screen now (all mods, or what the search leaves) that are active or not. */
+    private List<Row> shown(boolean active) {
+        List<Row> out = new ArrayList<>();
+        for (Object o : rows) if (o instanceof Row && ((Row) o).active == active) out.add((Row) o);
+        return out;
+    }
+
+    /**
+     * Every inactive mod shown goes to the end of the load order, as the game does with one - except
+     * mods not made for this game build, which the game would drop again.
+     */
+    private void enableAllShown() {
+        if (!editable) return;
+        List<String> order = order();
+        if (order == null) return;
+        int added = 0;
+        for (Row r : shown(false)) {
+            if (r.mod == null || !r.mod.fitsBuild || order.contains(r.id)) continue;
+            order.add(r.id);
+            added++;
+        }
+        if (added == 0) return;
+        write(order);
+        Toast.makeText(requireContext(), getString(R.string.mods_enabled_n, added), Toast.LENGTH_LONG).show();
+        refresh();
+    }
+
+    /** Every active mod shown is switched off; their load order is lost, so it asks first. */
+    private void disableAllShown() {
+        if (!editable) return;
+        List<String> ids = new ArrayList<>();
+        for (Row r : shown(true)) ids.add(r.id);
+        if (ids.isEmpty()) return;
+        new MaterialAlertDialogBuilder(requireContext())
+                .setMessage(getString(R.string.mods_disable_all_confirm, ids.size()))
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(R.string.mods_disable_all, (d, w) -> {
+                    List<String> order = order();
+                    if (order == null) return;
+                    order.removeAll(ids);
+                    write(order);
+                    refresh();
+                })
+                .show();
     }
 
     // ---- load order ----
