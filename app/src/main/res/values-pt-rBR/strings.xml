@@ -619,6 +619,7 @@
     <string name="control_element_custom_icon_failed">Não foi possível carregar a imagem</string>
     <string name="control_element_custom_icon_select_button">Selecione um botão primeiro</string>
     <string name="control_element_icon_no_tint">Manter cores originais</string>
+    <string name="control_element_icon_scale">Tamanho da imagem</string>
     <string name="vibrate_on_touch_switch_label">Vibrar ao pressionar botão</string>
     <string name="new_game_instance_analyzing">Analisando o arquivo do jogo, aguarde…</string>
     <string name="new_game_instance_detect_failed">Não foi possível ler o ZIP do jogo. Verifique se é um arquivo válido do Project Zomboid e tente novamente.</string>

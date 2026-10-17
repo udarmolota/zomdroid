@@ -41,6 +41,8 @@ public class IconPacksFragment extends Fragment {
     private static final int PREVIEW_ICONS = 6;
 
     private Spinner spInstance;
+    /** The spinner starts on "Choose an instance" (several instances); real instances follow it. */
+    private boolean choosePrompt;
     private LinearLayout packList;
     private final List<GameInstance> instances = new ArrayList<>();
 
@@ -74,6 +76,10 @@ public class IconPacksFragment extends Fragment {
         instances.addAll(GameInstanceManager.requireSingleton().getInstances());
         List<String> names = new ArrayList<>();
         if (instances.isEmpty()) names.add(getString(R.string.icon_packs_no_instances));
+        // With several instances nothing is preselected: Apply would otherwise go to an instance the
+        // player never chose (packs applied to 42.21 while playing 42.20, 2026-10-17).
+        choosePrompt = instances.size() > 1;
+        if (choosePrompt) names.add(getString(R.string.icon_packs_choose_instance));
         for (GameInstance gi : instances) names.add(gi.getName());
         ArrayAdapter<String> a = new ArrayAdapter<>(requireContext(), R.layout.spinner_item, names);
         a.setDropDownViewResource(R.layout.spinner_dropdown_item);
@@ -88,7 +94,7 @@ public class IconPacksFragment extends Fragment {
 
     @Nullable
     private GameInstance current() {
-        int i = spInstance.getSelectedItemPosition();
+        int i = spInstance.getSelectedItemPosition() - (choosePrompt ? 1 : 0);
         return (i >= 0 && i < instances.size()) ? instances.get(i) : null;
     }
 

@@ -31,6 +31,7 @@ public class RadialMenuControlElement extends AbstractControlElement {
     private String[] sectorLabels = {"", "", "", ""};
     private String iconFile;          // user image filename in controls/icons, or null
     private boolean noTint;           // keep custom image original colors when true
+    private float iconScale = 1f;     // center image size relative to its default box (editor slider)
     private Drawable iconDrawable;    // loaded center image, or null
 
     public RadialMenuControlElement(InputControlsView parentView, ControlElementDescription desc) {
@@ -62,6 +63,7 @@ public class RadialMenuControlElement extends AbstractControlElement {
         this.drawable.text = this.centerTitle;
 
         this.noTint = desc.noTint;
+        this.iconScale = desc.iconScaleOrDefault();
         if (desc.iconFile != null && !desc.iconFile.isEmpty()) {
             setCustomIcon(desc.iconFile, desc.noTint);
         }
@@ -150,6 +152,12 @@ public class RadialMenuControlElement extends AbstractControlElement {
 
     public String getIconFile() { return iconFile; }
     public boolean isNoTint() { return noTint; }
+    public float getIconScale() { return iconScale; }
+    public void setIconScale(float iconScale) {
+        this.iconScale = iconScale;
+        updateIconBounds();
+        parentView.invalidate();
+    }
     public void setNoTint(boolean noTint) {
         if (iconFile != null) setCustomIcon(iconFile, noTint);
         else this.noTint = noTint;
@@ -162,7 +170,7 @@ public class RadialMenuControlElement extends AbstractControlElement {
         // Inscribe a full square in the circle so the image corners don't poke past the round
         // outline (~0.70 of the diameter). Imported images are alpha-trimmed, so this maps to
         // the visible content directly.
-        float box = r * 2f * 0.70f;
+        float box = r * 2f * 0.70f * iconScale;
         float iw = iconDrawable.getIntrinsicWidth(), ih = iconDrawable.getIntrinsicHeight();
         float aspect = (ih == 0) ? 1f : iw / ih;
         float w, h;
@@ -178,7 +186,8 @@ public class RadialMenuControlElement extends AbstractControlElement {
         return new ControlElementDescription(drawable.centerX / parentView.getWidth(), drawable.centerY / parentView.getHeight(),
                 drawable.scale, Type.RADIAL_MENU, this.bindings.toArray(new GLFWBinding[0]),
                 combined, drawable.color, drawable.alpha, this.inputType, ControlElementDescription.Icon.NO_ICON, false,
-                sensitivity, ControlElementDescription.DEFAULT_STYLE, iconFile, noTint);
+                sensitivity, ControlElementDescription.DEFAULT_STYLE, iconFile, noTint, false, false, false,
+                iconScale);
     }
 
     @Override

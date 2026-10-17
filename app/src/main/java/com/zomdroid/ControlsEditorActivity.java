@@ -114,6 +114,46 @@ public class ControlsEditorActivity extends AppCompatActivity {
         });
 
         binding.inputControlsV.setElementSettingsController(new InputControlsView.ElementSettingsController() {
+            // Custom image size slider (buttons, D-pad, radial menu); 100% = the image's default box.
+            private void bindIconScale(AbstractControlElement element) {
+                setIconScaleVisible(true);
+                float current = 1f;
+                if (element instanceof com.zomdroid.input.ButtonControlElement) {
+                    current = ((com.zomdroid.input.ButtonControlElement) element).getIconScale();
+                } else if (element instanceof com.zomdroid.input.DpadControlElement) {
+                    current = ((com.zomdroid.input.DpadControlElement) element).getIconScale();
+                } else if (element instanceof com.zomdroid.input.RadialMenuControlElement) {
+                    current = ((com.zomdroid.input.RadialMenuControlElement) element).getIconScale();
+                }
+                int progress = Math.round(current * 100);
+                binding.elementIconScalePercentTv.setText(getResources().getString(R.string.percentage_format, progress));
+                binding.elementIconScaleSb.setOnSeekBarChangeListener(null);
+                binding.elementIconScaleSb.setProgress(progress);
+                binding.elementIconScaleSb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int value, boolean fromUser) {
+                        binding.elementIconScalePercentTv.setText(getResources().getString(R.string.percentage_format, value));
+                        float scale = value / 100f;
+                        if (element instanceof com.zomdroid.input.ButtonControlElement) {
+                            ((com.zomdroid.input.ButtonControlElement) element).setIconScale(scale);
+                        } else if (element instanceof com.zomdroid.input.DpadControlElement) {
+                            ((com.zomdroid.input.DpadControlElement) element).setIconScale(scale);
+                        } else if (element instanceof com.zomdroid.input.RadialMenuControlElement) {
+                            ((com.zomdroid.input.RadialMenuControlElement) element).setIconScale(scale);
+                        }
+                    }
+                    @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+                    @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+                });
+            }
+
+            private void setIconScaleVisible(boolean visible) {
+                int v = visible ? View.VISIBLE : View.GONE;
+                binding.elementIconScaleTv.setVisibility(v);
+                binding.elementIconScalePercentTv.setVisibility(v);
+                binding.elementIconScaleSb.setVisibility(v);
+            }
+
             private void loadElement(AbstractControlElement element) {
 
                 int scaleProgressValue = Math.round(element.getScale() * 100);
@@ -351,6 +391,7 @@ public class ControlsEditorActivity extends AppCompatActivity {
                         // Custom image icon (load your own picture)
                         binding.elementCustomIconB.setVisibility(View.VISIBLE);
                         binding.elementIconNoTintCb.setVisibility(View.VISIBLE);
+                        bindIconScale(element);
                         binding.elementIconNoTintCb.setOnCheckedChangeListener(null);
                         if (element instanceof com.zomdroid.input.ButtonControlElement) {
                             binding.elementIconNoTintCb.setChecked(
@@ -387,6 +428,7 @@ public class ControlsEditorActivity extends AppCompatActivity {
                         // Custom center image (same as round buttons).
                         binding.elementCustomIconB.setVisibility(View.VISIBLE);
                         binding.elementIconNoTintCb.setVisibility(View.VISIBLE);
+                        bindIconScale(element);
                         binding.elementIconNoTintCb.setOnCheckedChangeListener(null);
                         if (element instanceof com.zomdroid.input.RadialMenuControlElement) {
                             binding.elementIconNoTintCb.setChecked(
@@ -433,6 +475,7 @@ public class ControlsEditorActivity extends AppCompatActivity {
                         // (split DPAD_*, which are ButtonControlElements and already supported it).
                         binding.elementCustomIconB.setVisibility(View.VISIBLE);
                         binding.elementIconNoTintCb.setVisibility(View.VISIBLE);
+                        bindIconScale(element);
                         binding.elementIconNoTintCb.setOnCheckedChangeListener(null);
                         if (element instanceof com.zomdroid.input.DpadControlElement) {
                             binding.elementIconNoTintCb.setChecked(
@@ -466,6 +509,7 @@ public class ControlsEditorActivity extends AppCompatActivity {
                         binding.elementStyleS.setVisibility(View.GONE);
                         binding.elementCustomIconB.setVisibility(View.GONE);
                         binding.elementIconNoTintCb.setVisibility(View.GONE);
+                        setIconScaleVisible(false);
                         break;
                     }
                 }

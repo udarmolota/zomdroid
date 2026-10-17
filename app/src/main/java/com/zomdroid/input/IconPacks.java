@@ -47,6 +47,12 @@ import java.util.zip.ZipInputStream;
  * (control_icon_packs/&lt;id&gt;/), built-in ones in the APK's assets. An icon put on a button is
  * copied into the instance's controls/icons folder as pack_&lt;id&gt;_&lt;icon&gt;.png, the folder the
  * buttons already read custom images from, so an exported layout carries it.
+ *
+ * <p>The pictures at the top of a pack are for round buttons. A pack may add other versions for
+ * rectangular buttons in a rect/ folder (rect/attack.png), coloured or not by pack.json "rectTint"
+ * (default: "tint"): a round badge with its own rings looks wrong in a square frame. A rectangular
+ * button without a rect/ version gets the round picture, as before; copies are named
+ * pack_&lt;id&gt;_rect_&lt;icon&gt;.png.
  */
 public final class IconPacks {
     private IconPacks() {}
@@ -54,6 +60,8 @@ public final class IconPacks {
     public static final String ASSET_DIR = "control_icon_packs";
     private static final String PACKS_DIR = "control_icon_packs";
     private static final int MAX_ICON_PX = 256;
+    /** The folder inside a pack with the versions for rectangular buttons. */
+    public static final String RECT_DIR = "rect";
 
     public static final class Pack {
         public final String id;
@@ -67,9 +75,15 @@ public final class IconPacks {
         @Nullable public final String layout;
         /** Icon names (file names without .png), sorted. */
         public final List<String> icons;
+        /** Icons with a version for rectangular buttons (rect/&lt;icon&gt;.png), sorted. */
+        public final List<String> rectIcons;
+        /** Whether the rect/ versions are tinted (pack.json "rectTint", default {@link #tint}). */
+        public final boolean rectTint;
 
         Pack(String id, String name, boolean builtIn, boolean tint, List<String> icons,
-             @Nullable String author, @Nullable String layout) {
+             @Nullable String author, @Nullable String layout, List<String> rectIcons, boolean rectTint) {
+            this.rectIcons = rectIcons;
+            this.rectTint = rectTint;
             this.author = author;
             this.layout = layout;
             this.id = id;
@@ -100,8 +114,10 @@ public final class IconPacks {
                         json = readAll(in);
                     } catch (IOException ignored) {
                     }
+                    String[] rect = context.getAssets().list(ASSET_DIR + "/" + id + "/" + RECT_DIR);
                     packs.add(new Pack(id, packName(json, id), true, packTint(json), iconNames(files),
-                            packField(json, "author"), packField(json, "layout")));
+                            packField(json, "author"), packField(json, "layout"),
+                            iconNames(rect != null ? rect : new String[0]), packRectTint(json)));
                 }
             }
         } catch (IOException ignored) {
@@ -120,9 +136,11 @@ public final class IconPacks {
                     }
                 }
                 String[] files = d.list();
+                String[] rect = new File(d, RECT_DIR).list();
                 packs.add(new Pack(d.getName(), packName(json, d.getName()), false, packTint(json),
                         iconNames(files != null ? files : new String[0]),
-                        packField(json, "author"), packField(json, "layout")));
+                        packField(json, "author"), packField(json, "layout"),
+                        iconNames(rect != null ? rect : new String[0]), packRectTint(json)));
             }
         }
         return packs;
@@ -142,6 +160,16 @@ public final class IconPacks {
             return new JSONObject(new String(json, StandardCharsets.UTF_8)).optBoolean("tint", true);
         } catch (Exception e) {
             return true;
+        }
+    }
+
+    private static boolean packRectTint(byte[] json) {
+        boolean tint = packTint(json);
+        if (json == null) return tint;
+        try {
+            return new JSONObject(new String(json, StandardCharsets.UTF_8)).optBoolean("rectTint", tint);
+        } catch (Exception e) {
+            return tint;
         }
     }
 
@@ -168,14 +196,21 @@ public final class IconPacks {
 
     @Nullable
     public static Bitmap load(@NonNull Context context, @NonNull Pack pack, @NonNull String icon) {
+        return load(context, pack, icon, false);
+    }
+
+    /** The round-button picture, or with {@code rect} the rect/ version for rectangular buttons. */
+    @Nullable
+    public static Bitmap load(@NonNull Context context, @NonNull Pack pack, @NonNull String icon, boolean rect) {
+        String rel = (rect ? RECT_DIR + "/" : "") + icon + ".png";
         if (pack.builtIn) {
-            try (InputStream in = context.getAssets().open(ASSET_DIR + "/" + pack.id + "/" + icon + ".png")) {
+            try (InputStream in = context.getAssets().open(ASSET_DIR + "/" + pack.id + "/" + rel)) {
                 return BitmapFactory.decodeStream(in);
             } catch (IOException e) {
                 return null;
             }
         }
-        File f = new File(new File(importedDir(), pack.id), icon + ".png");
+        File f = new File(new File(importedDir(), pack.id), rel);
         return f.isFile() ? BitmapFactory.decodeFile(f.getAbsolutePath()) : null;
     }
 
@@ -201,16 +236,22 @@ public final class IconPacks {
             ZipEntry e;
             while ((e = zip.getNextEntry()) != null) {
                 if (e.isDirectory()) continue;
-                // Only the file name: an entry path must never leave the pack folder (zip slip).
-                String name = new File(e.getName()).getName();
+                // Only the file name: an entry path must never leave the pack folder (zip slip). The
+                // one folder kept is rect/, the versions for rectangular buttons.
+                File entry = new File(e.getName());
+                String name = entry.getName();
                 String lower = name.toLowerCase(Locale.ROOT);
+                File parent = entry.getParentFile();
+                boolean rect = parent != null && parent.getName().equalsIgnoreCase(RECT_DIR);
                 if (lower.equals("pack.json")) {
                     writeFile(new File(tmp, "pack.json"), readAll(zip));
                 } else if (lower.endsWith(".png")) {
                     String icon = lower.substring(0, lower.length() - 4).replaceAll("[^a-z0-9_-]+", "_");
                     Bitmap bmp = decodeScaled(readAll(zip));
                     if (bmp == null || icon.isEmpty()) continue;
-                    try (FileOutputStream out = new FileOutputStream(new File(tmp, icon + ".png"))) {
+                    File dest = rect ? new File(tmp, RECT_DIR) : tmp;
+                    if (!dest.isDirectory() && !dest.mkdirs()) throw new IOException("cannot create " + dest);
+                    try (FileOutputStream out = new FileOutputStream(new File(dest, icon + ".png"))) {
                         trimTransparentBorder(bmp).compress(Bitmap.CompressFormat.PNG, 100, out);
                     }
                     count++;
@@ -313,16 +354,27 @@ public final class IconPacks {
         if (b == null || !b.isJsonArray() || b.getAsJsonArray().size() != 1) return null;
         String[] icons = ACTIONS.get(b.getAsJsonArray().get(0).getAsString());
         if (icons == null) return null;
-        for (String icon : icons) if (pack.icons.contains(icon)) return icon;
+        boolean rect = isRect(d);
+        for (String icon : icons)
+            if (pack.icons.contains(icon) || (rect && pack.rectIcons.contains(icon))) return icon;
         return null;
+    }
+
+    private static boolean isRect(@NonNull JsonObject d) {
+        return "BUTTON_RECT".equals(optString(d, "type"));
+    }
+
+    /** Whether a button gets the rect/ version of this icon: a rectangular button, and the pack has one. */
+    private static boolean useRect(@NonNull Pack pack, @NonNull JsonObject d, @NonNull String icon) {
+        return isRect(d) && pack.rectIcons.contains(icon);
     }
 
     private static String prefix(Pack pack) {
         return "pack_" + pack.id + "_";
     }
 
-    private static String iconFileName(Pack pack, String icon) {
-        return prefix(pack) + icon + ".png";
+    private static String iconFileName(Pack pack, String icon, boolean rect) {
+        return prefix(pack) + (rect ? RECT_DIR + "_" : "") + icon + ".png";
     }
 
     // ---- an instance's saved layout --------------------------------------------------------
@@ -392,8 +444,10 @@ public final class IconPacks {
             String current = optString(d, "iconFile");
             if (current != null && current.startsWith(prefix(pack))) applied++;
             String icon = packIconFor(pack, d);
-            if (icon != null && (!iconFileName(pack, icon).equals(current) || optBool(d, "noTint") == pack.tint))
-                pending++;
+            if (icon == null) continue;
+            boolean rect = useRect(pack, d, icon);
+            boolean tint = rect ? pack.rectTint : pack.tint;
+            if (!iconFileName(pack, icon, rect).equals(current) || optBool(d, "noTint") == tint) pending++;
         }
         return new Status(applied, pending);
     }
@@ -413,16 +467,17 @@ public final class IconPacks {
             JsonObject d = e.getAsJsonObject();
             String icon = packIconFor(pack, d);
             if (icon == null) continue;
-            Bitmap bmp = load(context, pack, icon);
+            boolean rect = useRect(pack, d, icon);
+            Bitmap bmp = load(context, pack, icon, rect);
             if (bmp == null) continue;
-            String fileName = iconFileName(pack, icon);
+            String fileName = iconFileName(pack, icon, rect);
             try (FileOutputStream out = new FileOutputStream(new File(icons, fileName))) {
                 bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
             } catch (IOException ex) {
                 continue;
             }
             d.addProperty("iconFile", fileName);
-            d.addProperty("noTint", !pack.tint);
+            d.addProperty("noTint", !(rect ? pack.rectTint : pack.tint));
             applied++;
         }
         if (applied > 0 && !writeLayout(gi, layout)) return -1;

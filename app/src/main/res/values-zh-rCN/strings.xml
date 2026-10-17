@@ -601,6 +601,7 @@
     <string name="control_element_custom_icon_failed">无法加载图片</string>
     <string name="control_element_custom_icon_select_button">请先选择一个按钮</string>
     <string name="control_element_icon_no_tint">保留原始颜色</string>
+    <string name="control_element_icon_scale">图片大小</string>
     <string name="vibrate_on_touch_switch_label">按下按钮时振动</string>
     <string name="new_game_instance_analyzing">正在分析游戏文件，请稍候…</string>
     <string name="new_game_instance_detect_failed">无法读取游戏 ZIP。请确认它是有效的 Project Zomboid 压缩包后重试。</string>

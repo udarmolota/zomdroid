@@ -336,6 +336,40 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/element_custom_icon_b"/>
 
+                <!-- Custom image size -->
+                <TextView
+                    android:id="@+id/element_icon_scale_tv"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?attr/textAppearanceLabelSmall"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="13sp"
+                    android:gravity="start"
+                    android:text="@string/control_element_icon_scale"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/element_icon_no_tint_cb"
+                    app:layout_constraintEnd_toStartOf="@+id/element_icon_scale_percent_tv" />
+
+                <TextView
+                    android:id="@+id/element_icon_scale_percent_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    app:layout_constraintStart_toEndOf="@+id/element_icon_scale_tv"
+                    app:layout_constraintTop_toTopOf="@+id/element_icon_scale_tv"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <SeekBar
+                    android:id="@+id/element_icon_scale_sb"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:min="50"
+                    android:max="150"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/element_icon_scale_tv"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
                 <TextView
                     android:id="@+id/element_input_type_tv"
                     android:layout_width="0dp"
@@ -345,7 +379,7 @@
                     android:textSize="13sp"
                     android:text="@string/control_element_input_type"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/element_icon_no_tint_cb"/>
+                    app:layout_constraintTop_toBottomOf="@id/element_icon_scale_sb"/>
 
 
                 <Spinner

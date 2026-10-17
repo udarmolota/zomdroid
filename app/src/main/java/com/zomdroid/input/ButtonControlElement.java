@@ -251,6 +251,16 @@ public class ButtonControlElement extends AbstractControlElement {
         return this.drawable.noTint;
     }
 
+    public float getIconScale() {
+        return this.drawable.iconScale;
+    }
+
+    public void setIconScale(float iconScale) {
+        this.drawable.iconScale = iconScale;
+        this.drawable.updateIconDrawable();
+        this.parentView.invalidate();
+    }
+
     public void setNoTint(boolean noTint) {
         if (this.drawable.iconFile != null) {
             this.drawable.setCustomIcon(this.drawable.iconFile, noTint);
@@ -290,7 +300,8 @@ public class ButtonControlElement extends AbstractControlElement {
                 this.drawable.style,
                 this.drawable.iconFile,
                 this.drawable.noTint,
-                false);
+                false, false, false,
+                this.drawable.iconScale);
     }
 
     public class ButtonControlDrawable {
@@ -323,6 +334,8 @@ public class ButtonControlElement extends AbstractControlElement {
         private ControlElementDescription.Style style;
         private String iconFile;      // user image filename in controls/icons, or null
         private boolean noTint;       // keep custom image original colors when true
+        private boolean roundBadge;   // the custom image is itself a round button: fill the circle
+        private float iconScale = 1f; // custom image size relative to its default box (editor slider)
 
         public ButtonControlDrawable(InputControlsView parent, ControlElementDescription description) {
             this.type = description.type;
@@ -355,6 +368,7 @@ public class ButtonControlElement extends AbstractControlElement {
             setTextSizeToFit();
 
             setIcon(description.icon);
+            this.iconScale = description.iconScaleOrDefault();
             if (description.iconFile != null && !description.iconFile.isEmpty()) {
                 setCustomIcon(description.iconFile, description.noTint);
             }
@@ -373,9 +387,14 @@ public class ButtonControlElement extends AbstractControlElement {
             float oldStroke = p.getStrokeWidth();
             ColorFilter oldFilter = this.colorFilter;
 
+            // A round badge brings its own circle: our fill and contour would only draw a second ring
+            // (or a square frame on a rectangular button) next to it. The editor still shows where the
+            // button is, with a thin dashed outline that does not read as part of the picture.
+            boolean badge = this.roundBadge && this.iconFile != null && this.iconDrawable != null;
+
             // --- Fill pass (for FILLED / GLASS styles) ---
-            if (this.style == ControlElementDescription.Style.FILLED
-                    || this.style == ControlElementDescription.Style.GLASS) {
+            if (!badge && (this.style == ControlElementDescription.Style.FILLED
+                    || this.style == ControlElementDescription.Style.GLASS)) {
                 Paint.Style oldPaintStyle = p.getStyle();
                 p.setStyle(Paint.Style.FILL);
                 p.setColor(oldColor);
@@ -394,7 +413,7 @@ public class ButtonControlElement extends AbstractControlElement {
 
             // --- Toggle-ON FILL: only for filled styles. OUTLINE buttons get an orange contour below
             //     (so the ON indicator matches the button's drawing style). ---
-            if (toggledOn && (this.style == ControlElementDescription.Style.FILLED
+            if (!badge && toggledOn && (this.style == ControlElementDescription.Style.FILLED
                     || this.style == ControlElementDescription.Style.GLASS)) {
                 Paint.Style onStyle = p.getStyle();
                 p.setStyle(Paint.Style.FILL);
@@ -408,12 +427,14 @@ public class ButtonControlElement extends AbstractControlElement {
                 p.setColorFilter(oldFilter);
             }
 
-            p.setColor(android.graphics.Color.rgb(40, 40, 40));
-            //p.setAlpha(OUTLINE_ALPHA);
-            p.setAlpha(Math.min(oldAlpha, OUTLINE_ALPHA));
-            p.setStrokeWidth(oldStroke + OUTLINE_EXTRA_PX * parentView.pixelScale);
-            p.setColorFilter(null);
-            this.shapeDrawable.draw(canvas);
+            if (!badge) {
+                p.setColor(android.graphics.Color.rgb(40, 40, 40));
+                //p.setAlpha(OUTLINE_ALPHA);
+                p.setAlpha(Math.min(oldAlpha, OUTLINE_ALPHA));
+                p.setStrokeWidth(oldStroke + OUTLINE_EXTRA_PX * parentView.pixelScale);
+                p.setColorFilter(null);
+                this.shapeDrawable.draw(canvas);
+            }
 
             // --- Normal pass (contour). When toggled ON, draw the contour in the attention
             //     color and a bit thicker — this is the ON indicator for OUTLINE style. ---
@@ -421,7 +442,15 @@ public class ButtonControlElement extends AbstractControlElement {
             p.setAlpha(oldAlpha);
             p.setStrokeWidth(toggledOn ? oldStroke * 1.7f : oldStroke);
             p.setColorFilter(toggledOn ? null : oldFilter);
-            this.shapeDrawable.draw(canvas);
+            if (!badge || toggledOn) {
+                this.shapeDrawable.draw(canvas);   // a badge keeps only the ON contour
+            } else if (parentView.isEditMode) {
+                p.setStrokeWidth(Math.max(1f, oldStroke / 2f));
+                p.setPathEffect(new android.graphics.DashPathEffect(new float[] {
+                        6f * parentView.pixelScale, 6f * parentView.pixelScale}, 0f));
+                this.shapeDrawable.draw(canvas);
+                p.setPathEffect(null);
+            }
             // Restore the paint to the base state so nothing leaks into the next frame.
             p.setStrokeWidth(oldStroke);
             p.setColor(oldColor);
@@ -567,6 +596,7 @@ public class ButtonControlElement extends AbstractControlElement {
                 return;
             }
             this.iconFile = fileName;
+            this.roundBadge = isRoundBadge(bmp);
             BitmapDrawable bd = new BitmapDrawable(parentView.getResources(), bmp);
             if (shouldTintIcon()) {
                 bd.setTint(this.color);
@@ -649,6 +679,30 @@ public class ButtonControlElement extends AbstractControlElement {
             this.iconDrawable.setBounds(left, top, (int) (left + scaledWidth), (int) (top + scaledHeight));
         }
 
+        /**
+         * True for a picture that is itself a filled round button: opaque in the middle of each edge
+         * and inside on the diagonals, transparent in the corners (images are alpha-trimmed on import, so the edges are its own).
+         */
+        private boolean isRoundBadge(Bitmap b) {
+            int w = b.getWidth(), h = b.getHeight();
+            if (w < 16 || h < 16 || Math.abs(w - h) > Math.max(w, h) / 10) return false;
+            int m = Math.max(1, w / 64);   // a little inside the edge, past anti-aliasing
+            boolean edges = alphaAt(b, w / 2, m) > 200 && alphaAt(b, w / 2, h - 1 - m) > 200
+                    && alphaAt(b, m, h / 2) > 200 && alphaAt(b, w - 1 - m, h / 2) > 200;
+            int c = Math.max(1, w / 16);   // well inside the corners a circle leaves empty
+            boolean corners = alphaAt(b, c, c) < 40 && alphaAt(b, w - 1 - c, c) < 40
+                    && alphaAt(b, c, h - 1 - c) < 40 && alphaAt(b, w - 1 - c, h - 1 - c) < 40;
+            // Filled, not a ring or a cross: inside the circle on the diagonals too.
+            int d = Math.round(w * 0.25f);   // ~0.7 of the radius along each diagonal
+            boolean filled = alphaAt(b, d, d) > 200 && alphaAt(b, w - 1 - d, d) > 200
+                    && alphaAt(b, d, h - 1 - d) > 200 && alphaAt(b, w - 1 - d, h - 1 - d) > 200;
+            return edges && corners && filled;
+        }
+
+        private int alphaAt(Bitmap b, int x, int y) {
+            return (b.getPixel(x, y) >>> 24) & 0xff;
+        }
+
         private RectF getContentBounds() {
             final float contentScale = 0.8f;
             RectF bounds = new RectF();
@@ -680,7 +734,11 @@ public class ButtonControlElement extends AbstractControlElement {
             // a 0.92*diameter square pokes its corners past the circle. ~0.70 inscribes a full
             // square in the circle. (Imported images are alpha-trimmed on import, so this box maps
             // directly to the visible content.)
-            final float contentScale = (this.type == Type.BUTTON_RECT) ? 0.92f : 0.70f;
+            // A round badge (an icon drawn as a whole round button, its own circle included) fills the
+            // button instead, round or rectangular: inscribed in the 0.70 square it showed as a small
+            // button inside the big one.
+            final float contentScale = (this.roundBadge ? 1.0f
+                    : (this.type == Type.BUTTON_RECT) ? 0.92f : 0.70f) * this.iconScale;
             float contentW = this.width * contentScale;
             float contentH = this.height * contentScale;
             RectF bounds = new RectF();

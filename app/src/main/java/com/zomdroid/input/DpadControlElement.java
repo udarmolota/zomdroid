@@ -248,7 +248,8 @@ public class DpadControlElement extends AbstractControlElement {
                 this.drawable.alpha,
                 this.inputType, ControlElementDescription.Icon.NO_ICON, false,
                 ControlElementDescription.DEFAULT_SENSITIVITY, ControlElementDescription.DEFAULT_STYLE,
-                this.drawable.iconFile, this.drawable.noTint);
+                this.drawable.iconFile, this.drawable.noTint, false, false, false,
+                this.drawable.iconScale);
     }
 
     /** Replace the drawn cross with a user-supplied image from controls/icons (null clears it). */
@@ -263,6 +264,16 @@ public class DpadControlElement extends AbstractControlElement {
 
     public boolean isNoTint() {
         return this.drawable.noTint;
+    }
+
+    public float getIconScale() {
+        return this.drawable.iconScale;
+    }
+
+    public void setIconScale(float iconScale) {
+        this.drawable.iconScale = iconScale;
+        this.drawable.updateIconBounds();
+        this.parentView.invalidate();
     }
 
     public void setNoTint(boolean noTint) {
@@ -290,6 +301,7 @@ public class DpadControlElement extends AbstractControlElement {
         private final Path path = new Path();
         private String iconFile;        // user image filename in controls/icons, or null for the drawn cross
         private boolean noTint;         // keep the custom image's original colors when true
+        private float iconScale = 1f;   // custom image size relative to the footprint (editor slider)
         private Drawable iconDrawable;  // decoded custom image, drawn instead of the cross
         private ColorFilter colorFilter;
 
@@ -303,6 +315,7 @@ public class DpadControlElement extends AbstractControlElement {
 
             this.paint.setStyle(Paint.Style.STROKE);
 
+            this.iconScale = description.iconScaleOrDefault();
             if (description.iconFile != null && !description.iconFile.isEmpty()) {
                 setCustomIcon(description.iconFile, description.noTint);
             } else {
@@ -341,11 +354,12 @@ public class DpadControlElement extends AbstractControlElement {
         }
 
         // The image fills the d-pad's square footprint, so a cross-shaped picture lines up with
-        // the touch areas it replaces.
+        // the touch areas it replaces (at 100%; the size slider scales it around the centre).
         private void updateIconBounds() {
             if (this.iconDrawable == null) return;
-            this.iconDrawable.setBounds(Math.round(this.x), Math.round(this.y),
-                    Math.round(this.x + this.size), Math.round(this.y + this.size));
+            float inset = this.size * (1f - this.iconScale) / 2f;
+            this.iconDrawable.setBounds(Math.round(this.x + inset), Math.round(this.y + inset),
+                    Math.round(this.x + this.size - inset), Math.round(this.y + this.size - inset));
         }
 
         private void calculatePath() {

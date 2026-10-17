@@ -56,11 +56,18 @@ public class ControlElementDescription {
      */
     public final boolean noOutline;
     public final boolean noLabel;
+    /**
+     * Size of a custom iconFile relative to its default box (1 = 100%). Absent in older layouts =
+     * 0, read as 100% through {@link #iconScaleOrDefault()}.
+     */
+    public final float iconScale;
 
     public static final float DEFAULT_SENSITIVITY = 2.0f;
     public static final Style DEFAULT_STYLE = Style.OUTLINE;
     public static final float MIN_SENSITIVITY = 0.25f;
     public static final float MAX_SENSITIVITY = 8.0f;
+    public static final float MIN_ICON_SCALE = 0.5f;
+    public static final float MAX_ICON_SCALE = 1.5f;
 
     public ControlElementDescription(float centerXRelative, float centerYRelative, float scale,
                                      @NonNull AbstractControlElement.Type type, @NonNull GLFWBinding[] bindings,
@@ -115,6 +122,18 @@ public class ControlElementDescription {
                                      boolean isToggle, float sensitivity, Style style,
                                      String iconFile, boolean noTint, boolean tapDisabled,
                                      boolean noOutline, boolean noLabel) {
+        this(centerXRelative, centerYRelative, scale, type, bindings, text, color, alpha,
+                inputType, icon, isToggle, sensitivity, style, iconFile, noTint, tapDisabled,
+                noOutline, noLabel, 1f);
+    }
+
+    public ControlElementDescription(float centerXRelative, float centerYRelative, float scale,
+                                     @NonNull AbstractControlElement.Type type, @NonNull GLFWBinding[] bindings,
+                                     String text, int color, int alpha,
+                                     AbstractControlElement.InputType inputType, @NonNull Icon icon,
+                                     boolean isToggle, float sensitivity, Style style,
+                                     String iconFile, boolean noTint, boolean tapDisabled,
+                                     boolean noOutline, boolean noLabel, float iconScale) {
         this.centerXRelative = centerXRelative;
         this.centerYRelative = centerYRelative;
         this.scale = scale;
@@ -133,7 +152,14 @@ public class ControlElementDescription {
         this.tapDisabled = tapDisabled;
         this.noOutline = noOutline;
         this.noLabel = noLabel;
+        this.iconScale = iconScale;
         validate();
+    }
+
+    /** {@link #iconScale} clamped to the editor's range; 0 (an older layout) is 100%. */
+    public float iconScaleOrDefault() {
+        if (!(iconScale > 0f)) return 1f;
+        return Math.max(MIN_ICON_SCALE, Math.min(MAX_ICON_SCALE, iconScale));
     }
 
     public static ControlElementDescription getDefaultForType(AbstractControlElement.Type type) {

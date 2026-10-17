@@ -619,6 +619,7 @@
     <string name="control_element_custom_icon_failed">Не удалось загрузить изображение</string>
     <string name="control_element_custom_icon_select_button">Сначала выберите кнопку</string>
     <string name="control_element_icon_no_tint">Сохранить исходные цвета</string>
+    <string name="control_element_icon_scale">Размер картинки</string>
     <string name="vibrate_on_touch_switch_label">Вибрация при нажатии</string>
     <string name="new_game_instance_analyzing">Анализ файла игры, подождите…</string>
     <string name="new_game_instance_detect_failed">Не удалось прочитать ZIP игры. Убедитесь, что это корректный архив Project Zomboid, и попробуйте снова.</string>
