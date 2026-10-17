@@ -104,7 +104,9 @@ public class StickControlElement extends AbstractControlElement {
                 if (this.pointerId < 0) return false;
                 int pointerIndex = e.findPointerIndex(this.pointerId);
                 if (pointerIndex < 0) {
-                    this.pointerId = -1;
+                    // Our finger is gone without an UP we saw: centre the stick, or the game
+                    // keeps the last tilt and the character walks on by itself.
+                    release();
                     return false;
                 }
                 float x = e.getX(pointerIndex);
@@ -117,13 +119,24 @@ public class StickControlElement extends AbstractControlElement {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_POINTER_UP:
                 if (pointerId != this.pointerId) return false;
-                this.pointerId = -1;
-                drawable.resetInnerPosition();
-                this.parentView.invalidate();
-                this.dispatchEvent();
+                release();
+                return true;
+            case MotionEvent.ACTION_CANCEL:
+                // Android took the gesture away (an edge swipe, palm rejection, a busy app):
+                // there will be no UP, so let go now - the buttons and D-pad already do.
+                if (this.pointerId < 0) return false;
+                release();
                 return true;
         }
         return false;
+    }
+
+    /** Centres the stick and tells the game, as a lifted finger does. */
+    private void release() {
+        this.pointerId = -1;
+        drawable.resetInnerPosition();
+        this.parentView.invalidate();
+        this.dispatchEvent();
     }
 
     @Override
