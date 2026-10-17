@@ -654,6 +654,7 @@
     <string name="settings_texture_compression_short">Mengompresi tekstur besar dengan sedikit penurunan kualitas. Menyimpan cache yang bisa dibersihkan.</string>
     <string name="settings_jvm_args_title">Argumen JVM</string>
     <string name="launcher_empty_title">Cara memulai</string>
+    <string name="news_title">Berita Project Zomboid</string>
     <string name="launcher_empty_body">Untuk mulai bermain, buat instance — salinan Project Zomboid yang terpasang. Tambahkan file game dengan tombol + di atas, atau unduh game dari Steam atau GOG lewat menu samping. Unduhan dari Steam harus dikemas dulu ke .zip; dari GOG, ketuk “Buat instance” setelah unduhan selesai.</string>
     <string name="launcher_empty_quick_start">Mulai cepat</string>
     <!-- Button icons (icon packs) -->

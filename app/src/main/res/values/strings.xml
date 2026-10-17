@@ -696,6 +696,7 @@
     <string name="control_element_opacity_all">To all</string>
     <string name="settings_jvm_args_title">JVM arguments</string>
     <string name="launcher_empty_title">Getting started</string>
+    <string name="news_title">Project Zomboid news</string>
     <string name="launcher_empty_body">To start playing, create an instance — an installed copy of Project Zomboid. Add your game files with the + at the top, or download the game from Steam or GOG in the side menu. A Steam download must be packed into a .zip first; from GOG, tap “Create an instance” once the download is done.</string>
     <string name="launcher_empty_quick_start">Quick start</string>
     <!-- Button icons (icon packs) -->

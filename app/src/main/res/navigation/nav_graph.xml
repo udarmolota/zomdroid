@@ -60,7 +60,7 @@
     <fragment
         android:id="@+id/launcher_fragment"
         android:name="com.zomdroid.fragments.LauncherFragment"
-        android:label="@string/fragment_label_launcher"
+        android:label="@string/app_name"
         tools:layout="@layout/fragment_launcher" />
 
     <fragment

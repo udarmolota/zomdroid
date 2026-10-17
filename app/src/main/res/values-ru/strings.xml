@@ -654,6 +654,7 @@
     <string name="settings_features_title">Функции</string>
     <string name="settings_jvm_args_title">Аргументы JVM</string>
     <string name="launcher_empty_title">С чего начать</string>
+    <string name="news_title">Новости Project Zomboid</string>
     <string name="launcher_empty_body">Чтобы начать играть, создайте инстанс — установленную копию Project Zomboid. Добавьте файлы игры кнопкой + вверху или скачайте игру из Steam или GOG через боковое меню. Загрузку из Steam сначала нужно упаковать в .zip; из GOG после загрузки нажмите «Создать инстанс».</string>
     <string name="launcher_empty_quick_start">Быстрый старт</string>
     <!-- Button icons (icon packs) -->

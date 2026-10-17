@@ -350,7 +350,9 @@ public class LauncherFragment extends Fragment {
                 Navigation.findNavController(v).navigate(R.id.action_download_gog));
         updateEmptyState();
 
-        binding.gameInstancesRv.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+        showNews();
+
+        binding.launcherScroll.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
             @NonNull
             @Override
             public WindowInsets onApplyWindowInsets(@NonNull View v, @NonNull WindowInsets windowInsets) {
@@ -676,6 +678,54 @@ public class LauncherFragment extends Fragment {
             Context context = getContext();
             if (context != null) context.unbindService(this.installerServiceConnection);
             isInstallerServiceBound = false;
+        }
+    }
+
+    /** Fetched once per app start; later visits to the home screen show what is cached. */
+    private static boolean newsFetched;
+
+    /**
+     * Project Zomboid news under the instances: the cached posts at once, then fresh ones from Steam
+     * once per app start (SteamNews). A tap opens the post on Steam. Ported from RimDroid.
+     */
+    private void showNews() {
+        Context app = requireContext().getApplicationContext();
+        fillNews(com.zomdroid.SteamNews.cached(app));
+        if (newsFetched) return;
+        newsFetched = true;
+        android.os.Handler main = new android.os.Handler(android.os.Looper.getMainLooper());
+        new Thread(() -> {
+            java.util.List<com.zomdroid.SteamNews.Item> fresh = com.zomdroid.SteamNews.fetch(app);
+            if (fresh != null) main.post(() -> { if (isAdded() && binding != null) fillNews(fresh); });
+        }, "zd-news").start();
+    }
+
+    private void fillNews(java.util.List<com.zomdroid.SteamNews.Item> items) {
+        ViewGroup list = binding.launcherNewsItemsLl;
+        list.removeAllViews();
+        binding.launcherNewsLl.setVisibility(items.isEmpty() ? View.GONE : View.VISIBLE);
+        Context app = requireContext().getApplicationContext();
+        int width = getResources().getDisplayMetrics().widthPixels;
+        java.text.DateFormat df = java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM);
+        android.os.Handler main = new android.os.Handler(android.os.Looper.getMainLooper());
+        for (com.zomdroid.SteamNews.Item item : items) {
+            View card = LayoutInflater.from(requireContext()).inflate(R.layout.item_news, list, false);
+            ((TextView) card.findViewById(R.id.tv_news_date)).setText(df.format(new java.util.Date(item.date * 1000)));
+            ((TextView) card.findViewById(R.id.tv_news_title)).setText(item.title);
+            TextView snippet = card.findViewById(R.id.tv_news_snippet);
+            snippet.setText(item.snippet);
+            snippet.setVisibility(item.snippet.isEmpty() ? View.GONE : View.VISIBLE);
+            card.setOnClickListener(v -> {
+                try {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(item.link)));
+                } catch (Exception ignored) {}   // no browser
+            });
+            android.widget.ImageView image = card.findViewById(R.id.iv_news_image);
+            new Thread(() -> {
+                android.graphics.Bitmap bmp = com.zomdroid.SteamNews.image(app, item.imageUrl, width);
+                if (bmp != null) main.post(() -> { image.setImageBitmap(bmp); image.setVisibility(View.VISIBLE); });
+            }, "zd-news-image").start();
+            list.addView(card);
         }
     }
 
