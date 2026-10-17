@@ -729,6 +729,7 @@
     <string name="mods_inactive">Nonaktif (%1$d)</string>
     <string name="mods_search">Cari mod</string>
     <string name="mods_sort">Urutkan</string>
+    <string name="mods_open_import">→ Impor mod</string>
     <string name="mods_enable_all">Aktifkan semua yang tampil</string>
     <string name="mods_disable_all">Nonaktifkan semua yang tampil</string>
     <string name="mods_enabled_n">%1$d mod diaktifkan. Tekan Urutkan untuk merapikan urutannya.</string>

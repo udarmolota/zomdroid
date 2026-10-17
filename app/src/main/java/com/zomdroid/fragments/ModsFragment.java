@@ -114,7 +114,7 @@ public class ModsFragment extends Fragment {
             @Override public void onTextChanged(CharSequence s, int a, int b, int c) {}
             @Override public void afterTextChanged(Editable s) { refresh(); }
         });
-        v.findViewById(R.id.btn_mods_install).setOnClickListener(x ->
+        v.findViewById(R.id.tv_mods_install).setOnClickListener(x ->
                 Navigation.findNavController(v).navigate(R.id.action_open_install_mod));
         btnSort = v.findViewById(R.id.btn_mods_sort);
         btnSort.setOnClickListener(x -> sort());

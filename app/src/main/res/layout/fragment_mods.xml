@@ -57,18 +57,8 @@
             android:id="@+id/btn_mods_sort"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="6dp"
             android:layout_weight="1"
             android:text="@string/mods_sort"
-            android:textSize="12sp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_mods_install"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/nav_menu_install_mod"
             android:textSize="12sp" />
 
         <!-- Enable / disable every mod shown (all of them, or what the search leaves), for lists of
@@ -92,6 +82,19 @@
             android:tooltipText="@string/mods_disable_all"
             app:icon="@drawable/ic_mods_disable_all" />
     </LinearLayout>
+
+    <!-- Import mods as a link under the buttons, like "Open Settings" on the Optimization page:
+         as a second button its longer label made the two buttons different sizes. -->
+    <TextView
+        android:id="@+id/tv_mods_install"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:text="@string/mods_open_import"
+        android:textColor="?attr/colorPrimary"
+        android:textSize="12sp" />
 
     <TextView
         android:layout_width="match_parent"

@@ -728,6 +728,7 @@
     <string name="mods_inactive">Inativos (%1$d)</string>
     <string name="mods_search">Buscar mods</string>
     <string name="mods_sort">Ordenar</string>
+    <string name="mods_open_import">→ Importar mods</string>
     <string name="mods_enable_all">Ativar todos os mostrados</string>
     <string name="mods_disable_all">Desativar todos os mostrados</string>
     <string name="mods_enabled_n">%1$d mods ativados. Toque em Ordenar para colocá-los em ordem.</string>

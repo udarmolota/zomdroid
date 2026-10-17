@@ -722,6 +722,7 @@
     <string name="mods_inactive">未启用（%1$d）</string>
     <string name="mods_search">搜索模组</string>
     <string name="mods_sort">排序</string>
+    <string name="mods_open_import">→ 导入模组</string>
     <string name="mods_enable_all">启用显示的全部模组</string>
     <string name="mods_disable_all">停用显示的全部模组</string>
     <string name="mods_enabled_n">已启用 %1$d 个模组。点“排序”整理它们的顺序。</string>

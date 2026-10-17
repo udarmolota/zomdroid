@@ -729,6 +729,7 @@
     <string name="mods_inactive">Выключенные (%1$d)</string>
     <string name="mods_search">Поиск модов</string>
     <string name="mods_sort">Сортировать</string>
+    <string name="mods_open_import">→ Импорт модов</string>
     <string name="mods_enable_all">Включить все показанные</string>
     <string name="mods_disable_all">Выключить все показанные</string>
     <string name="mods_enabled_n">Включено модов: %1$d. Нажмите «Сортировать», чтобы расставить их по порядку.</string>

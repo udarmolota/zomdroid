@@ -772,6 +772,7 @@
     <string name="mods_inactive">Inactive (%1$d)</string>
     <string name="mods_search">Search mods</string>
     <string name="mods_sort">Sort</string>
+    <string name="mods_open_import">→ Import mods</string>
     <string name="mods_enable_all">Enable all shown</string>
     <string name="mods_disable_all">Disable all shown</string>
     <string name="mods_enabled_n">%1$d mods enabled. Press Sort to put them in order.</string>
