@@ -256,6 +256,13 @@ public class GameLauncher {
                     Log.w("Zomdroid", "Failed to create MobileGlues directory " + mgDir);
                 }
                 Os.setenv("MG_DIR_PATH", mgDir.getAbsolutePath(), false);
+                // The astra fork's texture-memory paths are off unless asked for: our switches ask.
+                // ETC2 keeps its disk cache in MG_DIR_PATH/etc2-cache; the memory saver halves
+                // textures of 1024 and up before upload.
+                String etc2 = settings.isTextureCompression() ? "1" : "0";
+                Os.setenv("MOBILEGLUES_PZ_ETC2", etc2, false);
+                Os.setenv("MOBILEGLUES_PZ_ETC2_CACHE", etc2, false);
+                if (settings.isMemorySaver()) Os.setenv("MOBILEGLUES_PZ_TEXTURE_MEMORY", "1", false);
                 break;
             }
             default: {

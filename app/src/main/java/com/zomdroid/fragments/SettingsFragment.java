@@ -168,13 +168,11 @@ public class SettingsFragment extends Fragment {
         ArrayAdapter<LauncherPreferences.Renderer> rendererArrayAdapter = new ArrayAdapter<>(
             requireContext(),
             R.layout.spinner_item,
-            java.util.Arrays.stream(LauncherPreferences.Renderer.values())
-                    .filter(renderer -> renderer != LauncherPreferences.Renderer.MOBILEGLUES_EXPERIMENTAL)
-                    .toArray(LauncherPreferences.Renderer[]::new));
+            LauncherPreferences.Renderer.values());
         rendererArrayAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         binding.settingsRendererS.setAdapter(rendererArrayAdapter);
         int rendererPosition = rendererArrayAdapter.getPosition(settings.getRenderer());
-        // An existing experimental selection is hidden too; keep the spinner on a valid item.
+        // A renderer missing from the list (a removed one in old settings): keep the spinner valid.
         if (rendererPosition < 0) {
             settings.setRenderer(LauncherPreferences.Renderer.NG_GL4ES);
             rendererPosition = rendererArrayAdapter.getPosition(settings.getRenderer());

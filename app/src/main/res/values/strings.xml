@@ -379,7 +379,7 @@
     <!-- CC BY requires the credit to stay visible, so it rides along in the version dialog - the
          one "about this app" surface reachable at any time. Untranslated on purpose: a licence
          attribution names people and a licence, and both stay as written. -->
-    <string name="credits_third_party" translatable="false">Donate icon: \"Donate\" by Edward Boatman from the Noun Project, CC BY 3.0.\nhttps://thenounproject.com/icon/donate-285/</string>
+    <string name="credits_third_party" translatable="false">Donate icon: \"Donate\" by Edward Boatman from the Noun Project, CC BY 3.0.\nhttps://thenounproject.com/icon/donate-285/\n\nMobileGlues renderer: the \"astra\" fork of MobileGL-Dev/MobileGlues by Willing-Upstairs-580 (constantinrarinca3-sketch), LGPL v2.1.\nhttps://github.com/constantinrarinca3-sketch/MobileGlues</string>
     <string name="nav_bottom_rimdroid" translatable="false">RimDroid</string>
     <string name="rimdroid_url" translatable="false">https://github.com/udarmolota/RimDroid/releases</string>
     <string name="rimdroid_dialog_title" translatable="false">RimDroid</string>

@@ -287,13 +287,19 @@ public class LauncherPreferences {
         ZINK_OSMESA("libOSMesa.so"),
         NG_GL4ES("libng_gl4es.so"),
         GL4ES("libgl4es.so"),
-        // MobileGlues, zomdroid-experimental fork: desktop GL on top of a GLES 3.2 context.
-        // Experimental renderer candidate for Build 42; NG_GL4ES stays the supported route.
+        // MobileGlues, the "astra" fork by constantinrarinca3-sketch (LGPL-2.1): desktop GL on top
+        // of a GLES 3.2 context. The enum keeps its old name, saved settings and reports use it.
         MOBILEGLUES_EXPERIMENTAL("libMobileGluesZomDroid.so");
 
         final String libName;
         Renderer(String libName) {
             this.libName = libName;
+        }
+
+        /** The name the renderer list shows. */
+        @Override
+        public String toString() {
+            return this == MOBILEGLUES_EXPERIMENTAL ? "MOBILEGLUES" : name();
         }
     }
 

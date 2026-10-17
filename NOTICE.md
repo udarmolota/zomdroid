@@ -69,11 +69,12 @@ Anyone redistributing this project must satisfy FMOD's licence independently.
 | **OpenJDK** (Android build by [PojavLauncherTeam](https://github.com/PojavLauncherTeam/android-openjdk-build-multiarch)) | 21.0.1 and 25.0.3 | GPL v2 **with the Classpath Exception** |
 | **GNU C Library (glibc)** — `libc.so.6`, `libpthread.so.0` | as shipped | LGPL v2.1 or later |
 | **GCC runtime** — `libstdc++.so.6`, `libgcc_s.so.1` | as shipped | GPL v3 with the GCC Runtime Library Exception |
+| **MobileGlues** — `libMobileGluesZomDroid.so`, the "astra" fork by [constantinrarinca3-sketch](https://github.com/constantinrarinca3-sketch/MobileGlues) (Willing-Upstairs-580, aka mepetz) of [MobileGL-Dev/MobileGlues](https://github.com/MobileGL-Dev/MobileGlues) | branch `zomdroid-pz-stable-astra-clean-candidate` @ 414c2c9 | LGPL v2.1 |
 
 The complete corresponding source for these components is available from their upstream projects
 ([OpenJDK](https://github.com/openjdk/jdk), [glibc](https://sourceware.org/glibc/),
-[GCC](https://gcc.gnu.org/)) and, for the Android OpenJDK build, from the PojavLauncherTeam
-repository linked above. On request we will provide the exact sources corresponding to the binaries
+[GCC](https://gcc.gnu.org/), [MobileGlues fork](https://github.com/constantinrarinca3-sketch/MobileGlues/tree/zomdroid-pz-stable-astra-clean-candidate))
+and, for the Android OpenJDK build, from the PojavLauncherTeam repository linked above. On request we will provide the exact sources corresponding to the binaries
 shipped in a given release; open an issue at
 <https://github.com/udarmolota/zomdroid/issues>.
 
