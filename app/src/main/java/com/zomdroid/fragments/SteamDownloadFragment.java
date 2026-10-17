@@ -247,11 +247,9 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
 
     private void startMods() {
         if (SteamDownloadState.get().isDownloading()) return;
-        List<Long> ids = new ArrayList<>();
-        for (String tok : text(etModsIds).split("[\\s,]+")) {
-            if (tok.isEmpty()) continue;
-            try { ids.add(Long.parseLong(tok)); } catch (NumberFormatException ignored) {}
-        }
+        // Numbers or Workshop links, of mods or of collections: a collection is unfolded into its
+        // mods by the downloader (SteamModDownloader.expandCollections).
+        List<Long> ids = SteamModDownloader.parseWorkshopIds(text(etModsIds));
         if (ids.isEmpty()) {
             Toast.makeText(requireContext(), R.string.steam_dl_mods_empty, Toast.LENGTH_SHORT).show();
             return;

@@ -601,11 +601,11 @@
     <string name="steam_dl_version_note">Mengunduh versi Linux Project Zomboid ke Downloads/zomdroid — tanpa Termux, tanpa PC. Build 41 ~6–7 GB dan Build 42 ~10–11 GB (belum dikompres), jadi butuh waktu lama; kalau terputus, mulai lagi build yang sama dan akan dilanjutkan. Biarkan kolom manifest kosong untuk versi terbaru. Untuk mengunci versi lama, cari di https://steamdb.info/depot/108603/manifests/ dan salin baris "DepotDownloader" (bukan "Steam Console") — tempel seluruh barisnya di sini, termasuk branch-nya; toggle Build 41/42 di atas akan diabaikan.</string>
     <string name="steam_dl_manifest_hint">Id manifest, atau baris DepotDownloader lengkap (kosong = terbaru)</string>
     <string name="steam_dl_download_game">Unduh game</string>
-    <string name="steam_dl_mods_note">Unduh mod Workshop berdasarkan ID (angka di URL Workshop: …/sharedfiles/filedetails/?id=ANGKA). Tidak perlu login Steam. Beberapa ID dipisah spasi. Masing-masing disimpan sebagai .zip di Downloads/zomdroid.</string>
-    <string name="steam_dl_mods_hint">ID Workshop (dipisah spasi)</string>
+    <string name="steam_dl_mods_note">Unduh mod Workshop berdasarkan ID atau tautan (…/sharedfiles/filedetails/?id=ANGKA). Tidak perlu login Steam. Beberapa ID dipisah spasi. Tautan koleksi mengunduh semua mod di dalamnya, sesuai urutan koleksi. Masing-masing mod disimpan sebagai .zip di Downloads/zomdroid.</string>
+    <string name="steam_dl_mods_hint">ID atau tautan Workshop — mod atau koleksi</string>
     <string name="steam_dl_download_mods">Unduh mod</string>
     <string name="steam_dl_required">Wajib</string>
-    <string name="steam_dl_mods_empty">Masukkan ID Workshop (angka dari URL)</string>
+    <string name="steam_dl_mods_empty">Masukkan ID atau tautan Workshop (mod atau koleksi)</string>
     <string name="steam_dl_storage_title">Perlu akses penyimpanan</string>
     <string name="steam_dl_storage_message">Game dan mod disimpan ke folder publik Downloads/zomdroid agar bisa dilihat, dibagikan, dan diimpor. Berikan \"Akses ke semua file\" untuk Zomdroid, lalu ketuk Unduh lagi.</string>
     <string name="steam_dl_grant">Izinkan</string>

@@ -124,6 +124,27 @@ public class SteamModDownloader implements Runnable, Cancellable {
         this.listener = listener;
     }
 
+    /**
+     * Workshop IDs from what the player typed: numbers, or links (…/filedetails/?id=NUMBER, with
+     * or without more parameters) to mods or collections, separated by spaces or commas. A
+     * collection stays one ID here; {@link #expandCollections} unfolds it once Steam is reached.
+     */
+    public static List<Long> parseWorkshopIds(String text) {
+        List<Long> ids = new java.util.ArrayList<>();
+        if (text == null) return ids;
+        java.util.regex.Pattern link = java.util.regex.Pattern.compile("[?&]id=(\\d+)");
+        for (String tok : text.trim().split("[\\s,]+")) {
+            if (tok.isEmpty()) continue;
+            java.util.regex.Matcher m = link.matcher(tok);
+            String number = m.find() ? m.group(1) : tok;
+            try {
+                long id = Long.parseLong(number);
+                if (!ids.contains(id)) ids.add(id);
+            } catch (NumberFormatException ignored) { /* not a number or a link */ }
+        }
+        return ids;
+    }
+
     @Override
     public void cancel() {
         running = false;
@@ -220,7 +241,7 @@ public class SteamModDownloader implements Runnable, Cancellable {
                 done("Cannot create downloads folder: " + downloadsDir + " (grant All-files access?)");
                 return;
             }
-            for (Long id : workshopIds) {
+            for (Long id : expandCollections(workshopIds)) {
                 if (!running) { progress("Aborted (disconnected)."); break; }
                 progress("=== Workshop item " + id + " (anonymous) ===");
                 File work = new File(tmpRoot, String.valueOf(id));
@@ -254,6 +275,118 @@ public class SteamModDownloader implements Runnable, Cancellable {
         } finally {
             running = false;
             try { steamUser.logOff(); } catch (Throwable ignored) {}
+        }
+    }
+
+    /**
+     * Collections among the IDs become their mods, in the collection's order (Steam's public
+     * GetCollectionDetails: no login, no key). Ported from RimDroid. A mod ID comes back unchanged;
+     * a mod listed twice, once. A collection that cannot be read stays as it is and fails like any
+     * other item.
+     */
+    private List<Long> expandCollections(List<Long> ids) {
+        List<Long> out = new java.util.ArrayList<>();
+        for (Long id : ids) {
+            List<Long> children;
+            try {
+                children = collectionChildren(id);
+            } catch (Exception e) {
+                Log.w(TAG, "collection check for " + id + " failed: " + describe(e));
+                children = Collections.emptyList();
+            }
+            if (children.isEmpty()) {
+                if (!out.contains(id)) out.add(id);
+                continue;
+            }
+            String title;
+            try { title = resolvePublishedFile(id).title; } catch (Exception e) { title = "(collection)"; }
+            progress("Collection '" + title + "' (" + id + "): " + children.size() + " mods");
+            // The mods by number and name, as the log shows them when typed in by hand.
+            Map<Long, String> titles = resolveTitles(children);
+            int n = 0;
+            for (Long child : children) {
+                n++;
+                String name = titles.get(child);
+                progress("  " + n + ". " + child + (name != null ? " — " + name : ""));
+                if (!out.contains(child)) out.add(child);
+            }
+        }
+        return out;
+    }
+
+    /** Titles for many items in one request (GetPublishedFileDetails takes a list); missing on failure. */
+    private static Map<Long, String> resolveTitles(List<Long> ids) {
+        Map<Long, String> titles = new HashMap<>();
+        if (ids.isEmpty()) return titles;
+        try {
+            StringBuilder body = new StringBuilder("itemcount=" + ids.size());
+            for (int i = 0; i < ids.size(); i++) body.append("&publishedfileids%5B").append(i).append("%5D=").append(ids.get(i));
+            JSONObject resp = new JSONObject(post(
+                    "https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/",
+                    body.toString())).optJSONObject("response");
+            JSONArray arr = resp != null ? resp.optJSONArray("publishedfiledetails") : null;
+            for (int i = 0; arr != null && i < arr.length(); i++) {
+                JSONObject d = arr.getJSONObject(i);
+                if (d.optInt("result", 0) != 1) continue;
+                try {
+                    titles.put(Long.parseLong(d.optString("publishedfileid", "")), d.optString("title", ""));
+                } catch (NumberFormatException ignored) {}
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "titles: " + describe(e));
+        }
+        return titles;
+    }
+
+    /** The mods of a collection in order, or an empty list for anything that is not a collection. */
+    private static List<Long> collectionChildren(long id) throws Exception {
+        List<Long> children = new java.util.ArrayList<>();
+        JSONObject resp = new JSONObject(post(
+                "https://api.steampowered.com/ISteamRemoteStorage/GetCollectionDetails/v1/",
+                "collectioncount=1&publishedfileids%5B0%5D=" + id)).optJSONObject("response");
+        JSONArray details = resp != null ? resp.optJSONArray("collectiondetails") : null;
+        if (details == null || details.length() == 0) return children;
+        JSONObject d = details.getJSONObject(0);
+        if (d.optInt("result", 0) != 1) return children;
+        JSONArray arr = d.optJSONArray("children");
+        if (arr == null) return children;
+        // sortorder is the author's order; the array normally comes that way, but make sure.
+        java.util.TreeMap<Integer, Long> ordered = new java.util.TreeMap<>();
+        for (int i = 0; i < arr.length(); i++) {
+            JSONObject ch = arr.getJSONObject(i);
+            if (ch.optInt("filetype", 0) != 0) continue;   // 0 = an item; a nested collection is skipped
+            try {
+                ordered.put(ch.optInt("sortorder", i), Long.parseLong(ch.optString("publishedfileid", "")));
+            } catch (NumberFormatException ignored) {}
+        }
+        children.addAll(ordered.values());
+        return children;
+    }
+
+    /** A form POST to the Steam Web API; the response body (also on an error status). */
+    private static String post(String address, String body) throws Exception {
+        HttpURLConnection c = (HttpURLConnection) new URL(address).openConnection();
+        try {
+            c.setRequestMethod("POST");
+            c.setDoOutput(true);
+            c.setConnectTimeout(20000);
+            c.setReadTimeout(30000);
+            c.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            try (OutputStream os = c.getOutputStream()) {
+                os.write(body.getBytes(StandardCharsets.UTF_8));
+            }
+            int code = c.getResponseCode();
+            InputStream in = code >= 200 && code < 300 ? c.getInputStream() : c.getErrorStream();
+            StringBuilder sb = new StringBuilder();
+            if (in != null) {
+                try (BufferedReader r = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
+                    String line;
+                    while ((line = r.readLine()) != null) sb.append(line);
+                }
+            }
+            return sb.toString();
+        } finally {
+            c.disconnect();
         }
     }
 
