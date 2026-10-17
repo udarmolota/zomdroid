@@ -64,7 +64,7 @@ Versions and licences for everything below are listed in [NOTICE](NOTICE.md).
 
 - [Mesa](https://gitlab.freedesktop.org/mesa/mesa) - Used as the rendering backend (Zink, Freedreno Turnip driver)
 
-- [MobileGlues](https://github.com/MobileGL-Dev/MobileGlues) — the "astra" fork by [constantinrarinca3-sketch](https://github.com/constantinrarinca3-sketch/MobileGlues) (Willing-Upstairs-580) - Used as a rendering backend (OpenGL on top of OpenGL ES)
+- [MobileGlues](https://github.com/MobileGL-Dev/MobileGlues) — the "astra" fork by [constantinrarinca3-sketch](https://github.com/constantinrarinca3-sketch/MobileGlues) (Willing-Upstairs-580 aka mepetz) - Used as a rendering backend (OpenGL on top of OpenGL ES)
 
 - [ByteBuddy](https://github.com/raphw/byte-buddy) - Used for java agent creation and runtime code generation
 
