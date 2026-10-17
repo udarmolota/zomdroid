@@ -40,6 +40,14 @@
         <!-- One step below the Material 3 drawer label (Label Large, 14sp): with the spacing
              above, the longest labels still did not fit. -->
         <item name="itemTextAppearance">@style/AppTheme.NavigationView.ItemText</item>
+        <!-- Shorter rows (item height 48dp to 40dp, padding 4dp to 2dp): with the Mods item the
+             drawer no longer fit a phone screen. -->
+        <item name="itemVerticalPadding">2dp</item>
+        <item name="materialThemeOverlay">@style/AppTheme.NavigationView.Overlay</item>
+    </style>
+
+    <style name="AppTheme.NavigationView.Overlay" parent="ThemeOverlay.Material3.NavigationView">
+        <item name="listPreferredItemHeightSmall">40dp</item>
     </style>
 
     <style name="AppTheme.NavigationView.ItemText" parent="TextAppearance.Material3.LabelLarge">

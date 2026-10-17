@@ -2,4 +2,6 @@
     <dimen name="list_item_height">56dp</dimen>
     <dimen name="list_item_leading_space">16dp</dimen>
     <dimen name="list_item_trailing_space">0dp</dimen>
+    <!-- Drawer: half the space around the lines between menu groups (Material default 8dp). -->
+    <dimen name="design_navigation_separator_vertical_padding">4dp</dimen>
 </resources>
