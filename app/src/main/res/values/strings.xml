@@ -98,8 +98,8 @@
     <string name="control_element_stick_binding">Stick Binding</string>
     <string name="control_element_icon">Icon</string>
     <string name="control_element_style">Style</string>
-    <string name="control_element_custom_icon">Custom icon…</string>
-    <string name="control_element_pack_icon">From an icon pack…</string>
+    <string name="control_element_custom_icon">Custom</string>
+    <string name="control_element_pack_icon">Pack</string>
     <string name="control_element_pick_pack">Choose an icon pack</string>
     <string name="control_element_icon_no_tint">Keep original colors</string>
     <string name="control_element_icon_scale">Image size</string>

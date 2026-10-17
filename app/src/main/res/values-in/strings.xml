@@ -617,8 +617,8 @@
     <string name="settings_group_appearance">Tampilan</string>
     <string name="settings_theme">Tema launcher</string>
     <string name="control_element_style">Gaya</string>
-    <string name="control_element_custom_icon">Ikon kustom…</string>
-    <string name="control_element_pack_icon">Dari paket ikon…</string>
+    <string name="control_element_custom_icon">Kustom</string>
+    <string name="control_element_pack_icon">Paket</string>
     <string name="control_element_pick_pack">Pilih paket ikon</string>
     <string name="control_element_custom_icon_failed">Tidak dapat memuat gambar</string>
     <string name="control_element_custom_icon_select_button">Pilih tombol terlebih dahulu</string>

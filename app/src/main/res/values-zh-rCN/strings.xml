@@ -598,8 +598,8 @@
     <string name="settings_group_appearance">外观</string>
     <string name="settings_theme">启动器主题</string>
     <string name="control_element_style">样式</string>
-    <string name="control_element_custom_icon">自定义图标…</string>
-    <string name="control_element_pack_icon">从图标包选择…</string>
+    <string name="control_element_custom_icon">自定义</string>
+    <string name="control_element_pack_icon">图标包</string>
     <string name="control_element_pick_pack">选择图标包</string>
     <string name="control_element_custom_icon_failed">无法加载图片</string>
     <string name="control_element_custom_icon_select_button">请先选择一个按钮</string>

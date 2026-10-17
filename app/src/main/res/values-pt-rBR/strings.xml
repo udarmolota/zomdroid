@@ -616,8 +616,8 @@
     <string name="settings_group_appearance">Aparência</string>
     <string name="settings_theme">Tema do launcher</string>
     <string name="control_element_style">Estilo</string>
-    <string name="control_element_custom_icon">Ícone personalizado…</string>
-    <string name="control_element_pack_icon">De um pacote de ícones…</string>
+    <string name="control_element_custom_icon">Própria</string>
+    <string name="control_element_pack_icon">Pacote</string>
     <string name="control_element_pick_pack">Escolha um pacote de ícones</string>
     <string name="control_element_custom_icon_failed">Não foi possível carregar a imagem</string>
     <string name="control_element_custom_icon_select_button">Selecione um botão primeiro</string>
