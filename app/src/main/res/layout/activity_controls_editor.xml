@@ -327,6 +327,18 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/element_style_s"/>
 
+                <!-- A picture from an icon pack (built-in or imported), from RimDroid -->
+                <Button
+                    android:id="@+id/element_pack_icon_b"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginStart="6dp"
+                    android:textSize="12sp"
+                    android:text="@string/control_element_pack_icon"
+                    app:layout_constraintStart_toEndOf="@id/element_custom_icon_b"
+                    app:layout_constraintTop_toBottomOf="@id/element_style_s"/>
+
                 <CheckBox
                     android:id="@+id/element_icon_no_tint_cb"
                     android:layout_width="wrap_content"

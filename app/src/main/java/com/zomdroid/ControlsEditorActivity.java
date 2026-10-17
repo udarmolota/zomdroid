@@ -61,6 +61,7 @@ public class ControlsEditorActivity extends AppCompatActivity {
         pickIconLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
             if (uri != null) onIconPicked(uri);
         });
+        binding.elementPackIconB.setOnClickListener(v -> pickPackIcon());
 
         getWindow().setDecorFitsSystemWindows(false);
         final WindowInsetsController controller = getWindow().getInsetsController();
@@ -390,6 +391,7 @@ public class ControlsEditorActivity extends AppCompatActivity {
 
                         // Custom image icon (load your own picture)
                         binding.elementCustomIconB.setVisibility(View.VISIBLE);
+                        binding.elementPackIconB.setVisibility(View.VISIBLE);
                         binding.elementIconNoTintCb.setVisibility(View.VISIBLE);
                         bindIconScale(element);
                         binding.elementIconNoTintCb.setOnCheckedChangeListener(null);
@@ -427,6 +429,7 @@ public class ControlsEditorActivity extends AppCompatActivity {
 
                         // Custom center image (same as round buttons).
                         binding.elementCustomIconB.setVisibility(View.VISIBLE);
+                        binding.elementPackIconB.setVisibility(View.VISIBLE);
                         binding.elementIconNoTintCb.setVisibility(View.VISIBLE);
                         bindIconScale(element);
                         binding.elementIconNoTintCb.setOnCheckedChangeListener(null);
@@ -474,6 +477,7 @@ public class ControlsEditorActivity extends AppCompatActivity {
                         // Custom image: replaces the drawn cross (composite DPAD) or the arrow
                         // (split DPAD_*, which are ButtonControlElements and already supported it).
                         binding.elementCustomIconB.setVisibility(View.VISIBLE);
+                        binding.elementPackIconB.setVisibility(View.VISIBLE);
                         binding.elementIconNoTintCb.setVisibility(View.VISIBLE);
                         bindIconScale(element);
                         binding.elementIconNoTintCb.setOnCheckedChangeListener(null);
@@ -508,6 +512,7 @@ public class ControlsEditorActivity extends AppCompatActivity {
                         binding.elementStyleTv.setVisibility(View.GONE);
                         binding.elementStyleS.setVisibility(View.GONE);
                         binding.elementCustomIconB.setVisibility(View.GONE);
+                        binding.elementPackIconB.setVisibility(View.GONE);
                         binding.elementIconNoTintCb.setVisibility(View.GONE);
                         setIconScaleVisible(false);
                         break;
@@ -903,6 +908,95 @@ public class ControlsEditorActivity extends AppCompatActivity {
         if (maxX < minX || maxY < minY) return src;               // fully transparent — leave as-is
         if (minX == 0 && minY == 0 && maxX == w - 1 && maxY == h - 1) return src; // nothing to trim
         return Bitmap.createBitmap(src, minX, minY, maxX - minX + 1, maxY - minY + 1);
+    }
+
+    /** "From an icon pack": choose a pack, then one of its pictures for the selected element. */
+    private void pickPackIcon() {
+        AbstractControlElement el = binding.inputControlsV.getSelectedElement();
+        if (!(el instanceof com.zomdroid.input.ButtonControlElement || el instanceof com.zomdroid.input.DpadControlElement
+                || el instanceof com.zomdroid.input.RadialMenuControlElement)) {
+            Toast.makeText(this, R.string.control_element_custom_icon_select_button, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        java.util.List<com.zomdroid.input.IconPacks.Pack> packs = com.zomdroid.input.IconPacks.list(this);
+        if (packs.isEmpty()) {
+            Toast.makeText(this, R.string.icon_packs_none, Toast.LENGTH_LONG).show();
+            return;
+        }
+        String[] names = new String[packs.size()];
+        for (int i = 0; i < names.length; i++) {
+            com.zomdroid.input.IconPacks.Pack p = packs.get(i);
+            names[i] = p.author != null ? p.author + " – " + p.name : p.name;
+        }
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.control_element_pick_pack)
+                .setItems(names, (d, which) -> pickIconFromPack(packs.get(which), el))
+                .show();
+    }
+
+    /**
+     * A grid of the pack's pictures with their names; a tap puts one on the element. A rectangular
+     * button gets the pack's rect/ version of the picture when it has one, as Apply does.
+     */
+    private void pickIconFromPack(com.zomdroid.input.IconPacks.Pack pack, AbstractControlElement el) {
+        final java.util.List<String> icons = pack.icons;
+        final float density = getResources().getDisplayMetrics().density;
+        android.widget.GridView grid = new android.widget.GridView(this);
+        grid.setNumColumns(android.widget.GridView.AUTO_FIT);
+        grid.setColumnWidth((int) (84 * density));
+        grid.setVerticalSpacing((int) (8 * density));
+        grid.setPadding((int) (12 * density), (int) (8 * density), (int) (12 * density), 0);
+        final androidx.appcompat.app.AlertDialog[] dlg = new androidx.appcompat.app.AlertDialog[1];
+        grid.setAdapter(new android.widget.BaseAdapter() {
+            @Override public int getCount() { return icons.size(); }
+            @Override public Object getItem(int i) { return icons.get(i); }
+            @Override public long getItemId(int i) { return i; }
+            @Override public View getView(int i, View convert, android.view.ViewGroup parent) {
+                android.widget.LinearLayout cell = new android.widget.LinearLayout(ControlsEditorActivity.this);
+                cell.setOrientation(android.widget.LinearLayout.VERTICAL);
+                cell.setGravity(Gravity.CENTER_HORIZONTAL);
+                android.widget.ImageView img = new android.widget.ImageView(ControlsEditorActivity.this);
+                img.setImageBitmap(com.zomdroid.input.IconPacks.load(ControlsEditorActivity.this, pack, icons.get(i)));
+                // White pictures need a dark backdrop to be visible in a light dialog.
+                img.setBackgroundColor(0xFF2B2F36);
+                int pad = (int) (6 * density);
+                img.setPadding(pad, pad, pad, pad);
+                cell.addView(img, new android.widget.LinearLayout.LayoutParams((int) (56 * density), (int) (56 * density)));
+                android.widget.TextView t = new android.widget.TextView(ControlsEditorActivity.this);
+                t.setText(icons.get(i));
+                t.setTextSize(11);
+                t.setGravity(Gravity.CENTER_HORIZONTAL);
+                cell.addView(t);
+                return cell;
+            }
+        });
+        grid.setOnItemClickListener((p, v, pos, id) -> {
+            String icon = icons.get(pos);
+            boolean rect = el.getType() == AbstractControlElement.Type.BUTTON_RECT && pack.rectIcons.contains(icon);
+            File dir = binding.inputControlsV.getControlsIconsDir();
+            String fileName = dir == null ? null : com.zomdroid.input.IconPacks.copyIcon(this, pack, icon, rect, dir);
+            if (fileName == null) {
+                Toast.makeText(this, R.string.control_element_custom_icon_failed, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            boolean noTint = !(rect ? pack.rectTint : pack.tint);
+            if (el instanceof com.zomdroid.input.ButtonControlElement) {
+                ((com.zomdroid.input.ButtonControlElement) el).setCustomIcon(fileName, noTint);
+            } else if (el instanceof com.zomdroid.input.DpadControlElement) {
+                ((com.zomdroid.input.DpadControlElement) el).setCustomIcon(fileName, noTint);
+            } else {
+                ((com.zomdroid.input.RadialMenuControlElement) el).setCustomIcon(fileName, noTint);
+            }
+            // Keep the "keep original colours" box in step with the pack (its listener sets the same value).
+            binding.elementIconNoTintCb.setChecked(noTint);
+            binding.inputControlsV.invalidate();
+            if (dlg[0] != null) dlg[0].dismiss();
+        });
+        dlg[0] = new MaterialAlertDialogBuilder(this)
+                .setTitle(pack.name)
+                .setView(grid)
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     private void onIconPicked(Uri uri) {

@@ -290,6 +290,17 @@ public final class IconPacks {
         ACTIONS.put(binding, icons);
     }
 
+    // A separate button (not a D-pad arrow) on W / S / A / D is a pedal or the steering of a driving
+    // layout - walking goes through the D-pad or the stick - so it looks for those pictures first.
+    private static final Map<String, String[]> BUTTON_ACTIONS = new HashMap<>();
+
+    static {
+        BUTTON_ACTIONS.put("KEY_W", new String[] {"gas_pedal", "move_up"});
+        BUTTON_ACTIONS.put("KEY_S", new String[] {"brake_pedal", "move_down"});
+        BUTTON_ACTIONS.put("KEY_A", new String[] {"steering_left", "move_left"});
+        BUTTON_ACTIONS.put("KEY_D", new String[] {"steering_right", "move_right"});
+    }
+
     static {
         action("MOUSE_BUTTON_LEFT", "attack");
         action("MOUSE_BUTTON_RIGHT", "aim");
@@ -332,8 +343,8 @@ public final class IconPacks {
     /** Action names a pack can use, for the "how to make a pack" text. */
     public static final String ACTION_NAMES = "attack, aim, shove, run, sprint, crouch, interact, "
             + "shout, reload, vehicle, health, inventory, map, chat, menu, build, zoom_in, zoom_out, "
-            + "move_up, move_down, move_left, move_right, keyboard, toggle_controls, close, loot, "
-            + "pad_a, pad_b, pad_x, pad_y";
+            + "move_up, move_down, move_left, move_right, gas_pedal, brake_pedal, steering_left, "
+            + "steering_right, keyboard, toggle_controls, close, loot, pad_a, pad_b, pad_x, pad_y";
 
     private static boolean isButton(@Nullable String type) {
         if (type == null) return false;
@@ -352,7 +363,11 @@ public final class IconPacks {
         if (!isButton(optString(d, "type"))) return null;
         JsonElement b = d.get("bindings");
         if (b == null || !b.isJsonArray() || b.getAsJsonArray().size() != 1) return null;
-        String[] icons = ACTIONS.get(b.getAsJsonArray().get(0).getAsString());
+        String binding = b.getAsJsonArray().get(0).getAsString();
+        String type = optString(d, "type");
+        boolean separateButton = "BUTTON_CIRCLE".equals(type) || "BUTTON_RECT".equals(type);
+        String[] icons = separateButton && BUTTON_ACTIONS.containsKey(binding)
+                ? BUTTON_ACTIONS.get(binding) : ACTIONS.get(binding);
         if (icons == null) return null;
         boolean rect = isRect(d);
         for (String icon : icons)
@@ -453,6 +468,25 @@ public final class IconPacks {
     }
 
     /**
+     * Copies one pack picture into a layout's icons folder (the round one, or with {@code rect} its
+     * rect/ version) and returns the file name a button stores, or null when it could not.
+     */
+    @Nullable
+    public static String copyIcon(@NonNull Context context, @NonNull Pack pack, @NonNull String icon,
+                                  boolean rect, @NonNull File iconsDir) {
+        if (!iconsDir.isDirectory() && !iconsDir.mkdirs()) return null;
+        Bitmap bmp = load(context, pack, icon, rect);
+        if (bmp == null) return null;
+        String fileName = iconFileName(pack, icon, rect);
+        try (FileOutputStream out = new FileOutputStream(new File(iconsDir, fileName))) {
+            bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
+        } catch (IOException ex) {
+            return null;
+        }
+        return fileName;
+    }
+
+    /**
      * Puts the pack on every button of an instance's layout whose action it has an icon for; the
      * others keep what they show. An instance still on the bundled default gets that default first.
      * Returns how many buttons got an icon, or -1 when the layout could not be read or saved.
@@ -468,14 +502,8 @@ public final class IconPacks {
             String icon = packIconFor(pack, d);
             if (icon == null) continue;
             boolean rect = useRect(pack, d, icon);
-            Bitmap bmp = load(context, pack, icon, rect);
-            if (bmp == null) continue;
-            String fileName = iconFileName(pack, icon, rect);
-            try (FileOutputStream out = new FileOutputStream(new File(icons, fileName))) {
-                bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
-            } catch (IOException ex) {
-                continue;
-            }
+            String fileName = copyIcon(context, pack, icon, rect, icons);
+            if (fileName == null) continue;
             d.addProperty("iconFile", fileName);
             d.addProperty("noTint", !(rect ? pack.rectTint : pack.tint));
             applied++;
