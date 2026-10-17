@@ -130,6 +130,9 @@ public class InstallModFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        binding.installModOpenOptimizationTv.setOnClickListener(v ->
+                androidx.navigation.Navigation.findNavController(v).navigate(R.id.action_open_optimization));
+
         // Setup progress dialog
         taskProgressDialogBinding = TaskProgressDialogBinding.inflate(getLayoutInflater());
         taskProgressDialog = new MaterialAlertDialogBuilder(requireContext())

@@ -168,6 +168,7 @@
     <string name="dialog_title_saves_installed">存档已导入</string>
 
     <string name="install_mod_zip_warning">某些模组更适合通过优化菜单安装。</string>
+    <string name="install_mod_open_optimization">→ 打开“优化”</string>
 
     <string name="install_mod_zip_help_title">模组压缩包结构</string>
 

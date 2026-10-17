@@ -179,6 +179,7 @@
     <string name="dialog_title_saves_installed">Simpanan diimpor</string>
 
     <string name="install_mod_zip_warning">Beberapa mod lebih baik dipasang melalui menu optimasi.</string>
+    <string name="install_mod_open_optimization">→ Buka Optimasi</string>
 
     <string name="install_mod_zip_help_title">Struktur arsip mod</string>
 

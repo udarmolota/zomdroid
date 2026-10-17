@@ -180,6 +180,7 @@
     <string name="dialog_title_saves_installed">Сохранения импортированы</string>
 
     <string name="install_mod_zip_warning">Некоторые моды лучше устанавливать через меню оптимизации.</string>
+    <string name="install_mod_open_optimization">→ Открыть Оптимизацию</string>
 
     <string name="install_mod_zip_help_title">Структура архива с модом</string>
 

@@ -215,6 +215,8 @@
     <string name="dialog_title_saves_installed">Saves imported</string>
 
     <string name="install_mod_zip_warning">Some mods are better installed from the Optimization menu.</string>
+    <string name="install_mod_multi_zip_note">You can import several mods at once: put their folders into one ZIP. Not tested with a large set of heavy mods; it needs free space for both the ZIP and the unpacked mods.</string>
+    <string name="install_mod_open_optimization">→ Open Optimization</string>
 
     <string name="install_mod_zip_help_title">Mod archive structure</string>
 
