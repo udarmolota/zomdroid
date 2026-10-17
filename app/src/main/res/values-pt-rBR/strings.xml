@@ -281,7 +281,7 @@
 
     <!-- JVM args dialog -->
     <string name="jvm_args_dialog_title">Argumentos JVM</string>
-    <string name="jvm_args_dialog_message">Argumentos JVM adicionais, ex.:\n\n• -Xmx2G — alocar 2GB de memória\n• -Xms512M — processo inicia com 512MB de RAM\n• -XX:MaxGCPauseMillis=120 — encurtar as pausas do coletor de lixo\n\nEm teoria, ajuda quando há pouca RAM. Alguns argumentos já são definidos pelas configurações.\nSe configurar incorretamente e o app não iniciar, reinstale-o ou apenas limpe o cache do app.</string>
+    <string name="jvm_args_dialog_message">Argumentos para o Java do jogo.\n\nO Build 41 usa o conjunto padrão: ele só ajusta o coletor de lixo e deixa o tamanho da memória com o Java.\n\nO Build 42 precisa de mais: o preset recomendado adiciona -Xms e -Xmx (memória inicial e máxima do Java) e limita as threads do coletor.\n\nVocê pode mudar esses valores por sua conta e risco. -Xmx alto demais deixa o renderizador sem memória e o Android fecha o jogo; baixo demais e falta memória para o jogo. Se o jogo parar de abrir, toque em \"Restaurar padrão\".</string>
 
     <!-- Custom Driver import/export -->
     <string name="install_driver_menu">Importar/Exportar Driver Personalizado</string>
@@ -412,7 +412,7 @@
 
     <!-- Optimization page -->
     <string name="optimization_group_jvm">Argumentos JVM</string>
-    <string name="optimization_jvm_hint">Os argumentos padrão apenas ajustam o coletor de lixo e são seguros em qualquer aparelho — o tamanho do heap e a quantidade de threads ficam a cargo da JVM, que os dimensiona para o seu telefone. A Build 42 se beneficia de um conjunto mais forte: aplique com um botão em Configurações → Avançado → Argumentos JVM.</string>
+    <string name="optimization_jvm_hint">As configurações de memória do Java e do coletor de lixo são definidas por instância: Configurações → Advanced → JVM arguments.</string>
     <string name="settings_jvm_args_reset">Restaurar padrão</string>
     <string name="settings_jvm_args_clear">Limpar</string>
     <string name="settings_jvm_args_b42_recommendation">Recomendado para a Build 42: limita o heap Java e devolve memória ao sistema, deixando espaço para o renderizador. Em alguns casos, o jogo pode não iniciar sem alguns desses parâmetros. Não é para a Build 41 — em aparelhos de 4 GB faz mais mal que bem.</string>
@@ -422,8 +422,6 @@
     <string name="renderer_ng_build42_only_message">Este renderizador foi feito para a Build 42 e não funciona na Build 41 — o jogo não vai iniciar.\n\nSe você joga a Build 41, escolha ZINK ou GL4ES.\n\nA Build 42 também precisa dos argumentos JVM recomendados: Configurações → Avançado → Argumentos JVM.</string>
     <string name="new_game_instance_b42_jvm_hint">A Build 42 precisa de argumentos JVM ajustados — há um preset de um botão para eles nas configurações.</string>
     <string name="new_game_instance_open_settings">Abrir Configurações → Avançado → Argumentos JVM →</string>
-    <string name="optimization_jvm_recommended_label">→ Padrão atual:</string>
-    <string name="optimization_jvm_4gb_note">⚠️ Em dispositivos com 4 GB de RAM o jogo funciona, mas não perfeitamente: o Build 42 não é recomendado — jogue o Build 41 e use os mods de otimização abaixo (BetterFPS, Every Texture Optimized). Eles ajudam muito mais que as configurações da JVM.</string>
     <string name="optimization_copy">Copiar</string>
     <string name="optimization_open_settings">→ Abrir Configurações</string>
     <string name="optimization_group_betterfps">BetterFPS b41</string>
@@ -680,6 +678,29 @@
     <string name="icon_packs_delete_confirm">Apagar o pacote «%1$s»? Os botões que já mostram as imagens dele as mantêm.</string>
     <string name="icon_packs_imported">Pacote «%1$s» importado: %2$d imagens</string>
     <string name="icon_packs_import_failed">Não foi possível importar o pacote: %1$s</string>
+    <!-- PZ Optimization installer -->
+    <string name="optimization_group_pzopt">PZ Optimization (experimental)</string>
+    <string name="optimization_pzopt_hint">O launcher só instala e desinstala o PZ Optimization; as configurações dele ficam por sua conta (no jogo: Opções → PZ Optimization).</string>
+    <string name="optimization_pzopt_help_title">PZ Optimization</string>
+    <string name="optimization_pzopt_help_message">O launcher só instala e desinstala o PZ Optimization; as configurações dele ficam por sua conta (no jogo: Opções → PZ Optimization). O que sabemos até agora:\n\n• Efeitos visuais (God Rays, espelhos, reflexos…) podem travar o NG_GL4ES; deixe-os desligados nele.\n• Se o jogo quebrar depois de mudar uma configuração, toque em Restaurar aqui e instale de novo.\n\nPara o Build 42.20.4 (manifest da Steam 6267392422221692966) existe uma versão do mod adaptada para Android, de Willing-Upstairs-580 (aka mepetz).</string>
+    <string name="optimization_pzopt_install">Instalar / Atualizar</string>
+    <string name="optimization_pzopt_restore">Restaurar</string>
+    <string name="optimization_pzopt_restore_title">Restaurar os arquivos originais do jogo?</string>
+    <string name="optimization_pzopt_restore_message">Isso remove o PZ Optimization da instância escolhida e devolve os arquivos do jogo que ele substituiu.</string>
+    <string name="optimization_pzopt_installing">Instalando o PZ Optimization…</string>
+    <string name="optimization_pzopt_copying">Copiando o arquivo…</string>
+    <string name="optimization_pzopt_validating">Verificando a versão e guardando os arquivos originais…</string>
+    <string name="optimization_pzopt_installed">PZ Optimization instalado</string>
+    <string name="optimization_pzopt_installed_detail">%1$d arquivos instalados; %2$d originais guardados.</string>
+    <string name="optimization_pzopt_restoring">Restaurando os arquivos originais do jogo…</string>
+    <string name="optimization_pzopt_restored">Arquivos originais do jogo restaurados</string>
+    <string name="optimization_pzopt_status_installed">Instalado nesta instância</string>
+    <string name="optimization_pzopt_status_none">Não instalado nesta instância</string>
+    <!-- Import mods: a mod with its own Optimization installer -->
+    <string name="install_mod_helper_title">Melhor pela Otimização</string>
+    <string name="install_mod_helper_message">Parece ser %1$s. Ele tem um instalador próprio em Otimização, que o adapta ao Android; importado aqui, pode não funcionar. Instalar por lá?</string>
+    <string name="install_mod_helper_open">Abrir Otimização</string>
+    <string name="install_mod_helper_anyway">Importar mesmo assim</string>
     <string name="control_element_no_outline">Sem moldura</string>
     <string name="control_element_no_label">Sem rótulo</string>
     <string name="icon_packs_layout_full">layout completo</string>

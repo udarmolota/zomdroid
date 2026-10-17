@@ -60,6 +60,7 @@ public class OptimizationFragment extends Fragment {
     private Uri etoZipUri = null;
     private Uri zombiebuddyZipUri = null;
     private Uri zbbetterfpsZipUri = null;
+    private Uri pzoptZipUri = null;
     private List<GameInstance> instances;
 
     private final ServiceConnection installerServiceConnection = new ServiceConnection() {
@@ -102,6 +103,7 @@ public class OptimizationFragment extends Fragment {
             Toast.makeText(requireContext(),
                     getString(R.string.mod_fix_installed),
                     Toast.LENGTH_SHORT).show();
+            updatePzOptStatus();
         } else if (state.isFinishedWithError) {
             showTaskFinishedWithErrorDialog(state.title, state.message);
             unbindInstallerService();
@@ -181,6 +183,118 @@ public class OptimizationFragment extends Fragment {
                 }
             });
 
+    // PZ Optimization ships as a zip of loose classes; some providers report it as a plain octet stream.
+    private final ActivityResultLauncher<String> pzoptLauncher =
+            registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+                if (uri == null) return;
+                String type = requireContext().getContentResolver().getType(uri);
+                if (Objects.equals(type, ZIP_MIME) || Objects.equals(type, "application/x-zip-compressed")
+                        || Objects.equals(type, "application/octet-stream")) {
+                    pzoptZipUri = uri;
+                    binding.optimizationPzoptPathEt.setText(extractFileName(uri));
+                } else {
+                    Toast.makeText(requireContext(),
+                            getString(R.string.game_instance_unsupported_extension),
+                            Toast.LENGTH_SHORT).show();
+                }
+            });
+
+    /** The instance picked in the PZ Optimization spinner, or null (same placeholder rule as above). */
+    private GameInstance selectedPzOptInstanceOrNull() {
+        if (instances == null || instances.isEmpty() || binding == null) return null;
+        int position = binding.optimizationPzoptInstanceSpinner.getSelectedItemPosition();
+        int idx = instances.size() > 1 ? position - 1 : position;
+        return (idx >= 0 && idx < instances.size()) ? instances.get(idx) : null;
+    }
+
+    /** Installed or not, for the picked instance; Restore only makes sense when it is. */
+    private void updatePzOptStatus() {
+        if (binding == null) return;
+        GameInstance gi = selectedPzOptInstanceOrNull();
+        boolean installed = gi != null && com.zomdroid.optimization.PzOptInstaller.hasManagedInstall(
+                InstallerService.pzOptStateDir(gi).toPath());
+        binding.optimizationPzoptStatusTv.setText(gi == null ? ""
+                : getString(installed ? R.string.optimization_pzopt_status_installed
+                        : R.string.optimization_pzopt_status_none));
+        binding.optimizationPzoptRestoreBtn.setEnabled(installed);
+    }
+
+    private void setUpPzOptSection() {
+        binding.optimizationPzoptHelpIb.setOnClickListener(v ->
+                new MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(R.string.optimization_pzopt_help_title)
+                        .setMessage(R.string.optimization_pzopt_help_message)
+                        .setPositiveButton(R.string.dialog_button_ok, null)
+                        .show());
+
+        List<String> names = new ArrayList<>();
+        if (instances == null || instances.isEmpty()) {
+            names.add(getString(R.string.select_instance));
+            binding.optimizationPzoptInstallBtn.setEnabled(false);
+        } else {
+            if (instances.size() > 1) names.add(getString(R.string.select_instance));
+            for (GameInstance gi : instances) names.add(gi.getName());
+        }
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.spinner_item, names);
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        binding.optimizationPzoptInstanceSpinner.setAdapter(adapter);
+        binding.optimizationPzoptInstanceSpinner.setOnItemSelectedListener(
+                new android.widget.AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(android.widget.AdapterView<?> parent,
+                                               android.view.View view, int position, long id) {
+                        updatePzOptStatus();
+                    }
+                    @Override
+                    public void onNothingSelected(android.widget.AdapterView<?> parent) {}
+                });
+        updatePzOptStatus();
+
+        binding.optimizationPzoptBrowseIb.setOnClickListener(v -> pzoptLauncher.launch(ZIP_MIME));
+
+        binding.optimizationPzoptInstallBtn.setOnClickListener(v -> {
+            if (pzoptZipUri == null) {
+                Toast.makeText(requireContext(), R.string.game_instance_no_file_selected,
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+            GameInstance selected = selectedPzOptInstanceOrNull();
+            if (selected == null) {
+                Toast.makeText(requireContext(), getString(R.string.select_instance),
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Intent installerIntent = new Intent(requireContext(), InstallerService.class);
+            installerIntent.putExtra(InstallerService.EXTRA_COMMAND,
+                    InstallerService.Task.INSTALL_PZOPT.ordinal());
+            installerIntent.putExtra(InstallerService.EXTRA_GAME_INSTANCE_NAME, selected.getName());
+            installerIntent.putExtra(InstallerService.EXTRA_ARCHIVE_URI, pzoptZipUri);
+            pzoptZipUri = null;
+            binding.optimizationPzoptPathEt.setText(getString(R.string.game_instance_no_file_selected));
+            requireContext().startForegroundService(installerIntent);
+            bindInstallerService();
+        });
+
+        binding.optimizationPzoptRestoreBtn.setOnClickListener(v -> {
+            GameInstance selected = selectedPzOptInstanceOrNull();
+            if (selected == null) return;
+            new MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.optimization_pzopt_restore_title)
+                    .setMessage(R.string.optimization_pzopt_restore_message)
+                    .setPositiveButton(R.string.optimization_pzopt_restore, (d, w) -> {
+                        Intent installerIntent = new Intent(requireContext(), InstallerService.class);
+                        installerIntent.putExtra(InstallerService.EXTRA_COMMAND,
+                                InstallerService.Task.RESTORE_PZOPT.ordinal());
+                        installerIntent.putExtra(InstallerService.EXTRA_GAME_INSTANCE_NAME,
+                                selected.getName());
+                        requireContext().startForegroundService(installerIntent);
+                        bindInstallerService();
+                    })
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
+        });
+    }
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentOptimizationBinding.inflate(inflater, container, false);
@@ -199,11 +313,6 @@ public class OptimizationFragment extends Fragment {
                 .create();
         taskProgressDialogBinding.progressDialogOkMb.setOnClickListener(v ->
                 taskProgressDialog.dismiss());
-
-        // Show what is currently seeded by default at instance creation (single source of
-        // truth — same constant the seeding and the Settings reset button use). Info-only:
-        // nothing to copy, the value is already applied; changing it lives in Settings.
-        binding.optimizationJvmRecommendedTv.setText(LauncherPreferences.DEFAULT_JVM_ARGS);
 
         // Open Settings link
         // Settings are per-instance now, so hand over the instance this screen is pointed at.
@@ -571,6 +680,11 @@ public class OptimizationFragment extends Fragment {
                 binding.optimizationZbbetterfpsHeader,
                 binding.optimizationZbbetterfpsContent,
                 binding.optimizationZbbetterfpsExpandIv);
+        setUpPzOptSection();
+        setupCollapsible(
+                binding.optimizationPzoptHeader,
+                binding.optimizationPzoptContent,
+                binding.optimizationPzoptExpandIv);
 
         // ===== ETO section =====
         binding.optimizationEtoHelpIb.setOnClickListener(v ->

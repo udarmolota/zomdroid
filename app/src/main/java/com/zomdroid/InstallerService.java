@@ -241,6 +241,12 @@ public class InstallerService extends Service implements TaskProgressListener {
             case INSTALL_ZBBETTERFPS:
                 doInstallZbBetterFps(intent);
                 break;
+            case INSTALL_PZOPT:
+                doInstallPzOpt(intent);
+                break;
+            case RESTORE_PZOPT:
+                doRestorePzOpt(intent);
+                break;
             case IMPORT_GAME_SETTINGS:
                 doImportGameSettings(intent);
                 break;
@@ -1905,6 +1911,75 @@ public class InstallerService extends Service implements TaskProgressListener {
         }
     }
 
+    // -------------------- PZ OPTIMIZATION (loose classes into game/) --------------------
+
+    /** Where an instance keeps the vanilla files PZ Optimization replaced. */
+    public static File pzOptStateDir(GameInstance gameInstance) {
+        return new File(gameInstance.getHomePath(), ".zomdroid-backups/pzopt");
+    }
+
+    private void doInstallPzOpt(Intent intent) {
+        String taskTitle = getString(R.string.optimization_pzopt_installing);
+        startForeground(NOTIFICATION_ID, buildNotification(taskTitle));
+        taskState.postValue(new TaskState(taskTitle, null, -1, 0, false, false));
+
+        String gameInstanceName = intent.getStringExtra(EXTRA_GAME_INSTANCE_NAME);
+        GameInstance gameInstance = gameInstanceName == null ? null
+                : GameInstanceManager.requireSingleton().getInstanceByName(gameInstanceName);
+        if (gameInstance == null) { finishWithError(taskTitle, "Game instance not found: " + gameInstanceName); return; }
+        Uri archiveUri = intent.getParcelableExtra(EXTRA_ARCHIVE_URI);
+        if (archiveUri == null) { finishWithError(taskTitle, "Archive URI is missing"); return; }
+
+        executorService.submit(() -> {
+            File archive = new File(getCacheDir(), "pzopt_" + System.currentTimeMillis() + ".zip");
+            try {
+                onProgressUpdate(getString(R.string.optimization_pzopt_copying), -1, 0);
+                try (InputStream in = getContentResolver().openInputStream(archiveUri);
+                     OutputStream out = new FileOutputStream(archive)) {
+                    if (in == null) throw new IOException("Cannot open the selected ZIP");
+                    byte[] buffer = new byte[128 * 1024];
+                    int count;
+                    while ((count = in.read(buffer)) != -1) out.write(buffer, 0, count);
+                }
+                onProgressUpdate(getString(R.string.optimization_pzopt_validating), -1, 0);
+                com.zomdroid.optimization.PzOptInstaller.Result result =
+                        com.zomdroid.optimization.PzOptInstaller.install(archive.toPath(),
+                                Paths.get(gameInstance.getGamePath()),
+                                pzOptStateDir(gameInstance).toPath());
+                com.zomdroid.optimization.PzOptAndroidDefaults.seedIfMissing(
+                        new File(gameInstance.getHomePath(), "Zomboid"));
+                finish(getString(R.string.optimization_pzopt_installed),
+                        getString(R.string.optimization_pzopt_installed_detail,
+                                result.fileCount, result.originalFileCount));
+            } catch (Exception e) {
+                finishWithError(taskTitle, e.getMessage() == null ? e.toString() : e.getMessage());
+            } finally {
+                archive.delete();
+            }
+        });
+    }
+
+    private void doRestorePzOpt(Intent intent) {
+        String taskTitle = getString(R.string.optimization_pzopt_restoring);
+        startForeground(NOTIFICATION_ID, buildNotification(taskTitle));
+        taskState.postValue(new TaskState(taskTitle, null, -1, 0, false, false));
+
+        String gameInstanceName = intent.getStringExtra(EXTRA_GAME_INSTANCE_NAME);
+        GameInstance gameInstance = gameInstanceName == null ? null
+                : GameInstanceManager.requireSingleton().getInstanceByName(gameInstanceName);
+        if (gameInstance == null) { finishWithError(taskTitle, "Game instance not found: " + gameInstanceName); return; }
+
+        executorService.submit(() -> {
+            try {
+                com.zomdroid.optimization.PzOptInstaller.restore(Paths.get(gameInstance.getGamePath()),
+                        pzOptStateDir(gameInstance).toPath());
+                finish(getString(R.string.optimization_pzopt_restored), null);
+            } catch (Exception e) {
+                finishWithError(taskTitle, e.getMessage() == null ? e.toString() : e.getMessage());
+            }
+        });
+    }
+
     // -------------------- TASK STATE / NOTIFICATION --------------------
 
     private void finish(String title, String message) {
@@ -3122,7 +3197,9 @@ public class InstallerService extends Service implements TaskProgressListener {
         EXPORT_GAME_SETTINGS,
         INSTALL_NATIVE_LIBS,
         INSTALL_MACOS_LIBS,
-        INSTALL_RENDER_LESS_ZOMBIE
+        INSTALL_RENDER_LESS_ZOMBIE,
+        INSTALL_PZOPT,
+        RESTORE_PZOPT
     }
 
     public static class TaskState {

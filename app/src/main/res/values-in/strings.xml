@@ -281,7 +281,7 @@
 
     <!-- JVM args dialog -->
     <string name="jvm_args_dialog_title">Argumen JVM</string>
-    <string name="jvm_args_dialog_message">Argumen JVM tambahan, misalnya:\n\n• -Xmx2G - mengalokasikan 2GB memori\n• -Xms512M - proses dimulai dengan 512MB RAM\n• -XX:MaxGCPauseMillis=120 - mempersingkat jeda garbage collector\n\nSecara teori, ini dapat membantu jika RAM tidak mencukupi. Beberapa argumen sudah diatur melalui pengaturan.\nJika dikonfigurasi secara tidak tepat dan aplikasi tidak dapat dijalankan, instal ulang aplikasi atau cukup hapus cache aplikasi.</string>
+    <string name="jvm_args_dialog_message">Argumen untuk Java game.\n\nBuild 41 memakai set bawaan: hanya mengatur pengumpul sampah dan menyerahkan ukuran memori ke Java.\n\nBuild 42 butuh lebih: preset yang disarankan menambahkan -Xms dan -Xmx (memori awal dan maksimum Java) serta membatasi thread pengumpul.\n\nAnda bisa mengubah nilai ini dengan risiko sendiri. -Xmx terlalu besar membuat renderer kekurangan memori dan Android menutup game; terlalu kecil membuat game kehabisan memori. Jika game berhenti bisa dibuka, tekan \"Kembalikan bawaan\".</string>
 
     <!-- Custom Driver import/export -->
     <string name="install_driver_menu">Impor/Ekspor Driver Kustom</string>
@@ -413,7 +413,7 @@
 
     <!-- Optimization page -->
     <string name="optimization_group_jvm">Argumen JVM</string>
-    <string name="optimization_jvm_hint">Argumen bawaan hanya menyetel pengumpul sampah dan aman di perangkat apa pun — ukuran heap dan jumlah thread diserahkan ke JVM, yang menyesuaikannya dengan ponsel Anda. Build 42 mendapat manfaat dari set yang lebih kuat: terapkan dengan satu tombol di Pengaturan → Lanjutan → Argumen JVM.</string>
+    <string name="optimization_jvm_hint">Pengaturan memori Java dan pengumpul sampah diatur per instans: Pengaturan → Advanced → JVM arguments.</string>
     <string name="settings_jvm_args_reset">Kembalikan bawaan</string>
     <string name="settings_jvm_args_clear">Hapus</string>
     <string name="settings_jvm_args_b42_recommendation">Disarankan untuk Build 42: membatasi heap Java dan mengembalikan memori ke sistem, sehingga ada ruang untuk renderer. Dalam beberapa kasus, game bisa gagal dimulai tanpa beberapa parameter ini. Bukan untuk Build 41 — pada perangkat 4 GB lebih banyak merugikan daripada membantu.</string>
@@ -423,8 +423,6 @@
     <string name="renderer_ng_build42_only_message">Renderer ini dibuat untuk Build 42 dan tidak bekerja pada Build 41 — gamenya tidak akan berjalan.\n\nJika Anda memainkan Build 41, pilih ZINK atau GL4ES.\n\nBuild 42 juga memerlukan argumen JVM yang disarankan: Pengaturan → Lanjutan → Argumen JVM.</string>
     <string name="new_game_instance_b42_jvm_hint">Build 42 memerlukan argumen JVM yang disetel — ada preset satu tombol untuk itu di pengaturan.</string>
     <string name="new_game_instance_open_settings">Buka Pengaturan → Lanjutan → Argumen JVM →</string>
-    <string name="optimization_jvm_recommended_label">→ Bawaan saat ini:</string>
-    <string name="optimization_jvm_4gb_note">⚠️ Pada perangkat 4 GB RAM game tetap berjalan, tetapi tidak sempurna: Build 42 tidak disarankan — mainkan Build 41 dan gunakan mod optimasi di bawah (BetterFPS, Every Texture Optimized). Itu jauh lebih membantu daripada pengaturan JVM.</string>
     <string name="optimization_copy">Salin</string>
     <string name="optimization_open_settings">→ Buka Pengaturan</string>
     <string name="optimization_group_betterfps">BetterFPS b41</string>
@@ -681,6 +679,29 @@
     <string name="icon_packs_delete_confirm">Hapus paket «%1$s»? Tombol yang sudah menampilkan gambarnya tetap menyimpannya.</string>
     <string name="icon_packs_imported">Paket «%1$s» diimpor: %2$d gambar</string>
     <string name="icon_packs_import_failed">Tidak dapat mengimpor paket: %1$s</string>
+    <!-- PZ Optimization installer -->
+    <string name="optimization_group_pzopt">PZ Optimization (eksperimental)</string>
+    <string name="optimization_pzopt_hint">Launcher hanya memasang dan mencopot PZ Optimization; pengaturannya terserah Anda (di game: Opsi → PZ Optimization).</string>
+    <string name="optimization_pzopt_help_title">PZ Optimization</string>
+    <string name="optimization_pzopt_help_message">Launcher hanya memasang dan mencopot PZ Optimization; pengaturannya terserah Anda (di game: Opsi → PZ Optimization). Yang kami ketahui sejauh ini:\n\n• Efek visual (God Rays, cermin, pantulan…) bisa membuat NG_GL4ES crash, jadi matikan di sana.\n• Jika game rusak setelah mengubah pengaturan, tekan Pulihkan di sini lalu pasang lagi.\n\nUntuk Build 42.20.4 (manifest Steam 6267392422221692966) ada versi mod yang disesuaikan untuk Android oleh Willing-Upstairs-580 (alias mepetz).</string>
+    <string name="optimization_pzopt_install">Pasang / Perbarui</string>
+    <string name="optimization_pzopt_restore">Pulihkan</string>
+    <string name="optimization_pzopt_restore_title">Pulihkan file asli game?</string>
+    <string name="optimization_pzopt_restore_message">Ini menghapus PZ Optimization dari instans yang dipilih dan mengembalikan file game yang digantikannya.</string>
+    <string name="optimization_pzopt_installing">Memasang PZ Optimization…</string>
+    <string name="optimization_pzopt_copying">Menyalin arsip…</string>
+    <string name="optimization_pzopt_validating">Memeriksa rilis dan menyimpan file asli…</string>
+    <string name="optimization_pzopt_installed">PZ Optimization terpasang</string>
+    <string name="optimization_pzopt_installed_detail">%1$d file dipasang; %2$d file asli disimpan.</string>
+    <string name="optimization_pzopt_restoring">Memulihkan file asli game…</string>
+    <string name="optimization_pzopt_restored">File asli game dipulihkan</string>
+    <string name="optimization_pzopt_status_installed">Terpasang di instans ini</string>
+    <string name="optimization_pzopt_status_none">Tidak terpasang di instans ini</string>
+    <!-- Import mods: a mod with its own Optimization installer -->
+    <string name="install_mod_helper_title">Lebih baik lewat Optimasi</string>
+    <string name="install_mod_helper_message">Sepertinya ini %1$s. Mod ini punya pemasang sendiri di Optimasi, yang menyesuaikannya untuk Android; jika diimpor di sini, mungkin tidak berfungsi. Pasang di sana?</string>
+    <string name="install_mod_helper_open">Buka Optimasi</string>
+    <string name="install_mod_helper_anyway">Tetap impor</string>
     <string name="control_element_no_outline">Tanpa bingkai</string>
     <string name="control_element_no_label">Tanpa label</string>
     <string name="icon_packs_layout_full">tata letak lengkap</string>

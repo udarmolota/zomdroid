@@ -243,31 +243,81 @@ public class InstallModFragment extends Fragment {
             }
 
             GameInstance selectedInstance = instances.get(instanceIndex);
-
-            Intent installerIntent = new Intent(requireContext(), InstallerService.class);
-            installerIntent.putExtra(
-                    InstallerService.EXTRA_COMMAND,
-                    InstallerService.Task.INSTALL_MOD_WITH_FIX.ordinal()
-            );
-            installerIntent.putExtra(
-                    InstallerService.EXTRA_GAME_INSTANCE_NAME,
-                    selectedInstance.getName()
-            );
-            installerIntent.putExtra(
-                    InstallerService.EXTRA_BUILD_VERSION,
-                    selectedInstance.getBuildVersion()
-            );
-            installerIntent.putExtra(
-                    InstallerService.EXTRA_MODS_URI,
-                    modZipUri
-            );
-
-            clearSelectedModZip();
-
-            requireContext().startForegroundService(installerIntent);
-            bindInstallerService();
+            warnIfHelperModThen(modZipUri, () -> startInstall(selectedInstance));
         });
 
+    }
+
+    /**
+     * A mod the Optimization screen installs itself works better from there (adapted to Android);
+     * say so before importing it plainly. Checked by the zip's name first, then by reading it off
+     * the UI thread. Only advice: "Import anyway" goes on as before.
+     */
+    private void warnIfHelperModThen(Uri zipUri, Runnable proceed) {
+        Integer byName = com.zomdroid.optimization.HelperMods.byFileName(extractFileName(zipUri));
+        if (byName != null) {
+            showHelperModDialog(byName, proceed);
+            return;
+        }
+        binding.installModInstallBtn.setEnabled(false);
+        android.content.Context app = requireContext().getApplicationContext();
+        new Thread(() -> {
+            Integer found = null;
+            try (InputStream in = app.getContentResolver().openInputStream(zipUri)) {
+                if (in != null) found = com.zomdroid.optimization.HelperMods.byContent(in);
+            } catch (Exception e) {
+                Log.w("InstallModFragment", "helper-mod check failed: " + e);
+            }
+            final Integer result = found;
+            android.app.Activity act = getActivity();
+            if (act == null) return;
+            act.runOnUiThread(() -> {
+                if (binding == null) return;
+                binding.installModInstallBtn.setEnabled(true);
+                if (result != null) showHelperModDialog(result, proceed);
+                else proceed.run();
+            });
+        }, "helper-mod-check").start();
+    }
+
+    private void showHelperModDialog(int sectionName, Runnable proceed) {
+        if (!isAdded()) return;
+        String section = getString(sectionName);
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.install_mod_helper_title)
+                .setMessage(getString(R.string.install_mod_helper_message, section))
+                .setPositiveButton(R.string.install_mod_helper_open, (d, w) ->
+                        androidx.navigation.Navigation.findNavController(requireView())
+                                .navigate(R.id.action_open_optimization))
+                .setNeutralButton(R.string.install_mod_helper_anyway, (d, w) -> proceed.run())
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void startInstall(GameInstance selectedInstance) {
+        if (modZipUri == null) return;
+        Intent installerIntent = new Intent(requireContext(), InstallerService.class);
+        installerIntent.putExtra(
+                InstallerService.EXTRA_COMMAND,
+                InstallerService.Task.INSTALL_MOD_WITH_FIX.ordinal()
+        );
+        installerIntent.putExtra(
+                InstallerService.EXTRA_GAME_INSTANCE_NAME,
+                selectedInstance.getName()
+        );
+        installerIntent.putExtra(
+                InstallerService.EXTRA_BUILD_VERSION,
+                selectedInstance.getBuildVersion()
+        );
+        installerIntent.putExtra(
+                InstallerService.EXTRA_MODS_URI,
+                modZipUri
+        );
+
+        clearSelectedModZip();
+
+        requireContext().startForegroundService(installerIntent);
+        bindInstallerService();
     }
 
     private void showWorkshopDownloadDialog() {

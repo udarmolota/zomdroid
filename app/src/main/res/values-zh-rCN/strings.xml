@@ -263,7 +263,7 @@
 
     <!-- JVM args dialog -->
     <string name="jvm_args_dialog_title">JVM 参数</string>
-    <string name="jvm_args_dialog_message">额外的 JVM 参数，例如：\n\n• -Xmx2G — 分配 2GB 内存\n• -Xms512M — 进程以 512MB RAM 启动\n• -XX:MaxGCPauseMillis=120 — 缩短垃圾回收暂停时间\n\n理论上在内存不足时有帮助。部分参数已由设置项自动配置。\n如果设置错误导致应用无法运行，请重新安装或清除应用缓存。</string>
+    <string name="jvm_args_dialog_message">游戏 Java 的参数。\n\nBuild 41 使用默认参数：只调整垃圾回收器，内存大小交给 Java 决定。\n\nBuild 42 需要更多：推荐预设会加入 -Xms 和 -Xmx（Java 的初始和最大内存），并限制回收器的线程数。\n\n修改这些值需自担风险。-Xmx 太大，渲染器会缺内存，Android 会关闭游戏；太小，游戏会内存不足。如果游戏无法启动，请点“恢复默认”。</string>
 
     <!-- Custom Driver import/export -->
     <string name="install_driver_menu">导入/导出自定义驱动</string>
@@ -394,7 +394,7 @@
 
     <!-- Optimization page -->
     <string name="optimization_group_jvm">JVM 参数</string>
-    <string name="optimization_jvm_hint">默认参数只调整垃圾回收器，在任何设备上都安全——堆大小和线程数交由 JVM 决定，它会按你的手机来调整。Build 42 适合更强的一组参数：在设置 → 高级 → JVM 参数中一键应用。</string>
+    <string name="optimization_jvm_hint">Java 内存和垃圾回收设置按实例单独设置：设置 → Advanced → JVM arguments。</string>
     <string name="settings_jvm_args_reset">恢复默认</string>
     <string name="settings_jvm_args_clear">清空</string>
     <string name="settings_jvm_args_b42_recommendation">推荐用于 Build 42：限制 Java 堆并把内存交还系统，为渲染器留出空间。在某些情况下，缺少其中一些参数游戏可能无法启动。不适用于 Build 41——在 4 GB 设备上得不偿失。</string>
@@ -404,8 +404,6 @@
     <string name="renderer_ng_build42_only_message">该渲染器是为 Build 42 编写的，在 Build 41 上无法工作——游戏不会启动。\n\n如果你玩 Build 41，请选择 ZINK 或 GL4ES。\n\nBuild 42 还需要推荐的 JVM 参数：设置 → 高级 → JVM 参数。</string>
     <string name="new_game_instance_b42_jvm_hint">Build 42 需要调整过的 JVM 参数——设置里有一键预设。</string>
     <string name="new_game_instance_open_settings">打开设置 → 高级 → JVM 参数 →</string>
-    <string name="optimization_jvm_recommended_label">→ 当前默认值：</string>
-    <string name="optimization_jvm_4gb_note">⚠️ 在 4 GB 内存的设备上游戏可以运行，但并不理想：不建议玩 Build 42 — 请玩 Build 41 并使用下方的优化模组（BetterFPS、Every Texture Optimized）。它们比 JVM 设置有效得多。</string>
     <string name="optimization_copy">复制</string>
     <string name="optimization_open_settings">→ 打开设置</string>
     <string name="optimization_group_betterfps">BetterFPS b41</string>
@@ -674,6 +672,29 @@
     <string name="icon_packs_delete_confirm">删除图标包“%1$s”？已经显示其图片的按钮会保留图片。</string>
     <string name="icon_packs_imported">已导入图标包“%1$s”：%2$d 张图片</string>
     <string name="icon_packs_import_failed">无法导入图标包：%1$s</string>
+    <!-- PZ Optimization installer -->
+    <string name="optimization_group_pzopt">PZ Optimization（实验性）</string>
+    <string name="optimization_pzopt_hint">启动器只负责安装和卸载 PZ Optimization；它的设置由你自己决定（游戏内：选项 → PZ Optimization）。</string>
+    <string name="optimization_pzopt_help_title">PZ Optimization</string>
+    <string name="optimization_pzopt_help_message">启动器只负责安装和卸载 PZ Optimization；它的设置由你自己决定（游戏内：选项 → PZ Optimization）。目前已知：\n\n• 视觉效果（God Rays、镜子、反射……）可能导致 NG_GL4ES 崩溃，在它上面请保持关闭。\n• 如果改了某项设置后游戏出问题，请在这里点“还原”，然后重新安装。\n\nBuild 42.20.4（Steam 清单 6267392422221692966）有一个由 Willing-Upstairs-580（又名 mepetz）为 Android 适配的模组版本。</string>
+    <string name="optimization_pzopt_install">安装 / 更新</string>
+    <string name="optimization_pzopt_restore">还原</string>
+    <string name="optimization_pzopt_restore_title">还原游戏的原始文件？</string>
+    <string name="optimization_pzopt_restore_message">这会从所选实例中移除 PZ Optimization，并放回它替换掉的游戏文件。</string>
+    <string name="optimization_pzopt_installing">正在安装 PZ Optimization…</string>
+    <string name="optimization_pzopt_copying">正在复制压缩包…</string>
+    <string name="optimization_pzopt_validating">正在检查发布并保存原始文件…</string>
+    <string name="optimization_pzopt_installed">PZ Optimization 已安装</string>
+    <string name="optimization_pzopt_installed_detail">已安装 %1$d 个文件；已保存 %2$d 个原始文件。</string>
+    <string name="optimization_pzopt_restoring">正在还原游戏的原始文件…</string>
+    <string name="optimization_pzopt_restored">游戏的原始文件已还原</string>
+    <string name="optimization_pzopt_status_installed">已安装在此实例中</string>
+    <string name="optimization_pzopt_status_none">未安装在此实例中</string>
+    <!-- Import mods: a mod with its own Optimization installer -->
+    <string name="install_mod_helper_title">建议通过“优化”安装</string>
+    <string name="install_mod_helper_message">这看起来是 %1$s。它在“优化”中有专门的安装程序，会针对 Android 进行适配；在这里导入可能无法正常工作。要去那里安装吗？</string>
+    <string name="install_mod_helper_open">打开“优化”</string>
+    <string name="install_mod_helper_anyway">仍然导入</string>
     <string name="control_element_no_outline">不显示边框</string>
     <string name="control_element_no_label">不显示文字</string>
     <string name="icon_packs_layout_full">完整布局</string>
