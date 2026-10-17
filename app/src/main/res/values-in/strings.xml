@@ -656,6 +656,34 @@
     <string name="launcher_empty_title">Cara memulai</string>
     <string name="launcher_empty_body">Untuk mulai bermain, buat instance — salinan Project Zomboid yang terpasang. Tambahkan file game dengan tombol + di atas, atau unduh game dari Steam atau GOG lewat menu samping. Unduhan dari Steam harus dikemas dulu ke .zip; dari GOG, ketuk “Buat instance” setelah unduhan selesai.</string>
     <string name="launcher_empty_quick_start">Mulai cepat</string>
+    <!-- Button icons (icon packs) -->
+    <string name="nav_menu_icon_packs">Ikon tombol</string>
+    <string name="icon_packs_title">Paket ikon</string>
+    <string name="icon_packs_note">Gambar untuk semua tombol di layar sekaligus, menggantikan labelnya. Pilih instans lalu tekan Terapkan di samping paket; tombol yang tidak punya gambar di paket tetap memakai labelnya. Lepas mengambil kembali gambar paket. Untuk satu tombol: editor kontrol.</string>
+    <string name="icon_packs_howto">Cara membuat paket sendiri</string>
+    <string name="icon_packs_format">Sebuah .zip berisi gambar PNG, persegi, 256 piksel, putih di atas latar transparan: tombol mewarnainya seperti labelnya. Agar gambar tetap berwarna aslinya, tambahkan pack.json dengan \"tint\": false. Beri nama setiap file sesuai aksi yang ditampilkannya: %1$s. Tombol mendapat gambar bila terikat ke tombol bawaan aksi itu. File PNG lain di zip juga disimpan. pack.json opsional memberi nama paket: {\"format\": 1, \"name\": \"Ikon saya\"}.</string>
+    <string name="icon_packs_instance">Instans</string>
+    <string name="icon_packs_no_instances">Belum ada instans</string>
+    <string name="icon_packs_apply">Terapkan</string>
+    <string name="icon_packs_unapply">Lepas</string>
+    <string name="icon_packs_delete">Hapus</string>
+    <string name="icon_packs_import">Impor paket (zip)</string>
+    <string name="icon_packs_none">Belum ada paket ikon. Impor zip berisi gambar PNG.</string>
+    <string name="icon_packs_count">%1$d gambar</string>
+    <string name="icon_packs_builtin">bawaan</string>
+    <string name="icon_packs_applied_count">diterapkan ke %1$d tombol</string>
+    <string name="icon_packs_applied">Ikon diterapkan ke %1$d tombol di %2$s</string>
+    <string name="icon_packs_applied_none">Tidak ada tombol di tata letak ini yang cocok dengan gambar paket</string>
+    <string name="icon_packs_apply_failed">Tidak dapat membaca atau menyimpan tata letak</string>
+    <string name="icon_packs_apply_confirm">Terapkan paket «%1$s» ke tata letak %2$s? Tombol yang punya gambar di paket akan menampilkannya menggantikan ikon atau label saat ini.</string>
+    <string name="icon_packs_remove_confirm">Lepas ikon «%1$s» dari tata letak %2$s? Tombol-tombol itu menampilkan labelnya lagi.</string>
+    <string name="icon_packs_removed">Ikon dilepas dari %1$d tombol di %2$s</string>
+    <string name="icon_packs_delete_confirm">Hapus paket «%1$s»? Tombol yang sudah menampilkan gambarnya tetap menyimpannya.</string>
+    <string name="icon_packs_imported">Paket «%1$s» diimpor: %2$d gambar</string>
+    <string name="icon_packs_import_failed">Tidak dapat mengimpor paket: %1$s</string>
     <string name="control_element_no_outline">Tanpa bingkai</string>
     <string name="control_element_no_label">Tanpa label</string>
+    <string name="icon_packs_layout_full">tata letak lengkap</string>
+    <string name="icon_packs_layout_vkbd">tata letak keyboard &amp; mouse</string>
+    <string name="icon_packs_layout_gamepad">tata letak gamepad</string>
 </resources>

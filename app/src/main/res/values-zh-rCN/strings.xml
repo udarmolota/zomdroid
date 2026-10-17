@@ -649,6 +649,34 @@
     <string name="launcher_empty_title">如何开始</string>
     <string name="launcher_empty_body">要开始游戏，请先创建一个实例——也就是已安装的一份 Project Zomboid。用顶部的 + 添加游戏文件，或在侧边菜单中从 Steam 或 GOG 下载游戏。Steam 的下载需要先打包成 .zip；GOG 的下载完成后，点击“创建实例”即可。</string>
     <string name="launcher_empty_quick_start">快速开始</string>
+    <!-- Button icons (icon packs) -->
+    <string name="nav_menu_icon_packs">按钮图标</string>
+    <string name="icon_packs_title">图标包</string>
+    <string name="icon_packs_note">一次性给所有屏幕按钮换上图片，代替文字标签。选择实例，在图标包旁边按“应用”；图标包里没有对应图片的按钮保留标签。“移除”会撤下该图标包的图片。要单独设置某个按钮，请用控件编辑器。</string>
+    <string name="icon_packs_howto">如何自己制作图标包</string>
+    <string name="icon_packs_format">一个 .zip，里面是 PNG 图片：正方形、256 像素、透明背景白色图案——按钮会像绘制标签一样绘制它们。要保留图片自己的颜色，在 pack.json 里加上 \"tint\": false。每个文件按它表示的动作命名：%1$s。按钮绑定了该动作的默认按键时就会得到对应图片。zip 里其他 PNG 文件也会保留。可选的 pack.json 用来给图标包命名：{\"format\": 1, \"name\": \"My icons\"}。</string>
+    <string name="icon_packs_instance">实例</string>
+    <string name="icon_packs_no_instances">还没有实例</string>
+    <string name="icon_packs_apply">应用</string>
+    <string name="icon_packs_unapply">移除</string>
+    <string name="icon_packs_delete">删除</string>
+    <string name="icon_packs_import">导入图标包（zip）</string>
+    <string name="icon_packs_none">还没有图标包。请导入一个包含 PNG 图片的 zip。</string>
+    <string name="icon_packs_count">%1$d 张图片</string>
+    <string name="icon_packs_builtin">内置</string>
+    <string name="icon_packs_applied_count">已应用到 %1$d 个按钮</string>
+    <string name="icon_packs_applied">已为 %2$s 的 %1$d 个按钮应用图标</string>
+    <string name="icon_packs_applied_none">此布局中没有按钮与图标包里的图片对应</string>
+    <string name="icon_packs_apply_failed">无法读取或保存布局</string>
+    <string name="icon_packs_apply_confirm">把图标包“%1$s”应用到 %2$s 的布局？图标包里有图片的按钮会显示该图片，代替当前的图标或标签。</string>
+    <string name="icon_packs_remove_confirm">从 %2$s 的布局中移除“%1$s”的图标？这些按钮会重新显示标签。</string>
+    <string name="icon_packs_removed">已移除 %2$s 的 %1$d 个按钮的图标</string>
+    <string name="icon_packs_delete_confirm">删除图标包“%1$s”？已经显示其图片的按钮会保留图片。</string>
+    <string name="icon_packs_imported">已导入图标包“%1$s”：%2$d 张图片</string>
+    <string name="icon_packs_import_failed">无法导入图标包：%1$s</string>
     <string name="control_element_no_outline">不显示边框</string>
     <string name="control_element_no_label">不显示文字</string>
+    <string name="icon_packs_layout_full">完整布局</string>
+    <string name="icon_packs_layout_vkbd">键鼠布局</string>
+    <string name="icon_packs_layout_gamepad">手柄布局</string>
 </resources>

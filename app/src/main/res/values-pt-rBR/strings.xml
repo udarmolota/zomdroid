@@ -655,6 +655,34 @@
     <string name="launcher_empty_title">Por onde começar</string>
     <string name="launcher_empty_body">Para começar a jogar, crie uma instância: uma cópia instalada de Project Zomboid. Adicione os arquivos do jogo com o + no topo ou baixe o jogo da Steam ou da GOG pelo menu lateral. Um download da Steam precisa ser compactado em .zip antes; da GOG, toque em “Criar uma instância” quando o download terminar.</string>
     <string name="launcher_empty_quick_start">Início rápido</string>
+    <!-- Button icons (icon packs) -->
+    <string name="nav_menu_icon_packs">Ícones dos botões</string>
+    <string name="icon_packs_title">Pacotes de ícones</string>
+    <string name="icon_packs_note">Imagens para todos os botões na tela de uma vez, no lugar dos rótulos. Escolha a instância e toque em Aplicar ao lado de um pacote; os botões para os quais o pacote não tem imagem mantêm o rótulo. Remover tira as imagens do pacote. Para um botão só: o editor de controles.</string>
+    <string name="icon_packs_howto">Como fazer o seu próprio pacote</string>
+    <string name="icon_packs_format">Um .zip de imagens PNG, quadradas, de 256 pixels, brancas sobre fundo transparente: o botão as pinta como o seu rótulo. Para manter as cores das imagens, acrescente um pack.json com \"tint\": false. Cada arquivo tem o nome da ação que mostra: %1$s. Um botão recebe a imagem quando está ligado à tecla padrão dessa ação. Os outros PNG do zip também são guardados. Um pack.json opcional dá o nome: {\"format\": 1, \"name\": \"Meus ícones\"}.</string>
+    <string name="icon_packs_instance">Instância</string>
+    <string name="icon_packs_no_instances">Ainda não há instâncias</string>
+    <string name="icon_packs_apply">Aplicar</string>
+    <string name="icon_packs_unapply">Remover</string>
+    <string name="icon_packs_delete">Apagar</string>
+    <string name="icon_packs_import">Importar um pacote (zip)</string>
+    <string name="icon_packs_none">Ainda não há pacotes de ícones. Importe um zip de imagens PNG.</string>
+    <string name="icon_packs_count">%1$d imagens</string>
+    <string name="icon_packs_builtin">embutido</string>
+    <string name="icon_packs_applied_count">aplicado a %1$d botões</string>
+    <string name="icon_packs_applied">Ícones aplicados a %1$d botões de %2$s</string>
+    <string name="icon_packs_applied_none">Nenhum botão deste layout corresponde a uma imagem do pacote</string>
+    <string name="icon_packs_apply_failed">Não foi possível ler ou salvar o layout</string>
+    <string name="icon_packs_apply_confirm">Aplicar o pacote «%1$s» ao layout de %2$s? Os botões para os quais ele tem imagem vão mostrá-la no lugar do ícone ou rótulo atual.</string>
+    <string name="icon_packs_remove_confirm">Remover os ícones de «%1$s» do layout de %2$s? Esses botões voltam a mostrar os rótulos.</string>
+    <string name="icon_packs_removed">Ícones removidos de %1$d botões de %2$s</string>
+    <string name="icon_packs_delete_confirm">Apagar o pacote «%1$s»? Os botões que já mostram as imagens dele as mantêm.</string>
+    <string name="icon_packs_imported">Pacote «%1$s» importado: %2$d imagens</string>
+    <string name="icon_packs_import_failed">Não foi possível importar o pacote: %1$s</string>
     <string name="control_element_no_outline">Sem moldura</string>
     <string name="control_element_no_label">Sem rótulo</string>
+    <string name="icon_packs_layout_full">layout completo</string>
+    <string name="icon_packs_layout_vkbd">layout de teclado e mouse</string>
+    <string name="icon_packs_layout_gamepad">layout de controle</string>
 </resources>

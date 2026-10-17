@@ -14,6 +14,11 @@
             android:icon="@drawable/ic_controls"
             app:showAsAction="never"/>
         <item
+            android:id="@+id/action_open_icon_packs"
+            android:title="@string/nav_menu_icon_packs"
+            android:icon="@drawable/mt_icon_stack"
+            app:showAsAction="never"/>
+        <item
             android:id="@+id/action_open_gamepad_mapper"
             android:title="@string/nav_menu_gamepad_mapper"
             android:icon="@drawable/mt_icon_controller"

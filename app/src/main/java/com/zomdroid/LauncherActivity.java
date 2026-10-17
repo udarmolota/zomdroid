@@ -113,6 +113,10 @@ public class LauncherActivity extends AppCompatActivity {
                 binding.drawerLayout.close();
                 navController.navigate(R.id.action_open_controls_editor_launch);
                 return true;
+            } else if (item.getItemId() == R.id.action_open_icon_packs) {
+                binding.drawerLayout.close();
+                navController.navigate(R.id.action_open_icon_packs);
+                return true;
             } else if (item.getItemId() == R.id.action_open_gamepad_mapper) {
                 // Navigate to gamepad mapper using NavController
                 binding.drawerLayout.close();

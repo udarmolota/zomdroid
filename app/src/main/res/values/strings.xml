@@ -697,6 +697,34 @@
     <string name="launcher_empty_title">Getting started</string>
     <string name="launcher_empty_body">To start playing, create an instance — an installed copy of Project Zomboid. Add your game files with the + at the top, or download the game from Steam or GOG in the side menu. A Steam download must be packed into a .zip first; from GOG, tap “Create an instance” once the download is done.</string>
     <string name="launcher_empty_quick_start">Quick start</string>
+    <!-- Button icons (icon packs) -->
+    <string name="nav_menu_icon_packs">Button icons</string>
+    <string name="icon_packs_title">Icon packs</string>
+    <string name="icon_packs_note">Pictures for all on-screen buttons at once instead of their text labels. Pick the instance and press Apply next to a pack; buttons the pack has no picture for keep their label. Remove takes the pack\'s pictures off again. One button at a time: the controls editor.</string>
+    <string name="icon_packs_howto">How to make a pack yourself</string>
+    <string name="icon_packs_format">A .zip of PNG pictures, square, 256 pixels, white on a transparent background: the button paints them like its label. To keep the pictures\' own colours, add a pack.json with \"tint\": false. Name each file after the action it shows: %1$s. A button gets the picture when it is bound to that action\'s default key. Other PNG files in the zip are kept too. An optional pack.json names the pack: {\"format\": 1, \"name\": \"My icons\"}.</string>
+    <string name="icon_packs_instance">Instance</string>
+    <string name="icon_packs_no_instances">No instances yet</string>
+    <string name="icon_packs_apply">Apply</string>
+    <string name="icon_packs_unapply">Remove</string>
+    <string name="icon_packs_delete">Delete</string>
+    <string name="icon_packs_import">Import a pack (zip)</string>
+    <string name="icon_packs_none">No icon packs yet. Import a zip of PNG pictures.</string>
+    <string name="icon_packs_count">%1$d pictures</string>
+    <string name="icon_packs_builtin">built in</string>
+    <string name="icon_packs_applied_count">applied to %1$d buttons</string>
+    <string name="icon_packs_applied">Icons applied to %1$d buttons of %2$s</string>
+    <string name="icon_packs_applied_none">No button of this layout matches a picture of the pack</string>
+    <string name="icon_packs_apply_failed">Could not read or save the layout</string>
+    <string name="icon_packs_apply_confirm">Apply the pack «%1$s» to the layout of %2$s? Buttons it has a picture for show that picture instead of their current icon or label.</string>
+    <string name="icon_packs_remove_confirm">Remove the icons of «%1$s» from the layout of %2$s? Those buttons show their labels again.</string>
+    <string name="icon_packs_removed">Icons removed from %1$d buttons of %2$s</string>
+    <string name="icon_packs_delete_confirm">Delete the pack «%1$s»? Buttons that already show its pictures keep them.</string>
+    <string name="icon_packs_imported">Pack «%1$s» imported: %2$d pictures</string>
+    <string name="icon_packs_import_failed">Could not import the pack: %1$s</string>
     <string name="control_element_no_outline">No frame</string>
     <string name="control_element_no_label">No label</string>
+    <string name="icon_packs_layout_full">full layout</string>
+    <string name="icon_packs_layout_vkbd">keyboard &amp; mouse layout</string>
+    <string name="icon_packs_layout_gamepad">gamepad layout</string>
 </resources>

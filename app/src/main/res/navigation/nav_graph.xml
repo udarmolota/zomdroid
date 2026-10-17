@@ -24,6 +24,9 @@
         android:id="@+id/action_open_wiki_fragment"
         app:destination="@id/wiki_fragment"/>
     <action
+        android:id="@id/action_open_icon_packs"
+        app:destination="@id/icon_packs_fragment"/>
+    <action
         android:id="@+id/action_open_install_mod"
         app:destination="@id/install_mod_fragment" />
     <action
@@ -89,6 +92,12 @@
         android:label="@string/fragment_label_settings"
         tools:layout="@layout/fragment_app_settings">
     </fragment>
+
+    <fragment
+        android:id="@+id/icon_packs_fragment"
+        android:name="com.zomdroid.fragments.IconPacksFragment"
+        android:label="@string/nav_menu_icon_packs"
+        tools:layout="@layout/fragment_icon_packs" />
 
     <fragment
         android:id="@+id/gamepad_mapper_fragment"

@@ -656,6 +656,34 @@
     <string name="launcher_empty_title">С чего начать</string>
     <string name="launcher_empty_body">Чтобы начать играть, создайте инстанс — установленную копию Project Zomboid. Добавьте файлы игры кнопкой + вверху или скачайте игру из Steam или GOG через боковое меню. Загрузку из Steam сначала нужно упаковать в .zip; из GOG после загрузки нажмите «Создать инстанс».</string>
     <string name="launcher_empty_quick_start">Быстрый старт</string>
+    <!-- Button icons (icon packs) -->
+    <string name="nav_menu_icon_packs">Иконки кнопок</string>
+    <string name="icon_packs_title">Пакеты иконок</string>
+    <string name="icon_packs_note">Картинки сразу для всех экранных кнопок вместо их подписей. Выберите экземпляр игры и нажмите «Применить» у пакета; кнопки, для которых в пакете нет картинки, сохранят подпись. «Убрать» снимает картинки пакета. Для одной кнопки: редактор управления.</string>
+    <string name="icon_packs_howto">Как сделать свой пакет</string>
+    <string name="icon_packs_format">Архив .zip с картинками PNG, квадратными, 256 пикселей, белыми на прозрачном фоне: кнопка окрашивает их как свою подпись. Чтобы картинки сохранили свои цвета, добавьте pack.json с \"tint\": false. Каждый файл называется по действию, которое он показывает: %1$s. Кнопка получает картинку, если на ней стандартная клавиша этого действия. Остальные PNG из архива тоже сохраняются. Необязательный pack.json задаёт название: {\"format\": 1, \"name\": \"Мои иконки\"}.</string>
+    <string name="icon_packs_instance">Экземпляр игры</string>
+    <string name="icon_packs_no_instances">Экземпляров игры пока нет</string>
+    <string name="icon_packs_apply">Применить</string>
+    <string name="icon_packs_unapply">Убрать</string>
+    <string name="icon_packs_delete">Удалить</string>
+    <string name="icon_packs_import">Импортировать пакет (zip)</string>
+    <string name="icon_packs_none">Пакетов иконок пока нет. Импортируйте zip с картинками PNG.</string>
+    <string name="icon_packs_count">Картинок: %1$d</string>
+    <string name="icon_packs_builtin">встроенный</string>
+    <string name="icon_packs_applied_count">применён к %1$d кнопкам</string>
+    <string name="icon_packs_applied">Иконки применены к %1$d кнопкам экземпляра %2$s</string>
+    <string name="icon_packs_applied_none">Ни одной кнопке этой раскладки нет картинки в пакете</string>
+    <string name="icon_packs_apply_failed">Не удалось прочитать или сохранить раскладку</string>
+    <string name="icon_packs_apply_confirm">Применить пакет «%1$s» к раскладке %2$s? Кнопки, для которых в пакете есть картинка, покажут её вместо нынешней иконки или подписи.</string>
+    <string name="icon_packs_remove_confirm">Убрать иконки «%1$s» с раскладки %2$s? Эти кнопки снова покажут подписи.</string>
+    <string name="icon_packs_removed">Иконки убраны с %1$d кнопок экземпляра %2$s</string>
+    <string name="icon_packs_delete_confirm">Удалить пакет «%1$s»? Кнопки, на которых уже стоят его картинки, сохранят их.</string>
+    <string name="icon_packs_imported">Пакет «%1$s» импортирован, картинок: %2$d</string>
+    <string name="icon_packs_import_failed">Не удалось импортировать пакет: %1$s</string>
     <string name="control_element_no_outline">Без рамки</string>
     <string name="control_element_no_label">Без подписи</string>
+    <string name="icon_packs_layout_full">полная раскладка</string>
+    <string name="icon_packs_layout_vkbd">раскладка клавиатуры и мыши</string>
+    <string name="icon_packs_layout_gamepad">раскладка геймпада</string>
 </resources>
