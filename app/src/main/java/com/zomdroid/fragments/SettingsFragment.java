@@ -132,10 +132,31 @@ public class SettingsFragment extends Fragment {
         // Installed or not - that is all a player can act on. The build number the manifest
         // carries meant nothing to anyone (an instance keeps the build it was created with).
         java.util.Set<String> installed = com.zomdroid.steam.MacosLibraries.installed(game);
-        binding.settingsMacosStatus.setText(installed.isEmpty() ? R.string.macos_libs_missing : R.string.macos_libs_ready);
-        bindMacosModule(binding.settingsMacosLightingSwitch, "lighting", installed.contains("libLighting.dylib"));
-        bindMacosModule(binding.settingsMacosPathfindSwitch, "pathfind", installed.contains("libPZPathFind.dylib"));
-        bindMacosModule(binding.settingsMacosPopmanSwitch, "popman", installed.contains("libPZPopMan.dylib"));
+        // 42.21+: the game's own ARM64 builds are complete and run natively, the dylibs would add
+        // nothing (and are not used even if present) - nothing to offer.
+        boolean notNeeded = com.zomdroid.steam.MacosLibraries.notNeeded(game);
+        binding.settingsMacosStatus.setText(notNeeded ? R.string.macos_libs_not_needed
+                : installed.isEmpty() ? R.string.macos_libs_missing : R.string.macos_libs_ready);
+        // "Not needed" stands out (red, bold) so nobody goes downloading them anyway.
+        if (binding.settingsMacosStatus.getTag() == null)
+            binding.settingsMacosStatus.setTag(binding.settingsMacosStatus.getTextColors());
+        binding.settingsMacosStatus.setTypeface(null, notNeeded ? android.graphics.Typeface.BOLD
+                : android.graphics.Typeface.NORMAL);
+        if (notNeeded) {
+            binding.settingsMacosStatus.setTextColor(com.google.android.material.color.MaterialColors.getColor(
+                    binding.settingsMacosStatus, androidx.appcompat.R.attr.colorError));
+        } else {
+            binding.settingsMacosStatus.setTextColor(
+                    (android.content.res.ColorStateList) binding.settingsMacosStatus.getTag());
+        }
+        binding.settingsMacosDownload.setVisibility(notNeeded ? View.GONE : View.VISIBLE);
+        binding.settingsMacosImport.setVisibility(notNeeded ? View.GONE : View.VISIBLE);
+        bindMacosModule(binding.settingsMacosLightingSwitch, "lighting", installed.contains("libLighting.dylib")
+                && !com.zomdroid.steam.MacosLibraries.gameArmBuildInUse(game, "libLighting.dylib"));
+        bindMacosModule(binding.settingsMacosPathfindSwitch, "pathfind", installed.contains("libPZPathFind.dylib")
+                && !com.zomdroid.steam.MacosLibraries.gameArmBuildInUse(game, "libPZPathFind.dylib"));
+        bindMacosModule(binding.settingsMacosPopmanSwitch, "popman", installed.contains("libPZPopMan.dylib")
+                && !com.zomdroid.steam.MacosLibraries.gameArmBuildInUse(game, "libPZPopMan.dylib"));
     }
 
     @Override public void onResume() {

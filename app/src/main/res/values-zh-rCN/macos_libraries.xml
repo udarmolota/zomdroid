@@ -13,6 +13,7 @@
     <string name="macos_libs_import_title">加载 macOS 库</string>
     <string name="macos_libs_import_hint">选择包含 libLighting.dylib、libPZPathFind.dylib 和 libPZPopMan.dylib 的 ZIP（来自 macOS 版 Project Zomboid）。压缩包内的文件夹结构无关紧要。文件将放入所选实例的 game/macos。</string>
     <string name="macos_libs_ready">macOS 库已安装</string>
+    <string name="macos_libs_not_needed">不需要：此游戏版本自带完整的 Android 光照、寻路和僵尸人口库，它们以原生方式运行。</string>
     <string name="macos_libs_installing">正在安装 macOS 库…</string>
     <string name="macos_libs_installed">macOS 库已安装</string>
     <string name="macos_libs_modules">使用中的库</string>

@@ -1163,7 +1163,9 @@ public class InstallerService extends Service implements TaskProgressListener {
         for (String name : com.zomdroid.steam.MacosLibraries.NAMES) {
             File file = new File(folder, name);
             String state;
-            if (installed.contains(name)) {
+            if (com.zomdroid.steam.MacosLibraries.gameArmBuildInUse(game, name)) {
+                state = "not used: the game's own ARM64 build runs natively";
+            } else if (installed.contains(name)) {
                 state = settings.isMacosModuleEnabled(com.zomdroid.steam.MacosLibraries.MODULE_KEYS.get(name))
                         ? "on" : "turned off in settings";
             } else {

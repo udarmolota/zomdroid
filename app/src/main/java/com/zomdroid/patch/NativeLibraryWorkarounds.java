@@ -60,6 +60,64 @@ public final class NativeLibraryWorkarounds {
             disable(gameInstance, "libLighting64.so",
                     "stale build: torch/headlight cones ignored, squareSetLightTransmission missing");
         }
+
+        disableArgumentMismatches(gameInstance);
+    }
+
+    private static final String ABI_CACHE = ".zomdroid-abi-checked";
+
+    /**
+     * Switches off an ARM64 build whose JNI functions take a different number of arguments than
+     * the game passes (JniAbiCheck). The export list cannot see this: 42.20's Lighting had an
+     * updateTorch() of the right name and the wrong arguments. Only libraries with a Linux twin
+     * are judged, so there is always a working fallback through box64. The verdict per file
+     * (name, size, date) is cached next to the libraries: the check reads the DWARF once, not on
+     * every launch.
+     */
+    private static void disableArgumentMismatches(GameInstance gameInstance) {
+        File game = new File(gameInstance.getGamePath());
+        File jar = new File(game, "projectzomboid.jar");
+        File armDir = new File(game, "android/arm64-v8a");
+        File[] libs = armDir.listFiles((dir, name) -> name.endsWith(".so"));
+        if (!jar.isFile() || libs == null) return;
+
+        File cacheFile = new File(armDir, ABI_CACHE);
+        java.util.Map<String, String> cache = new java.util.HashMap<>();
+        try {
+            if (cacheFile.isFile()) {
+                for (String line : Files.readAllLines(cacheFile.toPath())) {
+                    int tab = line.lastIndexOf('\t');
+                    if (tab > 0) cache.put(line.substring(0, tab), line.substring(tab + 1));
+                }
+            }
+        } catch (IOException ignored) {
+        }
+        boolean changed = false;
+        String jarKey = jar.length() + ":" + jar.lastModified();
+        for (File lib : libs) {
+            if (!new File(game, lib.getName()).isFile()) continue;   // no Linux twin to fall back to
+            String key = lib.getName() + ":" + lib.length() + ":" + lib.lastModified() + ":" + jarKey;
+            String verdict = cache.get(key);
+            if (verdict == null) {
+                java.util.List<String> bad = com.zomdroid.JniAbiCheck.mismatches(lib, jar);
+                verdict = bad == null ? "unknown" : bad.isEmpty() ? "ok" : String.join("; ", bad);
+                cache.put(key, verdict);
+                changed = true;
+            }
+            if (!"ok".equals(verdict) && !"unknown".equals(verdict)) {
+                disable(gameInstance, lib.getName(), "JNI arguments differ from the game: " + verdict);
+            }
+        }
+        if (changed) {
+            StringBuilder out = new StringBuilder();
+            for (java.util.Map.Entry<String, String> e : cache.entrySet())
+                out.append(e.getKey()).append('\t').append(e.getValue()).append('\n');
+            try {
+                Files.write(cacheFile.toPath(), out.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            } catch (IOException e) {
+                Log.w(LOG_TAG, "Cannot store the JNI argument check results", e);
+            }
+        }
     }
 
     /** JNI exports of the game's ARM64 build of a library, active or disabled; null if unknown. */

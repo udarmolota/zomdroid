@@ -13,6 +13,7 @@
     <string name="macos_libs_import_title">Carregar bibliotecas macOS</string>
     <string name="macos_libs_import_hint">Selecione um ZIP com libLighting.dylib, libPZPathFind.dylib e libPZPopMan.dylib da versão macOS do Project Zomboid. As pastas dentro do arquivo não importam. Os arquivos vão para game/macos da instância selecionada.</string>
     <string name="macos_libs_ready">Bibliotecas macOS instaladas</string>
+    <string name="macos_libs_not_needed">Não são necessárias: esta versão do jogo traz bibliotecas Android completas de iluminação, pathfinding e população de zumbis, e elas rodam nativamente.</string>
     <string name="macos_libs_installing">Instalando bibliotecas macOS…</string>
     <string name="macos_libs_installed">Bibliotecas macOS instaladas</string>
     <string name="macos_libs_modules">Bibliotecas em uso</string>

@@ -13,6 +13,7 @@
     <string name="macos_libs_import_title">Muat pustaka macOS</string>
     <string name="macos_libs_import_hint">Pilih ZIP berisi libLighting.dylib, libPZPathFind.dylib, dan libPZPopMan.dylib dari Project Zomboid versi macOS. Folder di dalam arsip tidak penting. File akan disalin ke game/macos instance yang dipilih.</string>
     <string name="macos_libs_ready">Pustaka macOS terpasang</string>
+    <string name="macos_libs_not_needed">Tidak perlu: versi game ini membawa pustaka Android lengkap untuk pencahayaan, pencarian jalan, dan populasi zombi, dan semuanya berjalan secara native.</string>
     <string name="macos_libs_installing">Memasang pustaka macOS…</string>
     <string name="macos_libs_installed">Pustaka macOS terpasang</string>
     <string name="macos_libs_modules">Pustaka yang digunakan</string>

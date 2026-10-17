@@ -28,6 +28,23 @@ public final class MacosLibraries {
     public static final String LINUX_METADATA = "zomdroid-steam.json";
     private MacosLibraries() {}
 
+    /**
+     * True when the game's own ARM64 build of this library is in place and switched on - the
+     * launch checks leave only complete builds with matching arguments active - so it runs
+     * natively and the macOS dylib has nothing to add. 42.21 ships all three this way; 42.20's
+     * Lighting and PopMan were incomplete and got switched off, which is where the dylibs help.
+     */
+    public static boolean gameArmBuildInUse(File gameDir, String dylibName) {
+        String jni = JNI_NAMES.get(dylibName);
+        return jni != null && new File(gameDir, "android/arm64-v8a/lib" + jni + ".so").isFile();
+    }
+
+    /** True when all three run from the game's own ARM64 builds: the macOS libraries are not needed. */
+    public static boolean notNeeded(File gameDir) {
+        for (String name : NAMES) if (!gameArmBuildInUse(gameDir, name)) return false;
+        return true;
+    }
+
     private static Map<String, String> orderedMap(String... pairs) {
         Map<String, String> map = new LinkedHashMap<>();
         for (int i = 0; i < pairs.length; i += 2) map.put(pairs[i], pairs[i + 1]);

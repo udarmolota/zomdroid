@@ -20,12 +20,16 @@ final class NativeLibraryEnvironment {
         // what the player turned off under "Libraries in use". Off and not installed both go to
         // ZOMDROID_MACHO_SKIP, and that matters: with the loader on, linker.c sends a PathFind or
         // PopMan whose dylib is missing to box64, past TIS's own ARM64 build.
+        File game = new File(instance.getGamePath());
         Set<String> installed = instance.isBuild4220Plus()
-                ? MacosLibraries.installed(new File(instance.getGamePath())) : Collections.emptySet();
+                ? MacosLibraries.installed(game) : Collections.emptySet();
         boolean enabled = false;
         StringBuilder skip = new StringBuilder();
         for (Map.Entry<String, String> library : MacosLibraries.JNI_NAMES.entrySet()) {
+            // The game's own complete ARM64 build wins over the dylib (42.21+): native either way,
+            // and a dylib left over from an older game build cannot break a newer one.
             if (installed.contains(library.getKey())
+                    && !MacosLibraries.gameArmBuildInUse(game, library.getKey())
                     && settings.isMacosModuleEnabled(MacosLibraries.MODULE_KEYS.get(library.getKey()))) {
                 enabled = true;
             } else {
