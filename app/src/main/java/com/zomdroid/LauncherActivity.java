@@ -122,6 +122,10 @@ public class LauncherActivity extends AppCompatActivity {
                 binding.drawerLayout.close();
                 navController.navigate(R.id.action_open_gamepad_mapper);
                 return true;
+            } else if (item.getItemId() == R.id.action_open_mods) {
+                binding.drawerLayout.close();
+                navController.navigate(R.id.action_open_mods);
+                return true;
             } else if (item.getItemId() == R.id.action_open_install_mod) {
                 // Navigate to Mod installation
                 binding.drawerLayout.close();

@@ -73,6 +73,11 @@
 
     <group android:id="@+id/group_mods" android:checkableBehavior="none">
         <item
+            android:id="@+id/action_open_mods"
+            android:title="@string/nav_menu_mods"
+            android:icon="@drawable/mt_icon_mods"
+            app:showAsAction="never"/>
+        <item
             android:id="@+id/action_open_install_mod"
             android:title="@string/nav_menu_install_mod"
             android:icon="@drawable/ic_mods"

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One row of the mods screen: name (14sp) and author / note (12sp), the switch, the delete button,
+     and for an active mod the drag handle.
+     A section header reuses this row with only tv_mod_header visible. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv_mod_header"
+        android:textAppearance="?attr/textAppearanceTitleSmall"
+        android:textColor="?attr/colorPrimary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="12dp"
+        android:paddingBottom="4dp"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/row_mod"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:minHeight="48dp"
+        android:orientation="horizontal"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_mod_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tv_mod_sub"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:alpha="0.7"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/sw_mod"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <ImageButton
+            android:id="@+id/btn_mod_delete"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="4dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/mods_delete_confirm"
+            android:src="@drawable/mt_icon_delete"
+            android:tint="?attr/colorOnSurfaceVariant" />
+
+        <ImageView
+            android:id="@+id/iv_mod_drag"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:contentDescription="@string/mods_drag"
+            android:padding="8dp"
+            android:src="@drawable/mt_icon_drag"
+            android:tint="?attr/colorOnSurfaceVariant" />
+    </LinearLayout>
+</LinearLayout>

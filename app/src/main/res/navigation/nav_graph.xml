@@ -30,6 +30,9 @@
         android:id="@+id/action_open_install_mod"
         app:destination="@id/install_mod_fragment" />
     <action
+        android:id="@id/action_open_mods"
+        app:destination="@id/mods_fragment" />
+    <action
         android:id="@+id/action_install_controls"
         app:destination="@id/installControlsFragment" />
     <action
@@ -92,6 +95,12 @@
         android:label="@string/fragment_label_settings"
         tools:layout="@layout/fragment_app_settings">
     </fragment>
+
+    <fragment
+        android:id="@+id/mods_fragment"
+        android:name="com.zomdroid.fragments.ModsFragment"
+        android:label="@string/nav_menu_mods"
+        tools:layout="@layout/fragment_mods" />
 
     <fragment
         android:id="@+id/icon_packs_fragment"
