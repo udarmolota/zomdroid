@@ -649,4 +649,6 @@
     <string name="launcher_empty_title">如何开始</string>
     <string name="launcher_empty_body">要开始游戏，请先创建一个实例——也就是已安装的一份 Project Zomboid。用顶部的 + 添加游戏文件，或在侧边菜单中从 Steam 或 GOG 下载游戏。Steam 的下载需要先打包成 .zip；GOG 的下载完成后，点击“创建实例”即可。</string>
     <string name="launcher_empty_quick_start">快速开始</string>
+    <string name="control_element_no_outline">不显示边框</string>
+    <string name="control_element_no_label">不显示文字</string>
 </resources>

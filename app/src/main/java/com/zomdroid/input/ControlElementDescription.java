@@ -50,6 +50,12 @@ public class ControlElementDescription {
      * fills absent booleans with false.
      */
     public final boolean tapDisabled;
+    /**
+     * Touchpad only: draw no frame (just the translucent fill) and no "TOUCH" label - for a large
+     * pad that covers half the screen. Asked for by a player; absent in older layouts = false = drawn.
+     */
+    public final boolean noOutline;
+    public final boolean noLabel;
 
     public static final float DEFAULT_SENSITIVITY = 2.0f;
     public static final Style DEFAULT_STYLE = Style.OUTLINE;
@@ -98,6 +104,17 @@ public class ControlElementDescription {
                                      AbstractControlElement.InputType inputType, @NonNull Icon icon,
                                      boolean isToggle, float sensitivity, Style style,
                                      String iconFile, boolean noTint, boolean tapDisabled) {
+        this(centerXRelative, centerYRelative, scale, type, bindings, text, color, alpha,
+                inputType, icon, isToggle, sensitivity, style, iconFile, noTint, tapDisabled, false, false);
+    }
+
+    public ControlElementDescription(float centerXRelative, float centerYRelative, float scale,
+                                     @NonNull AbstractControlElement.Type type, @NonNull GLFWBinding[] bindings,
+                                     String text, int color, int alpha,
+                                     AbstractControlElement.InputType inputType, @NonNull Icon icon,
+                                     boolean isToggle, float sensitivity, Style style,
+                                     String iconFile, boolean noTint, boolean tapDisabled,
+                                     boolean noOutline, boolean noLabel) {
         this.centerXRelative = centerXRelative;
         this.centerYRelative = centerYRelative;
         this.scale = scale;
@@ -114,6 +131,8 @@ public class ControlElementDescription {
         this.iconFile = iconFile;
         this.noTint = noTint;
         this.tapDisabled = tapDisabled;
+        this.noOutline = noOutline;
+        this.noLabel = noLabel;
         validate();
     }
 

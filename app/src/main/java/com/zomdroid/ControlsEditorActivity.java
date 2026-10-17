@@ -219,8 +219,22 @@ public class ControlsEditorActivity extends AppCompatActivity {
                     binding.elementTapClickCb.setOnCheckedChangeListener(
                             (v, checked) -> touchpad.setTapDisabled(!checked));
                     binding.elementTapClickCb.setVisibility(View.VISIBLE);
+                    // Look only: a large pad covering half the screen reads better without its frame
+                    // and its "TOUCH" label.
+                    binding.elementNoOutlineCb.setOnCheckedChangeListener(null);
+                    binding.elementNoOutlineCb.setChecked(touchpad.isNoOutline());
+                    binding.elementNoOutlineCb.setOnCheckedChangeListener(
+                            (v, checked) -> touchpad.setNoOutline(checked));
+                    binding.elementNoOutlineCb.setVisibility(View.VISIBLE);
+                    binding.elementNoLabelCb.setOnCheckedChangeListener(null);
+                    binding.elementNoLabelCb.setChecked(touchpad.isNoLabel());
+                    binding.elementNoLabelCb.setOnCheckedChangeListener(
+                            (v, checked) -> touchpad.setNoLabel(checked));
+                    binding.elementNoLabelCb.setVisibility(View.VISIBLE);
                 } else {
                     binding.elementTapClickCb.setVisibility(View.GONE);
+                    binding.elementNoOutlineCb.setVisibility(View.GONE);
+                    binding.elementNoLabelCb.setVisibility(View.GONE);
                 }
 
                 // apply UI for current type

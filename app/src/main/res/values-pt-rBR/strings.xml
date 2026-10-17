@@ -655,4 +655,6 @@
     <string name="launcher_empty_title">Por onde começar</string>
     <string name="launcher_empty_body">Para começar a jogar, crie uma instância: uma cópia instalada de Project Zomboid. Adicione os arquivos do jogo com o + no topo ou baixe o jogo da Steam ou da GOG pelo menu lateral. Um download da Steam precisa ser compactado em .zip antes; da GOG, toque em “Criar uma instância” quando o download terminar.</string>
     <string name="launcher_empty_quick_start">Início rápido</string>
+    <string name="control_element_no_outline">Sem moldura</string>
+    <string name="control_element_no_label">Sem rótulo</string>
 </resources>
