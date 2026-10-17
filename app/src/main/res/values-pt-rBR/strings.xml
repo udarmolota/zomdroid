@@ -765,4 +765,24 @@
     <string name="mods_delete_confirm">Excluir</string>
     <string name="install_mod_multi_zip_note">Você pode importar vários mods de uma vez: coloque as pastas deles em um ZIP. Não testado com um conjunto grande de mods pesados; é preciso espaço livre para o ZIP e para os mods descompactados.</string>
     <string name="icon_packs_choose_instance">Escolha uma instância…</string>
+    <!-- Instance settings, presets, credits (translated 2026-10-17) -->
+    <string name="fragment_label_instance_settings">Configurações da instância</string>
+    <string name="settings_etc2_cache_label">Cache de texturas: %1$s</string>
+    <string name="settings_etc2_cache_cleared">Cache de texturas limpo</string>
+    <string name="app_settings_instance_hint">Renderizador, driver, argumentos Java, resolução e os controles na tela pertencem a uma instância do jogo. Abra-os pelo botão de engrenagem no cartão da instância.</string>
+    <string name="game_instance_settings">Configurações da instância</string>
+    <string name="release_notes_title">Novidades em %1$s</string>
+    <string name="bug_report_pick_instance">De qual jogo é este relatório?</string>
+    <string name="credits_third_party">Ícone de doação: “Donate”, de Edward Boatman, do Noun Project, CC BY 3.0.\nhttps://thenounproject.com/icon/donate-285/\n\nRenderizador MobileGlues: o fork “astra” do MobileGL-Dev/MobileGlues, de Willing-Upstairs-580 (constantinrarinca3-sketch), LGPL v2.1.\nhttps://github.com/constantinrarinca3-sketch/MobileGlues</string>
+    <string name="rimdroid_dialog_message">O RimDroid roda RimWorld no Android do mesmo jeito que este launcher roda Project Zomboid. Mesmo autor, mesma abordagem.\n\nhttps://github.com/udarmolota/RimDroid/releases</string>
+    <string name="preset_current">Aplicado agora: %1$s</string>
+    <string name="preset_current_none">Aplicado agora: suas próprias configurações</string>
+    <string name="preset_button_apply_suggested">Predefinição sugerida</string>
+    <string name="renderer_gl4es_build41_title">GL4ES é para o Build 41</string>
+    <string name="renderer_gl4es_build41_message">No Build 41 é a escolha certa: funciona em qualquer GPU e não precisa configurar driver.\n\nNo Build 42 ele não funciona — a tela fica preta. Lá, use NG_GL4ES (qualquer GPU) ou ZINK (Adreno).</string>
+    <string name="preset_dialog_gpu_zink">%1$s detectada. O renderizador ZINK_ZFA e o driver Vulkan adequado à sua GPU foram configurados. Se a imagem parecer errada, tente outro driver ou importe o seu nas Configurações.</string>
+    <string name="preset_dialog_gpu_zink_unnamed">O renderizador ZINK_ZFA e um driver Vulkan foram configurados. Se a imagem parecer errada, tente outro driver ou importe o seu nas Configurações.</string>
+    <string name="preset_dialog_troubleshoot">Se o jogo não abrir com estas configurações, ou fechar logo depois, tente uma predefinição pronta — o botão abaixo.</string>
+    <string name="preset_dialog_b41_applied">O renderizador GL4ES foi configurado — funciona em qualquer GPU e não precisa configurar driver.</string>
+    <string name="settings_texture_compression_hint">Comprime texturas grandes com perda mínima de qualidade para telas de celular e até de tablet. Usa um cache que você mesmo pode limpar. A primeira execução monta o cache e pode demorar um pouco mais. O cache é compartilhado pelo ZINK e pelo NG_GL4ES. <b>Observação:</b> com o ETC2 ativado, a variável LIBGL_SHRINK fica quase inútil, e nenhuma grade de blocos é desenhada nas texturas.</string>
 </resources>

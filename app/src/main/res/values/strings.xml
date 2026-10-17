@@ -380,7 +380,7 @@
 
     <string name="nav_menu_reddit">Reddit</string>
     <!-- Labels for the bottom icon row. Short on purpose: five columns share the drawer width. -->
-    <string name="nav_bottom_github">GitHub</string>
+    <string name="nav_bottom_github" translatable="false">GitHub</string>
     <!-- CC BY requires the credit to stay visible, so it rides along in the version dialog - the
          one "about this app" surface reachable at any time. Untranslated on purpose: a licence
          attribution names people and a licence, and both stay as written. -->

@@ -759,4 +759,24 @@
     <string name="mods_delete_confirm">删除</string>
     <string name="install_mod_multi_zip_note">可以一次导入多个模组：把它们的文件夹放进同一个 ZIP。尚未在大量大型模组上测试；需要足够的空间同时容纳 ZIP 和解压后的模组。</string>
     <string name="icon_packs_choose_instance">选择实例…</string>
+    <!-- Instance settings, presets, credits (translated 2026-10-17) -->
+    <string name="fragment_label_instance_settings">实例设置</string>
+    <string name="settings_etc2_cache_label">纹理缓存：%1$s</string>
+    <string name="settings_etc2_cache_cleared">纹理缓存已清除</string>
+    <string name="app_settings_instance_hint">渲染器、驱动、Java 参数、分辨率和屏幕按键都属于某个游戏实例。请用实例卡片上的齿轮按钮打开它们。</string>
+    <string name="game_instance_settings">实例设置</string>
+    <string name="release_notes_title">%1$s 新内容</string>
+    <string name="bug_report_pick_instance">这份报告是关于哪个游戏的？</string>
+    <string name="credits_third_party">捐助图标：“Donate”，作者 Edward Boatman，来自 the Noun Project，CC BY 3.0。\nhttps://thenounproject.com/icon/donate-285/\n\nMobileGlues 渲染器：Willing-Upstairs-580（constantinrarinca3-sketch）制作的 MobileGL-Dev/MobileGlues “astra” 分支，LGPL v2.1。\nhttps://github.com/constantinrarinca3-sketch/MobileGlues</string>
+    <string name="rimdroid_dialog_message">RimDroid 用与本启动器运行 Project Zomboid 相同的方式在 Android 上运行 RimWorld。同一作者，同样的思路。\n\nhttps://github.com/udarmolota/RimDroid/releases</string>
+    <string name="preset_current">当前已应用：%1$s</string>
+    <string name="preset_current_none">当前已应用：你自己的设置</string>
+    <string name="preset_button_apply_suggested">推荐预设</string>
+    <string name="renderer_gl4es_build41_title">GL4ES 适用于 Build 41</string>
+    <string name="renderer_gl4es_build41_message">在 Build 41 上这是正确的选择：它在任何 GPU 上都能运行，无需设置驱动。\n\n在 Build 42 上它无法工作——会黑屏。请改用 NG_GL4ES（任何 GPU）或 ZINK（Adreno）。</string>
+    <string name="preset_dialog_gpu_zink">检测到 %1$s。已设置 ZINK_ZFA 渲染器和适合你 GPU 的 Vulkan 驱动。如果画面不正常，请尝试其他驱动，或在设置中导入你自己的驱动。</string>
+    <string name="preset_dialog_gpu_zink_unnamed">已设置 ZINK_ZFA 渲染器和一个 Vulkan 驱动。如果画面不正常，请尝试其他驱动，或在设置中导入你自己的驱动。</string>
+    <string name="preset_dialog_troubleshoot">如果用这些设置游戏无法启动，或启动后很快关闭，请尝试现成的预设——下面的按钮。</string>
+    <string name="preset_dialog_b41_applied">已设置 GL4ES 渲染器——它在任何 GPU 上都能运行，无需设置驱动。</string>
+    <string name="settings_texture_compression_hint">以极小的画质损失压缩大纹理，适合手机甚至平板屏幕。附带一个可以自行清除的缓存。首次启动会生成缓存，可能稍慢一些。ZINK 和 NG_GL4ES 共用此缓存。<b>注意：</b>启用 ETC2 后，LIBGL_SHRINK 变量几乎没有意义，纹理上也不会画出瓦片网格。</string>
 </resources>

@@ -766,4 +766,23 @@
     <string name="mods_delete_confirm">Удалить</string>
     <string name="install_mod_multi_zip_note">Можно импортировать несколько модов сразу: положите их папки в один ZIP. Не проверялось на большом наборе тяжёлых модов; нужно свободное место и под ZIP, и под распакованные моды.</string>
     <string name="icon_packs_choose_instance">Выберите инстанс…</string>
+    <!-- Instance settings, presets, credits (translated 2026-10-17) -->
+    <string name="fragment_label_instance_settings">Настройки инстанса</string>
+    <string name="settings_etc2_cache_label">Кэш текстур: %1$s</string>
+    <string name="settings_etc2_cache_cleared">Кэш текстур очищен</string>
+    <string name="app_settings_instance_hint">Рендерер, драйвер, аргументы Java, разрешение и экранное управление относятся к инстансу игры. Откройте их кнопкой с шестерёнкой на карточке инстанса.</string>
+    <string name="game_instance_settings">Настройки инстанса</string>
+    <string name="release_notes_title">Что нового в %1$s</string>
+    <string name="bug_report_pick_instance">К какой игре относится этот отчёт?</string>
+    <string name="credits_third_party">Иконка «Поддержать»: «Donate», автор Edward Boatman, the Noun Project, CC BY 3.0.\nhttps://thenounproject.com/icon/donate-285/\n\nРендерер MobileGlues: форк «astra» проекта MobileGL-Dev/MobileGlues от Willing-Upstairs-580 (constantinrarinca3-sketch), LGPL v2.1.\nhttps://github.com/constantinrarinca3-sketch/MobileGlues</string>
+    <string name="rimdroid_dialog_message">RimDroid запускает RimWorld на Android так же, как этот лаунчер запускает Project Zomboid. Тот же автор, тот же подход.\n\nhttps://github.com/udarmolota/RimDroid/releases</string>
+    <string name="preset_current">Сейчас применено: %1$s</string>
+    <string name="preset_current_none">Сейчас применено: ваши собственные настройки</string>
+    <string name="preset_button_apply_suggested">Рекомендуемый пресет</string>
+    <string name="renderer_gl4es_build41_title">GL4ES — для Build 41</string>
+    <string name="renderer_gl4es_build41_message">Для Build 41 это правильный выбор: работает на любом GPU и не требует настройки драйвера.\n\nНа Build 42 он не работает — будет чёрный экран. Там используйте NG_GL4ES (любой GPU) или ZINK (Adreno).</string>
+    <string name="preset_dialog_gpu_zink">Обнаружен %1$s. Установлены рендерер ZINK_ZFA и подходящий вашему GPU драйвер Vulkan. Если картинка выглядит неправильно, попробуйте другой драйвер или импортируйте свой в настройках.</string>
+    <string name="preset_dialog_gpu_zink_unnamed">Установлены рендерер ZINK_ZFA и драйвер Vulkan. Если картинка выглядит неправильно, попробуйте другой драйвер или импортируйте свой в настройках.</string>
+    <string name="preset_dialog_troubleshoot">Если с этими настройками игра не запускается или вскоре закрывается, попробуйте готовый пресет — кнопка ниже.</string>
+    <string name="preset_dialog_b41_applied">Установлен рендерер GL4ES — он работает на любом GPU и не требует настройки драйвера.</string>
 </resources>

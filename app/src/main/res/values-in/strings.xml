@@ -766,4 +766,24 @@
     <string name="mods_delete_confirm">Hapus</string>
     <string name="install_mod_multi_zip_note">Anda bisa mengimpor beberapa mod sekaligus: masukkan folder-foldernya ke satu ZIP. Belum diuji dengan banyak mod berat; perlu ruang kosong untuk ZIP dan mod yang sudah diekstrak.</string>
     <string name="icon_packs_choose_instance">Pilih instance…</string>
+    <!-- Instance settings, presets, credits (translated 2026-10-17) -->
+    <string name="fragment_label_instance_settings">Pengaturan instance</string>
+    <string name="settings_etc2_cache_label">Cache tekstur: %1$s</string>
+    <string name="settings_etc2_cache_cleared">Cache tekstur dibersihkan</string>
+    <string name="app_settings_instance_hint">Renderer, driver, argumen Java, resolusi, dan kontrol layar adalah milik sebuah instance game. Buka lewat tombol roda gigi di kartu instance.</string>
+    <string name="game_instance_settings">Pengaturan instance</string>
+    <string name="release_notes_title">Yang baru di %1$s</string>
+    <string name="bug_report_pick_instance">Laporan ini tentang game yang mana?</string>
+    <string name="credits_third_party">Ikon donasi: “Donate” oleh Edward Boatman dari the Noun Project, CC BY 3.0.\nhttps://thenounproject.com/icon/donate-285/\n\nRenderer MobileGlues: fork “astra” dari MobileGL-Dev/MobileGlues oleh Willing-Upstairs-580 (constantinrarinca3-sketch), LGPL v2.1.\nhttps://github.com/constantinrarinca3-sketch/MobileGlues</string>
+    <string name="rimdroid_dialog_message">RimDroid menjalankan RimWorld di Android dengan cara yang sama seperti launcher ini menjalankan Project Zomboid. Pembuat yang sama, pendekatan yang sama.\n\nhttps://github.com/udarmolota/RimDroid/releases</string>
+    <string name="preset_current">Sedang diterapkan: %1$s</string>
+    <string name="preset_current_none">Sedang diterapkan: pengaturan Anda sendiri</string>
+    <string name="preset_button_apply_suggested">Preset yang disarankan</string>
+    <string name="renderer_gl4es_build41_title">GL4ES untuk Build 41</string>
+    <string name="renderer_gl4es_build41_message">Di Build 41 ini pilihan yang tepat: berjalan di GPU apa pun dan tidak perlu mengatur driver.\n\nDi Build 42 ini tidak berjalan — layar akan hitam. Di sana, gunakan NG_GL4ES (GPU apa pun) atau ZINK (Adreno).</string>
+    <string name="preset_dialog_gpu_zink">%1$s terdeteksi. Renderer ZINK_ZFA dan driver Vulkan yang cocok untuk GPU Anda sudah diatur. Jika gambarnya terlihat salah, coba driver lain atau impor driver Anda sendiri di Pengaturan.</string>
+    <string name="preset_dialog_gpu_zink_unnamed">Renderer ZINK_ZFA dan sebuah driver Vulkan sudah diatur. Jika gambarnya terlihat salah, coba driver lain atau impor driver Anda sendiri di Pengaturan.</string>
+    <string name="preset_dialog_troubleshoot">Jika game tidak mau mulai dengan pengaturan ini, atau segera tertutup setelahnya, coba preset siap pakai — tombol di bawah.</string>
+    <string name="preset_dialog_b41_applied">Renderer GL4ES sudah diatur — berjalan di GPU apa pun dan tidak perlu mengatur driver.</string>
+    <string name="settings_texture_compression_hint">Mengompres tekstur besar dengan penurunan kualitas yang minimal untuk layar ponsel bahkan tablet. Disertai cache yang bisa Anda bersihkan sendiri. Peluncuran pertama membangun cache dan mungkin sedikit lebih lama. Cache dipakai bersama oleh ZINK dan NG_GL4ES. <b>Catatan:</b> dengan ETC2 aktif, variabel LIBGL_SHRINK hampir tidak berguna, dan tidak ada grid ubin yang tergambar di tekstur.</string>
 </resources>
