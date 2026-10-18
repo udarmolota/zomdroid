@@ -709,6 +709,7 @@
     <string name="install_mod_helper_anyway">Tetap impor</string>
     <string name="control_element_no_outline">Tanpa bingkai</string>
     <string name="control_element_no_label">Tanpa label</string>
+    <string name="control_element_full_screen">Layar penuh (tidak terlihat dalam game)</string>
     <string name="icon_packs_layout_full">tata letak lengkap</string>
     <string name="icon_packs_layout_vkbd">tata letak keyboard &amp; mouse</string>
     <string name="icon_packs_layout_gamepad">tata letak gamepad</string>

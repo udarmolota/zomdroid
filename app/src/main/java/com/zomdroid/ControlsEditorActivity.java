@@ -273,10 +273,16 @@ public class ControlsEditorActivity extends AppCompatActivity {
                     binding.elementNoLabelCb.setOnCheckedChangeListener(
                             (v, checked) -> touchpad.setNoLabel(checked));
                     binding.elementNoLabelCb.setVisibility(View.VISIBLE);
+                    binding.elementFullScreenCb.setOnCheckedChangeListener(null);
+                    binding.elementFullScreenCb.setChecked(touchpad.isFullScreen());
+                    binding.elementFullScreenCb.setOnCheckedChangeListener(
+                            (v, checked) -> touchpad.setFullScreen(checked));
+                    binding.elementFullScreenCb.setVisibility(View.VISIBLE);
                 } else {
                     binding.elementTapClickCb.setVisibility(View.GONE);
                     binding.elementNoOutlineCb.setVisibility(View.GONE);
                     binding.elementNoLabelCb.setVisibility(View.GONE);
+                    binding.elementFullScreenCb.setVisibility(View.GONE);
                 }
 
                 // apply UI for current type

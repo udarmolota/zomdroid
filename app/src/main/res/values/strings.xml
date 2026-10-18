@@ -752,6 +752,7 @@
     <string name="install_mod_helper_anyway">Import anyway</string>
     <string name="control_element_no_outline">No frame</string>
     <string name="control_element_no_label">No label</string>
+    <string name="control_element_full_screen">Full screen (invisible in the game)</string>
     <string name="icon_packs_layout_full">full layout</string>
     <string name="icon_packs_layout_vkbd">keyboard &amp; mouse layout</string>
     <string name="icon_packs_layout_gamepad">gamepad layout</string>

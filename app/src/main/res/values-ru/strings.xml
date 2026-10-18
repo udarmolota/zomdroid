@@ -709,6 +709,7 @@
     <string name="install_mod_helper_anyway">Всё равно импортировать</string>
     <string name="control_element_no_outline">Без рамки</string>
     <string name="control_element_no_label">Без подписи</string>
+    <string name="control_element_full_screen">Во весь экран (в игре не виден)</string>
     <string name="icon_packs_layout_full">полная раскладка</string>
     <string name="icon_packs_layout_vkbd">раскладка клавиатуры и мыши</string>
     <string name="icon_packs_layout_gamepad">раскладка геймпада</string>

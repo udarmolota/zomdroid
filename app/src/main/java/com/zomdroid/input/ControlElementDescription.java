@@ -57,6 +57,12 @@ public class ControlElementDescription {
     public final boolean noOutline;
     public final boolean noLabel;
     /**
+     * Touchpad only: in the game the pad is not drawn and catches touches anywhere on the screen
+     * that no other element takes (it gets them last). The editor still shows it at its own size
+     * so it can be selected. Absent in older layouts = false.
+     */
+    public final boolean fullScreen;
+    /**
      * Size of a custom iconFile relative to its default box (1 = 100%). Absent in older layouts =
      * 0, read as 100% through {@link #iconScaleOrDefault()}.
      */
@@ -134,6 +140,19 @@ public class ControlElementDescription {
                                      boolean isToggle, float sensitivity, Style style,
                                      String iconFile, boolean noTint, boolean tapDisabled,
                                      boolean noOutline, boolean noLabel, float iconScale) {
+        this(centerXRelative, centerYRelative, scale, type, bindings, text, color, alpha,
+                inputType, icon, isToggle, sensitivity, style, iconFile, noTint, tapDisabled,
+                noOutline, noLabel, iconScale, false);
+    }
+
+    public ControlElementDescription(float centerXRelative, float centerYRelative, float scale,
+                                     @NonNull AbstractControlElement.Type type, @NonNull GLFWBinding[] bindings,
+                                     String text, int color, int alpha,
+                                     AbstractControlElement.InputType inputType, @NonNull Icon icon,
+                                     boolean isToggle, float sensitivity, Style style,
+                                     String iconFile, boolean noTint, boolean tapDisabled,
+                                     boolean noOutline, boolean noLabel, float iconScale,
+                                     boolean fullScreen) {
         this.centerXRelative = centerXRelative;
         this.centerYRelative = centerYRelative;
         this.scale = scale;
@@ -153,6 +172,7 @@ public class ControlElementDescription {
         this.noOutline = noOutline;
         this.noLabel = noLabel;
         this.iconScale = iconScale;
+        this.fullScreen = fullScreen;
         validate();
     }
 

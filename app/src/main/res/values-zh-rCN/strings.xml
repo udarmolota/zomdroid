@@ -702,6 +702,7 @@
     <string name="install_mod_helper_anyway">仍然导入</string>
     <string name="control_element_no_outline">不显示边框</string>
     <string name="control_element_no_label">不显示文字</string>
+    <string name="control_element_full_screen">全屏（游戏中不可见）</string>
     <string name="icon_packs_layout_full">完整布局</string>
     <string name="icon_packs_layout_vkbd">键鼠布局</string>
     <string name="icon_packs_layout_gamepad">手柄布局</string>

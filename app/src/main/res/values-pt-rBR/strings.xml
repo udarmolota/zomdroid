@@ -708,6 +708,7 @@
     <string name="install_mod_helper_anyway">Importar mesmo assim</string>
     <string name="control_element_no_outline">Sem moldura</string>
     <string name="control_element_no_label">Sem rótulo</string>
+    <string name="control_element_full_screen">Tela inteira (invisível no jogo)</string>
     <string name="icon_packs_layout_full">layout completo</string>
     <string name="icon_packs_layout_vkbd">layout de teclado e mouse</string>
     <string name="icon_packs_layout_gamepad">layout de controle</string>

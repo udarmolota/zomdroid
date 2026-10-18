@@ -23,6 +23,8 @@ public class TouchpadControlElement extends AbstractControlElement {
     private float sensitivity;
     // See ControlElementDescription.tapDisabled - true turns the pad into a pure cursor mover.
     private boolean tapDisabled;
+    // See ControlElementDescription.fullScreen.
+    private boolean fullScreen;
 
     private final TouchpadDrawable drawable;
     private int    pointerId = -1;
@@ -47,6 +49,7 @@ public class TouchpadControlElement extends AbstractControlElement {
         super(parentView, description);
         this.sensitivity = (description.sensitivity > 0f) ? description.sensitivity : ControlElementDescription.DEFAULT_SENSITIVITY;
         this.tapDisabled = description.tapDisabled;
+        this.fullScreen = description.fullScreen;
         this.drawable = new TouchpadDrawable(parentView, description);
         debugCursorFill.setStyle(Paint.Style.FILL);
         debugCursorFill.setColor(Color.WHITE);
@@ -87,7 +90,7 @@ public class TouchpadControlElement extends AbstractControlElement {
                 }
                 float x = e.getX(actIndex);
                 float y = e.getY(actIndex);
-                boolean over = drawable.isPointOver(x, y);
+                boolean over = isPointOver(x, y);
                 //Log.d(TAG, "DOWN isPointOver=" + over
                 //        + " touch=(" + x + "," + y + ")"
                 //        + " rect=" + drawable.rect);
@@ -167,7 +170,7 @@ public class TouchpadControlElement extends AbstractControlElement {
 
     @Override
     public void draw(Canvas canvas) {
-        drawable.draw(canvas);
+        if (!catchesWholeScreen()) drawable.draw(canvas);
 
         if (!DEBUG_DRAW_CURSOR) return;
         if (parentView.gameDrawsCursor) return; // the game draws its own cursor
@@ -198,7 +201,20 @@ public class TouchpadControlElement extends AbstractControlElement {
         //canvas.drawCircle(x, y, dotR, debugCursorFill);
         //canvas.drawCircle(x, y, dotR, debugCursorStroke);
     }
-    @Override public boolean isPointOver(float x, float y)      { return drawable.isPointOver(x, y); }
+    @Override public boolean isPointOver(float x, float y)      { return catchesWholeScreen() || drawable.isPointOver(x, y); }
+
+    /** Full screen and in the game (the editor keeps the pad at its own size so it can be picked). */
+    public boolean catchesWholeScreen() {
+        return fullScreen && !parentView.isEditMode;
+    }
+
+    public void setFullScreen(boolean fullScreen) {
+        this.fullScreen = fullScreen;
+    }
+
+    public boolean isFullScreen() {
+        return fullScreen;
+    }
     @Override public void setHighlighted(boolean h)             { drawable.setColorFilter(h ? HIGHLIGHT_COLOR_FILTER : null); parentView.invalidate(); }
     @Override public void setAlpha(int alpha)                   { drawable.setAlpha(alpha); parentView.invalidate(); }
     @Override public int getAlpha()                             { return drawable.alpha; }
@@ -253,7 +269,7 @@ public class TouchpadControlElement extends AbstractControlElement {
                 InputType.MNK,
                 ControlElementDescription.Icon.NO_ICON, false,
                 sensitivity, ControlElementDescription.DEFAULT_STYLE, null, false,
-                tapDisabled, drawable.noOutline, drawable.noLabel);
+                tapDisabled, drawable.noOutline, drawable.noLabel, 1f, fullScreen);
     }
 
     // While a first-person mod holds the mouse it turns the view by how far the cursor moves, so the

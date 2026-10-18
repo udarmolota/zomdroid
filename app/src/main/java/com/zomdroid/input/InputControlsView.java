@@ -226,12 +226,23 @@ public class InputControlsView extends View {
             }
 
             // DOWN/POINTER_DOWN: можно оставить “первый захватил”
+            // A full-screen touchpad covers everything, so it goes last: buttons and sticks on top
+            // of it keep their touches.
             for (AbstractControlElement controlElement : controlElements) {
-                if (!controlElement.isVisible()) continue;
+                if (!controlElement.isVisible() || catchesWholeScreen(controlElement)) continue;
+                if (controlElement.handleMotionEvent(e)) return true;
+            }
+            for (AbstractControlElement controlElement : controlElements) {
+                if (!controlElement.isVisible() || !catchesWholeScreen(controlElement)) continue;
                 if (controlElement.handleMotionEvent(e)) return true;
             }
             return false;
         }
+    }
+
+    private static boolean catchesWholeScreen(AbstractControlElement element) {
+        return element instanceof TouchpadControlElement
+                && ((TouchpadControlElement) element).catchesWholeScreen();
     }
 
     private void selectElement(@NonNull AbstractControlElement element) {
