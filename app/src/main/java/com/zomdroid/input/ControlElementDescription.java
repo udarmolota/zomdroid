@@ -245,9 +245,10 @@ public class ControlElementDescription {
 
     private void validate() {
         // scale
-        if (this.scale < AbstractControlElement.MIN_SCALE || this.scale > AbstractControlElement.MAX_SCALE) {
+        float maxScale = AbstractControlElement.maxScale(this.type);
+        if (this.scale < AbstractControlElement.MIN_SCALE || this.scale > maxScale) {
             throw new IllegalStateException("Scale must be in [" +
-                    AbstractControlElement.MIN_SCALE + ", " + AbstractControlElement.MAX_SCALE + "]");
+                    AbstractControlElement.MIN_SCALE + ", " + maxScale + "]");
         }
 
         // center (exclusive 0..1)

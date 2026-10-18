@@ -161,6 +161,7 @@ public class ControlsEditorActivity extends AppCompatActivity {
                 binding.elementScalePercentTv.setText(getResources().getString(R.string.percentage_format,
                         scaleProgressValue));
                 binding.elementScaleSb.setOnSeekBarChangeListener(null);
+                binding.elementScaleSb.setMax(Math.round(AbstractControlElement.maxScale(element.getType()) * 100));
                 binding.elementScaleSb.setProgress(scaleProgressValue);
                 binding.elementScaleSb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override

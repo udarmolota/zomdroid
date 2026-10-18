@@ -17,6 +17,12 @@ public abstract class AbstractControlElement {
     private static final String LOG_TAG = AbstractControlElement.class.getName();
     protected static final float MIN_SCALE = 0.5f;
     protected static final float MAX_SCALE = 2.0f;
+    /** The touchpad may grow further: at 3.2 it is about as tall as the screen. */
+    public static final float TOUCHPAD_MAX_SCALE = 3.2f;
+
+    public static float maxScale(Type type) {
+        return type == Type.TOUCHPAD ? TOUCHPAD_MAX_SCALE : MAX_SCALE;
+    }
     protected final ArrayList<GLFWBinding> bindings = new ArrayList<>();
     protected final InputControlsView parentView;
     protected static final ColorFilter HIGHLIGHT_COLOR_FILTER = new PorterDuffColorFilter(Color.CYAN, PorterDuff.Mode.SRC_ATOP);

@@ -202,7 +202,7 @@ public class TouchpadControlElement extends AbstractControlElement {
     @Override public void setHighlighted(boolean h)             { drawable.setColorFilter(h ? HIGHLIGHT_COLOR_FILTER : null); parentView.invalidate(); }
     @Override public void setAlpha(int alpha)                   { drawable.setAlpha(alpha); parentView.invalidate(); }
     @Override public int getAlpha()                             { return drawable.alpha; }
-    @Override public void setScale(float scale)                 { drawable.setScale(Math.clamp(scale, MIN_SCALE, MAX_SCALE)); parentView.invalidate(); }
+    @Override public void setScale(float scale)                 { drawable.setScale(Math.clamp(scale, MIN_SCALE, TOUCHPAD_MAX_SCALE)); parentView.invalidate(); }
     @Override public float getScale()                           { return drawable.scale; }
     @Override public void setCenterPosition(float x, float y)  { drawable.setCenterPosition(x, y); parentView.invalidate(); }
     @Override public void moveCenterPosition(float dx, float dy){ drawable.moveCenterPosition(dx, dy); parentView.invalidate(); }
