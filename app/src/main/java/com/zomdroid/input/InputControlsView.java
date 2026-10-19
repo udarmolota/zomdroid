@@ -64,6 +64,13 @@ public class InputControlsView extends View {
 
     private ElementSettingsController elementSettingsController;
 
+    // Editor grid (from RimDroid, fine step only, always on in the editor): drawn behind the
+    // elements, and a dragged element's centre lands on the nearest node when the finger lifts -
+    // snapping on every move made it jump. In dp, so it is the same physical size on every screen.
+    private static final float GRID_STEP_DP = 12f;
+    private final android.graphics.Paint gridPaint = new android.graphics.Paint();
+    private boolean editMoved;
+
     public InputControlsView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         this.context = context;
@@ -93,6 +100,7 @@ public class InputControlsView extends View {
             public boolean onScroll(@Nullable MotionEvent e1, @NonNull MotionEvent e2, float distanceX, float distanceY) {
                 if (pointerOverElement == null) return false;
                 pointerOverElement.moveCenterPosition(-distanceX, -distanceY);
+                editMoved = true;
                 return true;
             }
 
@@ -170,6 +178,7 @@ public class InputControlsView extends View {
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
         //System.out.println("[mixed b] onDraw called");
+        if (isEditMode) drawGrid(canvas);
 
         for (AbstractControlElement controlElement : controlElements) {
             boolean visible = controlElement.isVisible();
@@ -185,9 +194,38 @@ public class InputControlsView extends View {
         }
     }
 
+    private void drawGrid(Canvas canvas) {
+        float step = GRID_STEP_DP * getResources().getDisplayMetrics().density;
+        gridPaint.setColor(0x26FFFFFF);
+        gridPaint.setStrokeWidth(1f);
+        for (float x = step; x < getWidth(); x += step) canvas.drawLine(x, 0, x, getHeight(), gridPaint);
+        for (float y = step; y < getHeight(); y += step) canvas.drawLine(0, y, getWidth(), y, gridPaint);
+    }
+
+    /** The element just dragged: its centre onto the nearest grid node. */
+    private void snapToGrid(AbstractControlElement element) {
+        float step = GRID_STEP_DP * getResources().getDisplayMetrics().density;
+        // Elements expose only their X centre; the description has both.
+        ControlElementDescription d = element.describe();
+        float x = Math.round(d.centerXRelative * getWidth() / step) * step;
+        float y = Math.round(d.centerYRelative * getHeight() / step) * step;
+        // The layout stores the centre as a fraction strictly inside 0..1.
+        x = Math.max(1f, Math.min(getWidth() - 1f, x));
+        y = Math.max(1f, Math.min(getHeight() - 1f, y));
+        element.setCenterPosition(x, y);
+        invalidate();
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent e) {
         if (isEditMode) {
+            int editAction = e.getActionMasked();
+            if (editAction == MotionEvent.ACTION_DOWN) editMoved = false;
+            if ((editAction == MotionEvent.ACTION_UP || editAction == MotionEvent.ACTION_CANCEL)
+                    && editMoved && pointerOverElement != null) {
+                editMoved = false;
+                snapToGrid(pointerOverElement);
+            }
             /* this is here and not in gesture detector because longpressEnabled should be set before
             detector processes motion event */
             int action = e.getActionMasked();
