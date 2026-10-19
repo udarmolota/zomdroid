@@ -754,6 +754,10 @@
     <string name="mods_exporting">Compactando %1$d mod(s)…</string>
     <string name="mods_export_progress">Compactando mods: %1$d / %2$d</string>
     <string name="mods_export_busy">Os mods ainda estão sendo compactados — aguarde a primeira exportação terminar.</string>
+    <string name="mods_pzopt_name">PZ Optimization</string>
+    <string name="mods_pzopt_sub">Embutido nos arquivos do jogo · ⚠️ para remover: Otimização → PZ Optimization → Restaurar</string>
+    <string name="mods_pzopt_details">Instalado nos arquivos do jogo desta instância, ao lado do projectzomboid.jar, então carrega antes de todos os mods e em todos os saves. Não está nas listas de mods: não dá para desativá-lo em um save, e Ordenar não o move.\n\nVersão: %1$s\n\n⚠️ Para remover: abra Otimização no menu, encontre o cartão PZ Optimization e toque em Restaurar. Exportar o empacota de modo que Instalar / Atualizar nesse cartão o aceite de volta.</string>
+    <string name="mods_pzopt_open">Abrir Otimização</string>
     <string name="mods_exported">Salvo: %1$s</string>
     <string name="mods_export_failed">Não foi possível salvar o ZIP: %1$s</string>
     <string name="mods_export_storage_message">O ZIP é salvo na pasta pública Downloads/zomdroid. Conceda \"Acesso a todos os arquivos\" ao Zomdroid e toque em Exportar de novo.</string>

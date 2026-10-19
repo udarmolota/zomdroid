@@ -748,6 +748,10 @@
     <string name="mods_exporting">正在打包 %1$d 个模组…</string>
     <string name="mods_export_progress">正在打包模组：%1$d / %2$d</string>
     <string name="mods_export_busy">模组仍在打包中——请等待第一次导出完成。</string>
+    <string name="mods_pzopt_name">PZ Optimization</string>
+    <string name="mods_pzopt_sub">已内置到游戏文件 · ⚠️ 移除：优化 → PZ Optimization → 还原</string>
+    <string name="mods_pzopt_details">它被安装到此实例的游戏文件中，位于 projectzomboid.jar 旁边，因此会在所有模组之前、在每个存档中加载。它不在模组列表里：不能只对某个存档关闭，“排序”也不会移动它。\n\n版本：%1$s\n\n⚠️ 移除方法：从菜单打开“优化”，找到 PZ Optimization 卡片并点“还原”。“导出”会把它打包成该卡片上的“安装 / 更新”能重新安装的格式。</string>
+    <string name="mods_pzopt_open">打开“优化”</string>
     <string name="mods_exported">已保存：%1$s</string>
     <string name="mods_export_failed">无法保存 ZIP：%1$s</string>
     <string name="mods_export_storage_message">ZIP 会保存到公共的 Downloads/zomdroid 文件夹。请授予 Zomdroid“所有文件访问权限”，然后再次点“导出”。</string>

@@ -755,6 +755,10 @@
     <string name="mods_exporting">Упаковка модов: %1$d…</string>
     <string name="mods_export_progress">Упаковка модов: %1$d / %2$d</string>
     <string name="mods_export_busy">Моды ещё упаковываются — дождитесь конца первого экспорта.</string>
+    <string name="mods_pzopt_name">PZ Optimization</string>
+    <string name="mods_pzopt_sub">Встроен в файлы игры · ⚠️ удалить: Оптимизация → PZ Optimization → «Восстановить»</string>
+    <string name="mods_pzopt_details">Установлен в файлы игры этого инстанса, рядом с projectzomboid.jar, поэтому грузится раньше всех модов и во всех сейвах. В списках модов его нет: выключить его для одного сейва нельзя, и «Сортировать» его не двигает.\n\nСборка: %1$s\n\n⚠️ Как удалить: откройте «Оптимизацию» в меню, найдите карточку PZ Optimization и нажмите «Восстановить». «Экспорт» упакует его так, что «Установить / Обновить» на этой карточке примет его обратно.</string>
+    <string name="mods_pzopt_open">Открыть «Оптимизацию»</string>
     <string name="mods_exported">Сохранено: %1$s</string>
     <string name="mods_export_failed">Не удалось сохранить ZIP: %1$s</string>
     <string name="mods_export_storage_message">ZIP сохраняется в общую папку Downloads/zomdroid. Разрешите Zomdroid «Доступ ко всем файлам» и снова нажмите «Экспорт».</string>

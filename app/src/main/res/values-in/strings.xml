@@ -755,6 +755,10 @@
     <string name="mods_exporting">Mengemas %1$d mod…</string>
     <string name="mods_export_progress">Mengemas mod: %1$d / %2$d</string>
     <string name="mods_export_busy">Mod masih dikemas — tunggu ekspor pertama selesai.</string>
+    <string name="mods_pzopt_name">PZ Optimization</string>
+    <string name="mods_pzopt_sub">Tertanam di file game · ⚠️ untuk menghapus: Optimasi → PZ Optimization → Pulihkan</string>
+    <string name="mods_pzopt_details">Dipasang di file game instance ini, di samping projectzomboid.jar, jadi dimuat sebelum semua mod dan di setiap save. Ia tidak ada di daftar mod: tidak bisa dimatikan untuk satu save, dan Urutkan tidak memindahkannya.\n\nBuild: %1$s\n\n⚠️ Cara menghapus: buka Optimasi dari menu, cari kartu PZ Optimization dan tekan Pulihkan. Ekspor mengemasnya agar Pasang / Perbarui di kartu itu bisa memasangnya lagi.</string>
+    <string name="mods_pzopt_open">Buka Optimasi</string>
     <string name="mods_exported">Tersimpan: %1$s</string>
     <string name="mods_export_failed">Gagal menyimpan ZIP: %1$s</string>
     <string name="mods_export_storage_message">ZIP disimpan ke folder publik Downloads/zomdroid. Berikan \"Akses semua file\" ke Zomdroid, lalu ketuk Ekspor lagi.</string>

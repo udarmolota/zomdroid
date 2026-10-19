@@ -798,6 +798,10 @@
     <string name="mods_exporting">Packing %1$d mod(s)…</string>
     <string name="mods_export_progress">Packing mods: %1$d / %2$d</string>
     <string name="mods_export_busy">Mods are still being packed — wait for the first export to finish.</string>
+    <string name="mods_pzopt_name">PZ Optimization</string>
+    <string name="mods_pzopt_sub">Built into the game files · ⚠️ to remove: Optimization → PZ Optimization → Restore</string>
+    <string name="mods_pzopt_details">Installed into this instance\'s game files, next to projectzomboid.jar, so it loads before every mod and in every save. It is not in the mod lists: it can\'t be switched off for one save, and Sort doesn\'t move it.\n\nBuild: %1$s\n\n⚠️ To remove it: open Optimization from the menu, find the PZ Optimization card and press Restore. Export packs it so that Install / Update on that card can take it back.</string>
+    <string name="mods_pzopt_open">Open Optimization</string>
     <string name="mods_exported">Saved: %1$s</string>
     <string name="mods_export_failed">Could not save the ZIP: %1$s</string>
     <string name="mods_export_storage_message">The ZIP is saved into the public Downloads/zomdroid folder. Please grant \"All files access\" to Zomdroid, then tap Export again.</string>

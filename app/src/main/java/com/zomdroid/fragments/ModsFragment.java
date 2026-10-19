@@ -57,6 +57,11 @@ import java.util.Set;
  * Export: the archive button switches the rows to checkboxes; the picked mods are packed into one
  * ZIP in Downloads/zomdroid (each mod folder at the top, as Import mods takes several mods at once).
  * Only reads, so it works while the game runs too.
+ *
+ * PZ Optimization is not a mod to the game - no mod.info, not in any mod list: its classes sit next
+ * to projectzomboid.jar and load before every mod, in every save. When an instance has it, a fixed
+ * row above the lists says so, with its build, how to remove it (Optimization -> Restore) and an
+ * export that Optimization -> Install takes back. No switch, no delete, no place in the load order.
  */
 public class ModsFragment extends Fragment {
 
@@ -74,6 +79,11 @@ public class ModsFragment extends Fragment {
             new java.util.concurrent.atomic.AtomicBoolean();
     private static final String EXPORT_CHANNEL = "zd_mods_export";
     private static final int EXPORT_NOTIFICATION = 4243;
+    /** The PZ Optimization row; see the class comment. */
+    private static final Object PZOPT_ROW = new Object();
+    /** Game folder of the selected list's instance when PZ Optimization is installed there. */
+    @Nullable private File pzoptGame;
+    private boolean pzoptPicked;
     private final List<Entry> entries = new ArrayList<>();
     private final List<Object> rows = new ArrayList<>();   // String = section header, Row = a mod
     private boolean editable;
@@ -149,6 +159,7 @@ public class ModsFragment extends Fragment {
         v.findViewById(R.id.btn_mods_select_cancel).setOnClickListener(x -> setSelecting(false));
         v.findViewById(R.id.btn_mods_select_all).setOnClickListener(x -> {
             for (Object o : rows) if (o instanceof Row && ((Row) o).mod != null) selected.add(((Row) o).mod.folder);
+            if (rows.contains(PZOPT_ROW)) pzoptPicked = true;
             updateSelection();
         });
         v.findViewById(R.id.btn_mods_export_go).setOnClickListener(x -> exportSelected());
@@ -269,6 +280,8 @@ public class ModsFragment extends Fragment {
             Row r = new Row(m.id, m, false);
             if (matches(r, q)) inactive.add(r);
         }
+        pzoptGame = pzoptInstalled(new File(e.instance.getGamePath()));
+        if (pzoptGame != null && (q.isEmpty() || "pz optimization pzopt".contains(q))) rows.add(PZOPT_ROW);
         rows.add(getString(R.string.mods_active, active.size()));
         rows.addAll(active);
         rows.add(getString(R.string.mods_inactive, inactive.size()));
@@ -279,11 +292,46 @@ public class ModsFragment extends Fragment {
         adapter.notifyDataSetChanged();
     }
 
+    // ---- PZ Optimization ----
+
+    /** The game folder when PZ Optimization's classes are installed in it (its own manifest is there too). */
+    @Nullable
+    private static File pzoptInstalled(File game) {
+        return new File(game, "pzopt-files.txt").isFile() && new File(game, "pzopt/BuildInfo.class").isFile()
+                ? game : null;
+    }
+
+    private static String pzoptBuild(File game) {
+        java.util.Properties p = new java.util.Properties();
+        try (java.io.InputStream in = new java.io.FileInputStream(new File(game, "pzopt/build-info.properties"))) {
+            p.load(in);
+        } catch (IOException ignored) {
+        }
+        List<String> parts = new ArrayList<>();
+        for (String key : new String[] {"version", "tag", "release", "revision"}) {
+            String v = p.getProperty(key, "").trim();
+            if (!v.isEmpty() && !parts.contains(v)) parts.add(v);
+        }
+        return parts.isEmpty() ? "?" : String.join(" · ", parts);
+    }
+
+    private void showPzoptDetails() {
+        if (pzoptGame == null) return;
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.mods_pzopt_name)
+                .setMessage(getString(R.string.mods_pzopt_details, pzoptBuild(pzoptGame)))
+                .setPositiveButton(R.string.mods_pzopt_open, (d, w) ->
+                        Navigation.findNavController(requireView()).navigate(R.id.action_open_optimization))
+                .setNegativeButton(android.R.string.ok, null)
+                .show();
+    }
+
     // ---- export ----
 
     private void setSelecting(boolean on) {
         selecting = on;
         selected.clear();
+        pzoptPicked = false;
         llSelect.setVisibility(on ? View.VISIBLE : View.GONE);
         tvHint.setText(on ? R.string.mods_export_hint : R.string.mods_sort_hint);
         updateSelection();
@@ -291,8 +339,9 @@ public class ModsFragment extends Fragment {
     }
 
     private void updateSelection() {
-        tvSelected.setText(getString(R.string.mods_selected_n, selected.size()));
-        if (llSelect != null) llSelect.findViewById(R.id.btn_mods_export_go).setEnabled(!selected.isEmpty());
+        int n = selected.size() + (pzoptPicked ? 1 : 0);
+        tvSelected.setText(getString(R.string.mods_selected_n, n));
+        if (llSelect != null) llSelect.findViewById(R.id.btn_mods_export_go).setEnabled(n > 0);
         adapter.notifyDataSetChanged();
     }
 
@@ -303,7 +352,7 @@ public class ModsFragment extends Fragment {
      */
     private void exportSelected() {
         Entry e = current();
-        if (e == null || selected.isEmpty()) return;
+        if (e == null || (selected.isEmpty() && !pzoptPicked)) return;
         if (exporting.get()) {
             Toast.makeText(requireContext(), R.string.mods_export_busy, Toast.LENGTH_SHORT).show();
             return;
@@ -327,18 +376,20 @@ public class ModsFragment extends Fragment {
             return;
         }
         List<File> folders = new ArrayList<>(selected);
+        final File pzopt = pzoptPicked ? pzoptGame : null;
+        final int total = folders.size() + (pzopt != null ? 1 : 0);
         String stamp = new java.text.SimpleDateFormat("yyyy-MM-dd_HHmm", Locale.ROOT).format(new java.util.Date());
         String instance = e.instance.getName().replaceAll("[^A-Za-z0-9._-]+", "_");
         File out = new File(com.zomdroid.steam.SteamGameDownloader.getDownloadsDir(),
                 "mods-" + instance + "-" + stamp + ".zip");
         android.content.Context app = requireContext().getApplicationContext();
         if (!exporting.compareAndSet(false, true)) return;
-        Toast.makeText(app, getString(R.string.mods_exporting, folders.size()), Toast.LENGTH_SHORT).show();
+        Toast.makeText(app, getString(R.string.mods_exporting, total), Toast.LENGTH_SHORT).show();
         setSelecting(false);
         new Thread(() -> {
             String error = null;
             try {
-                writeModsZip(folders, out, done -> notifyExport(app, done, folders.size(), null));
+                writeModsZip(folders, pzopt, out, done -> notifyExport(app, done, total, null));
             } catch (Exception ex) {
                 error = ex.getMessage() != null ? ex.getMessage() : ex.toString();
             } finally {
@@ -346,7 +397,7 @@ public class ModsFragment extends Fragment {
             }
             final String result = error == null ? app.getString(R.string.mods_exported, out.getAbsolutePath())
                     : app.getString(R.string.mods_export_failed, error);
-            notifyExport(app, folders.size(), folders.size(), result);
+            notifyExport(app, total, total, result);
             new android.os.Handler(android.os.Looper.getMainLooper()).post(() ->
                     Toast.makeText(app, result, Toast.LENGTH_LONG).show());
         }, "mods-export").start();
@@ -385,7 +436,8 @@ public class ModsFragment extends Fragment {
         }
     }
 
-    private static void writeModsZip(List<File> folders, File out, java.util.function.IntConsumer progress) throws IOException {
+    private static void writeModsZip(List<File> folders, @Nullable File pzoptGame, File out,
+                                     java.util.function.IntConsumer progress) throws IOException {
         File parent = out.getParentFile();
         if (parent != null && !parent.isDirectory() && !parent.mkdirs()) throw new IOException("Cannot create " + parent);
         File tmp = new File(out.getPath() + ".part");
@@ -407,6 +459,20 @@ public class ModsFragment extends Fragment {
                         return java.nio.file.FileVisitResult.CONTINUE;
                     }
                 });
+            }
+            if (pzoptGame != null) {
+                // The installed release, file by file from its own manifest, under pzopt-classes/ -
+                // the layout Optimization -> Install looks for.
+                progress.accept(done);
+                for (String rel : java.nio.file.Files.readAllLines(new File(pzoptGame, "pzopt-files.txt").toPath())) {
+                    rel = rel.trim();
+                    if (rel.isEmpty() || rel.startsWith("/") || rel.contains("..")) continue;
+                    File f = new File(pzoptGame, rel);
+                    if (!f.isFile()) continue;
+                    zip.putNextEntry(new java.util.zip.ZipEntry("pzopt-classes/" + rel));
+                    java.nio.file.Files.copy(f.toPath(), zip);
+                    zip.closeEntry();
+                }
             }
         } catch (IOException ex) {
             //noinspection ResultOfMethodCallIgnored
@@ -718,6 +784,10 @@ public class ModsFragment extends Fragment {
             }
             header.setVisibility(View.GONE);
             row.setVisibility(View.VISIBLE);
+            if (item == PZOPT_ROW) {
+                bindPzopt(v, row);
+                return;
+            }
             Row r = (Row) item;
             Set<String> activeIds = new HashSet<>();
             for (Object o : rows) if (o instanceof Row && ((Row) o).active) activeIds.add(((Row) o).id);
@@ -781,5 +851,29 @@ public class ModsFragment extends Fragment {
         }
 
         @Override public int getItemCount() { return rows.size(); }
+
+        private void bindPzopt(View v, View row) {
+            TextView name = v.findViewById(R.id.tv_mod_name), sub = v.findViewById(R.id.tv_mod_sub);
+            name.setText(R.string.mods_pzopt_name);
+            sub.setText(R.string.mods_pzopt_sub);
+            sub.setVisibility(View.VISIBLE);
+            if (sub.getTag() instanceof android.content.res.ColorStateList)
+                sub.setTextColor((android.content.res.ColorStateList) sub.getTag());
+            android.widget.CheckBox cb = v.findViewById(R.id.cb_mod);
+            v.findViewById(R.id.sw_mod).setVisibility(View.GONE);
+            v.findViewById(R.id.btn_mod_delete).setVisibility(View.GONE);
+            v.findViewById(R.id.iv_mod_drag).setVisibility(View.GONE);
+            row.setAlpha(1f);
+            row.setOnLongClickListener(null);
+            if (selecting) {
+                cb.setVisibility(View.VISIBLE);
+                cb.setEnabled(true);
+                cb.setChecked(pzoptPicked);
+                row.setOnClickListener(x -> { pzoptPicked = !pzoptPicked; updateSelection(); });
+            } else {
+                cb.setVisibility(View.GONE);
+                row.setOnClickListener(x -> showPzoptDetails());
+            }
+        }
     };
 }
