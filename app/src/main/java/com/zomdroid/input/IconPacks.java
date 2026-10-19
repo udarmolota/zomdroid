@@ -215,16 +215,55 @@ public final class IconPacks {
     }
 
     /**
+     * Imports a pack zip. A zip whose pictures sit in several top folders (color/, bw/, bw_outline/
+     * ... - one artist's variants of the same set) becomes one pack per folder, named
+     * "<pack> - <folder>"; otherwise the whole zip is one pack. Blocking - run it off the UI thread.
+     */
+    @NonNull
+    public static List<Pack> importZipAll(@NonNull Context context, @NonNull Uri uri, @Nullable String displayName)
+            throws IOException {
+        java.util.Set<String> variants = new java.util.TreeSet<>();
+        try (InputStream raw = context.getContentResolver().openInputStream(uri)) {
+            if (raw == null) throw new IOException("cannot open the file");
+            ZipInputStream zip = new ZipInputStream(raw);
+            ZipEntry e;
+            while ((e = zip.getNextEntry()) != null) {
+                String n = e.getName().replace('\\', '/');
+                int slash = n.indexOf('/');
+                if (e.isDirectory() || slash <= 0 || !n.toLowerCase(Locale.ROOT).endsWith(".png")) continue;
+                String top = n.substring(0, slash);
+                if (!top.equalsIgnoreCase(RECT_DIR)) variants.add(top);
+            }
+        }
+        List<Pack> out = new ArrayList<>();
+        if (variants.size() < 2) {
+            out.add(importZip(context, uri, displayName, null));
+            return out;
+        }
+        for (String v : variants) out.add(importZip(context, uri, displayName, v));
+        return out;
+    }
+
+    /**
      * Imports a pack zip: every PNG (scaled down to 256 px, transparent borders trimmed) and
      * pack.json. Its id comes from the zip's file name; importing the same name again replaces it.
+     * With {@code variant}, only that top folder of the zip, as a pack of its own.
      * Blocking - run it off the UI thread. Returns the pack.
      */
     @NonNull
     public static Pack importZip(@NonNull Context context, @NonNull Uri uri, @Nullable String displayName)
             throws IOException {
+        return importZip(context, uri, displayName, null);
+    }
+
+    @NonNull
+    private static Pack importZip(@NonNull Context context, @NonNull Uri uri, @Nullable String displayName,
+                                  @Nullable String variant) throws IOException {
         String base = displayName != null ? displayName.replaceAll("(?i)\\.zip$", "") : "pack";
-        String id = base.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_-]+", "_").replaceAll("^_+|_+$", "");
+        String id = (variant == null ? base : base + "_" + variant)
+                .toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_-]+", "_").replaceAll("^_+|_+$", "");
         if (id.isEmpty()) id = "pack";
+        byte[] rootJson = null, variantJson = null;
         File dir = new File(importedDir(), id);
         File tmp = new File(importedDir(), id + ".importing");
         deleteTree(tmp);
@@ -236,6 +275,12 @@ public final class IconPacks {
             ZipEntry e;
             while ((e = zip.getNextEntry()) != null) {
                 if (e.isDirectory()) continue;
+                String path = e.getName().replace('\\', '/');
+                if (variant != null) {
+                    // A variant takes its own folder, and pack.json from the top of the zip.
+                    if (path.equalsIgnoreCase("pack.json")) { rootJson = readAll(zip); continue; }
+                    if (!path.startsWith(variant + "/")) continue;
+                }
                 // Only the file name: an entry path must never leave the pack folder (zip slip). The
                 // one folder kept is rect/, the versions for rectangular buttons.
                 File entry = new File(e.getName());
@@ -244,7 +289,8 @@ public final class IconPacks {
                 File parent = entry.getParentFile();
                 boolean rect = parent != null && parent.getName().equalsIgnoreCase(RECT_DIR);
                 if (lower.equals("pack.json")) {
-                    writeFile(new File(tmp, "pack.json"), readAll(zip));
+                    if (variant != null) variantJson = readAll(zip);
+                    else writeFile(new File(tmp, "pack.json"), readAll(zip));
                 } else if (lower.endsWith(".png")) {
                     String icon = lower.substring(0, lower.length() - 4).replaceAll("[^a-z0-9_-]+", "_");
                     Bitmap bmp = decodeScaled(readAll(zip));
@@ -264,6 +310,19 @@ public final class IconPacks {
         if (count == 0) {
             deleteTree(tmp);
             throw new IOException("no PNG pictures in the zip");
+        }
+        if (variant != null) {
+            // The variant's own pack.json, else the zip's, named after the folder.
+            byte[] json = variantJson != null ? variantJson : rootJson;
+            try {
+                JSONObject o = json != null ? new JSONObject(new String(json, StandardCharsets.UTF_8)) : new JSONObject();
+                String name = o.optString("name", "").trim();
+                o.put("format", o.optInt("format", 1));
+                o.put("name", (name.isEmpty() ? base : name) + " — " + variant);
+                writeFile(new File(tmp, "pack.json"), o.toString(2).getBytes(StandardCharsets.UTF_8));
+            } catch (org.json.JSONException ex) {
+                throw new IOException("pack.json: " + ex.getMessage());
+            }
         }
         deleteTree(dir);
         if (!tmp.renameTo(dir)) {
@@ -302,23 +361,30 @@ public final class IconPacks {
     }
 
     static {
-        action("MOUSE_BUTTON_LEFT", "attack");
-        action("MOUSE_BUTTON_RIGHT", "aim");
+        // After the action's own name come the names artists actually use for the same picture
+        // (zomdroid_icons 0.3: magazine, medkit, paw_heart, backpack...), so their packs fit as
+        // they are. The first one the pack has wins; the editor can swap any button by hand.
+        action("MOUSE_BUTTON_LEFT", "attack", "mouse_left_click", "punch");
+        action("MOUSE_BUTTON_RIGHT", "aim", "mouse_right_click");
         action("KEY_SPACE", "shove");
-        action("KEY_LEFT_SHIFT", "run");
+        action("KEY_LEFT_SHIFT", "run", "run_axe");
         action("KEY_LEFT_ALT", "sprint");
         action("KEY_C", "crouch");
-        action("KEY_E", "interact");
+        action("KEY_E", "interact", "paw_heart");
         action("KEY_Q", "shout");
-        action("KEY_R", "reload");
-        action("KEY_V", "vehicle");
-        action("KEY_H", "health");
-        action("KEY_I", "inventory");
-        action("KEY_M", "map");
+        action("KEY_R", "reload", "magazine");
+        action("KEY_V", "vehicle", "mechanic");
+        action("KEY_U", "mechanic");
+        action("KEY_F", "flashlight");
+        action("KEY_Y", "walk");
+        action("KEY_F2", "pause", "meditate");
+        action("KEY_H", "health", "medkit", "bandage");
+        action("KEY_I", "inventory", "backpack");
+        action("KEY_M", "map", "map_paws");
         action("KEY_T", "chat");
         action("KEY_ESCAPE", "menu");
-        action("MOUSE_WHEEL_UP", "zoom_in");
-        action("MOUSE_WHEEL_DOWN", "zoom_out");
+        action("MOUSE_WHEEL_UP", "zoom_in", "arrow_up");
+        action("MOUSE_WHEEL_DOWN", "zoom_out", "arrow_down");
         action("KEY_W", "move_up");
         action("KEY_S", "move_down");
         action("KEY_A", "move_left");
@@ -342,7 +408,8 @@ public final class IconPacks {
 
     /** Action names a pack can use, for the "how to make a pack" text. */
     public static final String ACTION_NAMES = "attack, aim, shove, run, sprint, crouch, interact, "
-            + "shout, reload, vehicle, health, inventory, map, chat, menu, build, zoom_in, zoom_out, "
+            + "shout, reload, vehicle, mechanic, flashlight, walk, pause, health, inventory, map, chat, "
+            + "menu, build, zoom_in, zoom_out, "
             + "move_up, move_down, move_left, move_right, gas_pedal, brake_pedal, steering_left, "
             + "steering_right, keyboard, toggle_controls, close, loot, pad_a, pad_b, pad_x, pad_y";
 

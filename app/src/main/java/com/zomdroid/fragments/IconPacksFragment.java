@@ -209,8 +209,13 @@ public class IconPacksFragment extends Fragment {
         new Thread(() -> {
             String msg;
             try {
-                IconPacks.Pack p = IconPacks.importZip(app, uri, name);
-                msg = app.getString(R.string.icon_packs_imported, p.name, p.icons.size());
+                java.util.List<IconPacks.Pack> packs = IconPacks.importZipAll(app, uri, name);
+                if (packs.size() == 1) {
+                    IconPacks.Pack p = packs.get(0);
+                    msg = app.getString(R.string.icon_packs_imported, p.name, p.icons.size());
+                } else {
+                    msg = app.getString(R.string.icon_packs_imported_many, packs.size());
+                }
             } catch (Exception e) {
                 msg = app.getString(R.string.icon_packs_import_failed,
                         e.getMessage() == null ? e.toString() : e.getMessage());
