@@ -257,11 +257,19 @@ public class GameLauncher {
                 }
                 Os.setenv("MG_DIR_PATH", mgDir.getAbsolutePath(), false);
                 // The astra fork's texture-memory paths are off unless asked for: our switches ask.
-                // ETC2 keeps its disk cache in MG_DIR_PATH/etc2-cache; the memory saver halves
-                // textures of 1024 and up before upload.
+                // The memory saver halves textures of 1024 and up before upload. ETC2 uses our
+                // encoder (same hash, same .e2 files), so its disk cache is the one NG_GL4ES and
+                // ZINK share: switching renderers no longer encodes everything a second time, and
+                // the Settings "Clear" button covers it. Its old separate store is removed once.
                 String etc2 = settings.isTextureCompression() ? "1" : "0";
                 Os.setenv("MOBILEGLUES_PZ_ETC2", etc2, false);
                 Os.setenv("MOBILEGLUES_PZ_ETC2_CACHE", etc2, false);
+                Os.setenv("MOBILEGLUES_PZ_ETC2_CACHE_DIR",
+                        AppStorage.requireSingleton().getHomePath() + "/" + C.NGG_ETC2_CACHE_DIR, false);
+                File oldMgCache = new File(mgDir, "etc2-cache");
+                if (oldMgCache.isDirectory()) {
+                    new Thread(() -> FileUtils.deleteDirectory(oldMgCache), "mg-etc2-cache-cleanup").start();
+                }
                 if (settings.isMemorySaver()) Os.setenv("MOBILEGLUES_PZ_TEXTURE_MEMORY", "1", false);
                 break;
             }
