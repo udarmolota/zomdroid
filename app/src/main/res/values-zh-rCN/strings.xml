@@ -322,6 +322,19 @@
 
     <!-- Bug report -->
     <string name="nav_bug_report">报告错误</string>
+    <string name="bug_report_intro">出问题了？请发送报告给我们。报告包含游戏日志，我们能据此看出发生了什么。</string>
+    <string name="bug_report_group_email">通过邮件发送</string>
+    <string name="bug_report_steps">1. 在上方选择游戏。\n2. 点“通过邮件发送”。\n3. 在弹出的列表中选择邮件应用（Gmail、Outlook…）。\n4. 简单写下发生了什么，然后发送。</string>
+    <string name="bug_report_send_email">通过邮件发送</string>
+    <string name="bug_report_pick_mail">选择邮件应用</string>
+    <string name="bug_report_no_email_title">设备上没有邮件应用？</string>
+    <string name="bug_report_no_email_text">把报告保存为文件，然后用任意设备发送到这个地址。附上文件并简单写下发生了什么。</string>
+    <string name="bug_report_copy">复制</string>
+    <string name="bug_report_copied">地址已复制</string>
+    <string name="bug_report_save_file">将报告保存为文件</string>
+    <string name="bug_report_saved">报告已保存</string>
+    <string name="bug_report_save_failed">无法保存报告：%1$s</string>
+    <string name="bug_report_no_mail_use_file">此设备上没有邮件应用。请将报告保存为文件，并用其他设备发送。</string>
     <string name="bug_report_preparing">正在准备错误报告…</string>
     <string name="bug_report_email" translatable="false">210478@mail.ru</string>
     <string name="bug_report_subject" translatable="false">ZOMDROID REPORT %1$s</string>
@@ -657,7 +670,7 @@
     <string name="icon_packs_title">图标包</string>
     <string name="icon_packs_note">一次性给所有屏幕按钮换上图片，代替文字标签。选择实例，在图标包旁边按“应用”；图标包里没有对应图片的按钮保留标签。“移除”会撤下该图标包的图片。要单独设置某个按钮，请用控件编辑器。</string>
     <string name="icon_packs_howto">如何自己制作图标包</string>
-    <string name="icon_packs_format">一个 .zip，里面是 PNG 图片：正方形、256 像素、透明背景白色图案——按钮会像绘制标签一样绘制它们。要保留图片自己的颜色，在 pack.json 里加上 \"tint\": false。每个文件按它表示的动作命名：%1$s。按钮绑定了该动作的默认按键时就会得到对应图片。zip 里其他 PNG 文件也会保留。可选的 pack.json 用来给图标包命名：{\"format\": 1, \"name\": \"My icons\"}。这些图片用于圆形按钮。对于矩形按钮，图标包可以在 zip 中的 rect 文件夹里提供另一套版本（rect/attack.png），并在 pack.json 中用 \"rectTint\" 控制着色；没有这种版本的矩形按钮会使用圆形图片。</string>
+    <string name="icon_packs_format">一个 .zip，里面是 PNG 图片：正方形、256 像素、透明背景白色图案——按钮会像绘制标签一样绘制它们。要保留图片自己的颜色，在 pack.json 里加上 \"tint\": false。每个文件按它表示的动作命名：%1$s。按钮绑定了该动作的默认按键时就会得到对应图片。zip 里其他 PNG 文件也会保留。可选的 pack.json 用来给图标包命名：{\"format\": 1, \"name\": \"My icons\"}。这些图片用于圆形按钮。对于矩形按钮，图标包可以在 zip 中的 rect 文件夹里提供另一套版本（rect/attack.png），并在 pack.json 中用 \"rectTint\" 控制着色；没有这种版本的矩形按钮会使用圆形图片。 顶层有多个文件夹（color/、bw/ …）的 zip 会按文件夹分别导入为多个图标包。 有些操作可对应多张图片（鼠标左键：鼠标或拳头）；按钮会使用图标包里找到的第一张。要换成其他图片，请打开按键编辑器，点该按钮并选择 Pack。</string>
     <string name="icon_packs_instance">实例</string>
     <string name="icon_packs_no_instances">还没有实例</string>
     <string name="icon_packs_apply">应用</string>
@@ -676,6 +689,7 @@
     <string name="icon_packs_removed">已移除 %2$s 的 %1$d 个按钮的图标</string>
     <string name="icon_packs_delete_confirm">删除图标包“%1$s”？已经显示其图片的按钮会保留图片。</string>
     <string name="icon_packs_imported">已导入图标包“%1$s”：%2$d 张图片</string>
+    <string name="icon_packs_imported_many">已导入 %1$d 个图标包，每个文件夹一个</string>
     <string name="icon_packs_import_failed">无法导入图标包：%1$s</string>
     <!-- PZ Optimization installer -->
     <string name="optimization_group_pzopt">PZ Optimization（实验性）</string>
@@ -726,6 +740,17 @@
     <string name="mods_open_import">→ 导入模组</string>
     <string name="mods_enable_all">启用显示的全部模组</string>
     <string name="mods_disable_all">停用显示的全部模组</string>
+    <string name="mods_export">导出模组</string>
+    <string name="mods_export_go">导出</string>
+    <string name="mods_select_all">全选显示的</string>
+    <string name="mods_selected_n">已选 %1$d 个</string>
+    <string name="mods_export_hint">点选要导出的模组，然后点“导出”。它们会打包成一个 ZIP 保存到 Downloads/zomdroid，可在此处或其他设备上通过“导入模组”重新安装。</string>
+    <string name="mods_exporting">正在打包 %1$d 个模组…</string>
+    <string name="mods_export_progress">正在打包模组：%1$d / %2$d</string>
+    <string name="mods_export_busy">模组仍在打包中——请等待第一次导出完成。</string>
+    <string name="mods_exported">已保存：%1$s</string>
+    <string name="mods_export_failed">无法保存 ZIP：%1$s</string>
+    <string name="mods_export_storage_message">ZIP 会保存到公共的 Downloads/zomdroid 文件夹。请授予 Zomdroid“所有文件访问权限”，然后再次点“导出”。</string>
     <string name="mods_enabled_n">已启用 %1$d 个模组。点“排序”整理它们的顺序。</string>
     <string name="mods_disable_all_confirm">停用显示的全部 %1$d 个模组？它们的加载顺序会丢失；重新启用时会排到末尾——之后请点“排序”。</string>
     <string name="mods_sort_hint">“排序”按作者给出的规则排列已启用的模组。拖动 ≡ 移动模组；长按可移到顶部 / 底部。</string>

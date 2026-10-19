@@ -340,6 +340,19 @@
 
     <!-- Bug report -->
     <string name="nav_bug_report">Сообщить об ошибке</string>
+    <string name="bug_report_intro">Что-то пошло не так? Пришлите нам отчёт. В нём логи игры, по ним мы увидим, что случилось.</string>
+    <string name="bug_report_group_email">Отправить по почте</string>
+    <string name="bug_report_steps">1. Выберите игру выше.\n2. Нажмите «Отправить по почте».\n3. В открывшемся списке выберите почтовое приложение (Gmail, Outlook…).\n4. Напишите пару слов о том, что случилось, и отправьте.</string>
+    <string name="bug_report_send_email">Отправить по почте</string>
+    <string name="bug_report_pick_mail">Отправить через</string>
+    <string name="bug_report_no_email_title">На устройстве нет почты?</string>
+    <string name="bug_report_no_email_text">Сохраните отчёт в файл и отправьте его с любого устройства на этот адрес. Приложите файл и напишите пару слов о том, что случилось.</string>
+    <string name="bug_report_copy">Копировать</string>
+    <string name="bug_report_copied">Адрес скопирован</string>
+    <string name="bug_report_save_file">Сохранить отчёт в файл</string>
+    <string name="bug_report_saved">Отчёт сохранён</string>
+    <string name="bug_report_save_failed">Не удалось сохранить отчёт: %1$s</string>
+    <string name="bug_report_no_mail_use_file">На устройстве нет почтового приложения. Сохраните отчёт в файл и отправьте с другого устройства.</string>
     <string name="bug_report_preparing">Подготовка отчёта об ошибке…</string>
     <string name="bug_report_email" translatable="false">210478@mail.ru</string>
     <string name="bug_report_subject" translatable="false">ZOMDROID REPORT %1$s</string>
@@ -664,7 +677,7 @@
     <string name="icon_packs_title">Пакеты иконок</string>
     <string name="icon_packs_note">Картинки сразу для всех экранных кнопок вместо их подписей. Выберите экземпляр игры и нажмите «Применить» у пакета; кнопки, для которых в пакете нет картинки, сохранят подпись. «Убрать» снимает картинки пакета. Для одной кнопки: редактор управления.</string>
     <string name="icon_packs_howto">Как сделать свой пакет</string>
-    <string name="icon_packs_format">Архив .zip с картинками PNG, квадратными, 256 пикселей, белыми на прозрачном фоне: кнопка окрашивает их как свою подпись. Чтобы картинки сохранили свои цвета, добавьте pack.json с \"tint\": false. Каждый файл называется по действию, которое он показывает: %1$s. Кнопка получает картинку, если на ней стандартная клавиша этого действия. Остальные PNG из архива тоже сохраняются. Необязательный pack.json задаёт название: {\"format\": 1, \"name\": \"Мои иконки\"}. Эти картинки ставятся на круглые кнопки. Для прямоугольных кнопок пак может добавить другие версии в папке rect внутри zip (rect/attack.png), с \"rectTint\" в pack.json для их окраски; прямоугольная кнопка без такой версии получает круглую картинку.</string>
+    <string name="icon_packs_format">Архив .zip с картинками PNG, квадратными, 256 пикселей, белыми на прозрачном фоне: кнопка окрашивает их как свою подпись. Чтобы картинки сохранили свои цвета, добавьте pack.json с \"tint\": false. Каждый файл называется по действию, которое он показывает: %1$s. Кнопка получает картинку, если на ней стандартная клавиша этого действия. Остальные PNG из архива тоже сохраняются. Необязательный pack.json задаёт название: {\"format\": 1, \"name\": \"Мои иконки\"}. Эти картинки ставятся на круглые кнопки. Для прямоугольных кнопок пак может добавить другие версии в папке rect внутри zip (rect/attack.png), с \"rectTint\" в pack.json для их окраски; прямоугольная кнопка без такой версии получает круглую картинку. ZIP с несколькими папками сверху (color/, bw/ …) станет отдельным паком на каждую папку. Некоторым действиям подходит больше одной картинки (левой кнопке мыши — мышь или кулак); кнопка получает первую, что есть в паке. Чтобы выбрать другую, откройте редактор раскладки, нажмите на эту кнопку и выберите «Pack».</string>
     <string name="icon_packs_instance">Экземпляр игры</string>
     <string name="icon_packs_no_instances">Экземпляров игры пока нет</string>
     <string name="icon_packs_apply">Применить</string>
@@ -683,6 +696,7 @@
     <string name="icon_packs_removed">Иконки убраны с %1$d кнопок экземпляра %2$s</string>
     <string name="icon_packs_delete_confirm">Удалить пакет «%1$s»? Кнопки, на которых уже стоят его картинки, сохранят их.</string>
     <string name="icon_packs_imported">Пакет «%1$s» импортирован, картинок: %2$d</string>
+    <string name="icon_packs_imported_many">Импортировано паков: %1$d, по одному на папку</string>
     <string name="icon_packs_import_failed">Не удалось импортировать пакет: %1$s</string>
     <!-- PZ Optimization installer -->
     <string name="optimization_group_pzopt">PZ Optimization (экспериментально)</string>
@@ -733,6 +747,17 @@
     <string name="mods_open_import">→ Импорт модов</string>
     <string name="mods_enable_all">Включить все показанные</string>
     <string name="mods_disable_all">Выключить все показанные</string>
+    <string name="mods_export">Экспорт модов</string>
+    <string name="mods_export_go">Экспорт</string>
+    <string name="mods_select_all">Все показанные</string>
+    <string name="mods_selected_n">Выбрано: %1$d</string>
+    <string name="mods_export_hint">Отметьте моды и нажмите «Экспорт». Они упакуются в один ZIP в Downloads/zomdroid, который можно снова установить через «Импорт модов» здесь или на другом устройстве.</string>
+    <string name="mods_exporting">Упаковка модов: %1$d…</string>
+    <string name="mods_export_progress">Упаковка модов: %1$d / %2$d</string>
+    <string name="mods_export_busy">Моды ещё упаковываются — дождитесь конца первого экспорта.</string>
+    <string name="mods_exported">Сохранено: %1$s</string>
+    <string name="mods_export_failed">Не удалось сохранить ZIP: %1$s</string>
+    <string name="mods_export_storage_message">ZIP сохраняется в общую папку Downloads/zomdroid. Разрешите Zomdroid «Доступ ко всем файлам» и снова нажмите «Экспорт».</string>
     <string name="mods_enabled_n">Включено модов: %1$d. Нажмите «Сортировать», чтобы расставить их по порядку.</string>
     <string name="mods_disable_all_confirm">Выключить все показанные моды (%1$d)? Их порядок загрузки потеряется; при повторном включении они встанут в конец — затем нажмите «Сортировать».</string>
     <string name="mods_sort_hint">«Сортировать» расставляет включённые моды по правилам их авторов. Перетащите мод за ≡; долгое нажатие — в начало / в конец.</string>

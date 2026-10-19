@@ -340,6 +340,19 @@
 
     <!-- Bug report -->
     <string name="nav_bug_report">Reportar um bug</string>
+    <string name="bug_report_intro">Algo deu errado? Envie um relatório. Ele leva os logs do jogo, assim vemos o que aconteceu.</string>
+    <string name="bug_report_group_email">Enviar por e-mail</string>
+    <string name="bug_report_steps">1. Escolha o jogo acima.\n2. Toque em Enviar por e-mail.\n3. Na lista que abrir, escolha seu app de e-mail (Gmail, Outlook…).\n4. Escreva algumas palavras sobre o que aconteceu e envie.</string>
+    <string name="bug_report_send_email">Enviar por e-mail</string>
+    <string name="bug_report_pick_mail">Enviar com</string>
+    <string name="bug_report_no_email_title">Sem app de e-mail neste aparelho?</string>
+    <string name="bug_report_no_email_text">Salve o relatório em um arquivo e envie de qualquer aparelho para este endereço. Anexe o arquivo e escreva algumas palavras sobre o que aconteceu.</string>
+    <string name="bug_report_copy">Copiar</string>
+    <string name="bug_report_copied">Endereço copiado</string>
+    <string name="bug_report_save_file">Salvar relatório em arquivo</string>
+    <string name="bug_report_saved">Relatório salvo</string>
+    <string name="bug_report_save_failed">Não foi possível salvar o relatório: %1$s</string>
+    <string name="bug_report_no_mail_use_file">Nenhum app de e-mail neste aparelho. Salve o relatório em um arquivo e envie de outro aparelho.</string>
     <string name="bug_report_preparing">Preparando relatório de bug…</string>
     <string name="bug_report_email" translatable="false">210478@mail.ru</string>
     <string name="bug_report_subject" translatable="false">ZOMDROID REPORT %1$s</string>
@@ -663,7 +676,7 @@
     <string name="icon_packs_title">Pacotes de ícones</string>
     <string name="icon_packs_note">Imagens para todos os botões na tela de uma vez, no lugar dos rótulos. Escolha a instância e toque em Aplicar ao lado de um pacote; os botões para os quais o pacote não tem imagem mantêm o rótulo. Remover tira as imagens do pacote. Para um botão só: o editor de controles.</string>
     <string name="icon_packs_howto">Como fazer o seu próprio pacote</string>
-    <string name="icon_packs_format">Um .zip de imagens PNG, quadradas, de 256 pixels, brancas sobre fundo transparente: o botão as pinta como o seu rótulo. Para manter as cores das imagens, acrescente um pack.json com \"tint\": false. Cada arquivo tem o nome da ação que mostra: %1$s. Um botão recebe a imagem quando está ligado à tecla padrão dessa ação. Os outros PNG do zip também são guardados. Um pack.json opcional dá o nome: {\"format\": 1, \"name\": \"Meus ícones\"}. Estas imagens vão nos botões redondos. Para botões retangulares, um pacote pode trazer outras versões numa pasta rect dentro do zip (rect/attack.png), com \"rectTint\" no pack.json para a cor delas; um botão retangular sem essa versão recebe a imagem redonda.</string>
+    <string name="icon_packs_format">Um .zip de imagens PNG, quadradas, de 256 pixels, brancas sobre fundo transparente: o botão as pinta como o seu rótulo. Para manter as cores das imagens, acrescente um pack.json com \"tint\": false. Cada arquivo tem o nome da ação que mostra: %1$s. Um botão recebe a imagem quando está ligado à tecla padrão dessa ação. Os outros PNG do zip também são guardados. Um pack.json opcional dá o nome: {\"format\": 1, \"name\": \"Meus ícones\"}. Estas imagens vão nos botões redondos. Para botões retangulares, um pacote pode trazer outras versões numa pasta rect dentro do zip (rect/attack.png), com \"rectTint\" no pack.json para a cor delas; um botão retangular sem essa versão recebe a imagem redonda. Um zip com várias pastas no topo (color/, bw/ …) vira um pacote por pasta. Algumas ações combinam com mais de uma imagem (o botão esquerdo do mouse: um mouse ou um punho); o botão recebe a primeira que o pacote tiver. Para escolher outra, abra o editor de controles, toque nesse botão e escolha Pack.</string>
     <string name="icon_packs_instance">Instância</string>
     <string name="icon_packs_no_instances">Ainda não há instâncias</string>
     <string name="icon_packs_apply">Aplicar</string>
@@ -682,6 +695,7 @@
     <string name="icon_packs_removed">Ícones removidos de %1$d botões de %2$s</string>
     <string name="icon_packs_delete_confirm">Apagar o pacote «%1$s»? Os botões que já mostram as imagens dele as mantêm.</string>
     <string name="icon_packs_imported">Pacote «%1$s» importado: %2$d imagens</string>
+    <string name="icon_packs_imported_many">%1$d pacotes importados, um por pasta</string>
     <string name="icon_packs_import_failed">Não foi possível importar o pacote: %1$s</string>
     <!-- PZ Optimization installer -->
     <string name="optimization_group_pzopt">PZ Optimization (experimental)</string>
@@ -732,6 +746,17 @@
     <string name="mods_open_import">→ Importar mods</string>
     <string name="mods_enable_all">Ativar todos os mostrados</string>
     <string name="mods_disable_all">Desativar todos os mostrados</string>
+    <string name="mods_export">Exportar mods</string>
+    <string name="mods_export_go">Exportar</string>
+    <string name="mods_select_all">Todos exibidos</string>
+    <string name="mods_selected_n">%1$d selecionado(s)</string>
+    <string name="mods_export_hint">Toque nos mods para exportar e depois em Exportar. Eles são compactados em um único ZIP em Downloads/zomdroid, que Importar mods pode instalar de novo aqui ou em outro aparelho.</string>
+    <string name="mods_exporting">Compactando %1$d mod(s)…</string>
+    <string name="mods_export_progress">Compactando mods: %1$d / %2$d</string>
+    <string name="mods_export_busy">Os mods ainda estão sendo compactados — aguarde a primeira exportação terminar.</string>
+    <string name="mods_exported">Salvo: %1$s</string>
+    <string name="mods_export_failed">Não foi possível salvar o ZIP: %1$s</string>
+    <string name="mods_export_storage_message">O ZIP é salvo na pasta pública Downloads/zomdroid. Conceda \"Acesso a todos os arquivos\" ao Zomdroid e toque em Exportar de novo.</string>
     <string name="mods_enabled_n">%1$d mods ativados. Toque em Ordenar para colocá-los em ordem.</string>
     <string name="mods_disable_all_confirm">Desativar todos os %1$d mods mostrados? A ordem de carregamento deles se perde; ao ativá-los de novo, eles vão para o fim — use Ordenar depois.</string>
     <string name="mods_sort_hint">Ordenar organiza os mods ativos pelas regras dos autores. Arraste um mod por ≡ para movê-lo; toque longo para início / fim.</string>

@@ -341,6 +341,19 @@
 
     <!-- Bug report -->
     <string name="nav_bug_report">Laporkan bug</string>
+    <string name="bug_report_intro">Ada yang salah? Kirimkan laporan. Laporan berisi log game, jadi kami bisa melihat apa yang terjadi.</string>
+    <string name="bug_report_group_email">Kirim lewat email</string>
+    <string name="bug_report_steps">1. Pilih game di atas.\n2. Ketuk Kirim lewat email.\n3. Di daftar yang terbuka, pilih aplikasi email (Gmail, Outlook…).\n4. Tulis sedikit tentang apa yang terjadi, lalu kirim.</string>
+    <string name="bug_report_send_email">Kirim lewat email</string>
+    <string name="bug_report_pick_mail">Kirim dengan</string>
+    <string name="bug_report_no_email_title">Tidak ada aplikasi email di perangkat ini?</string>
+    <string name="bug_report_no_email_text">Simpan laporan ke file, lalu kirim dari perangkat mana pun ke alamat ini. Lampirkan file dan tulis sedikit tentang apa yang terjadi.</string>
+    <string name="bug_report_copy">Salin</string>
+    <string name="bug_report_copied">Alamat disalin</string>
+    <string name="bug_report_save_file">Simpan laporan ke file</string>
+    <string name="bug_report_saved">Laporan tersimpan</string>
+    <string name="bug_report_save_failed">Gagal menyimpan laporan: %1$s</string>
+    <string name="bug_report_no_mail_use_file">Tidak ada aplikasi email di perangkat ini. Simpan laporan ke file dan kirim dari perangkat lain.</string>
     <string name="bug_report_preparing">Menyiapkan laporan bug…</string>
     <string name="bug_report_email" translatable="false">210478@mail.ru</string>
     <string name="bug_report_subject" translatable="false">ZOMDROID REPORT %1$s</string>
@@ -664,7 +677,7 @@
     <string name="icon_packs_title">Paket ikon</string>
     <string name="icon_packs_note">Gambar untuk semua tombol di layar sekaligus, menggantikan labelnya. Pilih instans lalu tekan Terapkan di samping paket; tombol yang tidak punya gambar di paket tetap memakai labelnya. Lepas mengambil kembali gambar paket. Untuk satu tombol: editor kontrol.</string>
     <string name="icon_packs_howto">Cara membuat paket sendiri</string>
-    <string name="icon_packs_format">Sebuah .zip berisi gambar PNG, persegi, 256 piksel, putih di atas latar transparan: tombol mewarnainya seperti labelnya. Agar gambar tetap berwarna aslinya, tambahkan pack.json dengan \"tint\": false. Beri nama setiap file sesuai aksi yang ditampilkannya: %1$s. Tombol mendapat gambar bila terikat ke tombol bawaan aksi itu. File PNG lain di zip juga disimpan. pack.json opsional memberi nama paket: {\"format\": 1, \"name\": \"Ikon saya\"}. Gambar-gambar ini dipasang di tombol bulat. Untuk tombol persegi, paket bisa menambahkan versi lain di folder rect dalam zip (rect/attack.png), dengan \"rectTint\" di pack.json untuk pewarnaannya; tombol persegi tanpa versi itu mendapat gambar bulat.</string>
+    <string name="icon_packs_format">Sebuah .zip berisi gambar PNG, persegi, 256 piksel, putih di atas latar transparan: tombol mewarnainya seperti labelnya. Agar gambar tetap berwarna aslinya, tambahkan pack.json dengan \"tint\": false. Beri nama setiap file sesuai aksi yang ditampilkannya: %1$s. Tombol mendapat gambar bila terikat ke tombol bawaan aksi itu. File PNG lain di zip juga disimpan. pack.json opsional memberi nama paket: {\"format\": 1, \"name\": \"Ikon saya\"}. Gambar-gambar ini dipasang di tombol bulat. Untuk tombol persegi, paket bisa menambahkan versi lain di folder rect dalam zip (rect/attack.png), dengan \"rectTint\" di pack.json untuk pewarnaannya; tombol persegi tanpa versi itu mendapat gambar bulat. Zip dengan beberapa folder teratas (color/, bw/ …) menjadi satu paket per folder. Beberapa aksi cocok dengan lebih dari satu gambar (tombol kiri mouse: mouse atau kepalan); tombol mendapat gambar pertama yang ada di paket. Untuk memilih yang lain, buka editor kontrol, ketuk tombol itu dan pilih Pack.</string>
     <string name="icon_packs_instance">Instans</string>
     <string name="icon_packs_no_instances">Belum ada instans</string>
     <string name="icon_packs_apply">Terapkan</string>
@@ -683,6 +696,7 @@
     <string name="icon_packs_removed">Ikon dilepas dari %1$d tombol di %2$s</string>
     <string name="icon_packs_delete_confirm">Hapus paket «%1$s»? Tombol yang sudah menampilkan gambarnya tetap menyimpannya.</string>
     <string name="icon_packs_imported">Paket «%1$s» diimpor: %2$d gambar</string>
+    <string name="icon_packs_imported_many">%1$d paket diimpor, satu per folder</string>
     <string name="icon_packs_import_failed">Tidak dapat mengimpor paket: %1$s</string>
     <!-- PZ Optimization installer -->
     <string name="optimization_group_pzopt">PZ Optimization (eksperimental)</string>
@@ -733,6 +747,17 @@
     <string name="mods_open_import">→ Impor mod</string>
     <string name="mods_enable_all">Aktifkan semua yang tampil</string>
     <string name="mods_disable_all">Nonaktifkan semua yang tampil</string>
+    <string name="mods_export">Ekspor mod</string>
+    <string name="mods_export_go">Ekspor</string>
+    <string name="mods_select_all">Semua yang tampil</string>
+    <string name="mods_selected_n">%1$d dipilih</string>
+    <string name="mods_export_hint">Ketuk mod yang ingin diekspor, lalu Ekspor. Mod dikemas menjadi satu ZIP di Downloads/zomdroid, yang bisa dipasang lagi lewat Impor mod di sini atau di perangkat lain.</string>
+    <string name="mods_exporting">Mengemas %1$d mod…</string>
+    <string name="mods_export_progress">Mengemas mod: %1$d / %2$d</string>
+    <string name="mods_export_busy">Mod masih dikemas — tunggu ekspor pertama selesai.</string>
+    <string name="mods_exported">Tersimpan: %1$s</string>
+    <string name="mods_export_failed">Gagal menyimpan ZIP: %1$s</string>
+    <string name="mods_export_storage_message">ZIP disimpan ke folder publik Downloads/zomdroid. Berikan \"Akses semua file\" ke Zomdroid, lalu ketuk Ekspor lagi.</string>
     <string name="mods_enabled_n">%1$d mod diaktifkan. Tekan Urutkan untuk merapikan urutannya.</string>
     <string name="mods_disable_all_confirm">Nonaktifkan semua %1$d mod yang tampil? Urutan muatnya akan hilang; saat diaktifkan lagi mod masuk ke akhir — tekan Urutkan sesudahnya.</string>
     <string name="mods_sort_hint">Urutkan menata mod aktif menurut aturan dari pembuatnya. Seret mod lewat ≡ untuk memindahkannya; tekan lama untuk ke atas / ke bawah.</string>

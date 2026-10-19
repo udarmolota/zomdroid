@@ -42,11 +42,6 @@
             android:icon="@drawable/mt_icon_driver"
             app:showAsAction="never"/>
         <item
-            android:id="@+id/action_export_log"
-            android:title="@string/export_log_menu"
-            android:icon="@drawable/ic_log_file"
-            app:showAsAction="never"/>
-        <item
             android:id="@+id/action_bug_report"
             android:title="@string/nav_bug_report"
             android:icon="@drawable/ic_bug_report"

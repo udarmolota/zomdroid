@@ -421,6 +421,19 @@
 
     <!-- Bug report -->
     <string name="nav_bug_report">Report a bug</string>
+    <string name="bug_report_intro">Something went wrong? Send us a report. It carries the game\'s logs, so we can see what happened.</string>
+    <string name="bug_report_group_email">Send by email</string>
+    <string name="bug_report_steps">1. Choose the game above.\n2. Tap Send by email.\n3. In the list that opens, pick your mail app (Gmail, Outlook…).\n4. Write a few words about what happened and send.</string>
+    <string name="bug_report_send_email">Send by email</string>
+    <string name="bug_report_pick_mail">Send with</string>
+    <string name="bug_report_no_email_title">No email app on this device?</string>
+    <string name="bug_report_no_email_text">Save the report to a file, then send it from any device to this address. Attach the file and write a few words about what happened.</string>
+    <string name="bug_report_copy">Copy</string>
+    <string name="bug_report_copied">Address copied</string>
+    <string name="bug_report_save_file">Save report to a file</string>
+    <string name="bug_report_saved">Report saved</string>
+    <string name="bug_report_save_failed">Could not save the report: %1$s</string>
+    <string name="bug_report_no_mail_use_file">No email app found on this device. Save the report to a file and send it from another device.</string>
     <string name="bug_report_preparing">Preparing bug report…</string>
     <string name="bug_report_email" translatable="false">210478@mail.ru</string>
     <string name="bug_report_subject" translatable="false">ZOMDROID REPORT %1$s</string>
@@ -706,7 +719,7 @@
     <string name="icon_packs_title">Icon packs</string>
     <string name="icon_packs_note">Pictures for all on-screen buttons at once instead of their text labels. Pick the instance and press Apply next to a pack; buttons the pack has no picture for keep their label. Remove takes the pack\'s pictures off again. One button at a time: the controls editor.</string>
     <string name="icon_packs_howto">How to make a pack yourself</string>
-    <string name="icon_packs_format">A .zip of PNG pictures, square, 256 pixels, white on a transparent background: the button paints them like its label. To keep the pictures\' own colours, add a pack.json with \"tint\": false. Name each file after the action it shows: %1$s. A button gets the picture when it is bound to that action\'s default key. Other PNG files in the zip are kept too. An optional pack.json names the pack: {\"format\": 1, \"name\": \"My icons\"}. These pictures go on round buttons. For rectangular buttons a pack can add other versions in a rect folder inside the zip (rect/attack.png), with \"rectTint\" in pack.json for their colouring; a rectangular button without one gets the round picture.</string>
+    <string name="icon_packs_format">A .zip of PNG pictures, square, 256 pixels, white on a transparent background: the button paints them like its label. To keep the pictures\' own colours, add a pack.json with \"tint\": false. Name each file after the action it shows: %1$s. A button gets the picture when it is bound to that action\'s default key. Other PNG files in the zip are kept too. An optional pack.json names the pack: {\"format\": 1, \"name\": \"My icons\"}. These pictures go on round buttons. For rectangular buttons a pack can add other versions in a rect folder inside the zip (rect/attack.png), with \"rectTint\" in pack.json for their colouring; a rectangular button without one gets the round picture. A zip with several top folders (color/, bw/ ...) becomes one pack per folder. Some actions match more than one picture (the left mouse button: a mouse or a fist); a button gets the first one the pack has. To pick another, open the controls editor, tap that button and choose Pack.</string>
     <string name="icon_packs_instance">Instance</string>
     <string name="icon_packs_no_instances">No instances yet</string>
     <string name="icon_packs_choose_instance">Choose an instance…</string>
@@ -726,6 +739,7 @@
     <string name="icon_packs_removed">Icons removed from %1$d buttons of %2$s</string>
     <string name="icon_packs_delete_confirm">Delete the pack «%1$s»? Buttons that already show its pictures keep them.</string>
     <string name="icon_packs_imported">Pack «%1$s» imported: %2$d pictures</string>
+    <string name="icon_packs_imported_many">%1$d packs imported, one per folder</string>
     <string name="icon_packs_import_failed">Could not import the pack: %1$s</string>
     <!-- PZ Optimization installer -->
     <string name="optimization_group_pzopt">PZ Optimization (experimental)</string>
@@ -776,6 +790,17 @@
     <string name="mods_open_import">→ Import mods</string>
     <string name="mods_enable_all">Enable all shown</string>
     <string name="mods_disable_all">Disable all shown</string>
+    <string name="mods_export">Export mods</string>
+    <string name="mods_export_go">Export</string>
+    <string name="mods_select_all">All shown</string>
+    <string name="mods_selected_n">%1$d selected</string>
+    <string name="mods_export_hint">Tap the mods to export, then Export. They are packed into one ZIP in Downloads/zomdroid, which Import mods can install again here or on another device.</string>
+    <string name="mods_exporting">Packing %1$d mod(s)…</string>
+    <string name="mods_export_progress">Packing mods: %1$d / %2$d</string>
+    <string name="mods_export_busy">Mods are still being packed — wait for the first export to finish.</string>
+    <string name="mods_exported">Saved: %1$s</string>
+    <string name="mods_export_failed">Could not save the ZIP: %1$s</string>
+    <string name="mods_export_storage_message">The ZIP is saved into the public Downloads/zomdroid folder. Please grant \"All files access\" to Zomdroid, then tap Export again.</string>
     <string name="mods_enabled_n">%1$d mods enabled. Press Sort to put them in order.</string>
     <string name="mods_disable_all_confirm">Disable all %1$d mods shown? Their load order is lost; enabling them again adds them at the end — use Sort afterwards.</string>
     <string name="mods_sort_hint">Sort orders the active mods by the rules their authors give. Drag a mod by ≡ to move it; long-press for top / bottom.</string>

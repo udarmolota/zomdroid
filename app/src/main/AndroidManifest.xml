@@ -13,6 +13,14 @@
     <!-- Steam downloader writes the game/mods into the public Downloads/zomdroid folder. -->
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
 
+  <!-- Report a bug lists the mail apps itself (Android 11+ package visibility). -->
+  <queries>
+    <intent>
+      <action android:name="android.intent.action.SENDTO" />
+      <data android:scheme="mailto" />
+    </intent>
+  </queries>
+
   <application
         android:name=".ZomdroidApplication"
         android:appCategory="game"

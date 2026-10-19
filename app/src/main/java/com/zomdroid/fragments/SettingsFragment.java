@@ -161,6 +161,9 @@ public class SettingsFragment extends Fragment {
 
     @Override public void onResume() {
         super.onResume();
+        // Which instance these settings belong to, under the screen title: with several instances
+        // the screen otherwise looks the same for each of them.
+        setToolbarSubtitle(instanceName);
         refreshMacosStatus();
         if (hostingEnablePending && binding != null && hostingLibrariesPresent()) {
             hostingEnablePending = false;
@@ -695,16 +698,14 @@ public class SettingsFragment extends Fragment {
         binding.settingsTextureShrinkSection.setVisibility(shrink ? View.VISIBLE : View.GONE);
         // NG_GL4ES and both ZINK variants write this cache (same encoder, same store); plain
         // GL4ES has no ETC2 path, so the rows would only raise questions there.
+        // MobileGlues writes the same cache too (MOBILEGLUES_PZ_ETC2_CACHE_DIR, set at launch).
         boolean visible = renderer == LauncherPreferences.Renderer.NG_GL4ES
                 || renderer == LauncherPreferences.Renderer.ZINK_ZFA
-                || renderer == LauncherPreferences.Renderer.ZINK_OSMESA;
+                || renderer == LauncherPreferences.Renderer.ZINK_OSMESA
+                || renderer == LauncherPreferences.Renderer.MOBILEGLUES_EXPERIMENTAL;
         int visibility = visible ? View.VISIBLE : View.GONE;
-        // MobileGlues takes the same switch (MOBILEGLUES_PZ_ETC2) but keeps its own cache in
-        // MG_DIR_PATH, which the Clear button does not cover - so the switch only, no cache row.
-        int switchVisibility = visible || renderer == LauncherPreferences.Renderer.MOBILEGLUES_EXPERIMENTAL
-                ? View.VISIBLE : View.GONE;
-        binding.settingsTextureCompressionRow.setVisibility(switchVisibility);
-        binding.settingsTextureCompressionHintTv.setVisibility(switchVisibility);
+        binding.settingsTextureCompressionRow.setVisibility(visibility);
+        binding.settingsTextureCompressionHintTv.setVisibility(visibility);
         binding.settingsEtc2CacheRow.setVisibility(visibility);
         if (!visible) binding.settingsEtc2CacheContent.setVisibility(View.GONE);
         if (!visible) return;
@@ -883,6 +884,13 @@ public class SettingsFragment extends Fragment {
         return SuggestedPreset.withShrink(envVars, value);
     }
 
+    private void setToolbarSubtitle(@androidx.annotation.Nullable String subtitle) {
+        if (!(getActivity() instanceof androidx.appcompat.app.AppCompatActivity)) return;
+        androidx.appcompat.app.ActionBar bar =
+                ((androidx.appcompat.app.AppCompatActivity) getActivity()).getSupportActionBar();
+        if (bar != null) bar.setSubtitle(subtitle);
+    }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -892,6 +900,7 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+        setToolbarSubtitle(null);   // the next screen has its own title only
         LauncherPreferences.requireSingleton().saveToPreferences();
     }
 }

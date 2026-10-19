@@ -149,7 +149,7 @@ public class LauncherActivity extends AppCompatActivity {
                 return true;
             } else if (item.getItemId() == R.id.action_bug_report) {
                 binding.drawerLayout.close();
-                sendBugReport();
+                navController.navigate(R.id.action_open_bug_report);
                 return true;
         }
 
@@ -324,99 +324,6 @@ public class LauncherActivity extends AppCompatActivity {
                 // offline/failed — try again tomorrow
             }
         }, "zd-daily-update-check").start();
-    }
-
-    // ---- Bug report -------------------------------------------------------------
-
-    /**
-     * Open the user's email app pre-filled with a bug report — with the same log bundle that
-     * "Export logs" produces attached, so a report arrives diagnosable. Building the zip can touch
-     * multi-MB console.txt/native.log, so it runs off the UI thread; the email intent fires once
-     * it's ready. If there's no instance (nothing to log) it falls back to a text-only mailto.
-     */
-    private void sendBugReport() {
-        final java.util.Date now = new java.util.Date();
-        final String date = new java.text.SimpleDateFormat("ddMMyyyy", java.util.Locale.US).format(now);
-        final String device = "Device: " + Build.MANUFACTURER + " " + Build.MODEL
-                + "\nAndroid: " + Build.VERSION.RELEASE
-                + "\nZomdroid: " + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")";
-
-        java.util.List<GameInstance> instances = GameInstanceManager.requireSingleton().getInstances();
-        // No instance is the hottest report, not the empty one: it is the user whose install is
-        // failing. The launcher-level logcat capture exists without any instance and is exactly
-        // where that failure landed, so the zip is still built - from whatever there is.
-        if (instances.isEmpty()) { buildAndSendBugReport(date, device, null); return; }
-
-        // More than one instance: ask which game the report is about. This used to take
-        // instances.get(0) silently, so a player reporting a Build 42 bug shipped Build 41 logs -
-        // and neither he nor we could tell until the mismatch surfaced mid-investigation. The
-        // reporter is the one person who knows which game just misbehaved; one tap collects it.
-        if (instances.size() > 1) {
-            String[] names = new String[instances.size()];
-            for (int i = 0; i < instances.size(); i++) names[i] = instances.get(i).getName();
-            new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
-                    .setTitle(R.string.bug_report_pick_instance)
-                    .setItems(names, (d, which) ->
-                            buildAndSendBugReport(date, device, instances.get(which)))
-                    .setNegativeButton(R.string.dialog_button_cancel, null)
-                    .show();
-            return;
-        }
-        buildAndSendBugReport(date, device, instances.get(0));
-    }
-
-    private void buildAndSendBugReport(String date, String device, GameInstance instance) {
-        // Distinct timestamp for the zip name (adds time-of-day) so a tester sending several
-        // reports in one sitting doesn't overwrite the same "zomdroid_report.zip" attachment.
-        final String timestamp = new java.text.SimpleDateFormat("ddMMyyyy_HHmm", java.util.Locale.US).format(new java.util.Date());
-        Toast.makeText(this, R.string.bug_report_preparing, Toast.LENGTH_SHORT).show();
-        new Thread(() -> {
-            Uri attach = null;
-            try {
-                File dir = new File(getCacheDir(), "reports");
-                if (dir.isDirectory() || dir.mkdirs()) {
-                    File zip = new File(dir, "zomdroid_report_" + timestamp + ".zip");
-                    try (OutputStream out = new FileOutputStream(zip)) {
-                        InstallerService.writeLogReportZip(instance, out);
-                    }
-                    if (zip.length() > 0)
-                        attach = androidx.core.content.FileProvider.getUriForFile(
-                                this, "com.zomdroid.fileprovider", zip);
-                }
-            } catch (Throwable t) { attach = null; } // no logs → still send the text report
-            final Uri fAttach = attach;
-            runOnUiThread(() -> startBugReportEmail(date, device, fAttach));
-        }).start();
-    }
-
-    private void startBugReportEmail(String date, String device, Uri attachment) {
-        String[] to = { getString(R.string.bug_report_email) };
-        String subject = getString(R.string.bug_report_subject, date);
-        String body = getString(R.string.bug_report_body, device);
-        Intent i;
-        if (attachment != null) {
-            // ACTION_SEND carries an attachment (mailto/SENDTO can't). A chooser lets the user pick
-            // their mail app; to/subject/body/zip are all prefilled.
-            i = new Intent(Intent.ACTION_SEND);
-            i.setType("application/zip");
-            i.putExtra(Intent.EXTRA_EMAIL, to);
-            i.putExtra(Intent.EXTRA_SUBJECT, subject);
-            i.putExtra(Intent.EXTRA_TEXT, body);
-            i.putExtra(Intent.EXTRA_STREAM, attachment);
-            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            try { startActivity(Intent.createChooser(i, getString(R.string.nav_bug_report))); return; }
-            catch (android.content.ActivityNotFoundException ignored) { /* fall through to mailto */ }
-        }
-        // No attachment (or no app took the SEND) → plain mailto, text only.
-        i = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"));
-        i.putExtra(Intent.EXTRA_EMAIL, to);
-        i.putExtra(Intent.EXTRA_SUBJECT, subject);
-        i.putExtra(Intent.EXTRA_TEXT, body);
-        try {
-            startActivity(i);
-        } catch (android.content.ActivityNotFoundException e) {
-            Toast.makeText(this, R.string.bug_report_no_mail, Toast.LENGTH_LONG).show();
-        }
     }
 
     private void showVersionDialog(String current, String latest, String releaseUrl) {
