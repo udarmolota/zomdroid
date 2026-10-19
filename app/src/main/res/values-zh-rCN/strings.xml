@@ -792,6 +792,7 @@
     <string name="app_settings_instance_hint">渲染器、驱动、Java 参数、分辨率和屏幕按键都属于某个游戏实例。请用实例卡片上的齿轮按钮打开它们。</string>
     <string name="game_instance_settings">实例设置</string>
     <string name="release_notes_title">%1$s 新内容</string>
+    <string name="release_notes_body">新功能\n\n• 模组页面：开启或关闭模组并设置加载顺序。“排序”按作者给出的规则排列已启用的模组。“导出”把选中的模组打包成一个 ZIP。\n\n• MobileGlues 渲染器向所有人开放，通常是最快的。基于 mepetz（Willing-Upstairs-580）的 MobileGlues “astra” 分支。可在 Mali 和骁龙上运行，其他 GPU 尚未测试。\n\n• 在优化页面一键安装 PZ Optimization，用 Restore 可再次移除。\n\n• 按钮图标：为布局准备的图标包——3D、Gamepad、Shooter 和 Spiffo。感谢 loseray99、Smooth-Designer7162 和 Willing-Run-8987 提供的图片。\n\n• 触控板：最大 320%，或“全屏”——游戏中不可见，在没有其他按钮的地方都能接收触控。可去掉边框和文字。\n\n• 按键编辑器：细网格。键盘布局（vkbd）有了新的、更整洁的默认样式。\n\n• Steam 下载器：支持创意工坊合集和链接。\n\n• 主页显示来自 Steam 的 Project Zomboid 新闻。\n\n• “报告问题”现在是独立页面：可通过邮件发送报告或保存为文件。</string>
     <string name="bug_report_pick_instance">这份报告是关于哪个游戏的？</string>
     <string name="credits_third_party">捐助图标：“Donate”，作者 Edward Boatman，来自 the Noun Project，CC BY 3.0。\nhttps://thenounproject.com/icon/donate-285/\n\nMobileGlues 渲染器：Willing-Upstairs-580（constantinrarinca3-sketch）制作的 MobileGL-Dev/MobileGlues “astra” 分支，LGPL v2.1。\nhttps://github.com/constantinrarinca3-sketch/MobileGlues</string>
     <string name="rimdroid_dialog_message">RimDroid 用与本启动器运行 Project Zomboid 相同的方式在 Android 上运行 RimWorld。同一作者，同样的思路。\n\nhttps://github.com/udarmolota/RimDroid/releases</string>
