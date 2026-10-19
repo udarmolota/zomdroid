@@ -81,6 +81,57 @@
             android:contentDescription="@string/mods_disable_all"
             android:tooltipText="@string/mods_disable_all"
             app:icon="@drawable/ic_mods_disable_all" />
+
+        <!-- Export: pick mods, pack them into one ZIP in Downloads/zomdroid. -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_mods_export"
+            style="@style/Widget.Material3.Button.IconButton.Outlined"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/mods_export"
+            android:tooltipText="@string/mods_export"
+            app:icon="@drawable/ic_mods_export" />
+    </LinearLayout>
+
+    <!-- Shown while picking mods to export, in place of the usual hint. -->
+    <LinearLayout
+        android:id="@+id/ll_mods_select"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tv_mods_selected"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAppearance="?attr/textAppearanceLabelLarge" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_mods_select_all"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/mods_select_all"
+            android:textSize="12sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_mods_select_cancel"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@android:string/cancel"
+            android:textSize="12sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_mods_export_go"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/mods_export_go"
+            android:textSize="12sp" />
     </LinearLayout>
 
     <!-- Import mods as a link under the buttons, like "Open Settings" on the Optimization page:
@@ -97,6 +148,7 @@
         android:textSize="12sp" />
 
     <TextView
+        android:id="@+id/tv_mods_hint"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"

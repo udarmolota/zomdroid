@@ -53,6 +53,10 @@ import java.util.Set;
  * lifts), and a long press offers up / down / top / bottom. "Sort" orders the active mods by their
  * authors' rules (PzModSorter) and shows what changes and what is missing before writing. While the
  * game runs the screen is read-only: the game rewrites these files itself.
+ *
+ * Export: the archive button switches the rows to checkboxes; the picked mods are packed into one
+ * ZIP in Downloads/zomdroid (each mod folder at the top, as Import mods takes several mods at once).
+ * Only reads, so it works while the game runs too.
  */
 public class ModsFragment extends Fragment {
 
@@ -60,7 +64,16 @@ public class ModsFragment extends Fragment {
     private TextView tvRunning, tvUnreadable, tvEmpty;
     private EditText etSearch;
     private RecyclerView rv;
-    private View btnSort, btnEnableAll, btnDisableAll;
+    private View btnSort, btnEnableAll, btnDisableAll, btnExport, llSelect;
+    private TextView tvSelected, tvHint;
+    /** Picking mods to export; the set holds their folders (one entry per installed copy). */
+    private boolean selecting;
+    private final Set<File> selected = new HashSet<>();
+    /** One export at a time, across screen visits: a second tap would pack the same mods twice. */
+    private static final java.util.concurrent.atomic.AtomicBoolean exporting =
+            new java.util.concurrent.atomic.AtomicBoolean();
+    private static final String EXPORT_CHANNEL = "zd_mods_export";
+    private static final int EXPORT_NOTIFICATION = 4243;
     private final List<Entry> entries = new ArrayList<>();
     private final List<Object> rows = new ArrayList<>();   // String = section header, Row = a mod
     private boolean editable;
@@ -122,6 +135,23 @@ public class ModsFragment extends Fragment {
         btnDisableAll = v.findViewById(R.id.btn_mods_disable_all);
         btnEnableAll.setOnClickListener(x -> enableAllShown());
         btnDisableAll.setOnClickListener(x -> disableAllShown());
+        btnExport = v.findViewById(R.id.btn_mods_export);
+        llSelect = v.findViewById(R.id.ll_mods_select);
+        tvHint = v.findViewById(R.id.tv_mods_hint);
+        tvSelected = v.findViewById(R.id.tv_mods_selected);
+        btnExport.setOnClickListener(x -> {
+            if (exporting.get()) {
+                Toast.makeText(requireContext(), R.string.mods_export_busy, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            setSelecting(true);
+        });
+        v.findViewById(R.id.btn_mods_select_cancel).setOnClickListener(x -> setSelecting(false));
+        v.findViewById(R.id.btn_mods_select_all).setOnClickListener(x -> {
+            for (Object o : rows) if (o instanceof Row && ((Row) o).mod != null) selected.add(((Row) o).mod.folder);
+            updateSelection();
+        });
+        v.findViewById(R.id.btn_mods_export_go).setOnClickListener(x -> exportSelected());
     }
 
     @Override
@@ -208,6 +238,8 @@ public class ModsFragment extends Fragment {
             btnSort.setEnabled(false);
             btnEnableAll.setEnabled(false);
             btnDisableAll.setEnabled(false);
+            btnExport.setEnabled(false);
+            if (selecting) setSelecting(false);
             adapter.notifyDataSetChanged();
             return;
         }
@@ -220,6 +252,7 @@ public class ModsFragment extends Fragment {
         btnSort.setEnabled(editable);
         btnEnableAll.setEnabled(editable);
         btnDisableAll.setEnabled(editable);
+        btnExport.setEnabled(!mods.isEmpty());
 
         String q = etSearch.getText().toString().trim().toLowerCase(Locale.ROOT);
         Set<String> activeIds = new HashSet<>();
@@ -242,7 +275,145 @@ public class ModsFragment extends Fragment {
         rows.addAll(inactive);
         tvEmpty.setText(R.string.mods_empty);
         tvEmpty.setVisibility(mods.isEmpty() && active.isEmpty() ? View.VISIBLE : View.GONE);
+        if (selecting) updateSelection();
         adapter.notifyDataSetChanged();
+    }
+
+    // ---- export ----
+
+    private void setSelecting(boolean on) {
+        selecting = on;
+        selected.clear();
+        llSelect.setVisibility(on ? View.VISIBLE : View.GONE);
+        tvHint.setText(on ? R.string.mods_export_hint : R.string.mods_sort_hint);
+        updateSelection();
+        adapter.notifyDataSetChanged();
+    }
+
+    private void updateSelection() {
+        tvSelected.setText(getString(R.string.mods_selected_n, selected.size()));
+        if (llSelect != null) llSelect.findViewById(R.id.btn_mods_export_go).setEnabled(!selected.isEmpty());
+        adapter.notifyDataSetChanged();
+    }
+
+    /**
+     * Packs the picked mods into Downloads/zomdroid/mods-<instance>-<date>.zip: each mod folder at the
+     * top, as Import mods unpacks several mods from one ZIP. Symbolic links are left out - our
+     * lowercase path aliases would otherwise put every mod in several times.
+     */
+    private void exportSelected() {
+        Entry e = current();
+        if (e == null || selected.isEmpty()) return;
+        if (exporting.get()) {
+            Toast.makeText(requireContext(), R.string.mods_export_busy, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!android.os.Environment.isExternalStorageManager()) {
+            new MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.steam_dl_storage_title)
+                    .setMessage(R.string.mods_export_storage_message)
+                    .setPositiveButton(R.string.steam_dl_grant, (d, w) -> {
+                        try {
+                            startActivity(new android.content.Intent(
+                                    android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                                    android.net.Uri.parse("package:" + requireContext().getPackageName())));
+                        } catch (Exception ex) {
+                            startActivity(new android.content.Intent(
+                                    android.provider.Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION));
+                        }
+                    })
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
+            return;
+        }
+        List<File> folders = new ArrayList<>(selected);
+        String stamp = new java.text.SimpleDateFormat("yyyy-MM-dd_HHmm", Locale.ROOT).format(new java.util.Date());
+        String instance = e.instance.getName().replaceAll("[^A-Za-z0-9._-]+", "_");
+        File out = new File(com.zomdroid.steam.SteamGameDownloader.getDownloadsDir(),
+                "mods-" + instance + "-" + stamp + ".zip");
+        android.content.Context app = requireContext().getApplicationContext();
+        if (!exporting.compareAndSet(false, true)) return;
+        Toast.makeText(app, getString(R.string.mods_exporting, folders.size()), Toast.LENGTH_SHORT).show();
+        setSelecting(false);
+        new Thread(() -> {
+            String error = null;
+            try {
+                writeModsZip(folders, out, done -> notifyExport(app, done, folders.size(), null));
+            } catch (Exception ex) {
+                error = ex.getMessage() != null ? ex.getMessage() : ex.toString();
+            } finally {
+                exporting.set(false);
+            }
+            final String result = error == null ? app.getString(R.string.mods_exported, out.getAbsolutePath())
+                    : app.getString(R.string.mods_export_failed, error);
+            notifyExport(app, folders.size(), folders.size(), result);
+            new android.os.Handler(android.os.Looper.getMainLooper()).post(() ->
+                    Toast.makeText(app, result, Toast.LENGTH_LONG).show());
+        }, "mods-export").start();
+    }
+
+    /**
+     * The progress notification: "Packing mods: 37 / 146" with a bar, then the result. A big set
+     * (a hundred mods, a gigabyte) takes a minute or two, and without it the screen looks idle.
+     * Without the notification permission it simply does not appear; the toasts still do.
+     */
+    private static void notifyExport(android.content.Context app, int done, int total, @Nullable String result) {
+        android.app.NotificationManager nm = app.getSystemService(android.app.NotificationManager.class);
+        if (nm == null) return;
+        if (nm.getNotificationChannel(EXPORT_CHANNEL) == null) {
+            nm.createNotificationChannel(new android.app.NotificationChannel(EXPORT_CHANNEL,
+                    app.getString(R.string.mods_export), android.app.NotificationManager.IMPORTANCE_LOW));
+        }
+        androidx.core.app.NotificationCompat.Builder b = new androidx.core.app.NotificationCompat.Builder(app, EXPORT_CHANNEL)
+                .setSmallIcon(R.mipmap.ic_launcher_foreground)
+                .setContentTitle(app.getString(R.string.mods_export))
+                .setOnlyAlertOnce(true)
+                .setPriority(androidx.core.app.NotificationCompat.PRIORITY_LOW);
+        if (result == null) {
+            b.setContentText(app.getString(R.string.mods_export_progress, done, total))
+             .setProgress(total, done, false)
+             .setOngoing(true);
+        } else {
+            b.setContentText(result)
+             .setStyle(new androidx.core.app.NotificationCompat.BigTextStyle().bigText(result))
+             .setAutoCancel(true);
+        }
+        try {
+            nm.notify(EXPORT_NOTIFICATION, b.build());
+        } catch (SecurityException ignored) {
+            // no notification permission (Android 13+): the toasts carry the start and the result
+        }
+    }
+
+    private static void writeModsZip(List<File> folders, File out, java.util.function.IntConsumer progress) throws IOException {
+        File parent = out.getParentFile();
+        if (parent != null && !parent.isDirectory() && !parent.mkdirs()) throw new IOException("Cannot create " + parent);
+        File tmp = new File(out.getPath() + ".part");
+        Set<String> tops = new HashSet<>();
+        try (java.util.zip.ZipOutputStream zip = new java.util.zip.ZipOutputStream(new java.io.FileOutputStream(tmp))) {
+            int done = 0;
+            for (File folder : folders) {
+                progress.accept(done++);
+                // Two installed copies with one folder name (mods/ and the Workshop): the first wins.
+                if (!tops.add(folder.getName())) continue;
+                java.nio.file.Path base = folder.toPath().getParent();
+                java.nio.file.Files.walkFileTree(folder.toPath(), new java.nio.file.SimpleFileVisitor<java.nio.file.Path>() {
+                    @Override
+                    public java.nio.file.FileVisitResult visitFile(java.nio.file.Path p, java.nio.file.attribute.BasicFileAttributes a) throws IOException {
+                        if (!a.isRegularFile()) return java.nio.file.FileVisitResult.CONTINUE;   // symlinks too
+                        zip.putNextEntry(new java.util.zip.ZipEntry(base.relativize(p).toString().replace('\\', '/')));
+                        java.nio.file.Files.copy(p, zip);
+                        zip.closeEntry();
+                        return java.nio.file.FileVisitResult.CONTINUE;
+                    }
+                });
+            }
+        } catch (IOException ex) {
+            //noinspection ResultOfMethodCallIgnored
+            tmp.delete();
+            throw ex;
+        }
+        java.nio.file.Files.move(tmp.toPath(), out.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
     }
 
     private static boolean matches(Row r, String q) {
@@ -564,19 +735,39 @@ public class ModsFragment extends Fragment {
                 sub.setTextColor((android.content.res.ColorStateList) sub.getTag());
             }
 
+            android.widget.CheckBox cb = v.findViewById(R.id.cb_mod);
             MaterialSwitch sw = v.findViewById(R.id.sw_mod);
+            ImageButton del = v.findViewById(R.id.btn_mod_delete);
+            ImageView drag = v.findViewById(R.id.iv_mod_drag);
+            if (selecting) {
+                boolean pickable = r.mod != null;
+                cb.setVisibility(View.VISIBLE);
+                cb.setEnabled(pickable);
+                cb.setChecked(pickable && selected.contains(r.mod.folder));
+                sw.setVisibility(View.GONE);
+                del.setVisibility(View.GONE);
+                drag.setVisibility(View.GONE);
+                row.setOnClickListener(x -> {
+                    if (!pickable) return;
+                    if (!selected.remove(r.mod.folder)) selected.add(r.mod.folder);
+                    updateSelection();
+                });
+                row.setOnLongClickListener(null);
+                row.setAlpha(pickable ? 1f : 0.6f);
+                return;
+            }
+            cb.setVisibility(View.GONE);
+            sw.setVisibility(View.VISIBLE);
             sw.setOnCheckedChangeListener(null);
             sw.setChecked(r.active);
             sw.setEnabled(editable && (r.active || !wrongBuild));   // can be switched off, not on
             sw.setOnCheckedChangeListener((b, on) -> toggle(r, on));
 
-            ImageButton del = v.findViewById(R.id.btn_mod_delete);
             boolean deletable = r.mod != null && r.mod.deletable;
             del.setVisibility(deletable ? View.VISIBLE : View.INVISIBLE);
             del.setEnabled(editable);
             del.setOnClickListener(x -> confirmDelete(r.mod));
 
-            ImageView drag = v.findViewById(R.id.iv_mod_drag);
             boolean canDrag = draggable(pos);
             drag.setVisibility(r.active ? View.VISIBLE : View.GONE);
             drag.setAlpha(canDrag ? 1f : 0.3f);

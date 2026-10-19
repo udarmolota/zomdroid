@@ -53,6 +53,15 @@
                 android:textSize="12sp" />
         </LinearLayout>
 
+        <!-- Export selection; replaces the switch, delete and drag while picking. -->
+        <CheckBox
+            android:id="@+id/cb_mod"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:focusable="false"
+            android:visibility="gone" />
+
         <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/sw_mod"
             android:layout_width="wrap_content"
