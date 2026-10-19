@@ -699,8 +699,12 @@ public class SettingsFragment extends Fragment {
                 || renderer == LauncherPreferences.Renderer.ZINK_ZFA
                 || renderer == LauncherPreferences.Renderer.ZINK_OSMESA;
         int visibility = visible ? View.VISIBLE : View.GONE;
-        binding.settingsTextureCompressionRow.setVisibility(visibility);
-        binding.settingsTextureCompressionHintTv.setVisibility(visibility);
+        // MobileGlues takes the same switch (MOBILEGLUES_PZ_ETC2) but keeps its own cache in
+        // MG_DIR_PATH, which the Clear button does not cover - so the switch only, no cache row.
+        int switchVisibility = visible || renderer == LauncherPreferences.Renderer.MOBILEGLUES_EXPERIMENTAL
+                ? View.VISIBLE : View.GONE;
+        binding.settingsTextureCompressionRow.setVisibility(switchVisibility);
+        binding.settingsTextureCompressionHintTv.setVisibility(switchVisibility);
         binding.settingsEtc2CacheRow.setVisibility(visibility);
         if (!visible) binding.settingsEtc2CacheContent.setVisibility(View.GONE);
         if (!visible) return;
