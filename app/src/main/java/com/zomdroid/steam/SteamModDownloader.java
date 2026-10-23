@@ -241,32 +241,22 @@ public class SteamModDownloader implements Runnable, Cancellable {
                 done("Cannot create downloads folder: " + downloadsDir + " (grant All-files access?)");
                 return;
             }
+            // Two passes (from RimDroid): an item that fails - a CDN node answering 503 for one
+            // chunk, a dropped connection - is tried once more after the others, so one bad moment
+            // does not cost a whole collection. Finished zips are kept either way.
+            List<Long> failed = new java.util.ArrayList<>();
             for (Long id : expandCollections(workshopIds)) {
                 if (!running) { progress("Aborted (disconnected)."); break; }
-                progress("=== Workshop item " + id + " (anonymous) ===");
-                File work = new File(tmpRoot, String.valueOf(id));
-                deleteRecursive(work);
-                if (!work.mkdirs()) { progress("✗ " + id + ": cannot create work dir"); skipped++; continue; }
-
-                try {
-                    if (downloadOne(cdn, id, work) && hasContent(work)) {
-                        File zip = new File(downloadsDir, sanitizeFileName(lastTitle) + "_" + id + ".zip");
-                        try (FileOutputStream fos = new FileOutputStream(zip)) {
-                            ZipUtils.zipDirectoryToStream(work, fos);
-                        }
-                        progress("✓ " + id + " → " + zip.getAbsolutePath());
-                        ok++;
-                    } else {
-                        progress("✗ " + id + " — nothing usable downloaded "
-                                + "(items that require game ownership can't be downloaded anonymously).");
-                        skipped++;
-                    }
-                } catch (Throwable t) {
-                    Log.e(TAG, "item " + id + " failed", t);
-                    progress("✗ " + id + " — " + describe(t));
-                    skipped++;
+                if (downloadItem(cdn, id, tmpRoot, downloadsDir)) ok++; else failed.add(id);
+            }
+            if (running && !failed.isEmpty()) {
+                progress("=== Retrying " + failed.size() + " item(s) that failed ===");
+                for (Long id : failed) {
+                    if (!running) { progress("Aborted (disconnected)."); break; }
+                    if (downloadItem(cdn, id, tmpRoot, downloadsDir)) ok++; else skipped++;
                 }
-                deleteRecursive(work);
+            } else {
+                skipped += running ? 0 : failed.size();
             }
             done("Mods done: " + ok + " downloaded, " + skipped + " skipped. Saved to " + downloadsDir);
         } catch (Throwable t) {
@@ -336,6 +326,33 @@ public class SteamModDownloader implements Runnable, Cancellable {
             Log.w(TAG, "titles: " + describe(e));
         }
         return titles;
+    }
+
+    /** One item into its zip in {@code downloadsDir}; false when nothing usable came of it. */
+    private boolean downloadItem(Client cdn, long id, File tmpRoot, File downloadsDir) {
+        progress("=== Workshop item " + id + " (anonymous) ===");
+        File work = new File(tmpRoot, String.valueOf(id));
+        deleteRecursive(work);
+        if (!work.mkdirs()) { progress("✗ " + id + ": cannot create work dir"); return false; }
+        boolean ok = false;
+        try {
+            if (downloadOne(cdn, id, work) && hasContent(work)) {
+                File zip = new File(downloadsDir, sanitizeFileName(lastTitle) + "_" + id + ".zip");
+                try (FileOutputStream fos = new FileOutputStream(zip)) {
+                    ZipUtils.zipDirectoryToStream(work, fos);
+                }
+                progress("✓ " + id + " → " + zip.getAbsolutePath());
+                ok = true;
+            } else {
+                progress("✗ " + id + " — nothing usable downloaded "
+                        + "(items that require game ownership can't be downloaded anonymously).");
+            }
+        } catch (Throwable t) {
+            Log.e(TAG, "item " + id + " failed", t);
+            progress("✗ " + id + " — " + describe(t));
+        }
+        deleteRecursive(work);
+        return ok;
     }
 
     /** The mods of a collection in order, or an empty list for anything that is not a collection. */
@@ -448,13 +465,13 @@ public class SteamModDownloader implements Runnable, Cancellable {
         progress("manifest OK: " + files.size() + " entries, "
                 + (totalBytes / (1024 * 1024)) + " MB — downloading...");
 
-        // Files go through a small pool instead of one at a time, the same way the game downloader
-        // works (SteamGameDownloader): the wall clock here is CDN round-trips, not disk or CPU, so
-        // a few files in flight multiply the throughput of a mod made of many small files - maps
-        // and texture packs above all. Peak memory stays at one chunk buffer per worker.
-        // Parallel by FILE, never by chunk inside a file: all chunks of a file are written through
-        // one RandomAccessFile, so no two threads ever touch the same handle.
-        final int workers = Math.max(2, Math.min(4, Runtime.getRuntime().availableProcessors()));
+        // Chunks in parallel, PARALLEL_CHUNKS at a time from any file, as DepotDownloader and
+        // RimDroid do. The wall clock here is CDN round-trips, not disk or CPU; the old pool went by
+        // FILE (2-4 workers), so a mod of a few big files - texture packs, sound banks - fetched one
+        // chunk at a time per file. Every file is sized up front; each chunk then opens its own
+        // RandomAccessFile and writes its own range, so threads never share a handle or a byte.
+        // Peak memory stays at one chunk buffer per worker.
+        final int workers = PARALLEL_CHUNKS;
         final java.util.concurrent.atomic.AtomicInteger serverCursor =
                 new java.util.concurrent.atomic.AtomicInteger(Math.max(firstGood, 0));
         final java.util.concurrent.atomic.AtomicLong doneBytes = new java.util.concurrent.atomic.AtomicLong(0);
@@ -462,7 +479,7 @@ public class SteamModDownloader implements Runnable, Cancellable {
         final java.util.concurrent.atomic.AtomicReference<Throwable> firstError =
                 new java.util.concurrent.atomic.AtomicReference<>();
 
-        final List<FileData> pending = new java.util.ArrayList<>();
+        final List<ChunkJob> jobs = new java.util.ArrayList<>();
         for (FileData f : files) {
             String rel = sanitizeRel(f.getFileName());
             if (rel == null) continue;
@@ -475,7 +492,10 @@ public class SteamModDownloader implements Runnable, Cancellable {
             File parent = out.getParentFile();
             if (parent != null) //noinspection ResultOfMethodCallIgnored
                 parent.mkdirs();
-            pending.add(f);
+            try (RandomAccessFile raf = new RandomAccessFile(out, "rw")) {
+                raf.setLength(Math.max(f.getTotalSize(), 0));
+            }
+            for (ChunkData chunk : f.getChunks()) jobs.add(new ChunkJob(out, chunk));
         }
 
         final long fTotalBytes = totalBytes;
@@ -487,17 +507,17 @@ public class SteamModDownloader implements Runnable, Cancellable {
         final Map<String, String> fTokenCache = tokenCache;
         final File fWork = work;
 
-        final java.util.concurrent.ConcurrentLinkedQueue<FileData> queue =
-                new java.util.concurrent.ConcurrentLinkedQueue<>(pending);
+        final java.util.concurrent.ConcurrentLinkedQueue<ChunkJob> queue =
+                new java.util.concurrent.ConcurrentLinkedQueue<>(jobs);
         final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(workers);
         final List<Thread> pool = new java.util.ArrayList<>(workers);
         for (int w = 0; w < workers; w++) {
             Thread t = new Thread(() -> {
                 try {
-                    FileData f;
-                    while (running && firstError.get() == null && (f = queue.poll()) != null) {
+                    ChunkJob job;
+                    while (running && firstError.get() == null && (job = queue.poll()) != null) {
                         try {
-                            downloadOneFile(f, fWork, fCdn, fContent, fServers, fAppId, fDepot,
+                            fetchChunk(job, fCdn, fContent, fServers, fAppId, fDepot,
                                     fDepotKey, fTokenCache, serverCursor, doneBytes, fTotalBytes, lastPct);
                         } catch (Throwable e) {
                             firstError.compareAndSet(null, e);
@@ -539,47 +559,52 @@ public class SteamModDownloader implements Runnable, Cancellable {
         return true;
     }
 
-    /** One file: its chunks in order, each retried across CDN servers. Runs on a pool thread. */
-    private void downloadOneFile(FileData f, File work, Client cdn, SteamContent content,
-                                 List<Server> servers, int appId, int depot, byte[] depotKey,
-                                 Map<String, String> tokenCache,
-                                 java.util.concurrent.atomic.AtomicInteger serverCursor,
-                                 java.util.concurrent.atomic.AtomicLong doneBytes, long totalBytes,
-                                 java.util.concurrent.atomic.AtomicInteger lastPct) throws Exception {
-        String rel = sanitizeRel(f.getFileName());
-        if (rel == null) return;
-        File out = new File(work, rel);
-        try (RandomAccessFile raf = new RandomAccessFile(out, "rw")) {
-            if (f.getTotalSize() > 0) raf.setLength(f.getTotalSize());
-            for (ChunkData chunk : f.getChunks()) {
-                if (!running) return;
-                byte[] dest = new byte[Math.max(chunk.getCompressedLength(), chunk.getUncompressedLength())];
-                int written = -1;
-                Exception chunkErr = null;
-                int tries = Math.min(Math.max(servers.size(), 4), 8);
-                for (int t = 0; t < tries && written < 0; t++) {
-                    Server s = servers.get(Math.floorMod(serverCursor.get(), servers.size()));
-                    try {
-                        written = cdn.downloadDepotChunkFuture(depot, chunk, s, dest, depotKey, null,
-                                cdnTokenFor(content, appId, depot, s, tokenCache)).get(180, TimeUnit.SECONDS);
-                    } catch (Exception e) {
-                        chunkErr = e;
-                        Log.w(TAG, "chunk via " + s.getHost() + " failed (try " + (t + 1) + "): " + describe(e));
-                        // Move every worker off a server that just failed, not only this one.
-                        serverCursor.incrementAndGet();
-                        Thread.sleep(400);
-                    }
-                }
-                if (written < 0) {
-                    throw chunkErr != null ? chunkErr : new java.io.IOException("chunk download failed");
-                }
-                raf.seek(chunk.getOffset());
-                raf.write(dest, 0, written);
-                long done = doneBytes.addAndGet(written);
-                int pct = totalBytes > 0 ? (int) (done * 100 / totalBytes) : 0;
-                if (pct != lastPct.getAndSet(pct)) percent(pct);
+    /** How many chunks download at once (DepotDownloader's default, as in RimDroid). */
+    private static final int PARALLEL_CHUNKS = 8;
+
+    private static final class ChunkJob {
+        final File file;
+        final ChunkData chunk;
+        ChunkJob(File file, ChunkData chunk) { this.file = file; this.chunk = chunk; }
+    }
+
+    /** One chunk, retried across the CDN servers, written at its offset. Runs on a pool thread. */
+    private void fetchChunk(ChunkJob job, Client cdn, SteamContent content,
+                            List<Server> servers, int appId, int depot, byte[] depotKey,
+                            Map<String, String> tokenCache,
+                            java.util.concurrent.atomic.AtomicInteger serverCursor,
+                            java.util.concurrent.atomic.AtomicLong doneBytes, long totalBytes,
+                            java.util.concurrent.atomic.AtomicInteger lastPct) throws Exception {
+        if (!running) return;
+        ChunkData chunk = job.chunk;
+        byte[] dest = new byte[Math.max(chunk.getCompressedLength(), chunk.getUncompressedLength())];
+        int written = -1;
+        Exception chunkErr = null;
+        int tries = Math.min(Math.max(servers.size(), 4), 8);
+        for (int t = 0; t < tries && written < 0 && running; t++) {
+            Server s = servers.get(Math.floorMod(serverCursor.get(), servers.size()));
+            try {
+                written = cdn.downloadDepotChunkFuture(depot, chunk, s, dest, depotKey, null,
+                        cdnTokenFor(content, appId, depot, s, tokenCache)).get(180, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                chunkErr = e;
+                Log.w(TAG, "chunk via " + s.getHost() + " failed (try " + (t + 1) + "): " + describe(e));
+                // Move every worker off a server that just failed, not only this one.
+                serverCursor.incrementAndGet();
+                Thread.sleep(Math.min(400L * (t + 1), 3000L));   // 503s pass in a moment
             }
         }
+        if (written < 0) {
+            if (!running) return;
+            throw chunkErr != null ? chunkErr : new java.io.IOException("chunk download failed");
+        }
+        try (RandomAccessFile raf = new RandomAccessFile(job.file, "rw")) {
+            raf.seek(chunk.getOffset());
+            raf.write(dest, 0, written);
+        }
+        long done = doneBytes.addAndGet(written);
+        int pct = totalBytes > 0 ? (int) (done * 100 / totalBytes) : 0;
+        if (pct != lastPct.getAndSet(pct)) percent(pct);
     }
 
     private String cdnTokenFor(SteamContent content, int appId, int depot, Server s, Map<String, String> cache) {
