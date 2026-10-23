@@ -43,6 +43,16 @@ public final class NativeLibraryWorkarounds {
      * off, and a rebuilt one gets its native speed back with no code change.
      */
     public static void disableIncompleteNativeLibraries(GameInstance gameInstance) {
+        if ("41".equals(gameInstance.getBuildVersion())) {
+            // TIS ships no Android libraries for Build 41, yet B41 game archives going round carry
+            // a set copied from Build 42 (two players, 41.78.16 and 41.78.21, 2026-10-21/23). Its
+            // fmodintegration is built for Build 42's FMOD; next to the 2.02.06 runtime Build 41
+            // uses, FMOD::Studio::System::create() fails with "version mismatch" and the game has
+            // no sound at all. Without it the game's own x86_64 build runs through box64, as before.
+            disable(gameInstance, "libfmodintegration64.so",
+                    "built for Build 42's FMOD; Build 41 uses FMOD 2.02.06 and loses all sound with it");
+            return;
+        }
         if (!"42".equals(gameInstance.getBuildVersion())) return;
 
         Set<String> bulletSymbols = readArmJniSymbols(gameInstance, "libPZBullet64.so");
