@@ -250,7 +250,7 @@ public class LauncherFragment extends Fragment {
                                 .show();
                         return;
                     }
-                    launchGame(gameInstance);
+                    launchOrWarnCrashes(v, gameInstance);
                 });
 
                 // The gear opens this instance's launch settings; storage, backup and delete
@@ -530,6 +530,63 @@ public class LauncherFragment extends Fragment {
         taskProgressDialogBinding.progressDialogOkMb.setVisibility(View.VISIBLE);
 
         taskProgressDialog.show();
+    }
+
+    /**
+     * Two crashes in a row on this instance (CrashStreak): before the third start, suggest the
+     * check that settles most of them - mods off, and the macOS libraries off when installed (a
+     * library from another game build crashes the world load). The launcher shows where; it
+     * switches nothing itself, since every save keeps its own mod list.
+     */
+    private void launchOrWarnCrashes(View anchor, GameInstance gameInstance) {
+        // ZINK with "Custom driver" picked but no driver file - a launcher update removes it with
+        // the libraries. Without the file the game falls back to the phone's own Vulkan driver,
+        // and ZINK on Qualcomm's proprietary driver crashes in vkCreateGraphicsPipelines a minute
+        // into the world (report 23102026_1625). One file check per start, nothing to slow down.
+        com.zomdroid.game.InstanceSettings settings = new com.zomdroid.game.InstanceSettings(gameInstance.getName());
+        boolean zink = settings.getRenderer() == com.zomdroid.LauncherPreferences.Renderer.ZINK_ZFA
+                || settings.getRenderer() == com.zomdroid.LauncherPreferences.Renderer.ZINK_OSMESA;
+        if (zink && settings.getVulkanDriver() == com.zomdroid.LauncherPreferences.VulkanDriver.CUSTOM_DRIVER
+                && !new java.io.File(com.zomdroid.AppStorage.requireSingleton().getHomePath(), C.deps.CUSTOM_DRIVER).isFile()) {
+            new MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.custom_driver_missing_title)
+                    .setMessage(R.string.custom_driver_missing_message)
+                    .setPositiveButton(R.string.custom_driver_missing_load, (d, w) ->
+                            Navigation.findNavController(anchor).navigate(R.id.action_install_driver))
+                    .setNeutralButton(R.string.crash_streak_open_settings, (d, w) -> {
+                        Bundle args = new Bundle();
+                        args.putString(SettingsFragment.ARG_INSTANCE, gameInstance.getName());
+                        Navigation.findNavController(anchor).navigate(R.id.action_open_instance_settings, args);
+                    })
+                    .setNegativeButton(R.string.crash_streak_start_anyway, (d, w) -> warnCrashesOrLaunch(anchor, gameInstance))
+                    .show();
+            return;
+        }
+        warnCrashesOrLaunch(anchor, gameInstance);
+    }
+
+    private void warnCrashesOrLaunch(View anchor, GameInstance gameInstance) {
+        int streak = com.zomdroid.game.CrashStreak.update(requireContext(), gameInstance);
+        if (streak < 2) {
+            launchGame(gameInstance);
+            return;
+        }
+        boolean macos = !com.zomdroid.steam.MacosLibraries.installed(
+                new java.io.File(gameInstance.getGamePath())).isEmpty();
+        MaterialAlertDialogBuilder b = new MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.crash_streak_title)
+                .setMessage(getString(macos ? R.string.crash_streak_message_macos : R.string.crash_streak_message, streak))
+                .setPositiveButton(R.string.crash_streak_open_mods, (d, w) ->
+                        Navigation.findNavController(anchor).navigate(R.id.action_open_mods))
+                .setNegativeButton(R.string.crash_streak_start_anyway, (d, w) -> launchGame(gameInstance));
+        if (macos) {
+            b.setNeutralButton(R.string.crash_streak_open_settings, (d, w) -> {
+                Bundle args = new Bundle();
+                args.putString(SettingsFragment.ARG_INSTANCE, gameInstance.getName());
+                Navigation.findNavController(anchor).navigate(R.id.action_open_instance_settings, args);
+            });
+        }
+        b.show();
     }
 
     private void launchGame(GameInstance gameInstance) {

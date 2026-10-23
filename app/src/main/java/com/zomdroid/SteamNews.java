@@ -108,9 +108,11 @@ public final class SteamNews {
             Matcher m = CLAN_IMAGE.matcher(contents);
             String image = m.find() ? CLAN_IMAGES + m.group(1) : FALLBACK_IMAGE;
             String gid = n.optString("gid");
-            // Steam's own page for the post, not the feed's redirect link.
+            // The post's community page, not the feed's redirect link. The Steam app claims
+            // store.steampowered.com, so a store news link went to it, and it did not open the
+            // post; the announcement page on steamcommunity.com it does.
             String link = gid.isEmpty() ? n.optString("url")
-                    : "https://store.steampowered.com/news/app/108600/view/" + gid;
+                    : "https://steamcommunity.com/games/108600/announcements/detail/" + gid;
             items.add(new Item(clean(n.optString("title")), snippet(contents), link, image, n.optLong("date")));
         }
         return items;

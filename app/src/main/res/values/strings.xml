@@ -309,6 +309,15 @@
          fetched from GitHub: a once-only dialog that needs the network up at exactly the right
          moment is a dialog most people never see. Rewrite the body as part of every release. -->
     <string name="release_notes_title">What\'s new in %1$s</string>
+    <string name="crash_streak_title">The game keeps crashing</string>
+    <string name="crash_streak_message">Crashes in a row: %1$d. Let\'s check whether the game loads without mods: on the Mods screen press Disable all shown, then start again.</string>
+    <string name="crash_streak_message_macos">Crashes in a row: %1$d. Let\'s check whether the game loads without mods and macOS libraries: on the Mods screen press Disable all shown, switch the macOS libraries off in the instance settings, then start again.</string>
+    <string name="crash_streak_open_mods">Mods</string>
+    <string name="crash_streak_open_settings">Settings</string>
+    <string name="crash_streak_start_anyway">Start anyway</string>
+    <string name="custom_driver_missing_title">Custom Vulkan driver not found</string>
+    <string name="custom_driver_missing_message">This instance uses a custom Vulkan driver, but the driver file is missing; it may have been removed when the launcher was reinstalled.</string>
+    <string name="custom_driver_missing_load">Load driver</string>
     <string name="release_notes_body">New\n\n• Mods screen: switch mods on and off and set their load order. Sort orders the active mods by the rules their authors give. Export packs the mods you pick into one ZIP.\n\n• MobileGlues renderer for everyone, often the fastest one. Based on the \"astra\" fork of MobileGlues by mepetz (Willing-Upstairs-580). Works on Mali and Snapdragon, not tested on other GPUs yet.\n\n• PZ Optimization in one tap from the Optimization screen: install it, and Restore to remove it again.\n\n• Button icons: icon packs for your layout - 3D, Gamepad, Shooter and Spiffo. Thanks to loseray99, Smooth-Designer7162 and Willing-Run-8987 for the pictures.\n\n• Touchpad: up to 320% size, or Full screen - invisible in the game and catching touches anywhere other buttons are not. Options for no frame and no label.\n\n• Controls editor: a fine grid. The keyboard layout (vkbd) has a new, cleaner default.\n\n• Steam downloader: Workshop collections and links.\n\n• Project Zomboid news from Steam on the home screen.\n\n• Report a bug is a screen now: send the report by email or save it to a file.</string>
 
     <string name="settings_features_title">Features</string>
