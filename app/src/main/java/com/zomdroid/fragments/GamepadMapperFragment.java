@@ -65,10 +65,6 @@ public class GamepadMapperFragment extends Fragment {
   private static final int AXIS_LT_INDEX = 4;
   private static final int AXIS_RT_INDEX = 5;
 
-  /** Android keycodes for button-style triggers (fallback hardware) */
-  private static final int KC_BUTTON_L2 = KeyEvent.KEYCODE_BUTTON_L2; // usually 104
-  private static final int KC_BUTTON_R2 = KeyEvent.KEYCODE_BUTTON_R2; // usually 105
-
   /** Threshold to accept analog movement as "selected" in mapping UI */
   private static final float AXIS_THRESHOLD = 0.5f;
 
@@ -214,20 +210,11 @@ public class GamepadMapperFragment extends Fragment {
   private boolean handleKeyEvent(int keyCode, KeyEvent event) {
     if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
     if (currentStep >= STEP_COUNT || !isAdded()) return false;
-    // --- NEW: If current step expects a trigger (LT/RT) and user presses button L2/R2,
-    //           capture it as a BUTTON sentinel (fallback hardware that sends keycodes).
-    if (currentStep == STEP_LT && keyCode == KC_BUTTON_L2) {
-      int code = encodeButton(KC_BUTTON_L2);
-      if (isDuplicate(code)) {
-        Toast.makeText(getContext(), "Button already assigned!", Toast.LENGTH_SHORT).show();
-        return true;
-      }
-      assignCurrentStep(code);
-      return true;
-    }
-    if (currentStep == STEP_RT && keyCode == KC_BUTTON_R2) {
-      int code = encodeButton(KC_BUTTON_R2);
-      if (isDuplicate(code)) {
+    // A trigger step takes any button as a BUTTON sentinel, not only L2/R2: a plain keycode there
+    // left the trigger in axis mode, so swapping triggers with bumpers stacked both on the trigger.
+    if (currentStep == STEP_LT || currentStep == STEP_RT) {
+      int code = encodeButton(keyCode);
+      if (isDuplicate(code) || isDuplicate(keyCode)) {
         Toast.makeText(getContext(), "Button already assigned!", Toast.LENGTH_SHORT).show();
         return true;
       }
