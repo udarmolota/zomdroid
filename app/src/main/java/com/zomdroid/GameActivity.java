@@ -157,6 +157,18 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
             instanceSettings = safeStartSettings;
         } else {
             instanceSettings = new com.zomdroid.game.InstanceSettings(gameInstanceName);
+            // A renderer saved before the list was filtered by build (or copied from another
+            // instance) may not run this build at all: GL4ES on 42, NG_GL4ES/MobileGlues on 41.
+            GameInstance instance = gameInstanceName == null ? null
+                    : GameInstanceManager.requireSingleton().getInstanceByName(gameInstanceName);
+            String build = instance == null ? null : instance.getBuildVersion();
+            LauncherPreferences.Renderer saved = instanceSettings.getRenderer();
+            if (!saved.worksOn(build)) {
+                LauncherPreferences.Renderer fallback = LauncherPreferences.Renderer.defaultFor(build);
+                Log.w(LOG_TAG, "Renderer " + saved + " does not run Build " + build
+                        + ", switched to " + fallback);
+                instanceSettings.setRenderer(fallback);
+            }
         }
         binding.inputControlsV.setVibrateOnTouch(instanceSettings.isVibrateOnTouch());
 

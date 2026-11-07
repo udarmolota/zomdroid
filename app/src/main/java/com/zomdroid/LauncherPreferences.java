@@ -301,6 +301,29 @@ public class LauncherPreferences {
         public String toString() {
             return this == MOBILEGLUES_EXPERIMENTAL ? "MOBILEGLUES" : name();
         }
+
+        /**
+         * Whether this renderer can run a game build ("41", "42"). NG_GL4ES and MobileGlues are
+         * built for Build 42's shaders; GL4ES forces Java 21, which cannot load a single 42.x
+         * class. An unknown build allows everything.
+         */
+        public boolean worksOn(String build) {
+            if ("41".equals(build)) return this != NG_GL4ES && this != MOBILEGLUES_EXPERIMENTAL;
+            if ("42".equals(build)) return this != GL4ES;
+            return true;
+        }
+
+        /** The renderers offered for a game build, in list order. */
+        public static java.util.List<Renderer> forBuild(String build) {
+            java.util.List<Renderer> list = new java.util.ArrayList<>();
+            for (Renderer r : values()) if (r.worksOn(build)) list.add(r);
+            return list;
+        }
+
+        /** What replaces a renderer that does not work on the build: the build's safe default. */
+        public static Renderer defaultFor(String build) {
+            return "41".equals(build) ? GL4ES : NG_GL4ES;
+        }
     }
 
     public enum VulkanDriver {

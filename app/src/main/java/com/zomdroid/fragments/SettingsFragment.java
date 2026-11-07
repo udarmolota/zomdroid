@@ -188,17 +188,20 @@ public class SettingsFragment extends Fragment {
         setUpEtc2CacheRow();
         setUpMacosLibraries();
 
-        // Renderer
+        // Renderer: only the ones that run this instance's build are offered (2026-11-07, after
+        // players kept picking GL4ES on 42 and NG_GL4ES/MobileGlues on 41).
+        String instanceBuild = instanceBuild();
         ArrayAdapter<LauncherPreferences.Renderer> rendererArrayAdapter = new ArrayAdapter<>(
             requireContext(),
             R.layout.spinner_item,
-            LauncherPreferences.Renderer.values());
+            LauncherPreferences.Renderer.forBuild(instanceBuild));
         rendererArrayAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         binding.settingsRendererS.setAdapter(rendererArrayAdapter);
         int rendererPosition = rendererArrayAdapter.getPosition(settings.getRenderer());
-        // A renderer missing from the list (a removed one in old settings): keep the spinner valid.
+        // A renderer missing from the list (one for the other build, or a removed one in old
+        // settings): switch to the build's default so the spinner and the launch agree.
         if (rendererPosition < 0) {
-            settings.setRenderer(LauncherPreferences.Renderer.NG_GL4ES);
+            settings.setRenderer(LauncherPreferences.Renderer.defaultFor(instanceBuild));
             rendererPosition = rendererArrayAdapter.getPosition(settings.getRenderer());
         }
         binding.settingsRendererS.setSelection(rendererPosition);
@@ -819,23 +822,20 @@ public class SettingsFragment extends Fragment {
         updatePresetStatus();
     }
 
+    /** The build of the instance these settings belong to ("41", "42"), or null if unknown. */
+    private String instanceBuild() {
+        com.zomdroid.game.GameInstance instance = instanceName == null ? null
+                : com.zomdroid.game.GameInstanceManager.requireSingleton().getInstanceByName(instanceName);
+        return instance == null ? null : instance.getBuildVersion();
+    }
+
     /**
-     * Whether a "this renderer is for the other build" warning applies to this player at all.
-     *
-     * <p>Renderer settings are global while the warning is about a build, so the honest answer only
-     * exists when there is no ambiguity: exactly one instance installed. With one Build 42 instance,
-     * telling someone who just picked NG_GL4ES that it does not work on Build 41 is noise about a
-     * build they do not have. With several, or none, we cannot know which they will launch and the
-     * warning is worth showing.
+     * Whether a "this renderer is for the other build" warning applies. With a known build the
+     * list holds only that build's renderers, so the warning is left for an instance whose build
+     * we could not tell.
      */
     private boolean warningIsRelevantFor(boolean rendererIsForBuild42) {
-        java.util.ArrayList<com.zomdroid.game.GameInstance> instances =
-                com.zomdroid.game.GameInstanceManager.requireSingleton().getInstances();
-        if (instances.size() != 1) return true;
-        String build = instances.get(0).getBuildVersion();
-        if (build == null) return true;
-        boolean instanceIsBuild42 = build.startsWith("42");
-        return instanceIsBuild42 != rendererIsForBuild42;
+        return instanceBuild() == null;
     }
 
     private void setUpTextureShrinkSpinner() {
