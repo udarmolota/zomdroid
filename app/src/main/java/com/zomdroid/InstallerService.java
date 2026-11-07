@@ -514,11 +514,22 @@ public class InstallerService extends Service implements TaskProgressListener {
                 try {
                     String libsPath = AppStorage.requireSingleton().getHomePath() + "/" + C.deps.LIBS;
                     File libsDir = new File(libsPath);
+                    // The player's imported driver lives inside libs/ and is not in the bundle:
+                    // set it aside across the re-extract, or every libs update wipes it and the
+                    // game starts to a black screen.
+                    File customDriver = new File(AppStorage.requireSingleton().getHomePath(), C.deps.CUSTOM_DRIVER);
+                    File keptDriver = new File(getCacheDir(), C.deps.CUSTOM_DRIVER_FILENAME + ".kept");
+                    //noinspection ResultOfMethodCallIgnored
+                    keptDriver.delete();
+                    boolean driverKept = customDriver.isFile() && customDriver.renameTo(keptDriver);
                     if (libsDir.exists()) FileUtils.deleteDirectory(libsDir);
 
                     InputStream libsBundleInStream = getAssets().open(C.assets.BUNDLES_LIBS);
                     announceExtraction();
                     FileUtils.extractTarXzToDisk(libsBundleInStream, libsPath, this, 0);
+                    if (driverKept && !keptDriver.renameTo(customDriver)) {
+                        Log.w(LOG_TAG, "Could not put the custom driver back at " + customDriver);
+                    }
                 } catch (IOException e) {
                     finishWithError(getString(R.string.dialog_title_failed_to_install_dependencies), e.toString());
                     return;
@@ -1023,6 +1034,14 @@ public class InstallerService extends Service implements TaskProgressListener {
 
             zos.putNextEntry(new ZipEntry("report.txt"));
             writeLogUtf8(zos, "=== Zomdroid Bug Report ===\n");
+            // Known failure signatures first, so the usual cases need no digging (see
+            // ReportDiagnosis for the rules and where each came from).
+            java.util.List<File> diagnosisLogs = new java.util.ArrayList<>(java.util.Arrays.asList(
+                    consoleFile, nativeLog, crashFile, debugLog, prevDebugLog, launcherLog, lastLauncherLog));
+            if (gi != null) diagnosisLogs.add(new File(gi.getHomePath(), "coop-probe/coop-console.txt"));
+            writeLogUtf8(zos, ReportDiagnosis.format(ReportDiagnosis.diagnose(
+                    gi != null ? gi.getBuildVersion() : null, settings.getRenderer().name(),
+                    newestExit(context), diagnosisLogs)));
             writeLogUtf8(zos, "Device   : " + Build.MANUFACTURER + " " + Build.MODEL + "\n");
             writeLogUtf8(zos, "Android  : " + Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")\n");
             // The git id is what actually identifies the build: versionName/versionCode repeat
@@ -1163,18 +1182,47 @@ public class InstallerService extends Service implements TaskProgressListener {
             for (android.app.ApplicationExitInfo e : exits) {
                 sb.append("\n           ").append(time.format(new java.util.Date(e.getTimestamp())))
                         .append(' ').append(e.getProcessName())
-                        .append(": ").append(exitReasonName(e.getReason()));
-                if (e.getReason() == android.app.ApplicationExitInfo.REASON_SIGNALED) {
-                    sb.append(' ').append(signalName(e.getStatus()));
-                } else if (e.getReason() == android.app.ApplicationExitInfo.REASON_EXIT_SELF) {
-                    sb.append(" status ").append(e.getStatus());
-                }
+                        .append(": ").append(describeExit(e));
                 sb.append(", rss ").append(e.getRss() / 1024).append(" MB");
                 if (e.getDescription() != null) sb.append(" (").append(e.getDescription()).append(')');
             }
             return sb.append('\n').toString();
         } catch (RuntimeException e) {
             return sb.append(" unavailable (").append(e.getClass().getSimpleName()).append(")\n").toString();
+        }
+    }
+
+    /** "killed by signal SIGABRT (6)", "LOW MEMORY kill", "exited status 0"... */
+    private static String describeExit(android.app.ApplicationExitInfo e) {
+        String text = exitReasonName(e.getReason());
+        if (e.getReason() == android.app.ApplicationExitInfo.REASON_SIGNALED) {
+            text += " " + signalName(e.getStatus());
+        } else if (e.getReason() == android.app.ApplicationExitInfo.REASON_EXIT_SELF) {
+            text += " status " + e.getStatus();
+        }
+        return text;
+    }
+
+    /**
+     * How the newest recorded process of ours ended, or null. A process that was only the idle
+     * launcher (Android reclaims those for memory all the time) says nothing about the game, so
+     * only one that died while the game was loaded counts: any big RSS, or a signal - a start that
+     * dies before the game grows (42.22.2's SIGABRT left 93 MB) is exactly the interesting case.
+     */
+    private static String newestExit(android.content.Context context) {
+        try {
+            android.app.ActivityManager am = (android.app.ActivityManager)
+                    context.getSystemService(android.content.Context.ACTIVITY_SERVICE);
+            List<android.app.ApplicationExitInfo> exits = am == null ? null
+                    : am.getHistoricalProcessExitReasons(context.getPackageName(), 0, 1);
+            if (exits == null || exits.isEmpty()) return null;
+            android.app.ApplicationExitInfo e = exits.get(0);
+            boolean gameWasLoaded = e.getRss() > 1024L * 1024L; // KB, i.e. over 1 GB
+            boolean violent = e.getReason() == android.app.ApplicationExitInfo.REASON_SIGNALED
+                    || e.getReason() == android.app.ApplicationExitInfo.REASON_CRASH_NATIVE;
+            return gameWasLoaded || violent ? describeExit(e) : null;
+        } catch (RuntimeException e) {
+            return null;
         }
     }
 
