@@ -12,8 +12,11 @@ public final class CoopAgent {
         if ("server-upnp".equals(options)) {
             if (Boolean.getBoolean("zomdroid.server.upnpGuard"))
                 instrumentation.addTransformer(new ServerUpnpGuard());
-            if (Boolean.getBoolean("zomdroid.server.absoluteLuaFiles"))
+            // Both Build 42 server fixes share the "is this Build 42" flag the launcher sets.
+            if (Boolean.getBoolean("zomdroid.server.absoluteLuaFiles")) {
                 instrumentation.addTransformer(new ServerAbsoluteLuaFiles());
+                instrumentation.addTransformer(new ServerModMediaPaths());
+            }
             instrumentation.addTransformer(new ServerInternetObserver());
             return;
         }
