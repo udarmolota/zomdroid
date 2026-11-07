@@ -18,8 +18,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 /**
  * Extracts Project Zomboid from GOG's DRM-free Linux installer, the {@code .sh} file GOG offers for
@@ -88,16 +90,27 @@ public final class GogInstallerExtractor {
 
     /**
      * Whether ZIP entry names describe a bundle of installers rather than game files: at least one
-     * {@code .sh}, and nothing else but folders.
+     * {@code .sh}, and nothing else but folders and the pictures and metadata download sites add
+     * next to it (archive.org ships thumbnails, _meta.xml and _meta.sqlite with every item).
      */
     public static boolean isInstallerBundle(Iterable<String> entryNames) {
         boolean sh = false;
         for (String name : entryNames) {
             if (name.endsWith("/")) continue;
             if (isShellScript(name)) sh = true;
-            else return false;
+            else if (!isBundleExtra(name)) return false;
         }
         return sh;
+    }
+
+    private static final Set<String> BUNDLE_EXTRAS = new HashSet<>(Arrays.asList(
+            "jpg", "jpeg", "png", "webp", "gif", "bmp", "xml", "sqlite", "txt", "nfo",
+            "md5", "sha1", "sha256", "torrent", "html", "htm"));
+
+    private static boolean isBundleExtra(String path) {
+        String name = baseName(path).toLowerCase(Locale.ROOT);
+        int dot = name.lastIndexOf('.');
+        return dot >= 0 && BUNDLE_EXTRAS.contains(name.substring(dot + 1));
     }
 
     /**

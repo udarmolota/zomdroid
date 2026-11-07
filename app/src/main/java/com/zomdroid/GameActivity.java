@@ -49,7 +49,13 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     public static final String EXTRA_GAME_INSTANCE_NAME = "com.zomdroid.GameActivity.EXTRA_GAME_INSTANCE_NAME";
     public static final String EXTRA_SERVER_PROBE_CLIENT = "com.zomdroid.SERVER_PROBE_CLIENT";
     public static final String EXTRA_COOP_HOST_TEST = "com.zomdroid.COOP_HOST_TEST";
+    /** Boolean: run this launch as a Safe start (see SafeStart). */
+    public static final String EXTRA_SAFE_START = "com.zomdroid.SAFE_START";
+    /** The one-run settings while this launch is a Safe start, otherwise null. */
+    private com.zomdroid.game.InstanceSettings safeStartSettings;
+    private com.zomdroid.game.SafeStart.Watcher safeStartWatcher;
     private AutoCloseable coopHostBridge;
+    private HostingOffNotice hostingOffNotice;
     private boolean serverProbeBound;
     private final android.content.ServiceConnection serverProbeConnection = new android.content.ServiceConnection() {
         @Override public void onServiceConnected(android.content.ComponentName name, android.os.IBinder service) {
@@ -142,7 +148,16 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         // Render scale and the two on-screen-control toggles belong to the instance being played.
         // The control elements never read preferences themselves — they ask the view — so handing
         // the view these two values here is the whole of it.
-        instanceSettings = new com.zomdroid.game.InstanceSettings(gameInstanceName);
+        GameInstance safeStartInstance = gameInstanceName != null
+                && getIntent().getBooleanExtra(EXTRA_SAFE_START, false)
+                ? GameInstanceManager.requireSingleton().getInstanceByName(gameInstanceName) : null;
+        if (safeStartInstance != null) {
+            safeStartSettings = com.zomdroid.game.SuggestedPreset.forSafeStart(safeStartInstance)
+                    .asOneLaunchSettings(this, gameInstanceName);
+            instanceSettings = safeStartSettings;
+        } else {
+            instanceSettings = new com.zomdroid.game.InstanceSettings(gameInstanceName);
+        }
         binding.inputControlsV.setVibrateOnTouch(instanceSettings.isVibrateOnTouch());
 
         binding.gameSv.setFocusable(true);
@@ -207,14 +222,19 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
             throw new RuntimeException("Game instance with name " + gameInstanceName + " not found");
 
         final String coopBridgePath;
-        if (new com.zomdroid.game.InstanceSettings(gameInstanceName).isCoopHostingEnabled()
-                || (BuildConfig.DEBUG && getIntent().getBooleanExtra(EXTRA_COOP_HOST_TEST, false))) {
+        if (safeStartSettings == null && (new com.zomdroid.game.InstanceSettings(gameInstanceName).isCoopHostingEnabled()
+                || (BuildConfig.DEBUG && getIntent().getBooleanExtra(EXTRA_COOP_HOST_TEST, false)))) {
             try {
                 CoopHostBridge bridge = CoopHostBridge.start(this, gameInstance);
                 coopHostBridge = bridge;
                 coopBridgePath = bridge.getPath();
             } catch (java.io.IOException e) { throw new IllegalStateException("Cannot prepare COOP bridge", e); }
         } else coopBridgePath = null;
+        final String hostingOffAgent;
+        if (coopBridgePath == null && !serverProbeClient && safeStartSettings == null) {
+            hostingOffNotice = new HostingOffNotice(this);
+            hostingOffAgent = hostingOffNotice.getAgentPath();
+        } else hostingOffAgent = null;
 
         // Build 42.20 binds trigger actions to thresholds that assume a real pad's axis range,
         // e.g. "Melee > -0.80" on the left trigger. A released trigger has to read as -1 for that
@@ -226,7 +246,8 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         // The game keeps its options in the profile it runs on: hosting and the server test client
         // get their own cache folders (GameLauncher), so their options.ini is not Zomboid's.
         cursorOptionsFile = new java.io.File(gameInstance.getHomePath(), (coopBridgePath != null
-                ? "coop-probe" : serverProbeClient ? "client-probe" : "Zomboid") + "/options.ini");
+                ? "coop-probe" : serverProbeClient ? "client-probe"
+                : safeStartSettings != null ? com.zomdroid.game.SafeStart.PROFILE_DIR : "Zomboid") + "/options.ini");
         followGameCursorOption();
 
         System.loadLibrary("zomdroid");
@@ -265,8 +286,11 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
                         try {
                             // Needs the app's assets, which GameLauncher has no Context to reach.
                             com.zomdroid.patch.ZbBetterFpsJarRepair.repair(GameActivity.this, gameInstance);
+                            com.zomdroid.patch.BetterFpsClassRepair.repair(gameInstance);
                             com.zomdroid.patch.ViewpointSettingsSeed.seed(GameActivity.this, gameInstance);
-                            GameLauncher.launch(gameInstance, serverProbeClient, coopBridgePath);
+                            if (safeStartSettings != null) startSafeStart(gameInstance);
+                            GameLauncher.launch(gameInstance, serverProbeClient, coopBridgePath, hostingOffAgent,
+                                    safeStartSettings);
                         } catch (ErrnoException e) {
                             throw new RuntimeException(e);
                         }
@@ -473,10 +497,32 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         }
     };
 
+    /**
+     * Empties the Safe start profile, records the run and watches for the main menu. Runs on the
+     * launch thread, before the game starts writing into the profile.
+     */
+    private void startSafeStart(GameInstance gameInstance) {
+        try {
+            com.zomdroid.game.SafeStart.begin(gameInstance);
+        } catch (java.io.IOException e) {
+            Log.e("SafeStart", "Cannot prepare the Safe start profile", e);
+        }
+        safeStartWatcher = new com.zomdroid.game.SafeStart.Watcher(gameInstance, () -> {
+            if (isFinishing() || isDestroyed()) return;
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle(R.string.safe_start_passed_title)
+                    .setMessage(R.string.safe_start_passed_message)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show();
+        });
+    }
+
     @Override
     protected void onDestroy() {
       super.onDestroy();
       if (perfThread != null) { perfThread.quitSafely(); perfThread = null; perfHandler = null; }
+      if (hostingOffNotice != null) hostingOffNotice.close();
+      if (safeStartWatcher != null) safeStartWatcher.close();
       if (coopHostBridge != null) {
           try { coopHostBridge.close(); }
           catch (Exception e) { Log.e("CoopHostBridge", "Cannot close bridge", e); }

@@ -19,14 +19,21 @@ public class GameLauncher {
     }
 
     public static void launch(GameInstance gameInstance, boolean serverProbeClient) throws ErrnoException {
-        launch(gameInstance, serverProbeClient, null);
+        launch(gameInstance, serverProbeClient, null, null, null);
     }
-    public static void launch(GameInstance gameInstance, boolean serverProbeClient, String coopBridgePath) throws ErrnoException {
+    /**
+     * @param safeStartSettings non-null for a Safe start: these settings for this one run, the game
+     *                          on its own empty profile and no ZombieBuddy (see SafeStart)
+     */
+    public static void launch(GameInstance gameInstance, boolean serverProbeClient, String coopBridgePath,
+                              String hostingOffAgent, com.zomdroid.game.InstanceSettings safeStartSettings)
+            throws ErrnoException {
+        final boolean safeStart = safeStartSettings != null;
         serverProbeClient = BuildConfig.DEBUG && serverProbeClient;
         boolean coopHostTest = coopBridgePath != null;
         // Everything the launch path used to read from the global preferences now belongs to this
         // instance. Read once: InstanceSettings is a view over shared prefs, not a snapshot.
-        final com.zomdroid.game.InstanceSettings settings = gameInstance.settings();
+        final com.zomdroid.game.InstanceSettings settings = safeStart ? safeStartSettings : gameInstance.settings();
         if ("Build 41".equals(gameInstance.getPresetName())) {
             try { com.zomdroid.steam.MultiplayerLibraries.recover(new File(gameInstance.getGamePath())); }
             catch (java.io.IOException e) { Log.w("GameLauncher", "Could not recover MP library backup", e); }
@@ -323,7 +330,8 @@ public class GameLauncher {
         // ZOMDROID_MACHO_LIBS=1 typed during testing kept the macOS libraries on against the
         // settings (2026-09-12, twice), so the settings are the only authority for these names.
         NativeLibraryEnvironment.applyMacos(gameInstance, new File(gameInstance.getHomePath(),
-                coopHostTest ? "coop-probe" : serverProbeClient ? "client-probe" : "Zomboid"));
+                coopHostTest ? "coop-probe" : serverProbeClient ? "client-probe"
+                        : safeStart ? com.zomdroid.game.SafeStart.PROFILE_DIR : "Zomboid"));
         Os.setenv("ZOMDROID_NATIVE_FMOD", settings.isNativeFmodEnabled() ? "1" : "0", true);
         // Debug builds always carry the emulated-JNI statistics ([JNISTAT] in native.log); a user
         // value of 0 still turns them off.
@@ -393,6 +401,16 @@ public class GameLauncher {
             }
             Log.i("ServerProbeClient", (coopHostTest ? "COOP hosting enabled" : "Connecting to loopback server")
                     + "; isolated cache=" + clientCache);
+        } else if (safeStart) {
+            File profile = com.zomdroid.game.SafeStart.profileDir(gameInstance);
+            jvmArgs.removeIf(arg -> arg.startsWith("-Duser.home="));
+            jvmArgs.add("-Duser.home=" + profile.getAbsolutePath());
+            args.add("-cachedir=" + profile.getAbsolutePath());
+            Log.i("SafeStart", "Recommended settings, no mods, profile=" + profile);
+        } else if (hostingOffAgent != null) {
+            jvmArgs.add("-Dzomdroid.coop.hostingOffMarker="
+                    + new File(new File(hostingOffAgent).getParentFile(), HostingOffNotice.MARKER));
+            jvmArgs.add("-javaagent:" + hostingOffAgent + "=hosting-off");
         }
         if (BuildConfig.DEBUG) {
             //args.add("-debug");
@@ -423,7 +441,7 @@ public class GameLauncher {
         String instanceName = gameInstance.getName();
         String zombieBuddyPath = gameInstance.getGamePath() + "/" + C.deps.ZOMBIE_BUDDY_JAR;
         boolean zombieBuddyEnabled = zbPrefs.getBoolean("zombiebuddy_enabled_" + instanceName, false);
-        if (new File(zombieBuddyPath).exists() && zombieBuddyEnabled) {
+        if (new File(zombieBuddyPath).exists() && zombieBuddyEnabled && !safeStart) {
             jvmArgs.add("-javaagent:" + zombieBuddyPath + "=policy=allow-all");
             jvmArgs.add("-Dnet.bytebuddy.processor=ASM_ONLY");
             jvmArgs.add("-Dnet.bytebuddy.experimental=true");

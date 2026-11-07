@@ -754,6 +754,10 @@
     <string name="mods_exporting">Compactando %1$d mod(s)…</string>
     <string name="mods_export_progress">Compactando mods: %1$d / %2$d</string>
     <string name="mods_export_busy">Os mods ainda estão sendo compactados — aguarde a primeira exportação terminar.</string>
+    <string name="install_mod_failed_title">Falha ao importar o mod</string>
+    <string name="install_mod_out_of_memory">O app ficou sem memória ao descompactar o mod. Feche outros apps e tente de novo; um mod tão grande talvez precise ser importado em partes.</string>
+    <string name="import_interrupted_title">A última importação de mod foi interrompida</string>
+    <string name="import_interrupted_message">A importação de %1$s parou na etapa \"%2$s\", no arquivo %3$s (%4$d MB), após %5$d min. Provavelmente o sistema ficou sem memória ou o app foi fechado. Tente de novo com outros apps fechados; se parar de novo, envie um relatório de erro.</string>
     <string name="mods_pzopt_name">PZ Optimization</string>
     <string name="mods_pzopt_sub">Embutido nos arquivos do jogo · ⚠️ para remover: Otimização → PZ Optimization → Restaurar</string>
     <string name="mods_pzopt_details">Instalado nos arquivos do jogo desta instância, ao lado do projectzomboid.jar, então carrega antes de todos os mods e em todos os saves. Não está nas listas de mods: não dá para desativá-lo em um save, e Ordenar não o move.\n\nVersão: %1$s\n\n⚠️ Para remover: abra Otimização no menu, encontre o cartão PZ Optimization e toque em Restaurar. Exportar o empacota de modo que Instalar / Atualizar nesse cartão o aceite de volta.</string>
@@ -779,7 +783,12 @@
     <string name="mods_drag">Arraste para mudar a ordem de carregamento</string>
     <string name="mods_not_installed">Não instalado — está na lista, mas a pasta não existe</string>
     <string name="mods_wrong_build">Não é para esta versão do jogo</string>
-    <string name="mods_wrong_build_detail">%1$s não carrega este mod e o remove da lista de mods do save, por isso não dá para ativá-lo aqui.</string>
+    <string name="mods_wrong_build_detail">%1$s pode não carregar este mod e pode removê-lo da lista de mods do save.</string>
+    <string name="mods_wrong_build_confirm">Este mod diz ser para as versões %1$s, seu jogo é %2$s. O jogo pode não carregá-lo. Ativar mesmo assim?</string>
+    <string name="mods_wrong_build_enable">Ativar</string>
+    <string name="mods_allow_build">Permitir nesta versão do jogo</string>
+    <string name="mods_allow_build_done">mod.info ajustado para esta versão do jogo; o original foi mantido como mod.info.bak.</string>
+    <string name="mods_allow_build_failed">Não foi possível alterar o mod.info: %1$s</string>
     <string name="mods_this_game">Esta versão do jogo</string>
     <string name="mods_needs">Precisa de %1$s</string>
     <string name="mods_needed_by">Necessário para %1$s</string>
@@ -825,4 +834,12 @@
     <string name="preset_dialog_troubleshoot">Se o jogo não abrir com estas configurações, ou fechar logo depois, tente uma predefinição pronta — o botão abaixo.</string>
     <string name="preset_dialog_b41_applied">O renderizador GL4ES foi configurado — funciona em qualquer GPU e não precisa configurar driver.</string>
     <string name="settings_texture_compression_hint">Comprime texturas grandes com perda mínima de qualidade para telas de celular e até de tablet. Usa um cache que você mesmo pode limpar. A primeira execução monta o cache e pode demorar um pouco mais. O cache é compartilhado pelo ZINK e pelo NG_GL4ES. <b>Observação:</b> com o ETC2 ativado, a variável LIBGL_SHRINK fica quase inútil, e nenhuma grade de blocos é desenhada nas texturas.</string>
+    <string name="safe_start">Início seguro</string>
+    <string name="safe_start_do">Iniciar</string>
+    <string name="safe_start_confirm_message">Inicia o jogo uma vez com as configurações recomendadas para a build, sem mods e com as opções padrão do jogo. Sua instância, as configurações dela, os mods e os saves não são alterados.\n\nSe o jogo chegar ao menu principal, a causa do problema está nos mods ou nas configurações desta instância.</string>
+    <string name="safe_start_passed_title">Início seguro: o jogo funciona</string>
+    <string name="safe_start_passed_message">O jogo chegou ao menu principal com as configurações recomendadas e sem mods, então o problema vem dos mods ou das configurações desta instância. Você já pode fechar o jogo.</string>
+    <string name="safe_start_failed_title">Início seguro falhou: %1$s</string>
+    <string name="safe_start_failed_replaced_message">O jogo não conseguiu iniciar: alguns arquivos dele foram substituídos por mods. Crie uma nova instância completa sem mods e adicione mods com cuidado, alguns deles são a causa dos seus travamentos.\n\nArquivos substituídos:\n%1$s</string>
+    <string name="safe_start_failed_clean_message">O jogo não iniciou nem com as configurações recomendadas e sem mods, então a causa não está nos seus mods ou configurações. Se você copiou os arquivos do jogo por conta própria, instale-os novamente primeiro. Se não resolver, envie um relatório de erro.</string>
 </resources>

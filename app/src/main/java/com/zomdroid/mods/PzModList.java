@@ -40,6 +40,9 @@ public final class PzModList {
         /** Build 42 loads a mod from a 42.x folder, Build 41 from mod.info at the top; false when this
          *  mod has none the instance's build reads, or the game version is outside versionMin/Max. */
         public final boolean fitsBuild;
+        /** Not for this build only by versionMin/versionMax: the version folder the game reads is
+         *  there, so widening the range in mod.info ({@link #allowOnBuild}) lets the game load it. */
+        public final boolean rangeOnly;
         /** Only mods in Zomboid/mods (what the launcher installs) are deleted from here. */
         public final boolean deletable;
         // Load-order rules, ids as normalizeId() gives them.
@@ -47,7 +50,7 @@ public final class PzModList {
                 loadBefore = new ArrayList<>(), incompatible = new ArrayList<>();
         public final String poster;      // file name relative to infoDir, "" when none
 
-        Mod(File folder, File infoDir, Map<String, String> info, boolean fitsBuild, boolean deletable) {
+        Mod(File folder, File infoDir, Map<String, String> info, boolean fitsBuild, boolean rangeOnly, boolean deletable) {
             this.folder = folder;
             this.infoDir = infoDir;
             this.id = normalizeId(info.getOrDefault("id", ""));
@@ -59,6 +62,7 @@ public final class PzModList {
             this.versionMax = info.getOrDefault("versionmax", "").trim();
             this.poster = info.getOrDefault("poster", "").trim();
             this.fitsBuild = fitsBuild;
+            this.rangeOnly = rangeOnly;
             this.deletable = deletable;
             ids(info.get("require"), require);
             ids(info.get("loadmodafter"), loadAfter);
@@ -74,6 +78,33 @@ public final class PzModList {
             File f = new File(infoDir, poster);
             return f.isFile() ? f : null;
         }
+    }
+
+    /**
+     * Widens versionMin / versionMax in the mod's mod.info so they include {@code gameVersion}: the
+     * player's call for a mod whose author wrote the wrong range (a 42.20.4 folder declaring
+     * 42.21.0 only, 2026-10-24). The original stays next to it as mod.info.bak (the first one, if
+     * done again). Other lines are kept as they are.
+     */
+    public static void allowOnBuild(Mod mod, String gameVersion) throws IOException {
+        File info = new File(mod.infoDir, "mod.info");
+        File bak = new File(mod.infoDir, "mod.info.bak");
+        if (!bak.exists()) java.nio.file.Files.copy(info.toPath(), bak.toPath());
+        List<String> lines = java.nio.file.Files.readAllLines(info.toPath(), StandardCharsets.UTF_8);
+        List<String> out = new ArrayList<>();
+        for (String line : lines) {
+            int eq = line.indexOf('=');
+            String key = eq > 0 ? line.substring(0, eq).trim().toLowerCase(java.util.Locale.ROOT) : "";
+            String value = eq > 0 ? line.substring(eq + 1).trim() : "";
+            if (key.equals("versionmin") && !value.isEmpty() && compareVersions(gameVersion, value) < 0) {
+                out.add(line.substring(0, eq + 1) + gameVersion);
+            } else if (key.equals("versionmax") && !value.isEmpty() && compareVersions(gameVersion, value) > 0) {
+                out.add(line.substring(0, eq + 1) + gameVersion);
+            } else {
+                out.add(line);
+            }
+        }
+        java.nio.file.Files.write(info.toPath(), out, StandardCharsets.UTF_8);
     }
 
     /** A mod list the screen can edit: default.txt or one single-player world's mods.txt. */
@@ -157,7 +188,7 @@ public final class PzModList {
             boolean inRange = gameVersion.isEmpty()
                     || ((min.isEmpty() || compareVersions(gameVersion, min) >= 0)
                     && (max.isEmpty() || compareVersions(gameVersion, max) <= 0));
-            out.add(new Mod(folder, infoDir, info, fits && inRange, deletable));
+            out.add(new Mod(folder, infoDir, info, fits && inRange, fits && !inRange, deletable));
         }
     }
 

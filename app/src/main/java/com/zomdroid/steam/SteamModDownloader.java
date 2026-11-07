@@ -427,9 +427,10 @@ public class SteamModDownloader implements Runnable, Cancellable {
         }
 
         SteamContent content = steamClient.getHandler(SteamContent.class);
-        List<Server> servers = awaitDeferred(
-                content.getServersForSteamPipe(null, null, GlobalScope.INSTANCE), 30000);
-        if (servers == null || servers.isEmpty()) { progress("✗ no CDN servers"); return false; }
+        CdnServers cdnServers = CdnServers.fetch(content);
+        List<Server> servers = cdnServers.list;
+        if (servers.isEmpty()) { progress("✗ no CDN servers"); return false; }
+        this.cdnServers = cdnServers;
 
         long requestCode = awaitDeferred(
                 content.getManifestRequestCode(depot, appId, info.hcontentFile, "public", null,
@@ -559,6 +560,9 @@ public class SteamModDownloader implements Runnable, Cancellable {
         return true;
     }
 
+    /** The servers of the item being downloaded; fetchChunk widens them when they all fail. */
+    private volatile CdnServers cdnServers;
+
     /** How many chunks download at once (DepotDownloader's default, as in RimDroid). */
     private static final int PARALLEL_CHUNKS = 8;
 
@@ -592,6 +596,23 @@ public class SteamModDownloader implements Runnable, Cancellable {
                 // Move every worker off a server that just failed, not only this one.
                 serverCursor.incrementAndGet();
                 Thread.sleep(Math.min(400L * (t + 1), 3000L));   // 503s pass in a moment
+            }
+        }
+        // Every server tried failed: ask Steam for servers of other regions, once per item, and
+        // go through them before giving the chunk up.
+        CdnServers pool = cdnServers;
+        if (written < 0 && running && pool != null && pool.widen()) {
+            progress("Steam servers near you are busy - trying other regions...");
+            for (int t = 0; t < 8 && written < 0 && running; t++) {
+                Server s = servers.get(Math.floorMod(serverCursor.incrementAndGet(), servers.size()));
+                try {
+                    written = cdn.downloadDepotChunkFuture(depot, chunk, s, dest, depotKey, null,
+                            cdnTokenFor(content, appId, depot, s, tokenCache)).get(180, TimeUnit.SECONDS);
+                } catch (Exception e) {
+                    chunkErr = e;
+                    Log.w(TAG, "chunk via " + s.getHost() + " failed (wide try " + (t + 1) + "): " + describe(e));
+                    Thread.sleep(Math.min(400L * (t + 1), 3000L));
+                }
             }
         }
         if (written < 0) {

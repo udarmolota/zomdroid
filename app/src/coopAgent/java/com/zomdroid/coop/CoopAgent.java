@@ -17,6 +17,9 @@ public final class CoopAgent {
             instrumentation.addTransformer(new ServerInternetObserver());
             return;
         }
+        // Hosting off: same call site, but it only tells the launcher that Host was pressed.
+        final String processClass = "hosting-off".equals(options)
+                ? "com/zomdroid/coop/HostingOffProcess" : "com/zomdroid/coop/FileProcess";
         System.out.println("[coop] Installing server process bridge");
         instrumentation.addTransformer(new ClassFileTransformer() {
             @Override public byte[] transform(ClassLoader loader, String name, Class<?> type,
@@ -38,7 +41,7 @@ public final class CoopAgent {
                                     String descriptor, boolean isInterface) {
                                 if (opcode == Opcodes.INVOKEVIRTUAL && owner.equals("java/lang/ProcessBuilder")
                                         && name.equals("start") && descriptor.equals("()Ljava/lang/Process;")) {
-                                    super.visitMethodInsn(Opcodes.INVOKESTATIC, "com/zomdroid/coop/FileProcess",
+                                    super.visitMethodInsn(Opcodes.INVOKESTATIC, processClass,
                                             "start", "(Ljava/lang/ProcessBuilder;)Ljava/lang/Process;", false);
                                     replaced[0]++;
                                 } else super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);

@@ -2,6 +2,8 @@
 <resources>
     <string name="settings_multiplayer_title">多人游戏</string>
     <string name="settings_coop_hosting">允许创建服务器</string>
+    <string name="hosting_off_title">服务器托管未开启</string>
+    <string name="hosting_off_message">要创建服务器，请在实例设置中开启“%1$s”，然后重新启动游戏。要离开此界面，请在游戏中取消启动服务器。</string>
     <string name="settings_coop_hosting_short">实验性功能，可能存在错误。正常启动游戏，然后在游戏中选择 Host。正常游戏时请再关闭。</string>
     <string name="settings_coop_hosting_hint">正常启动游戏，然后在游戏中选择 Host。只有在你创建服务器时它才会运行。&lt;br&gt;&lt;br&gt;在 Build 42 上，创建服务器时请至少为它分配 2 GB 内存。这只是服务器的份额：游戏本身还需要额外的内存，因此开服需要一台内存充足的高性能手机。&lt;br&gt;&lt;br&gt;开服使用独立的配置档：开关开启期间，你平时的存档、模组和游戏设置都不会显示，关闭开关后会恢复。游戏内存上限为 2 GB，并且不启用调试模式。不保证后台开服。</string>
     <string name="coop_b41_libraries_required">在 Build 41 上开服需要两个库：libRakNet64.so 和 libZNetNoSteam64.so。它们来自 42.12 版本的 android 文件夹。如果你在 Steam 购买了游戏，可以从 Steam 下载；如果之前已经下载过压缩包，也可以从文件导入。</string>

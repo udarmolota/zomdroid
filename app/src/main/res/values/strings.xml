@@ -807,6 +807,10 @@
     <string name="mods_exporting">Packing %1$d mod(s)…</string>
     <string name="mods_export_progress">Packing mods: %1$d / %2$d</string>
     <string name="mods_export_busy">Mods are still being packed — wait for the first export to finish.</string>
+    <string name="install_mod_failed_title">Mod import failed</string>
+    <string name="install_mod_out_of_memory">The app ran out of memory while unpacking the mod. Close other apps and try again; a mod this big may need to be imported in parts.</string>
+    <string name="import_interrupted_title">The last mod import was interrupted</string>
+    <string name="import_interrupted_message">Importing %1$s stopped at stage \"%2$s\", on the file %3$s (%4$d MB), after %5$d min. The system probably ran short of memory or the app was closed. Try again with other apps closed; if it stops again, send a bug report.</string>
     <string name="mods_pzopt_name">PZ Optimization</string>
     <string name="mods_pzopt_sub">Built into the game files · ⚠️ to remove: Optimization → PZ Optimization → Restore</string>
     <string name="mods_pzopt_details">Installed into this instance\'s game files, next to projectzomboid.jar, so it loads before every mod and in every save. It is not in the mod lists: it can\'t be switched off for one save, and Sort doesn\'t move it.\n\nBuild: %1$s\n\n⚠️ To remove it: open Optimization from the menu, find the PZ Optimization card and press Restore. Export packs it so that Install / Update on that card can take it back.</string>
@@ -832,7 +836,12 @@
     <string name="mods_drag">Drag to change the load order</string>
     <string name="mods_not_installed">Not installed — in the list, but its folder is missing</string>
     <string name="mods_wrong_build">Not for this game build</string>
-    <string name="mods_wrong_build_detail">%1$s does not load this mod and removes it from the save\'s mod list, so it cannot be switched on here.</string>
+    <string name="mods_wrong_build_detail">%1$s may not load this mod and may remove it from the save\'s mod list.</string>
+    <string name="mods_wrong_build_confirm">This mod says it is for versions %1$s, your game is %2$s. The game may not load it. Switch it on anyway?</string>
+    <string name="mods_wrong_build_enable">Switch on</string>
+    <string name="mods_allow_build">Allow on this game version</string>
+    <string name="mods_allow_build_done">mod.info changed for this game version; the original is kept as mod.info.bak.</string>
+    <string name="mods_allow_build_failed">Could not change mod.info: %1$s</string>
     <string name="mods_this_game">This game build</string>
     <string name="mods_needs">Needs %1$s</string>
     <string name="mods_needed_by">Needed by %1$s</string>
@@ -846,4 +855,12 @@
     <string name="mods_delete_title">Delete %1$s?</string>
     <string name="mods_delete_message">The mod\'s folder is deleted from this instance, for every save. Saves that use it will miss it.</string>
     <string name="mods_delete_confirm">Delete</string>
+    <string name="safe_start">Safe start</string>
+    <string name="safe_start_do">Start</string>
+    <string name="safe_start_confirm_message">Starts the game once with the recommended settings for its build, without mods and with default game options. Your instance, its settings, mods and saves are not changed.\n\nIf the game reaches the main menu, the cause of your problem is in the mods or settings of this instance.</string>
+    <string name="safe_start_passed_title">Safe start: the game works</string>
+    <string name="safe_start_passed_message">The game reached the main menu with the recommended settings and no mods, so the problem is caused by the mods or settings of this instance. You can quit the game now.</string>
+    <string name="safe_start_failed_title">Safe start failed: %1$s</string>
+    <string name="safe_start_failed_replaced_message">The game could not start: some of its files have been replaced by mods. Create a new full instance without mods and add mods carefully, some of them are the cause of your crashes.\n\nReplaced files:\n%1$s</string>
+    <string name="safe_start_failed_clean_message">The game could not start even with the recommended settings and no mods, so the cause is not in your mods or settings. If you copied the game files yourself, install them again first. If that does not help, please send a bug report.</string>
 </resources>

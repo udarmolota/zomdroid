@@ -516,6 +516,39 @@ public class ModsFragment extends Fragment {
         refresh();
     }
 
+    private String gameVersionOfList() {
+        Entry e = current();
+        return e == null ? "" : PzModList.gameVersion(zomboidDir(e.instance));
+    }
+
+    /** Switching on a mod not made for this build: say so, then let the player decide. */
+    private void confirmWrongBuild(Row r) {
+        String game = gameVersionOfList();
+        String range = (r.mod.versionMin.isEmpty() ? "…" : r.mod.versionMin) + " – "
+                + (r.mod.versionMax.isEmpty() ? "…" : r.mod.versionMax);
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle(r.mod.name)
+                .setMessage(getString(R.string.mods_wrong_build_confirm, range,
+                        game.isEmpty() ? getString(R.string.mods_this_game) : game))
+                .setNegativeButton(android.R.string.cancel, (d, w) -> refresh())
+                .setOnCancelListener(d -> refresh())
+                .setPositiveButton(R.string.mods_wrong_build_enable, (d, w) -> toggle(r, true))
+                .show();
+    }
+
+    /** Widens the mod's version range to this game, after the player asked for it in the details. */
+    private void allowOnBuild(PzModList.Mod m) {
+        String game = gameVersionOfList();
+        if (game.isEmpty()) return;
+        try {
+            PzModList.allowOnBuild(m, game);
+            Toast.makeText(requireContext(), R.string.mods_allow_build_done, Toast.LENGTH_LONG).show();
+        } catch (IOException e) {
+            Toast.makeText(requireContext(), getString(R.string.mods_allow_build_failed, e.getMessage()), Toast.LENGTH_LONG).show();
+        }
+        refresh();
+    }
+
     /** The rows on screen now (all mods, or what the search leaves) that are active or not. */
     private List<Row> shown(boolean active) {
         List<Row> out = new ArrayList<>();
@@ -736,11 +769,16 @@ public class ModsFragment extends Fragment {
         box.addView(tv);
         android.widget.ScrollView scroll = new android.widget.ScrollView(requireContext());
         scroll.addView(box);
-        new MaterialAlertDialogBuilder(requireContext())
+        MaterialAlertDialogBuilder b = new MaterialAlertDialogBuilder(requireContext())
                 .setTitle(r.mod != null ? r.mod.name : r.id)
                 .setView(scroll)
-                .setPositiveButton(android.R.string.ok, null)
-                .show();
+                .setPositiveButton(android.R.string.ok, null);
+        // Only a range the author got wrong can be fixed this way; a missing version folder cannot.
+        if (r.mod != null && r.mod.rangeOnly && editable && !gameVersionOfList().isEmpty()) {
+            PzModList.Mod m = r.mod;
+            b.setNeutralButton(R.string.mods_allow_build, (d, w) -> allowOnBuild(m));
+        }
+        b.show();
     }
 
     /** The note under a mod's name: author, plus what is wrong with it in this list. */
@@ -830,8 +868,14 @@ public class ModsFragment extends Fragment {
             sw.setVisibility(View.VISIBLE);
             sw.setOnCheckedChangeListener(null);
             sw.setChecked(r.active);
-            sw.setEnabled(editable && (r.active || !wrongBuild));   // can be switched off, not on
-            sw.setOnCheckedChangeListener((b, on) -> toggle(r, on));
+            // A mod for another build can be switched on too - after a warning: the game may not
+            // load it, but a wrong range in mod.info is the author's slip, and the call is the
+            // player's (her decision, 2026-10-24).
+            sw.setEnabled(editable);
+            sw.setOnCheckedChangeListener((b, on) -> {
+                if (on && wrongBuild) confirmWrongBuild(r);
+                else toggle(r, on);
+            });
 
             boolean deletable = r.mod != null && r.mod.deletable;
             del.setVisibility(deletable ? View.VISIBLE : View.INVISIBLE);

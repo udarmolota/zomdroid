@@ -91,6 +91,12 @@ public class GogInstallerExtractorTest {
         assertTrue(GogInstallerExtractor.isInstallerBundle(Arrays.asList("projectzomboid_linux.sh")));
         assertTrue(GogInstallerExtractor.isInstallerBundle(Arrays.asList("gog/", "gog/game.SH")));
         assertFalse(GogInstallerExtractor.isInstallerBundle(Arrays.asList("game.sh", "ProjectZomboid64.json")));
+        // An archive.org download: the installer plus the site's thumbnails and metadata.
+        assertTrue(GogInstallerExtractor.isInstallerBundle(Arrays.asList("__ia_thumb.jpg",
+                "logo_Project_Zomboid.jpg", "project_zomboid_42_21_0_94165.sh",
+                "project-zomboid-linux-gog_meta.sqlite", "project-zomboid-linux-gog_meta.xml",
+                "screenshot-0_Project_Zomboid.webp")));
+        assertFalse(GogInstallerExtractor.isInstallerBundle(Arrays.asList("cover.jpg", "notes.txt")));
         assertFalse(GogInstallerExtractor.isInstallerBundle(Arrays.asList("ProjectZomboid64.json")));
         assertFalse(GogInstallerExtractor.isInstallerBundle(Arrays.<String>asList()));
     }

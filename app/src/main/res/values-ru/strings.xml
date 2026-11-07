@@ -755,6 +755,10 @@
     <string name="mods_exporting">Упаковка модов: %1$d…</string>
     <string name="mods_export_progress">Упаковка модов: %1$d / %2$d</string>
     <string name="mods_export_busy">Моды ещё упаковываются — дождитесь конца первого экспорта.</string>
+    <string name="install_mod_failed_title">Импорт мода не удался</string>
+    <string name="install_mod_out_of_memory">Приложению не хватило памяти при распаковке мода. Закройте другие приложения и попробуйте снова; такой большой мод, возможно, придётся импортировать частями.</string>
+    <string name="import_interrupted_title">Прошлый импорт мода прервался</string>
+    <string name="import_interrupted_message">Импорт %1$s остановился на этапе «%2$s», на файле %3$s (%4$d МБ), через %5$d мин. Скорее всего, системе не хватило памяти или приложение закрыли. Попробуйте снова, закрыв другие приложения; если опять остановится, отправьте отчёт об ошибке.</string>
     <string name="mods_pzopt_name">PZ Optimization</string>
     <string name="mods_pzopt_sub">Встроен в файлы игры · ⚠️ удалить: Оптимизация → PZ Optimization → «Восстановить»</string>
     <string name="mods_pzopt_details">Установлен в файлы игры этого инстанса, рядом с projectzomboid.jar, поэтому грузится раньше всех модов и во всех сейвах. В списках модов его нет: выключить его для одного сейва нельзя, и «Сортировать» его не двигает.\n\nСборка: %1$s\n\n⚠️ Как удалить: откройте «Оптимизацию» в меню, найдите карточку PZ Optimization и нажмите «Восстановить». «Экспорт» упакует его так, что «Установить / Обновить» на этой карточке примет его обратно.</string>
@@ -780,7 +784,12 @@
     <string name="mods_drag">Перетащите, чтобы изменить порядок загрузки</string>
     <string name="mods_not_installed">Не установлен — есть в списке, но папки нет</string>
     <string name="mods_wrong_build">Не для этой версии игры</string>
-    <string name="mods_wrong_build_detail">%1$s не загружает этот мод и убирает его из списка модов сейва, поэтому здесь его включить нельзя.</string>
+    <string name="mods_wrong_build_detail">%1$s может не загрузить этот мод и убрать его из списка модов сейва.</string>
+    <string name="mods_wrong_build_confirm">Мод заявлен для версий %1$s, у вас игра %2$s. Игра может его не загрузить. Всё равно включить?</string>
+    <string name="mods_wrong_build_enable">Включить</string>
+    <string name="mods_allow_build">Разрешить на этой версии игры</string>
+    <string name="mods_allow_build_done">mod.info исправлен под эту версию игры, исходный сохранён как mod.info.bak.</string>
+    <string name="mods_allow_build_failed">Не удалось изменить mod.info: %1$s</string>
     <string name="mods_this_game">Эта версия игры</string>
     <string name="mods_needs">Нужен %1$s</string>
     <string name="mods_needed_by">Нужен для %1$s</string>
@@ -825,4 +834,12 @@
     <string name="preset_dialog_gpu_zink_unnamed">Установлены рендерер ZINK_ZFA и драйвер Vulkan. Если картинка выглядит неправильно, попробуйте другой драйвер или импортируйте свой в настройках.</string>
     <string name="preset_dialog_troubleshoot">Если с этими настройками игра не запускается или вскоре закрывается, попробуйте готовый пресет — кнопка ниже.</string>
     <string name="preset_dialog_b41_applied">Установлен рендерер GL4ES — он работает на любом GPU и не требует настройки драйвера.</string>
+    <string name="safe_start">Безопасный запуск</string>
+    <string name="safe_start_do">Запустить</string>
+    <string name="safe_start_confirm_message">Запускает игру один раз с рекомендуемыми настройками для её билда, без модов и с настройками игры по умолчанию. Ваш инстанс, его настройки, моды и сохранения не меняются.\n\nЕсли игра дойдёт до главного меню, причина ваших проблем — в модах или настройках этого инстанса.</string>
+    <string name="safe_start_passed_title">Безопасный запуск: игра работает</string>
+    <string name="safe_start_passed_message">Игра дошла до главного меню с рекомендуемыми настройками и без модов, значит проблему вызывают моды или настройки этого инстанса. Теперь игру можно закрыть.</string>
+    <string name="safe_start_failed_title">Безопасный запуск не удался: %1$s</string>
+    <string name="safe_start_failed_replaced_message">Не удалось запустить игру: часть её файлов заменена модами. Создайте новый полноценный инстанс без модов и добавляйте моды осторожно — какие-то из них и есть причина ваших падений.\n\nЗаменённые файлы:\n%1$s</string>
+    <string name="safe_start_failed_clean_message">Игра не запустилась даже с рекомендуемыми настройками и без модов, значит причина не в ваших модах и настройках. Если вы копировали файлы игры сами, сначала установите их заново. Если это не поможет, отправьте отчёт об ошибке.</string>
 </resources>

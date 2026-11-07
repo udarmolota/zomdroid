@@ -173,6 +173,35 @@ public enum SuggestedPreset {
         return forBuild42(gpuVendor) == BUILD_42_QUALITY;
     }
 
+    /**
+     * The set a Safe start runs on: Build 41 or the Build 42 compatibility set, never ZINK. Safe
+     * start has to answer "does this game start at all", so it takes the renderer with no
+     * preconditions on any GPU - a ZINK failure on an unlisted Adreno would read as a broken game.
+     */
+    public static SuggestedPreset forSafeStart(GameInstance instance) {
+        return "42".equals(instance.getBuildVersion()) ? BUILD_42_COMPATIBILITY : BUILD_41;
+    }
+
+    /**
+     * This combination as settings for one launch, written nowhere: the instance keeps what the
+     * player chose. Everything a player can type in is cleared (environment, debug), and the
+     * features that load extra code (backup hooks, hosting) are off.
+     */
+    public InstanceSettings asOneLaunchSettings(Context context, String instanceName) {
+        final boolean saver = resolveMemorySaver(context);
+        return new InstanceSettings(instanceName) {
+            @Override public LauncherPreferences.Renderer getRenderer() { return renderer; }
+            @Override public String getJvmArgs() { return jvmArgs; }
+            @Override public String getEnvVars() { return withShrink("", shrink); }
+            @Override public float getRenderScale() { return RENDER_SCALE; }
+            @Override public boolean isDebug() { return false; }
+            @Override public boolean isMemorySaver() { return saver; }
+            @Override public boolean isQuickSaveBackup() { return false; }
+            @Override public boolean isCoopHostingEnabled() { return false; }
+            @Override public boolean isTextureCompression() { return true; }
+        };
+    }
+
     /** Write this combination into one instance's settings. */
     public void apply(Context context, InstanceSettings prefs) {
         prefs.setRenderer(renderer);

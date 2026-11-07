@@ -620,7 +620,7 @@ public class InstallerService extends Service implements TaskProgressListener {
                 }
 
                 finish(getString(R.string.dialog_title_mods_installed), null);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 finishWithError(getString(R.string.dialog_title_failed_to_install_mods), e.toString());
             }
         });
@@ -1049,6 +1049,9 @@ public class InstallerService extends Service implements TaskProgressListener {
             // budget toggle and the resolution the renderer actually draws at.
             writeLogUtf8(zos, "Memory   : saver " + (settings.isMemorySaver() ? "ON" : "off")
                     + ", render scale " + String.format(Locale.US, "%.2f", settings.getRenderScale()) + "\n");
+            // The ETC2 switch decides most of the GPU memory on NG, ZINK and MobileGlues; a report
+            // could not tell whether it was on (report 29102026_1311, Mali-G77 on MG).
+            writeLogUtf8(zos, "Textures : compression " + (settings.isTextureCompression() ? "ON" : "off") + "\n");
             String jvmArgs = LauncherPreferences.squashWhitespace(settings.getJvmArgs());
             writeLogUtf8(zos, "JVM args : " + (jvmArgs.isEmpty() ? "(none)" : jvmArgs)
                     + "  [" + LauncherPreferences.describeJvmArgsPreset(jvmArgs) + "]\n");
@@ -1057,6 +1060,11 @@ public class InstallerService extends Service implements TaskProgressListener {
             // way to tell an actual finding from something the player pasted in on someone's advice.
             String envVars = LauncherPreferences.squashWhitespace(settings.getEnvVars());
             writeLogUtf8(zos, "Env vars : " + (envVars.isEmpty() ? "(none)" : envVars) + "\n");
+            // Whether the game starts on this device at all with the recommended settings and no
+            // mods: "passed" means the instance's own mods or settings break it.
+            if (gi != null) {
+                writeLogUtf8(zos, "Safe start: " + com.zomdroid.game.SafeStart.describe(gi) + "\n");
+            }
             // Since 1.4.8 each build loads the game's OWN jassimp/Lighting/PZBullet from
             // android/arm64-v8a instead of ours, so the health of that folder now decides whether
             // the game starts at all - and a copy truncated during install is invisible in every
@@ -1077,6 +1085,18 @@ public class InstallerService extends Service implements TaskProgressListener {
                 addFileToZip(zos, new File(gi.getHomePath(), "server-probe/server-exception.txt"), "server-exception.txt");
                 addFileToZip(zos, new File(gi.getHomePath(), "client-probe/console.txt"), "client-probe-console.txt");
                 addFileToZip(zos, new File(gi.getHomePath(), "coop-probe/coop-console.txt"), "coop-console.txt");
+                // With Co-op hosting on, the player's own game runs in the coop-probe profile too, so
+                // its log is there, not in Zomboid/console.txt: without these a hosting report held
+                // only the server's side, never the session where the player made the character
+                // (report 25102026_2315, B41 spawn skipped).
+                addFileToZip(zos, new File(gi.getHomePath(), "coop-probe/console.txt"), "coop-client-console.txt");
+                File[] coopDebugLogs = new File(gi.getHomePath(), "coop-probe/Logs")
+                        .listFiles((dir, name) -> name.contains("DebugLog") && name.endsWith(".txt"));
+                if (coopDebugLogs != null && coopDebugLogs.length > 0) {
+                    File newest = coopDebugLogs[0];
+                    for (File f : coopDebugLogs) if (f.lastModified() > newest.lastModified()) newest = f;
+                    addFileToZip(zos, newest, "coop-client-debuglog.txt");
+                }
                 addFileToZip(zos, new File(gi.getHomePath(), "coop-probe/server-exception.txt"), "coop-server-exception.txt");
                 addFileToZip(zos, new File(gi.getHomePath(), "coop-probe/hosting-internet.properties"), "hosting-internet.properties");
                 // Server heap per garbage collection, current file and the rotated one before it.
@@ -1097,6 +1117,11 @@ public class InstallerService extends Service implements TaskProgressListener {
                 }
             }
             addFileToZip(zos, failedShaders, "failed_shaders.txt");
+            addFileToZip(zos, new File(AppStorage.requireSingleton().getHomePath(), ImportJournal.FILE), "import-journal.txt");
+            // MobileGlues writes its own log next to its config (MG_DIR_PATH, see GameLauncher); a
+            // Mali run that ate 2 GB of native memory on its first frame (report 29102026_1311)
+            // left nothing of MG's side in the report.
+            addFileToZip(zos, new File(AppStorage.requireSingleton().getHomePath(), "mobileglues/latest.log"), "mobileglues-latest.log");
             addFileToZip(zos, glTrace, "gl_trace.txt");
             addFileToZip(zos, consoleFile, "console.txt");
             addFileToZip(zos, launcherLog, "log.txt");
@@ -1110,6 +1135,8 @@ public class InstallerService extends Service implements TaskProgressListener {
             // it a hosting session showed the normal profile's options - the vivo cursor report
             // (2026-09-17) said lockCursorToWindow=false while that game had it on.
             addFileToZip(zos, gi == null ? null : new File(gi.getHomePath() + "/coop-probe/options.ini"), "coop-options.ini");
+            addFileToZip(zos, gi == null ? null : new File(gi.getHomePath(),
+                    com.zomdroid.game.SafeStart.PROFILE_DIR + "/console.txt"), "safe-start-console.txt");
         }
     }
 
@@ -1489,15 +1516,18 @@ public class InstallerService extends Service implements TaskProgressListener {
 
         executorService.submit(() -> {
             File tmpDir = new File(getCacheDir(), "mod_fix_tmp_" + System.currentTimeMillis());
+            long archiveBytes = -1;
+            try { archiveBytes = FileUtils.queryFileSize(getContentResolver(), archiveUri); } catch (RuntimeException ignored) {}
+            ImportJournal journal = ImportJournal.start(this, "install mod", extractZipName(archiveUri), archiveBytes);
             try {
-                // Step 1: Extract ZIP to temp dir
+                // Step 1: Extract ZIP to temp dir, with progress, through the archive's directory
+                // (FileUtils.extractZipFromUri): no entry is held in memory, and the journal names
+                // the entry being written if the process dies on it.
                 tmpDir.mkdirs();
-                // Commons Compress through FileUtils, not java.util.zip: it reads the archives
-                // ZipInputStream rejects (STORED entries with a data descriptor) and refuses
-                // entries that would land outside tmpDir.
-                try (InputStream is = getContentResolver().openInputStream(archiveUri)) {
-                    FileUtils.extractZipToDisk(is, tmpDir.getAbsolutePath(), null, -1);
-                }
+                journal.stage("extract");
+                announceExtraction();
+                FileUtils.extractZipFromUri(getContentResolver(), archiveUri, tmpDir.getAbsolutePath(), this,
+                        journal::entry);
                 Log.d("ModFix", "Step 1 done. tmpDir contents:");
                 File[] tmpContents = tmpDir.listFiles();
                 if (tmpContents != null) {
@@ -1512,6 +1542,7 @@ public class InstallerService extends Service implements TaskProgressListener {
                 List<File> modRoots = new ArrayList<>();
                 collectModRoots(tmpDir, modRoots);
                 if (modRoots.isEmpty()) {
+                    journal.failed(new IllegalArgumentException("no mod root"));
                     finishWithError(taskTitle, getString(R.string.install_mod_smart_no_root));
                     return;
                 }
@@ -1546,7 +1577,8 @@ public class InstallerService extends Service implements TaskProgressListener {
                     // Step 6: Install normal-case copy
                     File normalDest = new File(modsPath, modName);
                     if (normalDest.exists()) FileUtils.deleteDirectory(normalDest);
-                    copyDirectory(modRoot, normalDest);
+                    journal.stage("install " + modName);
+                    moveOrCopyDirectory(modRoot, normalDest);
                     Log.d("ModFix", "  Installed normal: " + normalDest.getAbsolutePath());
 
                     // Step 7: lowercase aliases inside the mod + the doubled-path link. Repeated at
@@ -1554,9 +1586,17 @@ public class InstallerService extends Service implements TaskProgressListener {
                     com.zomdroid.patch.LowercasePathAliases.applyToMod(normalDest, new File(modsPath));
                 }
 
+                journal.done();
                 finish(getString(R.string.mod_fix_installed), null);
-            } catch (Exception e) {
-                finishWithError(taskTitle, e.toString());
+                notifyImportResult(getString(R.string.mod_fix_installed), extractZipName(archiveUri));
+            } catch (Throwable e) {
+                // Throwable, not Exception: an OutOfMemoryError used to end the worker with no
+                // message at all, and the player saw nothing happen (report 21102026_0027).
+                journal.failed(e);
+                String error = e instanceof OutOfMemoryError
+                        ? getString(R.string.install_mod_out_of_memory) : e.toString();
+                finishWithError(taskTitle, error);
+                notifyImportResult(getString(R.string.install_mod_failed_title), error);
             } finally {
                 try { FileUtils.deleteDirectory(tmpDir); } catch (Exception ignored) {}
             }
@@ -1684,6 +1724,39 @@ public class InstallerService extends Service implements TaskProgressListener {
     // Symlinks are skipped rather than followed in every copy below: following one duplicates the
     // data it points at, and a link aimed at an ancestor never terminates. The lowercase aliases we
     // place inside a mod are regenerated at the destination, so nothing is lost by dropping them.
+    /**
+     * A mod from the temp folder into mods/: renamed when both sit on one file system (cache and
+     * files do), so a 5 GB mod needs no second 5 GB and no minutes of copying; copied otherwise.
+     */
+    private void moveOrCopyDirectory(File src, File dst) throws IOException {
+        File parent = dst.getParentFile();
+        if (parent != null) parent.mkdirs();
+        try {
+            Files.move(src.toPath(), dst.toPath(), java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+            return;
+        } catch (IOException | UnsupportedOperationException ignored) {
+            // another file system, or the rename refused: fall back to the copy
+        }
+        copyDirectory(src, dst);
+    }
+
+    private static final int IMPORT_RESULT_NOTIFICATION_ID = 7;
+
+    /** The result of a mod import as a notification that stays: big imports take minutes, and the
+     *  dialog is gone if the player left the screen meanwhile. */
+    private void notifyImportResult(String title, String text) {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) return;
+        android.app.Notification n = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.mipmap.ic_launcher_foreground)
+                .setContentTitle(title)
+                .setContentText(text)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
+                .setAutoCancel(true)
+                .build();
+        getSystemService(NotificationManager.class).notify(IMPORT_RESULT_NOTIFICATION_ID, n);
+    }
+
     private void copyDirectory(File src, File dst) throws IOException {
         dst.mkdirs();
         File[] files = src.listFiles();
@@ -2246,7 +2319,7 @@ public class InstallerService extends Service implements TaskProgressListener {
 
                 finish(getString(R.string.install_mod_smart_done), null);
 
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 finishWithError(taskTitle, e.toString());
             } finally {
                 try { FileUtils.deleteDirectory(tmpDir); } catch (Exception ignored) {}

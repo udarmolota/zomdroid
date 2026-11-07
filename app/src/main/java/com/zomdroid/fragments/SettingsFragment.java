@@ -640,6 +640,18 @@ public class SettingsFragment extends Fragment {
                     v -> confirmPreset(SuggestedPreset.BUILD_42_COMPATIBILITY));
         }
 
+        // Settings belong to one instance, so only its own build's presets are offered: the Build 41
+        // set on Build 42 means GL4ES and Java 21, which cannot load a single 42.x class.
+        com.zomdroid.game.GameInstance instance = instanceName == null ? null
+                : com.zomdroid.game.GameInstanceManager.requireSingleton().getInstanceByName(instanceName);
+        String build = instance == null ? null : instance.getBuildVersion();
+        if ("42".equals(build)) {
+            binding.settingsPresetB41Btn.setVisibility(View.GONE);
+        } else if ("41".equals(build)) {
+            binding.settingsPresetB42Btn.setVisibility(View.GONE);
+            binding.settingsPresetB42CompatBtn.setVisibility(View.GONE);
+        }
+
         updatePresetStatus();
     }
 

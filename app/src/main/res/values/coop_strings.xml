@@ -22,6 +22,8 @@
     <string name="coop_internet_close">Close</string>
     <string name="settings_multiplayer_title">Multiplayer</string>
     <string name="settings_coop_hosting">Allow server hosting</string>
+    <string name="hosting_off_title">Server hosting is off</string>
+    <string name="hosting_off_message">To host a server, turn on \"%1$s\" in the instance settings and start the game again. To leave this screen, cancel the server start in the game.</string>
     <string name="settings_coop_hosting_hint">Launch normally, then select Host in the game. The server starts only when you create it.&lt;br&gt;&lt;br&gt;On Build 42, give the server at least 2 GB of memory when you create it. That is only the server’s share: the game itself needs its own memory on top of it, so hosting needs a powerful phone with plenty of RAM.&lt;br&gt;&lt;br&gt;Hosting uses a separate profile: your usual saves, mods and game settings are hidden while this switch is on and come back when you turn it off. The game gets a 2 GB memory limit and runs without debug mode. Background hosting is not guaranteed.</string>
     <string name="coop_b41_libraries_required">Hosting on Build 41 needs two libraries: libRakNet64.so and libZNetNoSteam64.so. They come from the android folder of version 42.12. You can download them from Steam if you own the game there, or load them from a file with the archive if you have already downloaded it.</string>
     <string name="settings_coop_hosting_short">Experimental feature, bugs are possible. Launch normally, then choose Host in the game. For normal play, turn it off again.</string>

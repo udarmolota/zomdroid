@@ -266,6 +266,11 @@ public class LauncherFragment extends Fragment {
                     PopupMenu popupMenu = new PopupMenu(requireContext(), v);
                     popupMenu.getMenuInflater().inflate(R.menu.menu_game_instance, popupMenu.getMenu());
                     if (gameInstance.isInstallationFinished()) {
+                        popupMenu.getMenu().add(R.string.safe_start)
+                                .setOnMenuItemClickListener(item -> {
+                                    confirmSafeStart(gameInstance);
+                                    return true;
+                                });
                         popupMenu.getMenu().add(R.string.ds_start)
                                 .setOnMenuItemClickListener(item -> {
                                     Intent probe = new Intent().setClassName(requireContext(),
@@ -538,6 +543,26 @@ public class LauncherFragment extends Fragment {
      * library from another game build crashes the world load). The launcher shows where; it
      * switches nothing itself, since every save keeps its own mod list.
      */
+    /**
+     * A mod import whose process died mid-way (ImportJournal): say where it stopped, once. A kill
+     * leaves no error to show - the system ran short of memory or the app was closed - so the last
+     * archive entry written is the best clue there is.
+     */
+    private void showInterruptedImport() {
+        java.util.Properties p = com.zomdroid.ImportJournal.takeInterrupted(requireContext());
+        if (p == null) return;
+        long started = Long.parseLong(p.getProperty("startedAt", "0"));
+        long updated = Long.parseLong(p.getProperty("updatedAt", "0"));
+        long mb = Long.parseLong(p.getProperty("entryBytes", "0")) >> 20;
+        String entry = p.getProperty("entry", "?");
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.import_interrupted_title)
+                .setMessage(getString(R.string.import_interrupted_message, p.getProperty("archive", "?"),
+                        p.getProperty("stage", "?"), entry, mb, Math.max(0, (updated - started) / 60000)))
+                .setPositiveButton(android.R.string.ok, null)
+                .show();
+    }
+
     private void launchOrWarnCrashes(View anchor, GameInstance gameInstance) {
         // ZINK with "Custom driver" picked but no driver file - a launcher update removes it with
         // the libraries. Without the file the game falls back to the phone's own Vulkan driver,
@@ -590,13 +615,61 @@ public class LauncherFragment extends Fragment {
     }
 
     private void launchGame(GameInstance gameInstance) {
+        launchGame(gameInstance, false);
+    }
+
+    private void launchGame(GameInstance gameInstance, boolean safeStart) {
         // Heals whatever an interrupted restore may have left, cheap when there is nothing to do.
         BackupManager.cleanupInterruptedRestore(gameInstance);
         Intent intent = new Intent(requireContext(), GameActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.putExtra(GameActivity.EXTRA_GAME_INSTANCE_NAME, gameInstance.getName());
+        if (safeStart) intent.putExtra(GameActivity.EXTRA_SAFE_START, true);
         startActivity(intent);
         requireActivity().finish();
+    }
+
+    // -------------------- SAFE START --------------------
+
+    private void confirmSafeStart(GameInstance gameInstance) {
+        if (com.zomdroid.DedicatedServerService.active(requireContext())) {
+            Toast.makeText(requireContext(), R.string.ds_busy, Toast.LENGTH_LONG).show();
+            return;
+        }
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.safe_start)
+                .setMessage(R.string.safe_start_confirm_message)
+                .setPositiveButton(R.string.safe_start_do, (d, w) -> launchGame(gameInstance, true))
+                .setNegativeButton(R.string.dialog_button_cancel, null)
+                .show();
+    }
+
+    /**
+     * Tells the player how a Safe start that took the process down ended. Checked off the main
+     * thread: finding replaced files compares every loose class with the game jar.
+     */
+    private void showFailedSafeStarts() {
+        java.util.List<GameInstance> instances =
+                new java.util.ArrayList<>(GameInstanceManager.requireSingleton().getInstances());
+        new Thread(() -> {
+            for (GameInstance instance : instances) {
+                java.util.List<String> replaced = com.zomdroid.game.SafeStart.resolveFailedRun(instance);
+                if (replaced == null) continue;
+                if (getActivity() == null) return;
+                requireActivity().runOnUiThread(() -> {
+                    if (binding == null) return;
+                    String message = replaced.isEmpty()
+                            ? getString(R.string.safe_start_failed_clean_message)
+                            : getString(R.string.safe_start_failed_replaced_message,
+                                    com.zomdroid.game.SafeStart.summarize(replaced, 10));
+                    new MaterialAlertDialogBuilder(requireContext())
+                            .setTitle(getString(R.string.safe_start_failed_title, instance.getName()))
+                            .setMessage(message)
+                            .setPositiveButton(android.R.string.ok, null)
+                            .show();
+                });
+            }
+        }, "safe-start-result").start();
     }
 
     /**
@@ -796,6 +869,8 @@ public class LauncherFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        showInterruptedImport();
+        showFailedSafeStarts();
         if (adapter != null) adapter.notifyDataSetChanged();
         updateEmptyState();
 

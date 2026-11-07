@@ -755,6 +755,10 @@
     <string name="mods_exporting">Mengemas %1$d mod…</string>
     <string name="mods_export_progress">Mengemas mod: %1$d / %2$d</string>
     <string name="mods_export_busy">Mod masih dikemas — tunggu ekspor pertama selesai.</string>
+    <string name="install_mod_failed_title">Impor mod gagal</string>
+    <string name="install_mod_out_of_memory">Aplikasi kehabisan memori saat mengekstrak mod. Tutup aplikasi lain dan coba lagi; mod sebesar ini mungkin perlu diimpor sebagian-sebagian.</string>
+    <string name="import_interrupted_title">Impor mod terakhir terputus</string>
+    <string name="import_interrupted_message">Impor %1$s berhenti di tahap \"%2$s\", pada file %3$s (%4$d MB), setelah %5$d menit. Kemungkinan sistem kehabisan memori atau aplikasi ditutup. Coba lagi dengan aplikasi lain ditutup; jika berhenti lagi, kirim laporan bug.</string>
     <string name="mods_pzopt_name">PZ Optimization</string>
     <string name="mods_pzopt_sub">Tertanam di file game · ⚠️ untuk menghapus: Optimasi → PZ Optimization → Pulihkan</string>
     <string name="mods_pzopt_details">Dipasang di file game instance ini, di samping projectzomboid.jar, jadi dimuat sebelum semua mod dan di setiap save. Ia tidak ada di daftar mod: tidak bisa dimatikan untuk satu save, dan Urutkan tidak memindahkannya.\n\nBuild: %1$s\n\n⚠️ Cara menghapus: buka Optimasi dari menu, cari kartu PZ Optimization dan tekan Pulihkan. Ekspor mengemasnya agar Pasang / Perbarui di kartu itu bisa memasangnya lagi.</string>
@@ -780,7 +784,12 @@
     <string name="mods_drag">Seret untuk mengubah urutan muat</string>
     <string name="mods_not_installed">Tidak terpasang — ada di daftar, tapi foldernya tidak ada</string>
     <string name="mods_wrong_build">Bukan untuk versi game ini</string>
-    <string name="mods_wrong_build_detail">%1$s tidak memuat mod ini dan menghapusnya dari daftar mod save, jadi tidak bisa diaktifkan di sini.</string>
+    <string name="mods_wrong_build_detail">%1$s mungkin tidak memuat mod ini dan mungkin menghapusnya dari daftar mod save.</string>
+    <string name="mods_wrong_build_confirm">Mod ini menyatakan untuk versi %1$s, game Anda %2$s. Game mungkin tidak memuatnya. Tetap aktifkan?</string>
+    <string name="mods_wrong_build_enable">Aktifkan</string>
+    <string name="mods_allow_build">Izinkan di versi game ini</string>
+    <string name="mods_allow_build_done">mod.info diubah untuk versi game ini; yang asli disimpan sebagai mod.info.bak.</string>
+    <string name="mods_allow_build_failed">Gagal mengubah mod.info: %1$s</string>
     <string name="mods_this_game">Versi game ini</string>
     <string name="mods_needs">Butuh %1$s</string>
     <string name="mods_needed_by">Dibutuhkan oleh %1$s</string>
@@ -826,4 +835,12 @@
     <string name="preset_dialog_troubleshoot">Jika game tidak mau mulai dengan pengaturan ini, atau segera tertutup setelahnya, coba preset siap pakai — tombol di bawah.</string>
     <string name="preset_dialog_b41_applied">Renderer GL4ES sudah diatur — berjalan di GPU apa pun dan tidak perlu mengatur driver.</string>
     <string name="settings_texture_compression_hint">Mengompres tekstur besar dengan penurunan kualitas yang minimal untuk layar ponsel bahkan tablet. Disertai cache yang bisa Anda bersihkan sendiri. Peluncuran pertama membangun cache dan mungkin sedikit lebih lama. Cache dipakai bersama oleh ZINK dan NG_GL4ES. <b>Catatan:</b> dengan ETC2 aktif, variabel LIBGL_SHRINK hampir tidak berguna, dan tidak ada grid ubin yang tergambar di tekstur.</string>
+    <string name="safe_start">Mulai aman</string>
+    <string name="safe_start_do">Mulai</string>
+    <string name="safe_start_confirm_message">Menjalankan game sekali dengan pengaturan yang disarankan untuk build-nya, tanpa mod dan dengan opsi game bawaan. Instance Anda, pengaturannya, mod, dan save tidak diubah.\n\nJika game sampai ke menu utama, penyebab masalah Anda ada pada mod atau pengaturan instance ini.</string>
+    <string name="safe_start_passed_title">Mulai aman: game berjalan</string>
+    <string name="safe_start_passed_message">Game sampai ke menu utama dengan pengaturan yang disarankan dan tanpa mod, jadi masalahnya disebabkan oleh mod atau pengaturan instance ini. Sekarang Anda bisa keluar dari game.</string>
+    <string name="safe_start_failed_title">Mulai aman gagal: %1$s</string>
+    <string name="safe_start_failed_replaced_message">Game tidak bisa dimulai: sebagian file game telah diganti oleh mod. Buat instance baru yang lengkap tanpa mod dan tambahkan mod dengan hati-hati, beberapa di antaranya adalah penyebab crash Anda.\n\nFile yang diganti:\n%1$s</string>
+    <string name="safe_start_failed_clean_message">Game tidak bisa dimulai bahkan dengan pengaturan yang disarankan dan tanpa mod, jadi penyebabnya bukan mod atau pengaturan Anda. Jika Anda menyalin file game sendiri, pasang ulang terlebih dahulu. Jika tidak membantu, kirim laporan bug.</string>
 </resources>

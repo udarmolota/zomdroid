@@ -12,6 +12,7 @@ import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
@@ -58,6 +59,94 @@ public class FileUtils {
                     progress = (int) ((tarArchiveInStream.getBytesRead() / (float) tarSize) * 100);
                 taskProgressListener.onProgressUpdate(null, progress, 100);
             }
+        }
+    }
+
+    /** Told about every archive entry before it is written: name, size, and the bytes done so far. */
+    public interface EntryListener {
+        void onEntry(String name, long size, long bytesDone);
+    }
+
+    /**
+     * Extracts a ZIP the user picked, through its central directory when the file allows random
+     * access (a local file always does): sizes are known up front, so nothing is buffered in memory.
+     * The streaming reader has to keep a whole STORED entry with a data descriptor in memory, and a
+     * 1-5 GB mod with one such file ran the app out of its heap with no message (report
+     * 21102026_0027). Falls back to the streaming reader when the source cannot seek (some cloud
+     * providers).
+     */
+    public static void extractZipFromUri(@NonNull ContentResolver resolver, @NonNull android.net.Uri uri,
+                                         @NonNull String destPath, @Nullable TaskProgressListener progress,
+                                         @Nullable EntryListener entries) throws IOException {
+        long size = -1;
+        try { size = queryFileSize(resolver, uri); } catch (RuntimeException ignored) {}
+        android.os.ParcelFileDescriptor pfd = null;
+        try {
+            pfd = resolver.openFileDescriptor(uri, "r");
+        } catch (Exception ignored) {
+        }
+        if (pfd != null) {
+            try (android.os.ParcelFileDescriptor fd = pfd;
+                 java.io.FileInputStream fis = new java.io.FileInputStream(fd.getFileDescriptor());
+                 java.nio.channels.FileChannel channel = fis.getChannel()) {
+                channel.position(0);   // throws on a pipe: not seekable, use the stream below
+                try (org.apache.commons.compress.archivers.zip.ZipFile zip =
+                             org.apache.commons.compress.archivers.zip.ZipFile.builder()
+                                     .setSeekableByteChannel(channel).get()) {
+                    extractZipFile(zip, destPath, progress, entries);
+                    return;
+                }
+            } catch (IOException e) {
+                // Not seekable or not readable as a ZIP by its directory: stream it below. A real
+                // disk or format error repeats there and surfaces with its own message.
+                android.util.Log.w("FileUtils", "random-access ZIP read failed, streaming instead: " + e);
+            }
+        }
+        try (InputStream in = resolver.openInputStream(uri)) {
+            if (in == null) throw new IOException("Cannot open the archive");
+            extractZipToDisk(in, destPath, progress, size);
+        }
+    }
+
+    private static void extractZipFile(org.apache.commons.compress.archivers.zip.ZipFile zip, String destPath,
+                                       @Nullable TaskProgressListener progress, @Nullable EntryListener entries)
+            throws IOException {
+        long total = 0;
+        for (java.util.Enumeration<ZipArchiveEntry> e = zip.getEntries(); e.hasMoreElements(); ) {
+            long s = e.nextElement().getSize();
+            if (s > 0) total += s;
+        }
+        long done = 0;
+        String root = new File(destPath).getCanonicalPath() + File.separator;
+        for (java.util.Enumeration<ZipArchiveEntry> e = zip.getEntriesInPhysicalOrder(); e.hasMoreElements(); ) {
+            ZipArchiveEntry entry = e.nextElement();
+            File file = new File(destPath + "/" + entry.getName());
+            if (!file.getCanonicalPath().startsWith(root) && !file.getCanonicalPath().equals(root.substring(0, root.length() - 1))) {
+                throw new IOException("Archive entry outside the destination: " + entry.getName());
+            }
+            if (entries != null) entries.onEntry(entry.getName(), entry.getSize(), done);
+            if (entry.isDirectory()) {
+                if (!file.isDirectory() && !file.mkdirs()) throw new IOException("Failed to create directory " + file);
+                continue;
+            }
+            if (!zip.canReadEntryData(entry)) throw new IOException("Cannot read archive entry " + entry.getName());
+            File parent = file.getParentFile();
+            if (parent != null && !parent.isDirectory() && !parent.mkdirs()) {
+                throw new IOException("Failed to create directory " + parent);
+            }
+            long written;
+            try (InputStream in = zip.getInputStream(entry);
+                 OutputStream out = new BufferedOutputStream(new FileOutputStream(file), 1024 * 1024)) {
+                written = IOUtils.copyLarge(in, out);
+            }
+            if (entry.getSize() >= 0 && written != entry.getSize()) {
+                //noinspection ResultOfMethodCallIgnored
+                file.delete();
+                throw new IOException("Truncated extraction of " + entry.getName()
+                        + ": wrote " + written + " of " + entry.getSize() + " bytes");
+            }
+            done += Math.max(written, 0);
+            if (progress != null) progress.onProgressUpdate(null, total > 0 ? (int) (done * 100 / total) : -1, 100);
         }
     }
 

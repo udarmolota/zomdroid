@@ -62,6 +62,8 @@ public class OptimizationFragment extends Fragment {
     private Uri zbbetterfpsZipUri = null;
     private Uri pzoptZipUri = null;
     private List<GameInstance> instances;
+    // BetterFPS replaces IsoChunkMap.class with a Build 41 copy, which stops Build 42 from starting.
+    private final List<GameInstance> betterFpsInstances = new ArrayList<>();
 
     private final ServiceConnection installerServiceConnection = new ServiceConnection() {
         @Override
@@ -337,16 +339,21 @@ public class OptimizationFragment extends Fragment {
         // Instance spinner
         instances = GameInstanceManager.requireSingleton().getInstances();
 
+        if (instances == null) instances = new ArrayList<>();
+        betterFpsInstances.clear();
+        for (GameInstance gi : instances) {
+            if ("Build 41".equals(gi.getPresetName())) betterFpsInstances.add(gi);
+        }
+
         List<String> names = new ArrayList<>();
-        if (instances == null || instances.isEmpty()) {
-            instances = new ArrayList<>();
+        if (betterFpsInstances.isEmpty()) {
             names.add(getString(R.string.select_instance));
             binding.optimizationBetterfpsInstallBtn.setEnabled(false);
         } else {
-            if (instances.size() > 1) {
+            if (betterFpsInstances.size() > 1) {
                 names.add(getString(R.string.select_instance));
             }
-            for (GameInstance gi : instances) {
+            for (GameInstance gi : betterFpsInstances) {
                 names.add(gi.getName());
             }
         }
@@ -366,7 +373,7 @@ public class OptimizationFragment extends Fragment {
                     public void onNothingSelected(android.widget.AdapterView<?> parent) {
                     }
                 });
-        if (instances.size() == 1) {
+        if (betterFpsInstances.size() == 1) {
             binding.optimizationBetterfpsInstanceSpinner.setSelection(0);
         }
 
@@ -397,16 +404,16 @@ public class OptimizationFragment extends Fragment {
             }
 
             int position = binding.optimizationBetterfpsInstanceSpinner.getSelectedItemPosition();
-            int instanceIndex = instances.size() > 1 ? position - 1 : position;
+            int instanceIndex = betterFpsInstances.size() > 1 ? position - 1 : position;
 
-            if (instanceIndex < 0 || instanceIndex >= instances.size()) {
+            if (instanceIndex < 0 || instanceIndex >= betterFpsInstances.size()) {
                 Toast.makeText(requireContext(),
                         getString(R.string.select_instance),
                         Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            GameInstance selectedInstance = instances.get(instanceIndex);
+            GameInstance selectedInstance = betterFpsInstances.get(instanceIndex);
 
             Intent installerIntent = new Intent(requireContext(), InstallerService.class);
             String[] betterfpsModes = {"PotatoePC", "1080p", "4k"};

@@ -748,6 +748,10 @@
     <string name="mods_exporting">正在打包 %1$d 个模组…</string>
     <string name="mods_export_progress">正在打包模组：%1$d / %2$d</string>
     <string name="mods_export_busy">模组仍在打包中——请等待第一次导出完成。</string>
+    <string name="install_mod_failed_title">模组导入失败</string>
+    <string name="install_mod_out_of_memory">解压模组时应用内存不足。请关闭其他应用后重试；这么大的模组可能需要分批导入。</string>
+    <string name="import_interrupted_title">上次模组导入被中断</string>
+    <string name="import_interrupted_message">导入 %1$s 在“%2$s”阶段、文件 %3$s（%4$d MB）处停止，已进行 %5$d 分钟。可能是系统内存不足或应用被关闭。请关闭其他应用后重试；如果再次停止，请发送错误报告。</string>
     <string name="mods_pzopt_name">PZ Optimization</string>
     <string name="mods_pzopt_sub">已内置到游戏文件 · ⚠️ 移除：优化 → PZ Optimization → 还原</string>
     <string name="mods_pzopt_details">它被安装到此实例的游戏文件中，位于 projectzomboid.jar 旁边，因此会在所有模组之前、在每个存档中加载。它不在模组列表里：不能只对某个存档关闭，“排序”也不会移动它。\n\n版本：%1$s\n\n⚠️ 移除方法：从菜单打开“优化”，找到 PZ Optimization 卡片并点“还原”。“导出”会把它打包成该卡片上的“安装 / 更新”能重新安装的格式。</string>
@@ -773,7 +777,12 @@
     <string name="mods_drag">拖动以改变加载顺序</string>
     <string name="mods_not_installed">未安装——在列表中，但文件夹不存在</string>
     <string name="mods_wrong_build">不适用于此游戏版本</string>
-    <string name="mods_wrong_build_detail">%1$s 不会加载此模组，并会把它从存档的模组列表中移除，因此这里无法启用它。</string>
+    <string name="mods_wrong_build_detail">%1$s 可能不会加载此模组，并可能把它从存档的模组列表中移除。</string>
+    <string name="mods_wrong_build_confirm">此模组声明适用于版本 %1$s，你的游戏是 %2$s。游戏可能不会加载它。仍要启用吗？</string>
+    <string name="mods_wrong_build_enable">启用</string>
+    <string name="mods_allow_build">允许在此游戏版本使用</string>
+    <string name="mods_allow_build_done">已按此游戏版本修改 mod.info，原文件保存为 mod.info.bak。</string>
+    <string name="mods_allow_build_failed">无法修改 mod.info：%1$s</string>
     <string name="mods_this_game">此游戏版本</string>
     <string name="mods_needs">需要 %1$s</string>
     <string name="mods_needed_by">%1$s 需要它</string>
@@ -819,4 +828,12 @@
     <string name="preset_dialog_troubleshoot">如果用这些设置游戏无法启动，或启动后很快关闭，请尝试现成的预设——下面的按钮。</string>
     <string name="preset_dialog_b41_applied">已设置 GL4ES 渲染器——它在任何 GPU 上都能运行，无需设置驱动。</string>
     <string name="settings_texture_compression_hint">以极小的画质损失压缩大纹理，适合手机甚至平板屏幕。附带一个可以自行清除的缓存。首次启动会生成缓存，可能稍慢一些。ZINK 和 NG_GL4ES 共用此缓存。<b>注意：</b>启用 ETC2 后，LIBGL_SHRINK 变量几乎没有意义，纹理上也不会画出瓦片网格。</string>
+    <string name="safe_start">安全启动</string>
+    <string name="safe_start_do">启动</string>
+    <string name="safe_start_confirm_message">使用适合该版本的推荐设置启动一次游戏，不加载模组，游戏选项为默认值。你的实例、其设置、模组和存档都不会被更改。\n\n如果游戏能进入主菜单，说明问题出在该实例的模组或设置上。</string>
+    <string name="safe_start_passed_title">安全启动：游戏可以运行</string>
+    <string name="safe_start_passed_message">游戏在推荐设置且无模组的情况下进入了主菜单，说明问题是由该实例的模组或设置引起的。现在可以退出游戏了。</string>
+    <string name="safe_start_failed_title">安全启动失败：%1$s</string>
+    <string name="safe_start_failed_replaced_message">游戏无法启动：部分游戏文件已被模组替换。请创建一个不带模组的全新完整实例，并谨慎添加模组，其中某些模组正是导致崩溃的原因。\n\n被替换的文件：\n%1$s</string>
+    <string name="safe_start_failed_clean_message">即使使用推荐设置且不加载模组，游戏也无法启动，因此原因不在你的模组或设置。如果游戏文件是你自己复制的，请先重新安装。如果仍然无效，请发送错误报告。</string>
 </resources>
