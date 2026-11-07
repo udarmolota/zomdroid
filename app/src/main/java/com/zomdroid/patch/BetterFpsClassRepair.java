@@ -22,7 +22,7 @@ import java.nio.file.StandardCopyOption;
  *
  * Only a class that references FloorBloodTypes is touched, so loose classes from other mods are
  * left alone. The installer's IsoChunkMap.class.original is restored when it is a Build 42 class;
- * otherwise the loose class is deleted and the one in projectzomboid.jar is used.
+ * otherwise the jar's own IsoChunkMap.class is written over it (never just deleted - see repair).
  */
 public final class BetterFpsClassRepair {
     private static final String LOG_TAG = BetterFpsClassRepair.class.getSimpleName();
@@ -46,12 +46,31 @@ public final class BetterFpsClassRepair {
             if (backup.isFile() && !isBuild41Class(backup)) {
                 Files.move(backup.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 Log.i(LOG_TAG, "Build 41 BetterFPS IsoChunkMap replaced by " + BACKUP_NAME);
+            } else if (copyFromJar(new File(gameInstance.getGamePath(), "projectzomboid.jar"), target)) {
+                // Not deleted: a class missing from the folder would load from the jar, and with a
+                // signed jar (42.22+) one zombie.iso class from the jar beside the unpacked rest
+                // is refused by the JVM ("signer information does not match").
+                Log.i(LOG_TAG, "Build 41 BetterFPS IsoChunkMap replaced by the game's own class from the jar");
             } else {
-                Files.delete(target.toPath());
-                Log.i(LOG_TAG, "Build 41 BetterFPS IsoChunkMap removed; the game's own class is used");
+                Log.w(LOG_TAG, "Build 41 BetterFPS IsoChunkMap found but the game's own class is not in the jar; left in place");
             }
         } catch (IOException e) {
             Log.e(LOG_TAG, "BetterFPS class repair failed, leaving the game as it is", e);
+        }
+    }
+
+    /** Writes the jar's zombie/iso/IsoChunkMap.class over target; false when the jar lacks it. */
+    private static boolean copyFromJar(File jar, File target) throws IOException {
+        if (!jar.isFile()) return false;
+        try (java.util.zip.ZipFile zip = new java.util.zip.ZipFile(jar)) {
+            java.util.zip.ZipEntry entry = zip.getEntry("zombie/iso/" + CLASS_NAME);
+            if (entry == null) return false;
+            File tmp = new File(target.getPath() + ".tmp");
+            try (java.io.InputStream in = zip.getInputStream(entry)) {
+                Files.copy(in, tmp.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
+            Files.move(tmp.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            return true;
         }
     }
 

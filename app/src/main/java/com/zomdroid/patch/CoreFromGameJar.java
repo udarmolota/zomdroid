@@ -43,10 +43,18 @@ public final class CoreFromGameJar {
         File loose = new File(gameDir, CLASS_REL_PATH);
         File hidden = new File(gameDir, CLASS_REL_PATH + HIDDEN_SUFFIX);
 
-        if (!jar.isFile()) {
-            // No jar to load from (Build 41, older 42, or a jar removed by hand): undo.
-            if (!loose.isFile() && hidden.isFile() && !hidden.renameTo(loose)) {
-                Log.w(LOG_TAG, "Could not restore " + loose);
+        // No jar to load from (Build 41, older 42, or a jar removed by hand): undo. Same for a
+        // signed jar (42.22+): the JVM refuses a package whose classes come from a signed jar and
+        // an unsigned folder at once - "signer information does not match" - so Core from the
+        // jar next to the unpacked rest of zombie.core kills the game before its first log line.
+        boolean signed = jar.isFile() && isSigned(jar);
+        if (!jar.isFile() || signed) {
+            if (!loose.isFile() && hidden.isFile()) {
+                if (hidden.renameTo(loose)) {
+                    if (signed) Log.i(LOG_TAG, "Signed game jar: zombie.core.Core loads from the game folder again");
+                } else {
+                    Log.w(LOG_TAG, "Could not restore " + loose);
+                }
             }
             return;
         }
@@ -71,6 +79,25 @@ public final class CoreFromGameJar {
         } else {
             Log.w(LOG_TAG, "Could not hide " + loose);
         }
+    }
+
+    /**
+     * Whether a jar carries a signature (META-INF/*.SF). Classes of one package must then all
+     * come from that jar or none of them may: run from the unpacked folder and never let a single
+     * class fall through to the jar.
+     */
+    public static boolean isSigned(File jar) {
+        try (ZipFile zip = new ZipFile(jar)) {
+            java.util.Enumeration<? extends ZipEntry> entries = zip.entries();
+            while (entries.hasMoreElements()) {
+                String name = entries.nextElement().getName();
+                if (name.startsWith("META-INF/") && name.indexOf('/', 9) < 0
+                        && name.toUpperCase(java.util.Locale.ROOT).endsWith(".SF")) return true;
+            }
+        } catch (IOException e) {
+            Log.w(LOG_TAG, "Could not read " + jar, e);
+        }
+        return false;
     }
 
     private static long crc32(File file) throws IOException {
