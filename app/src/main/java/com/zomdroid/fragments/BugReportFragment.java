@@ -140,7 +140,7 @@ public class BugReportFragment extends Fragment {
                 if (dir.isDirectory() || dir.mkdirs()) {
                     File zip = new File(dir, "zomdroid_report_" + stamp + ".zip");
                     try (OutputStream out = new FileOutputStream(zip)) {
-                        InstallerService.writeLogReportZip(instance, out);
+                        InstallerService.writeLogReportZip(app, instance, out);
                     }
                     if (zip.length() > 0) attach = FileProvider.getUriForFile(app, "com.zomdroid.fileprovider", zip);
                 }
@@ -251,7 +251,7 @@ public class BugReportFragment extends Fragment {
             String error = null;
             try (OutputStream out = app.getContentResolver().openOutputStream(uri)) {
                 if (out == null) throw new java.io.IOException("cannot open the file");
-                InstallerService.writeLogReportZip(instance, out);
+                InstallerService.writeLogReportZip(app, instance, out);
             } catch (Throwable t) {
                 error = t.getMessage() != null ? t.getMessage() : t.toString();
             }

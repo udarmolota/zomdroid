@@ -956,7 +956,7 @@ public class InstallerService extends Service implements TaskProgressListener {
 
                 try (OutputStream os = getContentResolver().openOutputStream(outUri)) {
                     if (os == null) throw new IllegalStateException("openOutputStream returned null");
-                    writeLogReportZip(gi, os);
+                    writeLogReportZip(this, gi, os);
                 }
 
                 finish(getString(R.string.dialog_title_log_exported), null);
@@ -980,7 +980,7 @@ public class InstallerService extends Service implements TaskProgressListener {
      *  the user whose dependency install or instance creation is failing has no instance BY
      *  DEFINITION, and the launcher-level logcat capture is exactly where that failure is written.
      *  The zip is built from whatever exists instead of not at all. */
-    public static void writeLogReportZip(GameInstance gi, OutputStream os) throws IOException {
+    public static void writeLogReportZip(android.content.Context context, GameInstance gi, OutputStream os) throws IOException {
         File consoleFile = gi == null ? null : new File(gi.getHomePath() + "/Zomboid/console.txt");
         File launcherLog = new File(AppStorage.requireSingleton().getHomePath() + "/" + CrashHandler.LOG_FILE_NAME);
         // Crash session's logcat lives in lastlog.txt: after a native game crash the process
@@ -1072,6 +1072,11 @@ public class InstallerService extends Service implements TaskProgressListener {
             // shorter on disk than the game's zip says it should be; the sizes below make that a
             // glance instead of a two-day investigation.
             writeLogUtf8(zos, nativeLibInventory(gi));
+            // How the last processes ended, as Android saw it. The game runs in our process, so a
+            // native crash or abort takes the log readers down with it and the logs just stop;
+            // this is the only record of whether it was a signal, a memory kill or a normal exit
+            // (42.22.2: SIGNALED status=6 was the one clue to the signed-jar SecurityException).
+            writeLogUtf8(zos, recentExits(context));
             writeLogUtf8(zos, "===========================\n");
             zos.closeEntry();
 
@@ -1147,6 +1152,64 @@ public class InstallerService extends Service implements TaskProgressListener {
      * "no android/arm64-v8a folder" line is the normal answer for it, not a fault. Sizes are raw
      * bytes: compare a suspicious one against the same entry in the game's own zip.
      */
+    private static String recentExits(android.content.Context context) {
+        StringBuilder sb = new StringBuilder("Last exits:");
+        try {
+            android.app.ActivityManager am = (android.app.ActivityManager) context.getSystemService(android.content.Context.ACTIVITY_SERVICE);
+            List<android.app.ApplicationExitInfo> exits = am == null ? null
+                    : am.getHistoricalProcessExitReasons(context.getPackageName(), 0, 3);
+            if (exits == null || exits.isEmpty()) return sb.append(" none recorded\n").toString();
+            java.text.SimpleDateFormat time = new java.text.SimpleDateFormat("dd.MM HH:mm:ss", Locale.US);
+            for (android.app.ApplicationExitInfo e : exits) {
+                sb.append("\n           ").append(time.format(new java.util.Date(e.getTimestamp())))
+                        .append(' ').append(e.getProcessName())
+                        .append(": ").append(exitReasonName(e.getReason()));
+                if (e.getReason() == android.app.ApplicationExitInfo.REASON_SIGNALED) {
+                    sb.append(' ').append(signalName(e.getStatus()));
+                } else if (e.getReason() == android.app.ApplicationExitInfo.REASON_EXIT_SELF) {
+                    sb.append(" status ").append(e.getStatus());
+                }
+                sb.append(", rss ").append(e.getRss() / 1024).append(" MB");
+                if (e.getDescription() != null) sb.append(" (").append(e.getDescription()).append(')');
+            }
+            return sb.append('\n').toString();
+        } catch (RuntimeException e) {
+            return sb.append(" unavailable (").append(e.getClass().getSimpleName()).append(")\n").toString();
+        }
+    }
+
+    private static String exitReasonName(int reason) {
+        switch (reason) {
+            case android.app.ApplicationExitInfo.REASON_EXIT_SELF: return "exited";
+            case android.app.ApplicationExitInfo.REASON_SIGNALED: return "killed by signal";
+            case android.app.ApplicationExitInfo.REASON_LOW_MEMORY: return "LOW MEMORY kill";
+            case android.app.ApplicationExitInfo.REASON_CRASH: return "Java crash";
+            case android.app.ApplicationExitInfo.REASON_CRASH_NATIVE: return "NATIVE crash";
+            case android.app.ApplicationExitInfo.REASON_ANR: return "ANR";
+            case android.app.ApplicationExitInfo.REASON_INITIALIZATION_FAILURE: return "init failure";
+            case android.app.ApplicationExitInfo.REASON_PERMISSION_CHANGE: return "permission change";
+            case android.app.ApplicationExitInfo.REASON_EXCESSIVE_RESOURCE_USAGE: return "excessive resource use";
+            case android.app.ApplicationExitInfo.REASON_USER_REQUESTED: return "stopped by user";
+            case android.app.ApplicationExitInfo.REASON_USER_STOPPED: return "user stopped";
+            case android.app.ApplicationExitInfo.REASON_DEPENDENCY_DIED: return "dependency died";
+            case android.app.ApplicationExitInfo.REASON_OTHER: return "other (system)";
+            case android.app.ApplicationExitInfo.REASON_FREEZER: return "freezer";
+            default: return "reason " + reason;
+        }
+    }
+
+    private static String signalName(int signal) {
+        switch (signal) {
+            case 6: return "SIGABRT (6)";
+            case 9: return "SIGKILL (9)";
+            case 11: return "SIGSEGV (11)";
+            case 7: return "SIGBUS (7)";
+            case 4: return "SIGILL (4)";
+            case 15: return "SIGTERM (15)";
+            default: return "signal " + signal;
+        }
+    }
+
     private static String nativeLibInventory(GameInstance gi) {
         StringBuilder sb = new StringBuilder("Game libs: ");
         File nativeDir = gi == null ? null : new File(gi.getGamePath() + "/android/arm64-v8a");
