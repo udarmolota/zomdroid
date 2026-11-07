@@ -842,4 +842,6 @@
     <string name="safe_start_failed_title">Безопасный запуск не удался: %1$s</string>
     <string name="safe_start_failed_replaced_message">Не удалось запустить игру: часть её файлов заменена модами. Создайте новый полноценный инстанс без модов и добавляйте моды осторожно — какие-то из них и есть причина ваших падений.\n\nЗаменённые файлы:\n%1$s</string>
     <string name="safe_start_failed_clean_message">Игра не запустилась даже с рекомендуемыми настройками и без модов, значит причина не в ваших модах и настройках. Если вы копировали файлы игры сами, сначала установите их заново. Если это не поможет, отправьте отчёт об ошибке.</string>
+    <string name="vulkan_driver_turnip_7xx_new_title">TURNIP 7xx new (v26.2)</string>
+    <string name="vulkan_driver_turnip_7xx_new_message">Более новая сборка Turnip (Mesa 25) для Adreno 630–690 и Adreno 7xx. Попробуйте, если другие драйверы Adreno дают чёрный экран.\n\nНужен Android 15 или новее. На старых бюджетных Adreno (610, 619) возможен чёрный экран.</string>
 </resources>

@@ -341,6 +341,12 @@ public class SettingsFragment extends Fragment {
                             .setMessage(getString(R.string.vulkan_driver_turnip_bbdd688_message))
                             .setPositiveButton(getString(R.string.dialog_button_ok), null)
                             .show();
+                } else if (vulkanDriver == LauncherPreferences.VulkanDriver.TURNIP_7XX_NEW) {
+                    new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                            .setTitle(getString(R.string.vulkan_driver_turnip_7xx_new_title))
+                            .setMessage(getString(R.string.vulkan_driver_turnip_7xx_new_message))
+                            .setPositiveButton(getString(R.string.dialog_button_ok), null)
+                            .show();
                 } else if (vulkanDriver == LauncherPreferences.VulkanDriver.TURNIP_710) {
                     new androidx.appcompat.app.AlertDialog.Builder(requireContext())
                             .setTitle(getString(R.string.vulkan_driver_turnip_gmem_title))

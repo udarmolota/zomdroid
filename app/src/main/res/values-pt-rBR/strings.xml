@@ -842,4 +842,6 @@
     <string name="safe_start_failed_title">Início seguro falhou: %1$s</string>
     <string name="safe_start_failed_replaced_message">O jogo não conseguiu iniciar: alguns arquivos dele foram substituídos por mods. Crie uma nova instância completa sem mods e adicione mods com cuidado, alguns deles são a causa dos seus travamentos.\n\nArquivos substituídos:\n%1$s</string>
     <string name="safe_start_failed_clean_message">O jogo não iniciou nem com as configurações recomendadas e sem mods, então a causa não está nos seus mods ou configurações. Se você copiou os arquivos do jogo por conta própria, instale-os novamente primeiro. Se não resolver, envie um relatório de erro.</string>
+    <string name="vulkan_driver_turnip_7xx_new_title">TURNIP 7xx new (v26.2)</string>
+    <string name="vulkan_driver_turnip_7xx_new_message">Versão mais nova do Turnip (Mesa 25) para Adreno 630-690 e Adreno 7xx. Experimente se os outros drivers Adreno derem tela preta.\n\nPrecisa do Android 15 ou mais recente. Em Adreno antigos de entrada (610, 619) pode dar tela preta.</string>
 </resources>

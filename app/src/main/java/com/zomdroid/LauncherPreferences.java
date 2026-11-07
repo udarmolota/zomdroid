@@ -332,6 +332,10 @@ public class LauncherPreferences {
         FREEDRENO_8XX("libvulkan_freedreno_8xx.so"),
         FREEDRENO_840("libvulkan_freedreno_840.so"),
         TURNIP_7XX("libvulkan.ad07XX_regular.so"),
+        // Turnip v26.2 (Mesa 25, stevenmx build) from RimDroid, where it is the pick for Adreno
+        // 630-690 and fixes Adreno black/present issues; black-screens the old budget a6xx
+        // (610/619). Built against API 35. Manual choice only until there is field data.
+        TURNIP_7XX_NEW("libvulkan_freedreno_7xx_new.so"),
         TURNIP_740("libvulkan.ad07XX.so"),
         TURNIP_710("vulkan.turnip.710.so"),
         Turnip_6XX("vulkan.ad06XX.so"),

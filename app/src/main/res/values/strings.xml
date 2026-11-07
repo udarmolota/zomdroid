@@ -863,4 +863,6 @@
     <string name="safe_start_failed_title">Safe start failed: %1$s</string>
     <string name="safe_start_failed_replaced_message">The game could not start: some of its files have been replaced by mods. Create a new full instance without mods and add mods carefully, some of them are the cause of your crashes.\n\nReplaced files:\n%1$s</string>
     <string name="safe_start_failed_clean_message">The game could not start even with the recommended settings and no mods, so the cause is not in your mods or settings. If you copied the game files yourself, install them again first. If that does not help, please send a bug report.</string>
+    <string name="vulkan_driver_turnip_7xx_new_title">TURNIP 7xx new (v26.2)</string>
+    <string name="vulkan_driver_turnip_7xx_new_message">Newer Turnip build (Mesa 25) for Adreno 630-690 and Adreno 7xx. Try it if the other Adreno drivers give a black screen.\n\nNeeds Android 15 or newer. On old budget Adreno (610, 619) it can show a black screen.</string>
 </resources>

@@ -836,4 +836,6 @@
     <string name="safe_start_failed_title">安全启动失败：%1$s</string>
     <string name="safe_start_failed_replaced_message">游戏无法启动：部分游戏文件已被模组替换。请创建一个不带模组的全新完整实例，并谨慎添加模组，其中某些模组正是导致崩溃的原因。\n\n被替换的文件：\n%1$s</string>
     <string name="safe_start_failed_clean_message">即使使用推荐设置且不加载模组，游戏也无法启动，因此原因不在你的模组或设置。如果游戏文件是你自己复制的，请先重新安装。如果仍然无效，请发送错误报告。</string>
+    <string name="vulkan_driver_turnip_7xx_new_title">TURNIP 7xx new (v26.2)</string>
+    <string name="vulkan_driver_turnip_7xx_new_message">较新的 Turnip 版本（Mesa 25），适用于 Adreno 630-690 和 Adreno 7xx。如果其他 Adreno 驱动黑屏，可以试试它。\n\n需要 Android 15 或更高版本。在较旧的入门级 Adreno（610、619）上可能黑屏。</string>
 </resources>

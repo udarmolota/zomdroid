@@ -843,4 +843,6 @@
     <string name="safe_start_failed_title">Mulai aman gagal: %1$s</string>
     <string name="safe_start_failed_replaced_message">Game tidak bisa dimulai: sebagian file game telah diganti oleh mod. Buat instance baru yang lengkap tanpa mod dan tambahkan mod dengan hati-hati, beberapa di antaranya adalah penyebab crash Anda.\n\nFile yang diganti:\n%1$s</string>
     <string name="safe_start_failed_clean_message">Game tidak bisa dimulai bahkan dengan pengaturan yang disarankan dan tanpa mod, jadi penyebabnya bukan mod atau pengaturan Anda. Jika Anda menyalin file game sendiri, pasang ulang terlebih dahulu. Jika tidak membantu, kirim laporan bug.</string>
+    <string name="vulkan_driver_turnip_7xx_new_title">TURNIP 7xx new (v26.2)</string>
+    <string name="vulkan_driver_turnip_7xx_new_message">Build Turnip yang lebih baru (Mesa 25) untuk Adreno 630-690 dan Adreno 7xx. Coba jika driver Adreno lain menampilkan layar hitam.\n\nPerlu Android 15 atau lebih baru. Pada Adreno lama kelas bawah (610, 619) bisa muncul layar hitam.</string>
 </resources>
