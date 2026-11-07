@@ -398,6 +398,7 @@ public class GameLauncher {
             if (coopHostTest) {
                 jvmArgs.add("-Dzomdroid.coop.bridge=" + coopBridgePath);
                 jvmArgs.add("-javaagent:" + coopBridgePath + "/coop-agent.jar");
+                jvmArgs.add("-Dzomdroid.openUrlFile=" + GameLinkOpener.file().getAbsolutePath());
             }
             Log.i("ServerProbeClient", (coopHostTest ? "COOP hosting enabled" : "Connecting to loopback server")
                     + "; isolated cache=" + clientCache);
@@ -411,6 +412,7 @@ public class GameLauncher {
             jvmArgs.add("-Dzomdroid.coop.hostingOffMarker="
                     + new File(new File(hostingOffAgent).getParentFile(), HostingOffNotice.MARKER));
             jvmArgs.add("-javaagent:" + hostingOffAgent + "=hosting-off");
+            jvmArgs.add("-Dzomdroid.openUrlFile=" + GameLinkOpener.file().getAbsolutePath());
         }
         if (BuildConfig.DEBUG) {
             //args.add("-debug");

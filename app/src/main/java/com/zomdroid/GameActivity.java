@@ -56,6 +56,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     private com.zomdroid.game.SafeStart.Watcher safeStartWatcher;
     private AutoCloseable coopHostBridge;
     private HostingOffNotice hostingOffNotice;
+    private GameLinkOpener gameLinkOpener;
     private boolean serverProbeBound;
     private final android.content.ServiceConnection serverProbeConnection = new android.content.ServiceConnection() {
         @Override public void onServiceConnected(android.content.ComponentName name, android.os.IBinder service) {
@@ -247,6 +248,8 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
             hostingOffNotice = new HostingOffNotice(this);
             hostingOffAgent = hostingOffNotice.getAgentPath();
         } else hostingOffAgent = null;
+        // Menu links (news, Discord) reach us through the coop agent, loaded in both modes above.
+        if (coopBridgePath != null || hostingOffAgent != null) gameLinkOpener = new GameLinkOpener(this);
 
         // Build 42.20 binds trigger actions to thresholds that assume a real pad's axis range,
         // e.g. "Melee > -0.80" on the left trigger. A released trigger has to read as -1 for that
@@ -534,6 +537,7 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
       super.onDestroy();
       if (perfThread != null) { perfThread.quitSafely(); perfThread = null; perfHandler = null; }
       if (hostingOffNotice != null) hostingOffNotice.close();
+      if (gameLinkOpener != null) gameLinkOpener.close();
       if (safeStartWatcher != null) safeStartWatcher.close();
       if (coopHostBridge != null) {
           try { coopHostBridge.close(); }
