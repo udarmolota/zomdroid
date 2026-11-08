@@ -23,6 +23,11 @@ public final class CoopAgent {
         // Every game client: menu links open in the Android browser (when the launcher gave a file).
         if (System.getProperty("zomdroid.openUrlFile") != null)
             instrumentation.addTransformer(new OpenUrl());
+        // Host from the game: this client runs on the coop-probe profile too, where mods/ is the
+        // same link, and joining reloads Lua and checksums mod animations - the server's failure
+        // repeated on the client side. On Build 41 the method is not found and nothing changes.
+        if (!"hosting-off".equals(options))
+            instrumentation.addTransformer(new ServerModMediaPaths());
         // Hosting off: same call site, but it only tells the launcher that Host was pressed.
         final String processClass = "hosting-off".equals(options)
                 ? "com/zomdroid/coop/HostingOffProcess" : "com/zomdroid/coop/FileProcess";
