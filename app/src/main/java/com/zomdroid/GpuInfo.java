@@ -156,6 +156,14 @@ public final class GpuInfo {
                 // a619) it present-blacks - the game loads, swaps exactly one buffer and freezes.
                 // The 7xx build ran on both, with artifacts on the old ones. So that is the pick,
                 // and ad06XX stays available as a manual choice for anyone it does suit.
+                //
+                // The newer high a6xx (630-690) get the fresh Turnip v26.2 instead, as in RimDroid,
+                // where it is the field-confirmed fix for Adreno black/present problems - but it is
+                // built against API 35 and would not load on older Android. Old budget parts keep
+                // the 7xx build: v26.2 black-screens them.
+                if (adrenoModel >= 630 && android.os.Build.VERSION.SDK_INT >= 35) {
+                    return LauncherPreferences.VulkanDriver.TURNIP_7XX_NEW;
+                }
                 return LauncherPreferences.VulkanDriver.TURNIP_7XX;
             default:
                 return LauncherPreferences.VulkanDriver.SYSTEM_DEFAULT;
