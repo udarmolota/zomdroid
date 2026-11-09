@@ -158,7 +158,11 @@ public class BugReportFragment extends Fragment {
         String[] to = {getString(R.string.bug_report_email)};
         String subject = getString(R.string.bug_report_subject,
                 new SimpleDateFormat("ddMMyyyy", Locale.US).format(new Date()));
-        String body = getString(R.string.bug_report_body, device());
+        // Always English, whatever the launcher's language: it steers players to write the
+        // description in English too, so reports need no translating.
+        android.content.res.Configuration en = new android.content.res.Configuration(getResources().getConfiguration());
+        en.setLocale(Locale.ENGLISH);
+        String body = requireContext().createConfigurationContext(en).getString(R.string.bug_report_body, device());
         Intent i = new Intent(Intent.ACTION_SEND);
         i.setType("application/zip");
         i.putExtra(Intent.EXTRA_EMAIL, to);
