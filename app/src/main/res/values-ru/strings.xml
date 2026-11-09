@@ -845,7 +845,7 @@
     <string name="vulkan_driver_turnip_7xx_new_title">TURNIP 7xx new (v26.2)</string>
     <string name="vulkan_driver_turnip_7xx_new_message">Более новая сборка Turnip (Mesa 25) для Adreno 630–690 и Adreno 7xx. Попробуйте, если другие драйверы Adreno дают чёрный экран.\n\nНужен Android 15 или новее. На старых бюджетных Adreno (610, 619) возможен чёрный экран.</string>
     <string name="workshop_menu">Steam Workshop</string>
-    <string name="workshop_open_a_mod">Откройте страницу мода или коллекции, чтобы добавить её в очередь.</string>
+    <string name="workshop_open_a_mod">Нажмите ↓ на моде, чтобы добавить его в очередь.</string>
     <string name="workshop_add_to_queue">В очередь</string>
     <string name="workshop_remove_from_queue">Убрать</string>
     <string name="workshop_item_id">Предмет Workshop %1$d</string>
@@ -864,4 +864,7 @@
     <string name="mods_copy_done">Скопировано: %1$d. Уже были, оставлены как есть: %2$d.</string>
     <string name="mods_copy_done_short">Скопировано модов: %1$d</string>
     <string name="mods_copy_failed">Не удалось скопировать:</string>
+    <string name="workshop_text_smaller">Мельче текст</string>
+    <string name="workshop_text_larger">Крупнее текст</string>
+    <string name="workshop_download_many">⚠ Это %1$d модов. Они качаются по одному, это может занять много времени, и каждый займёт примерно вдвое больше своего размера (ZIP-копия в Загрузках плюс установленный мод).</string>
 </resources>

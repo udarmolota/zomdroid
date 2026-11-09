@@ -33,6 +33,31 @@
         android:paddingEnd="12dp"
         android:paddingBottom="6dp">
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_workshop_text_smaller"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="0dp"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp"
+            android:contentDescription="@string/workshop_text_smaller"
+            android:text="A−"
+            android:textSize="12sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_workshop_text_larger"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="6dp"
+            android:minWidth="0dp"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp"
+            android:contentDescription="@string/workshop_text_larger"
+            android:text="A+"
+            android:textSize="16sp" />
+
         <TextView
             android:id="@+id/tv_workshop_item"
             android:layout_width="0dp"
