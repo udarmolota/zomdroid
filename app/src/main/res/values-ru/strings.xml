@@ -844,4 +844,24 @@
     <string name="safe_start_failed_clean_message">Игра не запустилась даже с рекомендуемыми настройками и без модов, значит причина не в ваших модах и настройках. Если вы копировали файлы игры сами, сначала установите их заново. Если это не поможет, отправьте отчёт об ошибке.</string>
     <string name="vulkan_driver_turnip_7xx_new_title">TURNIP 7xx new (v26.2)</string>
     <string name="vulkan_driver_turnip_7xx_new_message">Более новая сборка Turnip (Mesa 25) для Adreno 630–690 и Adreno 7xx. Попробуйте, если другие драйверы Adreno дают чёрный экран.\n\nНужен Android 15 или новее. На старых бюджетных Adreno (610, 619) возможен чёрный экран.</string>
+    <string name="workshop_menu">Steam Workshop</string>
+    <string name="workshop_open_a_mod">Откройте страницу мода или коллекции, чтобы добавить её в очередь.</string>
+    <string name="workshop_add_to_queue">В очередь</string>
+    <string name="workshop_remove_from_queue">Убрать</string>
+    <string name="workshop_item_id">Предмет Workshop %1$d</string>
+    <string name="workshop_download_queue">Скачать</string>
+    <string name="workshop_download_n">Скачать (%1$d)</string>
+    <string name="workshop_download_busy">Загрузка из Steam уже идёт. Дождитесь её окончания.</string>
+    <string name="workshop_download_title">Скачать: %1$d шт.?</string>
+    <string name="workshop_download_message">%1$s\n\nОни скачиваются по очереди, вход в Steam не нужен. Каждый мод сохраняется как .zip в Downloads/zomdroid; установите его через «Импорт модов».</string>
+    <string name="workshop_download_go">Скачать</string>
+    <string name="workshop_clear_queue">Очистить очередь</string>
+    <string name="mods_copy">Скопировать все моды в другой инстанс</string>
+    <string name="mods_copy_choose_list">Выберите список модов инстанса, из которого копировать.</string>
+    <string name="mods_copy_no_target">Нет другого инстанса Build %1$s, куда можно скопировать.</string>
+    <string name="mods_copy_title">Скопировать все моды %1$s в:</string>
+    <string name="mods_copy_running">Копирую моды в %1$s</string>
+    <string name="mods_copy_done">Скопировано: %1$d. Уже были, оставлены как есть: %2$d.</string>
+    <string name="mods_copy_done_short">Скопировано модов: %1$d</string>
+    <string name="mods_copy_failed">Не удалось скопировать:</string>
 </resources>

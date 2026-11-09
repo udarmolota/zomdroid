@@ -62,6 +62,9 @@
     <action
         android:id="@+id/action_download_gog"
         app:destination="@id/gog_download_fragment" />
+    <action
+        android:id="@+id/action_open_workshop"
+        app:destination="@id/workshop_fragment" />
 
     <fragment
         android:id="@+id/launcher_fragment"
@@ -181,6 +184,11 @@
         android:id="@+id/install_macos_libs_fragment"
         android:name="com.zomdroid.fragments.InstallNativeLibsFragment"
         android:label="@string/macos_libs_import_title" />
+
+    <fragment
+        android:id="@+id/workshop_fragment"
+        android:name="com.zomdroid.fragments.WorkshopFragment"
+        android:label="@string/workshop_menu" />
 
     <fragment
         android:id="@+id/steam_download_fragment"

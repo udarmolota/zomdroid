@@ -91,6 +91,16 @@
             android:contentDescription="@string/mods_export"
             android:tooltipText="@string/mods_export"
             app:icon="@drawable/ic_mods_export" />
+
+        <!-- Copy every mod of this instance into another instance of the same build. -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_mods_copy"
+            style="@style/Widget.Material3.Button.IconButton.Outlined"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/mods_copy"
+            android:tooltipText="@string/mods_copy"
+            app:icon="@drawable/ic_mods_copy" />
     </LinearLayout>
 
     <!-- Shown while picking mods to export, in place of the usual hint. -->

@@ -64,6 +64,11 @@
             android:title="@string/gog_dl_menu"
             android:icon="@drawable/ic_gog"
             app:showAsAction="never"/>
+        <item
+            android:id="@+id/action_open_workshop"
+            android:title="@string/workshop_menu"
+            android:icon="@drawable/ic_steam"
+            app:showAsAction="never"/>
     </group>
 
     <group android:id="@+id/group_mods" android:checkableBehavior="none">

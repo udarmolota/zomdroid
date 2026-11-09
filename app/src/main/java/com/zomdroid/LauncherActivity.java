@@ -147,6 +147,10 @@ public class LauncherActivity extends AppCompatActivity {
                 binding.drawerLayout.close();
                 navController.navigate(R.id.action_download_gog);
                 return true;
+            } else if (item.getItemId() == R.id.action_open_workshop) {
+                binding.drawerLayout.close();
+                navController.navigate(R.id.action_open_workshop);
+                return true;
             } else if (item.getItemId() == R.id.action_bug_report) {
                 binding.drawerLayout.close();
                 navController.navigate(R.id.action_open_bug_report);

@@ -838,4 +838,24 @@
     <string name="safe_start_failed_clean_message">即使使用推荐设置且不加载模组，游戏也无法启动，因此原因不在你的模组或设置。如果游戏文件是你自己复制的，请先重新安装。如果仍然无效，请发送错误报告。</string>
     <string name="vulkan_driver_turnip_7xx_new_title">TURNIP 7xx new (v26.2)</string>
     <string name="vulkan_driver_turnip_7xx_new_message">较新的 Turnip 版本（Mesa 25），适用于 Adreno 630-690 和 Adreno 7xx。如果其他 Adreno 驱动黑屏，可以试试它。\n\n需要 Android 15 或更高版本。在较旧的入门级 Adreno（610、619）上可能黑屏。</string>
+    <string name="workshop_menu">Steam 创意工坊</string>
+    <string name="workshop_open_a_mod">打开模组或合集页面即可加入队列。</string>
+    <string name="workshop_add_to_queue">加入队列</string>
+    <string name="workshop_remove_from_queue">移除</string>
+    <string name="workshop_item_id">创意工坊物品 %1$d</string>
+    <string name="workshop_download_queue">下载</string>
+    <string name="workshop_download_n">下载 (%1$d)</string>
+    <string name="workshop_download_busy">Steam 下载已在进行中，请等待完成。</string>
+    <string name="workshop_download_title">下载 %1$d 个物品？</string>
+    <string name="workshop_download_message">%1$s\n\n将依次下载，无需登录 Steam。每个模组保存为 Downloads/zomdroid 中的 .zip；请通过“导入模组”安装。</string>
+    <string name="workshop_download_go">下载</string>
+    <string name="workshop_clear_queue">清空队列</string>
+    <string name="mods_copy">复制所有模组到另一个实例</string>
+    <string name="mods_copy_choose_list">请先选择要复制的实例的模组列表。</string>
+    <string name="mods_copy_no_target">没有其他 Build %1$s 实例可以复制到。</string>
+    <string name="mods_copy_title">将 %1$s 的所有模组复制到：</string>
+    <string name="mods_copy_running">正在复制模组到 %1$s</string>
+    <string name="mods_copy_done">已复制：%1$d。已存在、保持不变：%2$d。</string>
+    <string name="mods_copy_done_short">已复制模组：%1$d</string>
+    <string name="mods_copy_failed">无法复制：</string>
 </resources>

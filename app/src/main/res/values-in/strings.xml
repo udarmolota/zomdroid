@@ -845,4 +845,24 @@
     <string name="safe_start_failed_clean_message">Game tidak bisa dimulai bahkan dengan pengaturan yang disarankan dan tanpa mod, jadi penyebabnya bukan mod atau pengaturan Anda. Jika Anda menyalin file game sendiri, pasang ulang terlebih dahulu. Jika tidak membantu, kirim laporan bug.</string>
     <string name="vulkan_driver_turnip_7xx_new_title">TURNIP 7xx new (v26.2)</string>
     <string name="vulkan_driver_turnip_7xx_new_message">Build Turnip yang lebih baru (Mesa 25) untuk Adreno 630-690 dan Adreno 7xx. Coba jika driver Adreno lain menampilkan layar hitam.\n\nPerlu Android 15 atau lebih baru. Pada Adreno lama kelas bawah (610, 619) bisa muncul layar hitam.</string>
+    <string name="workshop_menu">Steam Workshop</string>
+    <string name="workshop_open_a_mod">Buka halaman mod atau koleksi untuk menambahkannya ke antrean.</string>
+    <string name="workshop_add_to_queue">Tambah ke antrean</string>
+    <string name="workshop_remove_from_queue">Hapus</string>
+    <string name="workshop_item_id">Item Workshop %1$d</string>
+    <string name="workshop_download_queue">Unduh</string>
+    <string name="workshop_download_n">Unduh (%1$d)</string>
+    <string name="workshop_download_busy">Unduhan Steam sedang berjalan. Tunggu sampai selesai.</string>
+    <string name="workshop_download_title">Unduh %1$d item?</string>
+    <string name="workshop_download_message">%1$s\n\nDiunduh satu per satu, tanpa login Steam. Setiap mod disimpan sebagai .zip di Downloads/zomdroid; pasang lewat Impor mod.</string>
+    <string name="workshop_download_go">Unduh</string>
+    <string name="workshop_clear_queue">Kosongkan antrean</string>
+    <string name="mods_copy">Salin semua mod ke instance lain</string>
+    <string name="mods_copy_choose_list">Pilih daftar mod dari instance sumber.</string>
+    <string name="mods_copy_no_target">Tidak ada instance Build %1$s lain untuk tujuan salin.</string>
+    <string name="mods_copy_title">Salin semua mod dari %1$s ke:</string>
+    <string name="mods_copy_running">Menyalin mod ke %1$s</string>
+    <string name="mods_copy_done">Disalin: %1$d. Sudah ada, dibiarkan: %2$d.</string>
+    <string name="mods_copy_done_short">Mod disalin: %1$d</string>
+    <string name="mods_copy_failed">Gagal disalin:</string>
 </resources>

@@ -865,4 +865,24 @@
     <string name="safe_start_failed_clean_message">The game could not start even with the recommended settings and no mods, so the cause is not in your mods or settings. If you copied the game files yourself, install them again first. If that does not help, please send a bug report.</string>
     <string name="vulkan_driver_turnip_7xx_new_title">TURNIP 7xx new (v26.2)</string>
     <string name="vulkan_driver_turnip_7xx_new_message">Newer Turnip build (Mesa 25) for Adreno 630-690 and Adreno 7xx. Try it if the other Adreno drivers give a black screen.\n\nNeeds Android 15 or newer. On old budget Adreno (610, 619) it can show a black screen.</string>
+    <string name="workshop_menu">Steam Workshop</string>
+    <string name="workshop_open_a_mod">Open a mod or collection page to add it to the queue.</string>
+    <string name="workshop_add_to_queue">Add to queue</string>
+    <string name="workshop_remove_from_queue">Remove</string>
+    <string name="workshop_item_id">Workshop item %1$d</string>
+    <string name="workshop_download_queue">Download</string>
+    <string name="workshop_download_n">Download (%1$d)</string>
+    <string name="workshop_download_busy">A Steam download is already running. Wait for it to finish.</string>
+    <string name="workshop_download_title">Download %1$d item(s)?</string>
+    <string name="workshop_download_message">%1$s\n\nThey are downloaded one after another, no Steam login needed. Each mod is saved as a .zip in Downloads/zomdroid; install it from Import mods.</string>
+    <string name="workshop_download_go">Download</string>
+    <string name="workshop_clear_queue">Clear queue</string>
+    <string name="mods_copy">Copy all mods to another instance</string>
+    <string name="mods_copy_choose_list">Choose a mod list of the instance to copy from.</string>
+    <string name="mods_copy_no_target">No other Build %1$s instance to copy to.</string>
+    <string name="mods_copy_title">Copy all mods of %1$s to:</string>
+    <string name="mods_copy_running">Copying mods to %1$s</string>
+    <string name="mods_copy_done">Copied: %1$d. Already there, left as they were: %2$d.</string>
+    <string name="mods_copy_done_short">Mods copied: %1$d</string>
+    <string name="mods_copy_failed">Could not copy:</string>
 </resources>

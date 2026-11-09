@@ -45,6 +45,8 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
     public static final String ARG_MP_INSTANCE = "mp_instance";
     /** Open on the Mods tab (from the Import mods screen). */
     public static final String ARG_OPEN_MODS = "open_mods";
+    /** Workshop ids to download right away, space-separated (from the Steam Workshop screen). */
+    public static final String ARG_MOD_IDS = "mod_ids";
     private String macosInstanceName;
     private String mpInstanceName;
 
@@ -95,6 +97,13 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
         });
         boolean openMods = getArguments() != null && getArguments().getBoolean(ARG_OPEN_MODS);
         toggle.check(openMods ? R.id.btn_type_mods : R.id.btn_type_game);
+        String queued = getArguments() == null ? null : getArguments().getString(ARG_MOD_IDS);
+        if (queued != null && !queued.trim().isEmpty()) {
+            toggle.check(R.id.btn_type_mods);
+            etModsIds.setText(queued);
+            getArguments().remove(ARG_MOD_IDS);   // once: coming back here must not start it again
+            if (!SteamDownloadState.get().isDownloading()) v.post(this::startMods);
+        }
 
         buildToggle = v.findViewById(R.id.toggle_dl_build);
         buildToggle.check(R.id.btn_build_41);   // legacy41 is the default selection

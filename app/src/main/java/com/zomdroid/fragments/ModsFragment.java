@@ -163,6 +163,81 @@ public class ModsFragment extends Fragment {
             updateSelection();
         });
         v.findViewById(R.id.btn_mods_export_go).setOnClickListener(x -> exportSelected());
+        v.findViewById(R.id.btn_mods_copy).setOnClickListener(x -> chooseCopyTarget());
+    }
+
+    // ---- Copy all mods to another instance ----
+
+    /**
+     * Copies every mod in this instance's Zomboid/mods into another instance. Only instances of
+     * the same build are offered: a Build 41 mod does nothing in Build 42 and the other way round.
+     */
+    private void chooseCopyTarget() {
+        Entry cur = current();
+        if (cur == null) {
+            Toast.makeText(requireContext(), R.string.mods_copy_choose_list, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        GameInstance from = cur.instance;
+        String build = from.getBuildVersion();
+        List<GameInstance> targets = new ArrayList<>();
+        for (GameInstance gi : GameInstanceManager.requireSingleton().getInstances()) {
+            if (gi != from && !gi.getName().equals(from.getName())
+                    && build != null && build.equals(gi.getBuildVersion())) targets.add(gi);
+        }
+        if (targets.isEmpty()) {
+            Toast.makeText(requireContext(), getString(R.string.mods_copy_no_target, build), Toast.LENGTH_LONG).show();
+            return;
+        }
+        java.util.Collections.sort(targets, (a, b) -> a.getName().compareToIgnoreCase(b.getName()));
+        String[] names = new String[targets.size()];
+        for (int i = 0; i < names.length; i++) names[i] = targets.get(i).getName();
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle(getString(R.string.mods_copy_title, from.getName()))
+                .setItems(names, (d, which) -> copyMods(from, targets.get(which)))
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void copyMods(GameInstance from, GameInstance to) {
+        if (GameActivity.hasGameJvm()) {
+            Toast.makeText(requireContext(), R.string.mods_game_running, Toast.LENGTH_LONG).show();
+            return;
+        }
+        android.content.Context app = requireContext().getApplicationContext();
+        androidx.appcompat.app.AlertDialog wait = new MaterialAlertDialogBuilder(requireContext())
+                .setTitle(getString(R.string.mods_copy_running, to.getName()))
+                .setMessage("…")
+                .setCancelable(false)
+                .show();
+        android.os.Handler main = new android.os.Handler(android.os.Looper.getMainLooper());
+        new Thread(() -> {
+            File toMods = new File(zomboidDir(to), "mods");
+            //noinspection ResultOfMethodCallIgnored
+            toMods.mkdirs();
+            com.zomdroid.mods.ModCopier.Result r = com.zomdroid.mods.ModCopier.copyAll(
+                    new File(zomboidDir(from), "mods"), toMods,
+                    (name, i, total) -> main.post(() -> wait.setMessage(i + " / " + total + "\n" + name)));
+            main.post(() -> {
+                wait.dismiss();
+                if (!isAdded()) {
+                    Toast.makeText(app, app.getString(R.string.mods_copy_done_short, r.copied.size()), Toast.LENGTH_LONG).show();
+                    return;
+                }
+                StringBuilder msg = new StringBuilder(getString(R.string.mods_copy_done,
+                        r.copied.size(), r.alreadyThere.size()));
+                if (!r.failed.isEmpty()) {
+                    msg.append("\n\n").append(getString(R.string.mods_copy_failed)).append('\n');
+                    for (String f : r.failed) msg.append("• ").append(f).append('\n');
+                }
+                new MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(to.getName())
+                        .setMessage(msg.toString().trim())
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show();
+                refresh();
+            });
+        }, "zd-copy-mods").start();
     }
 
     @Override
