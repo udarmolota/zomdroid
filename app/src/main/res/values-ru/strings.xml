@@ -895,4 +895,6 @@
     <string name="mods_copy_nothing">В этом инстансе нет модов для копирования.</string>
     <string name="mods_copy_uncheck_all">Снять все</string>
     <string name="mods_copy_check_all">Отметить все</string>
+    <string name="workshop_offline">Нет подключения к Steam. Воркшоп работает только онлайн.</string>
+    <string name="workshop_retry">Повторить</string>
 </resources>

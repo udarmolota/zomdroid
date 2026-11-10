@@ -895,4 +895,6 @@
     <string name="mods_copy_nothing">Esta instância não tem mods para copiar.</string>
     <string name="mods_copy_uncheck_all">Desmarcar todos</string>
     <string name="mods_copy_check_all">Marcar todos</string>
+    <string name="workshop_offline">Sem conexão com a Steam. O Workshop só funciona online.</string>
+    <string name="workshop_retry">Tentar de novo</string>
 </resources>

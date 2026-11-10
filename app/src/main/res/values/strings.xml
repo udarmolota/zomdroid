@@ -917,4 +917,6 @@
     <string name="mods_copy_nothing">This instance has no mods to copy.</string>
     <string name="mods_copy_uncheck_all">Uncheck all</string>
     <string name="mods_copy_check_all">Check all</string>
+    <string name="workshop_offline">No connection to Steam. The Workshop works only online.</string>
+    <string name="workshop_retry">Try again</string>
 </resources>

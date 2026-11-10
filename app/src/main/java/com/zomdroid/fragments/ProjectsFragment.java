@@ -126,16 +126,26 @@ public class ProjectsFragment extends Fragment {
         ImageView icon = card.findViewById(R.id.project_icon_iv);
         String iconRef = p.optString("icon", "");
         if (iconRef.startsWith("https://")) {
+            // The picture built in under the link's file name (icons/project_valdroid.png ->
+            // project_valdroid) covers a first open without a network; the saved or downloaded
+            // copy replaces it.
+            String file = iconRef.substring(iconRef.lastIndexOf('/') + 1);
+            int dot = file.lastIndexOf('.');
+            setBuiltInIcon(icon, dot > 0 ? file.substring(0, dot) : file);
             loadIcon(icon, iconRef);
         } else if (!iconRef.isEmpty()) {
-            String pkg = requireContext().getPackageName();
-            int res = getResources().getIdentifier(iconRef, "drawable", pkg);
-            if (res == 0) res = getResources().getIdentifier(iconRef, "mipmap", pkg);   // our own app icon
-            if (res != 0) icon.setImageResource(res);
+            setBuiltInIcon(icon, iconRef);
         }
 
         if (!github.isEmpty()) loadVersion(card.findViewById(R.id.project_version_tv), github);
         binding.projectsList.addView(card);
+    }
+
+    private void setBuiltInIcon(ImageView icon, String name) {
+        String pkg = requireContext().getPackageName();
+        int res = getResources().getIdentifier(name, "drawable", pkg);
+        if (res == 0) res = getResources().getIdentifier(name, "mipmap", pkg);   // our own app icon
+        if (res != 0) icon.setImageResource(res);
     }
 
     /** The description in the launcher's language, English otherwise. */

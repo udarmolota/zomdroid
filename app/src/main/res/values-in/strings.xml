@@ -896,4 +896,6 @@
     <string name="mods_copy_nothing">Instance ini tidak punya mod untuk disalin.</string>
     <string name="mods_copy_uncheck_all">Hapus semua centang</string>
     <string name="mods_copy_check_all">Centang semua</string>
+    <string name="workshop_offline">Tidak ada koneksi ke Steam. Workshop hanya berfungsi saat online.</string>
+    <string name="workshop_retry">Coba lagi</string>
 </resources>

@@ -889,4 +889,6 @@
     <string name="mods_copy_nothing">该实例没有可复制的模组。</string>
     <string name="mods_copy_uncheck_all">全部取消</string>
     <string name="mods_copy_check_all">全部选择</string>
+    <string name="workshop_offline">无法连接到 Steam。创意工坊仅在联网时可用。</string>
+    <string name="workshop_retry">重试</string>
 </resources>
