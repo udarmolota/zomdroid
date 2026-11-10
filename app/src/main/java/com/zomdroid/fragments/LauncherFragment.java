@@ -577,7 +577,7 @@ public class LauncherFragment extends Fragment {
                     .setTitle(R.string.custom_driver_missing_title)
                     .setMessage(R.string.custom_driver_missing_message)
                     .setPositiveButton(R.string.custom_driver_missing_load, (d, w) ->
-                            Navigation.findNavController(anchor).navigate(R.id.action_install_driver))
+                            Navigation.findNavController(anchor).navigate(R.id.action_open_transfer))
                     .setNeutralButton(R.string.crash_streak_open_settings, (d, w) -> {
                         Bundle args = new Bundle();
                         args.putString(SettingsFragment.ARG_INSTANCE, gameInstance.getName());

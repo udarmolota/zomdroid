@@ -867,4 +867,23 @@
     <string name="workshop_text_smaller">Texto menor</string>
     <string name="workshop_text_larger">Texto maior</string>
     <string name="workshop_download_many">⚠ São %1$d mods. Eles são baixados um por vez, o que pode demorar bastante, e cada um ocupa cerca do dobro do seu tamanho no armazenamento (uma cópia ZIP em Downloads mais o mod instalado).</string>
+    <string name="bottom_nav_home">Início</string>
+    <string name="bottom_nav_game">Jogo</string>
+    <string name="bottom_nav_workshop">Workshop</string>
+    <string name="bottom_nav_transfer">Importar</string>
+    <string name="bottom_nav_projects">Projetos</string>
+    <string name="transfer_title">Importar / exportar</string>
+    <string name="transfer_saves_title">Saves</string>
+    <string name="transfer_mods_hint">Importar: um ZIP de mod; a pasta do mod é encontrada mesmo dentro de pastas extras. Exportar, copiar para outra instância e baixar da Steam ficam na tela de Mods.</string>
+    <string name="transfer_mods_open">Tela de mods</string>
+    <string name="transfer_game_settings_title">Configurações do jogo</string>
+    <string name="transfer_controls_hint">O layout dos controles na tela, como um ZIP com controls.json.</string>
+    <string name="transfer_driver_hint">Um driver para todas as instâncias (.so). Importar substitui o carregado; use por sua conta e risco.</string>
+    <string name="transfer_import_confirm">Importar “%1$s” para “%2$s”?</string>
+    <string name="transfer_import_confirm_app">Importar “%1$s”?</string>
+    <string name="projects_title">Outros projetos</string>
+    <string name="projects_reddit_hint">Novidades de todos os meus projetos</string>
+    <string name="projects_download">Baixar</string>
+    <string name="projects_page">Página</string>
+    <string name="projects_latest_version">Última versão: %1$s</string>
 </resources>

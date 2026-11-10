@@ -27,29 +27,14 @@
 
     <group android:id="@+id/group_files" android:checkableBehavior="none">
         <item
-            android:id="@+id/action_install_controls"
-            android:title="@string/menu_install_controls"
-            android:icon="@drawable/ic_controls"
-            app:showAsAction="never"/>
-        <item
-            android:id="@+id/action_install_saves"
-            android:title="@string/install_saves_menu"
-            android:icon="@drawable/mt_icon_save"
-            app:showAsAction="never"/>
-        <item
-            android:id="@+id/action_install_driver"
-            android:title="@string/install_driver_menu"
-            android:icon="@drawable/mt_icon_driver"
+            android:id="@+id/action_open_transfer"
+            android:title="@string/transfer_title"
+            android:icon="@drawable/ic_nav_transfer"
             app:showAsAction="never"/>
         <item
             android:id="@+id/action_bug_report"
             android:title="@string/nav_bug_report"
             android:icon="@drawable/ic_bug_report"
-            app:showAsAction="never"/>
-        <item
-            android:id="@+id/action_game_settings"
-            android:title="@string/game_settings_menu"
-            android:icon="@drawable/mt_icon_settings"
             app:showAsAction="never"/>
     </group>
 
@@ -76,11 +61,6 @@
             android:id="@+id/action_open_mods"
             android:title="@string/nav_menu_mods"
             android:icon="@drawable/mt_icon_mods"
-            app:showAsAction="never"/>
-        <item
-            android:id="@+id/action_open_install_mod"
-            android:title="@string/nav_menu_install_mod"
-            android:icon="@drawable/ic_mods"
             app:showAsAction="never"/>
     </group>
 

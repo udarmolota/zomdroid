@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The pill behind the current bottom bar icon: a faint orange. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:alpha="0.18" android:color="@color/pz_orange" />
+</selector>

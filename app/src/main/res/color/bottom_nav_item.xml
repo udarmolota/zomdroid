@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bottom bar icon and label: the current screen in the accent orange. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/pz_orange" android:state_checked="true" />
+    <item android:color="?attr/colorOnSurfaceVariant" />
+</selector>

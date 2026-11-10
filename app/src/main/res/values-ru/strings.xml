@@ -867,4 +867,23 @@
     <string name="workshop_text_smaller">Мельче текст</string>
     <string name="workshop_text_larger">Крупнее текст</string>
     <string name="workshop_download_many">⚠ Это %1$d модов. Они качаются по одному, это может занять много времени, и каждый займёт примерно вдвое больше своего размера (ZIP-копия в Загрузках плюс установленный мод).</string>
+    <string name="bottom_nav_home">Главная</string>
+    <string name="bottom_nav_game">Игра</string>
+    <string name="bottom_nav_workshop">Воркшоп</string>
+    <string name="bottom_nav_transfer">Импорт</string>
+    <string name="bottom_nav_projects">Проекты</string>
+    <string name="transfer_title">Импорт / экспорт</string>
+    <string name="transfer_saves_title">Сохранения</string>
+    <string name="transfer_mods_hint">Импорт: ZIP с модом, папка мода найдётся даже внутри лишних папок. Экспорт, копирование в другой инстанс и загрузка из Steam — на экране модов.</string>
+    <string name="transfer_mods_open">Экран модов</string>
+    <string name="transfer_game_settings_title">Настройки игры</string>
+    <string name="transfer_controls_hint">Раскладка экранных кнопок: ZIP с controls.json.</string>
+    <string name="transfer_driver_hint">Один драйвер для всех инстансов (.so). Импорт заменяет загруженный; на свой страх и риск.</string>
+    <string name="transfer_import_confirm">Импортировать «%1$s» в «%2$s»?</string>
+    <string name="transfer_import_confirm_app">Импортировать «%1$s»?</string>
+    <string name="projects_title">Другие проекты</string>
+    <string name="projects_reddit_hint">Новости всех моих проектов</string>
+    <string name="projects_download">Скачать</string>
+    <string name="projects_page">Страница</string>
+    <string name="projects_latest_version">Последняя версия: %1$s</string>
 </resources>

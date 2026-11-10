@@ -1,0 +1,68 @@
+{
+  "reddit": "https://www.reddit.com/r/UdarMolotaDev",
+  "projects": [
+    {
+      "name": "XDroid360",
+      "description": {
+        "en": "A launcher that runs Dragon Age: Origins and State of Decay on Android.",
+        "ru": "Лаунчер, который запускает Dragon Age: Origins и State of Decay на Android."
+      },
+      "icon": "project_xdroid360",
+      "github": "udarmolota/XDroid360"
+    },
+    {
+      "name": "StormDroid",
+      "description": {
+        "en": "A launcher that runs Against the Storm on Android.",
+        "ru": "Лаунчер, который запускает Against the Storm на Android."
+      },
+      "icon": "project_stormdroid",
+      "github": "udarmolota/StormDroid"
+    },
+    {
+      "name": "ValDroid",
+      "description": {
+        "en": "A launcher that runs Valheim on Android.",
+        "ru": "Лаунчер, который запускает Valheim на Android."
+      },
+      "icon": "project_valdroid",
+      "github": "udarmolota/ValDroid"
+    },
+    {
+      "name": "RimDroid",
+      "description": {
+        "en": "A launcher that runs RimWorld on Android.",
+        "ru": "Лаунчер, который запускает RimWorld на Android."
+      },
+      "icon": "ic_rimdroid",
+      "github": "udarmolota/RimDroid"
+    },
+    {
+      "name": "PriDroid",
+      "description": {
+        "en": "A launcher that runs Prison Architect on Android.",
+        "ru": "Лаунчер, который запускает Prison Architect на Android."
+      },
+      "icon": "project_pridroid",
+      "github": "udarmolota/pridroid"
+    },
+    {
+      "name": "Zomdroid",
+      "description": {
+        "en": "A launcher that runs Project Zomboid on Android. You are here.",
+        "ru": "Лаунчер, который запускает Project Zomboid на Android. Вы здесь."
+      },
+      "icon": "ic_launcher",
+      "github": "udarmolota/zomdroid"
+    },
+    {
+      "name": "Deephall",
+      "description": {
+        "en": "A mobile game.",
+        "ru": "Мобильная игра."
+      },
+      "icon": "project_deephall",
+      "github": "udarmolota/deephall"
+    }
+  ]
+}

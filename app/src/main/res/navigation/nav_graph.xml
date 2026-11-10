@@ -33,15 +33,6 @@
         android:id="@id/action_open_mods"
         app:destination="@id/mods_fragment" />
     <action
-        android:id="@+id/action_install_controls"
-        app:destination="@id/installControlsFragment" />
-    <action
-        android:id="@+id/action_install_saves"
-        app:destination="@id/install_saves_fragment" />
-    <action
-        android:id="@+id/action_install_driver"
-        app:destination="@id/install_driver_fragment" />
-    <action
         android:id="@+id/action_export_log"
         app:destination="@id/export_log_fragment" />
     <action
@@ -54,14 +45,17 @@
         android:id="@+id/action_open_controls_editor_launch"
         app:destination="@id/controls_editor_launch_fragment" />
     <action
-        android:id="@+id/action_game_settings"
-        app:destination="@id/game_settings_fragment" />
-    <action
         android:id="@+id/action_download_steam"
         app:destination="@id/steam_download_fragment" />
     <action
         android:id="@+id/action_download_gog"
         app:destination="@id/gog_download_fragment" />
+    <action
+        android:id="@+id/action_open_transfer"
+        app:destination="@id/transfer_fragment" />
+    <action
+        android:id="@+id/action_open_projects"
+        app:destination="@id/projects_fragment" />
     <action
         android:id="@+id/action_open_workshop"
         app:destination="@id/workshop_fragment" />
@@ -133,22 +127,6 @@
         android:label="@string/nav_menu_install_mod" />
 
     <fragment
-        android:id="@+id/installControlsFragment"
-        android:name="com.zomdroid.fragments.InstallControlsFragment"
-        android:label="@string/menu_install_controls"
-        tools:layout="@layout/fragment_install_controls" />
-
-    <fragment
-        android:id="@+id/install_saves_fragment"
-        android:name="com.zomdroid.fragments.InstallSavesFragment"
-        android:label="@string/install_saves_menu" />
-
-    <fragment
-        android:id="@+id/install_driver_fragment"
-        android:name="com.zomdroid.fragments.InstallDriverFragment"
-        android:label="@string/install_driver_menu" />
-
-    <fragment
         android:id="@+id/bug_report_fragment"
         android:name="com.zomdroid.fragments.BugReportFragment"
         android:label="@string/nav_bug_report" />
@@ -168,12 +146,6 @@
         android:name="com.zomdroid.fragments.ControlsEditorLaunchFragment"
         android:label="@string/nav_menu_controls_editor"
         tools:layout="@layout/fragment_controls_editor_launch" />
-
-    <fragment
-        android:id="@+id/game_settings_fragment"
-        android:name="com.zomdroid.fragments.GameSettingsFragment"
-        android:label="@string/game_settings_menu"
-        tools:layout="@layout/fragment_game_settings" />
 
     <fragment
         android:id="@+id/install_native_libs_fragment"
@@ -199,5 +171,17 @@
         android:id="@+id/gog_download_fragment"
         android:name="com.zomdroid.fragments.GogDownloadFragment"
         android:label="@string/gog_dl_menu" />
+
+    <fragment
+        android:id="@+id/transfer_fragment"
+        android:name="com.zomdroid.fragments.TransferFragment"
+        android:label="@string/transfer_title"
+        tools:layout="@layout/fragment_transfer" />
+
+    <fragment
+        android:id="@+id/projects_fragment"
+        android:name="com.zomdroid.fragments.ProjectsFragment"
+        android:label="@string/projects_title"
+        tools:layout="@layout/fragment_projects" />
 
 </navigation>

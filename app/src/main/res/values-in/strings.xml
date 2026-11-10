@@ -868,4 +868,23 @@
     <string name="workshop_text_smaller">Teks lebih kecil</string>
     <string name="workshop_text_larger">Teks lebih besar</string>
     <string name="workshop_download_many">⚠ Ada %1$d mod. Mod diunduh satu per satu, jadi ini bisa memakan waktu lama, dan setiap mod memakan sekitar dua kali ukurannya di penyimpanan (salinan ZIP di Download ditambah mod yang terpasang).</string>
+    <string name="bottom_nav_home">Beranda</string>
+    <string name="bottom_nav_game">Game</string>
+    <string name="bottom_nav_workshop">Workshop</string>
+    <string name="bottom_nav_transfer">Impor</string>
+    <string name="bottom_nav_projects">Proyek</string>
+    <string name="transfer_title">Impor / ekspor</string>
+    <string name="transfer_saves_title">Simpanan</string>
+    <string name="transfer_mods_hint">Impor: ZIP mod; folder mod tetap ditemukan meski ada di dalam folder tambahan. Ekspor, salin ke instance lain, dan unduh dari Steam ada di layar Mod.</string>
+    <string name="transfer_mods_open">Layar mod</string>
+    <string name="transfer_game_settings_title">Pengaturan game</string>
+    <string name="transfer_controls_hint">Tata letak kontrol layar, sebagai ZIP berisi controls.json.</string>
+    <string name="transfer_driver_hint">Satu driver untuk semua instance (.so). Impor menggantikan yang dimuat; risiko ditanggung sendiri.</string>
+    <string name="transfer_import_confirm">Impor “%1$s” ke “%2$s”?</string>
+    <string name="transfer_import_confirm_app">Impor “%1$s”?</string>
+    <string name="projects_title">Proyek lain</string>
+    <string name="projects_reddit_hint">Berita semua proyek saya</string>
+    <string name="projects_download">Unduh</string>
+    <string name="projects_page">Halaman</string>
+    <string name="projects_latest_version">Versi terbaru: %1$s</string>
 </resources>

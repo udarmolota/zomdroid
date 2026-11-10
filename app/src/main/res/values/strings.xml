@@ -888,4 +888,24 @@
     <string name="workshop_text_smaller">Smaller text</string>
     <string name="workshop_text_larger">Larger text</string>
     <string name="workshop_download_many">⚠ That is %1$d mods. They download one at a time, so this can take a long while, and each one takes about twice its size on storage (a ZIP copy in Downloads plus the installed mod).</string>
+    <string name="bottom_nav_home">Home</string>
+    <string name="bottom_nav_game">Game</string>
+    <string name="bottom_nav_workshop">Workshop</string>
+    <string name="bottom_nav_transfer">Import</string>
+    <string name="bottom_nav_projects">Projects</string>
+    <string name="transfer_title">Import / export</string>
+    <string name="transfer_saves_title">Saves</string>
+    <string name="transfer_mods_hint">Import: a mod ZIP; the mod folder is found even inside extra folders. Export, copying to another instance and Steam downloads are on the Mods screen.</string>
+    <string name="transfer_mods_open">Mods screen</string>
+    <string name="transfer_game_settings_title">Game settings</string>
+    <string name="transfer_controls_hint">Your on-screen controls layout, as a ZIP with controls.json.</string>
+    <string name="transfer_driver_hint">One driver for all instances (.so). Importing replaces the loaded one; use at your own risk.</string>
+    <string name="transfer_import_confirm">Import “%1$s” into “%2$s”?</string>
+    <string name="transfer_import_confirm_app">Import “%1$s”?</string>
+    <string name="projects_title">Other projects</string>
+    <string name="projects_reddit_hint">News of all my projects</string>
+    <string name="projects_download">Download</string>
+    <string name="projects_page">Page</string>
+    <string name="projects_latest_version">Latest version: %1$s</string>
+    <string name="projects_reddit_title" translatable="false">r/UdarMolotaDev</string>
 </resources>

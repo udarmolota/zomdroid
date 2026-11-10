@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bottom bar of the launcher. Item ids are the destination ids, so NavigationUI switches
+     between them and highlights the current one. -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/launcher_fragment"
+        android:icon="@drawable/ic_nav_home"
+        android:title="@string/bottom_nav_home" />
+    <item
+        android:id="@+id/steam_download_fragment"
+        android:icon="@drawable/ic_download"
+        android:title="@string/bottom_nav_game" />
+    <item
+        android:id="@+id/workshop_fragment"
+        android:icon="@drawable/ic_steam"
+        android:title="@string/bottom_nav_workshop" />
+    <item
+        android:id="@+id/transfer_fragment"
+        android:icon="@drawable/ic_nav_transfer"
+        android:title="@string/bottom_nav_transfer" />
+    <item
+        android:id="@+id/projects_fragment"
+        android:icon="@drawable/ic_nav_projects"
+        android:title="@string/bottom_nav_projects" />
+</menu>

@@ -861,4 +861,23 @@
     <string name="workshop_text_smaller">缩小文字</string>
     <string name="workshop_text_larger">放大文字</string>
     <string name="workshop_download_many">⚠ 共 %1$d 个模组。它们会逐个下载，可能需要很长时间，并且每个模组大约占用其两倍大小的存储空间（下载文件夹中的 ZIP 副本加上已安装的模组）。</string>
+    <string name="bottom_nav_home">首页</string>
+    <string name="bottom_nav_game">游戏</string>
+    <string name="bottom_nav_workshop">创意工坊</string>
+    <string name="bottom_nav_transfer">导入</string>
+    <string name="bottom_nav_projects">项目</string>
+    <string name="transfer_title">导入 / 导出</string>
+    <string name="transfer_saves_title">存档</string>
+    <string name="transfer_mods_hint">导入：模组 ZIP，即使模组文件夹包在多余的文件夹里也能找到。导出、复制到其他实例和从 Steam 下载请在模组页面进行。</string>
+    <string name="transfer_mods_open">模组页面</string>
+    <string name="transfer_game_settings_title">游戏设置</string>
+    <string name="transfer_controls_hint">屏幕按键布局：包含 controls.json 的 ZIP。</string>
+    <string name="transfer_driver_hint">所有实例共用一个驱动（.so）。导入会替换已加载的驱动，风险自负。</string>
+    <string name="transfer_import_confirm">将“%1$s”导入到“%2$s”？</string>
+    <string name="transfer_import_confirm_app">导入“%1$s”？</string>
+    <string name="projects_title">其他项目</string>
+    <string name="projects_reddit_hint">我所有项目的新闻</string>
+    <string name="projects_download">下载</string>
+    <string name="projects_page">主页</string>
+    <string name="projects_latest_version">最新版本：%1$s</string>
 </resources>

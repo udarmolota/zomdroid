@@ -52,6 +52,10 @@ public class LauncherActivity extends AppCompatActivity {
     ActivityLauncherBinding binding;
     private NavController navController;
     private AppBarConfiguration appBarConfiguration;
+    /** The screens of the bottom bar (menu_bottom_nav.xml); the bar is shown on these only. */
+    private static final int[] BOTTOM_NAV_DESTINATIONS = {
+            R.id.launcher_fragment, R.id.steam_download_fragment, R.id.workshop_fragment,
+            R.id.transfer_fragment, R.id.projects_fragment};
     private boolean inited = false;
 
     @Override
@@ -93,19 +97,25 @@ public class LauncherActivity extends AppCompatActivity {
 
         setSupportActionBar(binding.appbar);
 
-        appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.launcher_fragment)
+        // The bottom bar's screens are top level: the drawer button, not a back arrow.
+        appBarConfiguration = new AppBarConfiguration.Builder(BOTTOM_NAV_DESTINATIONS)
                 .setOpenableLayout(binding.drawerLayout)
                 .build();
 
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.launcherNv, navController);
+        NavigationUI.setupWithNavController(binding.bottomNav, navController);
+        navController.addOnDestinationChangedListener((controller, destination, args) -> {
+            boolean main = false;
+            for (int id : BOTTOM_NAV_DESTINATIONS) if (id == destination.getId()) main = true;
+            binding.bottomNav.setVisibility(main ? View.VISIBLE : View.GONE);
+        });
 
         binding.launcherNv.setNavigationItemSelectedListener(item -> {
-            if (item.getItemId() == R.id.action_game_settings) {
+            if (item.getItemId() == R.id.action_open_transfer) {
                 binding.drawerLayout.close();
-                navController.navigate(R.id.action_game_settings);
+                navController.navigate(R.id.action_open_transfer);
                 return true;
             } else if (item.getItemId() == R.id.action_open_controls_editor) {
                 //Intent intent = new Intent(this, ControlsEditorActivity.class);
@@ -125,15 +135,6 @@ public class LauncherActivity extends AppCompatActivity {
             } else if (item.getItemId() == R.id.action_open_mods) {
                 binding.drawerLayout.close();
                 navController.navigate(R.id.action_open_mods);
-                return true;
-            } else if (item.getItemId() == R.id.action_open_install_mod) {
-                // Navigate to Mod installation
-                binding.drawerLayout.close();
-                navController.navigate(R.id.action_open_install_mod);
-                return true;
-            } else if (item.getItemId() == R.id.action_install_controls) {
-                binding.drawerLayout.close();
-                navController.navigate(R.id.action_install_controls);
                 return true;
             } else if (item.getItemId() == R.id.action_open_optimization) {
                 binding.drawerLayout.close();

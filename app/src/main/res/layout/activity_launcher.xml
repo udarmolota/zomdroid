@@ -28,9 +28,23 @@
             android:id="@+id/nav_host_fragment"
             android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             app:defaultNavHost="true"
             app:navGraph="@navigation/nav_graph" />
+
+        <!-- Shortcuts to the main screens, shown only on those screens (LauncherActivity). Many
+             players never find the drawer. The system bar inset is already padding the parent. -->
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottom_nav"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:itemActiveIndicatorStyle="@style/AppTheme.BottomNavIndicator"
+            app:itemIconTint="@color/bottom_nav_item"
+            app:itemTextColor="@color/bottom_nav_item"
+            app:labelVisibilityMode="labeled"
+            app:menu="@menu/menu_bottom_nav"
+            app:paddingBottomSystemWindowInsets="false" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <LinearLayout
