@@ -853,7 +853,7 @@
     <string name="mods_copy">复制所有模组到另一个实例</string>
     <string name="mods_copy_choose_list">请先选择要复制的实例的模组列表。</string>
     <string name="mods_copy_no_target">没有其他 Build %1$s 实例可以复制到。</string>
-    <string name="mods_copy_title">将 %1$s 的所有模组复制到：</string>
+    <string name="mods_copy_title">将 %1$s 的模组复制到：</string>
     <string name="mods_copy_running">正在复制模组到 %1$s</string>
     <string name="mods_copy_done">已复制：%1$d。已存在、保持不变：%2$d。</string>
     <string name="mods_copy_done_short">已复制模组：%1$d</string>
@@ -880,4 +880,13 @@
     <string name="projects_download">下载</string>
     <string name="projects_page">主页</string>
     <string name="projects_latest_version">最新版本：%1$s</string>
+    <string name="mods_copy_zombiebuddy">ZombieBuddy 未复制：它只有在“优化”页面安装后才能工作。请在那里为 %1$s 安装。</string>
+    <string name="mods_copy_zombiebuddy_needed">以下模组需要它：</string>
+    <string name="mods_copy_pick_title">要复制到 %1$s 的模组</string>
+    <string name="mods_copy_already_there">%1$s（已存在）</string>
+    <string name="mods_copy_go">复制</string>
+    <string name="mods_copy_none_picked">未选择任何模组。</string>
+    <string name="mods_copy_nothing">该实例没有可复制的模组。</string>
+    <string name="mods_copy_uncheck_all">全部取消</string>
+    <string name="mods_copy_check_all">全部选择</string>
 </resources>

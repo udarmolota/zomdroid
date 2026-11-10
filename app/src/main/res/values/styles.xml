@@ -30,6 +30,19 @@
         <item name="android:color">@color/bottom_nav_indicator</item>
     </style>
 
+    <!-- A dialog whose buttons are real orange buttons, not text links (mod copying). -->
+    <style name="ThemeOverlay.Zomdroid.ButtonDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="buttonBarPositiveButtonStyle">@style/AppTheme.DialogButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/AppTheme.DialogButton</item>
+        <item name="buttonBarNeutralButtonStyle">@style/AppTheme.DialogButton</item>
+    </style>
+    <style name="AppTheme.DialogButton" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/pz_orange</item>
+        <item name="android:textColor">?attr/colorOnPrimary</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:layout_marginStart">6dp</item>
+    </style>
+
     <!-- Import / export screen (fragment_transfer.xml) -->
     <style name="AppTheme.TransferCard" parent="">
         <item name="android:layout_marginStart">16dp</item>

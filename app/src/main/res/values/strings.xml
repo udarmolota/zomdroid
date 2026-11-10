@@ -880,7 +880,7 @@
     <string name="mods_copy">Copy all mods to another instance</string>
     <string name="mods_copy_choose_list">Choose a mod list of the instance to copy from.</string>
     <string name="mods_copy_no_target">No other Build %1$s instance to copy to.</string>
-    <string name="mods_copy_title">Copy all mods of %1$s to:</string>
+    <string name="mods_copy_title">Copy mods of %1$s to:</string>
     <string name="mods_copy_running">Copying mods to %1$s</string>
     <string name="mods_copy_done">Copied: %1$d. Already there, left as they were: %2$d.</string>
     <string name="mods_copy_done_short">Mods copied: %1$d</string>
@@ -908,4 +908,13 @@
     <string name="projects_page">Page</string>
     <string name="projects_latest_version">Latest version: %1$s</string>
     <string name="projects_reddit_title" translatable="false">r/UdarMolotaDev</string>
+    <string name="mods_copy_zombiebuddy">ZombieBuddy was not copied: it works only when installed on the Optimization screen. Install it there for %1$s.</string>
+    <string name="mods_copy_zombiebuddy_needed">These mods need it:</string>
+    <string name="mods_copy_pick_title">Mods to copy to %1$s</string>
+    <string name="mods_copy_already_there">%1$s (already there)</string>
+    <string name="mods_copy_go">Copy</string>
+    <string name="mods_copy_none_picked">No mod selected.</string>
+    <string name="mods_copy_nothing">This instance has no mods to copy.</string>
+    <string name="mods_copy_uncheck_all">Uncheck all</string>
+    <string name="mods_copy_check_all">Check all</string>
 </resources>

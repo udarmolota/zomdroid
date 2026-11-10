@@ -860,7 +860,7 @@
     <string name="mods_copy">Salin semua mod ke instance lain</string>
     <string name="mods_copy_choose_list">Pilih daftar mod dari instance sumber.</string>
     <string name="mods_copy_no_target">Tidak ada instance Build %1$s lain untuk tujuan salin.</string>
-    <string name="mods_copy_title">Salin semua mod dari %1$s ke:</string>
+    <string name="mods_copy_title">Salin mod dari %1$s ke:</string>
     <string name="mods_copy_running">Menyalin mod ke %1$s</string>
     <string name="mods_copy_done">Disalin: %1$d. Sudah ada, dibiarkan: %2$d.</string>
     <string name="mods_copy_done_short">Mod disalin: %1$d</string>
@@ -887,4 +887,13 @@
     <string name="projects_download">Unduh</string>
     <string name="projects_page">Halaman</string>
     <string name="projects_latest_version">Versi terbaru: %1$s</string>
+    <string name="mods_copy_zombiebuddy">ZombieBuddy tidak disalin: ia hanya berfungsi jika dipasang di layar Optimasi. Pasang di sana untuk %1$s.</string>
+    <string name="mods_copy_zombiebuddy_needed">Mod ini membutuhkannya:</string>
+    <string name="mods_copy_pick_title">Mod yang disalin ke %1$s</string>
+    <string name="mods_copy_already_there">%1$s (sudah ada)</string>
+    <string name="mods_copy_go">Salin</string>
+    <string name="mods_copy_none_picked">Tidak ada mod yang dipilih.</string>
+    <string name="mods_copy_nothing">Instance ini tidak punya mod untuk disalin.</string>
+    <string name="mods_copy_uncheck_all">Hapus semua centang</string>
+    <string name="mods_copy_check_all">Centang semua</string>
 </resources>

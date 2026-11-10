@@ -192,14 +192,74 @@ public class ModsFragment extends Fragment {
         java.util.Collections.sort(targets, (a, b) -> a.getName().compareToIgnoreCase(b.getName()));
         String[] names = new String[targets.size()];
         for (int i = 0; i < names.length; i++) names[i] = targets.get(i).getName();
-        new MaterialAlertDialogBuilder(requireContext())
+        new MaterialAlertDialogBuilder(requireContext(), R.style.ThemeOverlay_Zomdroid_ButtonDialog)
                 .setTitle(getString(R.string.mods_copy_title, from.getName()))
-                .setItems(names, (d, which) -> copyMods(from, targets.get(which)))
+                .setItems(names, (d, which) -> chooseModsToCopy(from, targets.get(which)))
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
     }
 
-    private void copyMods(GameInstance from, GameInstance to) {
+    /**
+     * Ticks for each mod of the source: all ticked, except those the target already has (copying
+     * them would change nothing, they stay as they are), which are marked as such.
+     */
+    private void chooseModsToCopy(GameInstance from, GameInstance to) {
+        File fromMods = new File(zomboidDir(from), "mods");
+        File toMods = new File(zomboidDir(to), "mods");
+        List<String> mods = com.zomdroid.mods.ModCopier.listCopyable(fromMods);
+        if (mods.isEmpty()) {
+            Toast.makeText(requireContext(), R.string.mods_copy_nothing, Toast.LENGTH_LONG).show();
+            return;
+        }
+        String[] labels = new String[mods.size()];
+        boolean[] checked = new boolean[mods.size()];
+        for (int i = 0; i < labels.length; i++) {
+            boolean there = new File(toMods, mods.get(i)).exists();
+            labels[i] = there ? getString(R.string.mods_copy_already_there, mods.get(i)) : mods.get(i);
+            checked[i] = !there;
+        }
+        androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext(), R.style.ThemeOverlay_Zomdroid_ButtonDialog)
+                .setTitle(getString(R.string.mods_copy_pick_title, to.getName()))
+                .setMultiChoiceItems(labels, checked, (d, which, isChecked) -> {
+                    checked[which] = isChecked;
+                    updateSelectAllButton((androidx.appcompat.app.AlertDialog) d, checked);
+                })
+                // Set up below: the default handler would close the dialog.
+                .setNeutralButton(R.string.mods_copy_uncheck_all, null)
+                .setPositiveButton(R.string.mods_copy_go, (d, w) -> {
+                    List<String> picked = new ArrayList<>();
+                    for (int i = 0; i < checked.length; i++) if (checked[i]) picked.add(mods.get(i));
+                    if (picked.isEmpty()) {
+                        Toast.makeText(requireContext(), R.string.mods_copy_none_picked, Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    copyMods(from, to, picked);
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+        // One button for both ways: "Uncheck all" while everything is ticked, "Check all" otherwise,
+        // so picking 3 mods out of 100 is not 97 taps.
+        updateSelectAllButton(dialog, checked);
+        dialog.getButton(android.content.DialogInterface.BUTTON_NEUTRAL).setOnClickListener(v -> {
+            boolean all = true;
+            for (boolean c : checked) all &= c;
+            for (int i = 0; i < checked.length; i++) {
+                checked[i] = !all;
+                dialog.getListView().setItemChecked(i, !all);
+            }
+            updateSelectAllButton(dialog, checked);
+        });
+    }
+
+    private void updateSelectAllButton(androidx.appcompat.app.AlertDialog dialog, boolean[] checked) {
+        android.widget.Button b = dialog.getButton(android.content.DialogInterface.BUTTON_NEUTRAL);
+        if (b == null) return;
+        boolean all = true;
+        for (boolean c : checked) all &= c;
+        b.setText(all ? R.string.mods_copy_uncheck_all : R.string.mods_copy_check_all);
+    }
+
+    private void copyMods(GameInstance from, GameInstance to, List<String> picked) {
         if (GameActivity.hasGameJvm()) {
             Toast.makeText(requireContext(), R.string.mods_game_running, Toast.LENGTH_LONG).show();
             return;
@@ -215,8 +275,8 @@ public class ModsFragment extends Fragment {
             File toMods = new File(zomboidDir(to), "mods");
             //noinspection ResultOfMethodCallIgnored
             toMods.mkdirs();
-            com.zomdroid.mods.ModCopier.Result r = com.zomdroid.mods.ModCopier.copyAll(
-                    new File(zomboidDir(from), "mods"), toMods,
+            com.zomdroid.mods.ModCopier.Result r = com.zomdroid.mods.ModCopier.copy(
+                    new File(zomboidDir(from), "mods"), toMods, picked,
                     (name, i, total) -> main.post(() -> wait.setMessage(i + " / " + total + "\n" + name)));
             main.post(() -> {
                 wait.dismiss();
@@ -230,7 +290,16 @@ public class ModsFragment extends Fragment {
                     msg.append("\n\n").append(getString(R.string.mods_copy_failed)).append('\n');
                     for (String f : r.failed) msg.append("• ").append(f).append('\n');
                 }
-                new MaterialAlertDialogBuilder(requireContext())
+                // ZombieBuddy is never copied (ModCopier): say so unless the target has it already.
+                if (r.zombieBuddySkipped
+                        && !new File(toMods, com.zomdroid.mods.ModCopier.ZOMBIE_BUDDY_FOLDER).isDirectory()) {
+                    msg.append("\n\n").append(getString(R.string.mods_copy_zombiebuddy, to.getName()));
+                    if (!r.needZombieBuddy.isEmpty()) {
+                        msg.append('\n').append(getString(R.string.mods_copy_zombiebuddy_needed)).append('\n');
+                        for (String m : r.needZombieBuddy) msg.append("• ").append(m).append('\n');
+                    }
+                }
+                new MaterialAlertDialogBuilder(requireContext(), R.style.ThemeOverlay_Zomdroid_ButtonDialog)
                         .setTitle(to.getName())
                         .setMessage(msg.toString().trim())
                         .setPositiveButton(android.R.string.ok, null)

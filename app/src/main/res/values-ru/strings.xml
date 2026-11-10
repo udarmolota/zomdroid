@@ -859,7 +859,7 @@
     <string name="mods_copy">Скопировать все моды в другой инстанс</string>
     <string name="mods_copy_choose_list">Выберите список модов инстанса, из которого копировать.</string>
     <string name="mods_copy_no_target">Нет другого инстанса Build %1$s, куда можно скопировать.</string>
-    <string name="mods_copy_title">Скопировать все моды %1$s в:</string>
+    <string name="mods_copy_title">Скопировать моды %1$s в:</string>
     <string name="mods_copy_running">Копирую моды в %1$s</string>
     <string name="mods_copy_done">Скопировано: %1$d. Уже были, оставлены как есть: %2$d.</string>
     <string name="mods_copy_done_short">Скопировано модов: %1$d</string>
@@ -886,4 +886,13 @@
     <string name="projects_download">Скачать</string>
     <string name="projects_page">Страница</string>
     <string name="projects_latest_version">Последняя версия: %1$s</string>
+    <string name="mods_copy_zombiebuddy">ZombieBuddy не перенесён: он работает, только если установлен на экране «Оптимизация». Установите его там для %1$s.</string>
+    <string name="mods_copy_zombiebuddy_needed">Он нужен этим модам:</string>
+    <string name="mods_copy_pick_title">Какие моды скопировать в %1$s</string>
+    <string name="mods_copy_already_there">%1$s (уже есть)</string>
+    <string name="mods_copy_go">Скопировать</string>
+    <string name="mods_copy_none_picked">Не выбрано ни одного мода.</string>
+    <string name="mods_copy_nothing">В этом инстансе нет модов для копирования.</string>
+    <string name="mods_copy_uncheck_all">Снять все</string>
+    <string name="mods_copy_check_all">Отметить все</string>
 </resources>
