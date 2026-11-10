@@ -165,16 +165,48 @@ public class ProjectsFragment extends Fragment {
         }, "projects-version").start();
     }
 
+    /**
+     * An icon by URL: the copy saved last time first, so it shows without a network, then the
+     * current one from the network, which replaces the saved copy when it decodes.
+     */
     private void loadIcon(ImageView view, String url) {
+        File cached = new File(new File(requireContext().getFilesDir(), ICON_CACHE_DIR), iconCacheName(url));
         new Thread(() -> {
+            if (cached.isFile()) {
+                Bitmap old = BitmapFactory.decodeFile(cached.getAbsolutePath());
+                if (old != null) onUi(() -> view.setImageBitmap(old));
+            }
             try {
                 byte[] data = get(url);
                 Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
-                if (bmp != null) onUi(() -> view.setImageBitmap(bmp));
+                if (bmp == null) return;
+                onUi(() -> view.setImageBitmap(bmp));
+                File dir = cached.getParentFile();
+                if (dir != null && (dir.isDirectory() || dir.mkdirs())) {
+                    File tmp = new File(dir, cached.getName() + ".tmp");
+                    try (FileOutputStream out = new FileOutputStream(tmp)) {
+                        out.write(data);
+                    }
+                    if (!tmp.renameTo(cached)) Log.w(LOG_TAG, "icon not cached: " + url);
+                }
             } catch (Exception e) {
                 Log.i(LOG_TAG, "icon not loaded: " + e);
             }
         }, "projects-icon").start();
+    }
+
+    private static final String ICON_CACHE_DIR = "project_icons";
+
+    /** A file name from the URL (its SHA-1), so a changed link never shows an old picture. */
+    private static String iconCacheName(String url) {
+        try {
+            byte[] d = java.security.MessageDigest.getInstance("SHA-1").digest(url.getBytes(StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+            for (byte b : d) sb.append(String.format(java.util.Locale.US, "%02x", b));
+            return sb.toString();
+        } catch (Exception e) {
+            return Integer.toHexString(url.hashCode());
+        }
     }
 
     private void open(String url) {
