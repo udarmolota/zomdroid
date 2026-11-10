@@ -60,6 +60,28 @@ jobs:
     - name: Build Release APK
       run: ./gradlew assembleRelease
 
+    # The release key, with the lineage from the old AOSP test key that signed every release before
+    # it, so a release installs over any earlier one and keeps the data (rotation needs Android 9+,
+    # minSdk is 30). v3 only: v1/v2 would need the old key too. Same key and lineage as ValDroid.
+    - name: Sign Release APK
+      env:
+        SIGNING_KEY_BASE64: ${{ secrets.SIGNING_KEY_BASE64 }}
+        SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+        SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+        SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+      run: |
+        if [ -z "$SIGNING_KEY_BASE64" ]; then echo "No signing secrets: the release APK stays unsigned"; exit 0; fi
+        BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -n 1)
+        APK=$(ls app/build/outputs/apk/release/zomdroid-release-*.apk | head -n 1)
+        KEY="$RUNNER_TEMP/release.p12"
+        echo "$SIGNING_KEY_BASE64" | base64 -d > "$KEY"
+        "$BT/apksigner" sign --ks "$KEY" --ks-type PKCS12 --ks-key-alias "$SIGNING_KEY_ALIAS" \
+          --ks-pass env:SIGNING_STORE_PASSWORD --key-pass env:SIGNING_KEY_PASSWORD \
+          --lineage tools/signing/zomdroid.lineage --rotation-min-sdk-version 28 \
+          --v1-signing-enabled false --v2-signing-enabled false --v3-signing-enabled true "$APK"
+        rm -f "$KEY"
+        "$BT/apksigner" verify --print-certs --min-sdk-version 30 "$APK"
+
     - name: Upload Debug APK
       uses: actions/upload-artifact@v4
       with:

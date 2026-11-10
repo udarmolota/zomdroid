@@ -12,6 +12,23 @@
 > owned copy. See [NOTICE](NOTICE.md) for the full statement, the changes the launcher makes to your
 > own copy on your device, and every third-party component and its licence.
 
+## Download only from GitHub
+
+> [!CAUTION]
+> Zomdroid turns up on APK sites, repacked. In a repack the code can be changed, and nobody can
+> tell you how or into what. Repacked launchers are not supported.
+
+Get Zomdroid only from the [Releases page](https://github.com/udarmolota/zomdroid/releases). Since
+1.5.3 it is signed with my own key. Certificate fingerprint (SHA-256):
+
+```
+F8:5A:43:7A:50:90:FB:84:B9:EB:2A:4C:BF:F5:AB:C0:7E:4D:3B:A2:D5:C4:BE:02:59:63:6F:3A:62:4E:D2:C6
+```
+
+You can check it in apps like MT Manager or App Manager. The real Zomdroid also installs over any
+earlier release as an update and keeps your instances: if Android refuses to update your copy with
+the one from GitHub, your copy is not the original.
+
 ## Features
 
 - ✔️ Supports **Project Zomboid Build 41**

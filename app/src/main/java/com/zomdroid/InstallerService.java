@@ -1049,6 +1049,7 @@ public class InstallerService extends Service implements TaskProgressListener {
             // a report cannot say which binary produced it. "+" means the tree had uncommitted work.
             writeLogUtf8(zos, "Zomdroid : " + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE
                     + ", " + BuildConfig.GIT_BUILD_ID + ")\n");
+            writeLogUtf8(zos, "Signed   : " + ApkSigner.describe(context) + "\n");
             // Which instance this report is even about, and the flag half our trigger handling
             // keys on. A player exported a Build 41 report for a Build 42 bug and it took two
             // assistants a day to establish from java.library.path what one header line would
