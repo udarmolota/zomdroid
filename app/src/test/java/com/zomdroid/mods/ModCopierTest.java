@@ -45,5 +45,22 @@ public class ModCopierTest {
         assertEquals("old", new String(Files.readAllBytes(new File(to, "Kept/mod.info").toPath()), StandardCharsets.UTF_8));
         assertFalse(new File(to, "data").exists());
         assertFalse(new File(to, "loose.txt").exists());
+        assertFalse(r.zombieBuddySkipped);
+    }
+
+    @Test
+    public void leavesZombieBuddyOutAndNamesTheModsThatNeedIt() throws IOException {
+        File from = tmp.newFolder("from");
+        File to = tmp.newFolder("to");
+        write(new File(from, "ZombieBuddy/42/mod.info"), "id=ZombieBuddy");
+        write(new File(from, "ZBBetterFPS/42.13/mod.info"), "id=ZBBetterFPS\nrequire=\\ZombieBuddy");
+        write(new File(from, "Plain/mod.info"), "id=Plain");
+
+        ModCopier.Result r = ModCopier.copyAll(from, to, null);
+
+        assertTrue(r.zombieBuddySkipped);
+        assertFalse(new File(to, "ZombieBuddy").exists());
+        assertEquals(Arrays.asList("Plain", "ZBBetterFPS"), r.copied);
+        assertEquals(Collections.singletonList("ZBBetterFPS"), r.needZombieBuddy);
     }
 }
