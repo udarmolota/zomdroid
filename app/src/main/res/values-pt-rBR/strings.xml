@@ -617,6 +617,12 @@
     <string name="steam_dl_download_mods">Baixar mods</string>
     <string name="steam_dl_required">Obrigatório</string>
     <string name="steam_dl_mods_empty">Digite um ID ou link da Workshop (mod ou coleção)</string>
+    <string name="copying_game_files">Copiando arquivos do jogo…</string>
+    <string name="steam_dl_create_instance">Criar instância</string>
+    <string name="steam_dl_game_ready_title">Jogo baixado</string>
+    <string name="steam_dl_game_ready_message">Criar uma instância do jogo a partir de %1$s agora? Os arquivos são copiados para a instância; depois você pode apagar o download.</string>
+    <string name="steam_dl_later">Depois</string>
+    <string name="steam_dl_pick_download">Escolha um download</string>
     <string name="steam_dl_storage_title">Acesso ao armazenamento necessário</string>
     <string name="steam_dl_storage_message">O jogo e os mods são salvos na pasta pública Downloads/zomdroid para você ver, compartilhar e importar. Conceda \"Acesso a todos os arquivos\" ao Zomdroid e toque em Baixar novamente.</string>
     <string name="steam_dl_grant">Conceder</string>

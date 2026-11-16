@@ -57,6 +57,8 @@ public class NewGameInstanceFragment extends Fragment {
      * Navigation argument: the absolute path of an archive to install, so the screen opens with the
      * file already chosen. The GOG downloader hands over the installer it fetched this way, because
      * the picker below is ZIP-only and most file managers would not show it a bare .sh anyway.
+     * The Steam downloader hands over the game FOLDER it downloaded; it is copied as it is, with no
+     * ZIP in between.
      */
     public static final String ARG_PRESELECTED_FILE = "preselected_file";
 
@@ -194,7 +196,7 @@ public class NewGameInstanceFragment extends Fragment {
         String preselected = getArguments() == null ? null : getArguments().getString(ARG_PRESELECTED_FILE);
         if (preselected != null) {
             File chosen = new File(preselected);
-            if (chosen.isFile()) {
+            if (chosen.isFile() || chosen.isDirectory()) {
                 gameFilesZipUri = Uri.fromFile(chosen);
                 detectedPreset = null;
                 binding.newGameInstanceFilesPathEt.setText(chosen.getName());
@@ -373,6 +375,13 @@ public class NewGameInstanceFragment extends Fragment {
     // the extracted files. Returns null if the archive cannot be read (e.g. a non-seekable provider).
     private Detection detect(Context ctx, Uri uri) {
         long t0 = System.currentTimeMillis();
+        if (isFileUri(uri) && new File(uri.getPath()).isDirectory()) {
+            // A game folder (from the Steam downloader): the files are right there to look at.
+            InstallationPreset preset = PresetManager.detectFromGameDir(new File(uri.getPath()));
+            android.util.Log.i("PresetDetect", "detect folder: preset=" + (preset == null ? null : preset.name)
+                    + " took=" + (System.currentTimeMillis() - t0) + "ms");
+            return preset == null ? null : new Detection(preset, GogInstallerExtractor.KIND_FOLDER);
+        }
         List<String> names = entryNames(ctx, uri);
         if (names == null) return null;
         String kind = GogInstallerExtractor.KIND_GAME_ZIP;

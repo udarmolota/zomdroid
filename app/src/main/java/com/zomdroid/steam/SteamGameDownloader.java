@@ -62,7 +62,8 @@ import kotlinx.coroutines.GlobalScope;
  *
  * <p>Logs in (credentials → Steam Mobile approval push, or Steam Guard code) because the game depot
  * key requires ownership. Output is a plain folder under the public
- * Downloads/zomdroid/ProjectZomboid_&lt;build&gt; — no instance is created here.
+ * Downloads/zomdroid/ProjectZomboid_&lt;build&gt; — no instance is created here; the download
+ * screen then offers to create one straight from that folder (no ZIP needed).
  *
  * <p>Manifest: blank → the latest public build; a specific manifest id → exactly that build.
  * Refresh token kept ONLY in memory (never on disk).
@@ -84,6 +85,8 @@ public class SteamGameDownloader implements Runnable, Cancellable {
         void onProgress(String message);
         default void onPercent(int percent) {}
         void onDone(String message);
+        /** The game finished downloading into dir; called just before {@link #onDone}. */
+        default void onGameDownloaded(File dir) {}
     }
 
     private final String username, password;
@@ -144,6 +147,24 @@ public class SteamGameDownloader implements Runnable, Cancellable {
     public static File getDownloadsDir() {
         File dl = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         return new File(dl, "zomdroid");
+    }
+
+    /**
+     * Game folders this downloader finished in Downloads/zomdroid, newest first. A folder counts as
+     * finished once it holds {@link MacosLibraries#LINUX_METADATA}, which is written only after
+     * every file was downloaded. Empty without All-files access.
+     */
+    public static List<File> listDownloadedGames() {
+        List<File> result = new java.util.ArrayList<>();
+        File[] dirs = getDownloadsDir().listFiles(f -> f.isDirectory()
+                && f.getName().startsWith("ProjectZomboid_")
+                && new File(f, MacosLibraries.LINUX_METADATA).isFile());
+        if (dirs == null) return result;
+        Collections.addAll(result, dirs);
+        result.sort((a, b) -> Long.compare(
+                new File(b, MacosLibraries.LINUX_METADATA).lastModified(),
+                new File(a, MacosLibraries.LINUX_METADATA).lastModified()));
+        return result;
     }
 
     /**
@@ -647,6 +668,7 @@ public class SteamGameDownloader implements Runnable, Cancellable {
                 done(libraryPack.id + " libraries installed, manifest " + Long.toUnsignedString(gid));
             } else {
                 java.nio.file.Files.write(new File(fOutDir, MacosLibraries.LINUX_METADATA).toPath(), metadata.toString(2).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                if (listener != null) listener.onGameDownloaded(fOutDir);
                 done("Game downloaded to " + fOutDir.getAbsolutePath());
             }
         } catch (Throwable t) {

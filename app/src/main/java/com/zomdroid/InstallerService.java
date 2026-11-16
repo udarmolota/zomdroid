@@ -2201,15 +2201,19 @@ public class InstallerService extends Service implements TaskProgressListener {
         }
     }
 
-    // The game files come in three shapes: the usual ZIP of the Linux build, GOG's Linux installer
-    // (a shell script with the game ZIP appended, handed over by path from the GOG downloader), or
-    // a ZIP wrapping such installers, which is what a file picker can deliver. The kind is decided
+    // The game files come in four shapes: the usual ZIP of the Linux build, GOG's Linux installer
+    // (a shell script with the game ZIP appended, handed over by path from the GOG downloader),
+    // a ZIP wrapping such installers, which is what a file picker can deliver, or a plain game
+    // folder, handed over by path from the Steam downloader. The kind is decided
     // by the new-instance screen from the archive index and passed along; nothing here re-sniffs a
     // multi-gigabyte stream.
     private void installGameFiles(GameInstance gameInstance, Uri archiveUri, String kind) throws IOException {
         File gameDir = new File(gameInstance.getGamePath());
         File cache = new File(getCacheDir(), "gog-install");
-        if (GogInstallerExtractor.KIND_INSTALLER.equals(kind)) {
+        if (GogInstallerExtractor.KIND_FOLDER.equals(kind)) {
+            if (!"file".equals(archiveUri.getScheme())) throw new IOException("Not a folder: " + archiveUri);
+            copyGameFolder(new File(archiveUri.getPath()), gameDir);
+        } else if (GogInstallerExtractor.KIND_INSTALLER.equals(kind)) {
             File installer = "file".equals(archiveUri.getScheme()) ? new File(archiveUri.getPath()) : null;
             File spooled = null;
             try {
@@ -2238,6 +2242,61 @@ public class InstallerService extends Service implements TaskProgressListener {
         } else {
             installGameFromZip(gameInstance, archiveUri);
         }
+    }
+
+    // Copies a downloaded game folder into the instance. The download sits on shared storage and the
+    // instance in app storage, so this is a real copy, not a rename; the source is left alone.
+    // Symlinks and the downloader's own resume markers are skipped.
+    private void copyGameFolder(File src, File dst) throws IOException {
+        if (!src.isDirectory()) throw new IOException("Game folder not found: " + src);
+        onProgressUpdate(getString(R.string.copying_game_files), -1, 0);
+        long total = folderSize(src);
+        if (!dst.isDirectory() && !dst.mkdirs()) throw new IOException("Failed to create " + dst);
+        long free = dst.getUsableSpace();
+        if (total > 0 && free > 0 && free < total) {
+            throw new IOException("Not enough free space: the game needs " + (total >> 20)
+                    + " MB, " + (free >> 20) + " MB available");
+        }
+        copyGameFolder(src, dst, new long[]{0}, total);
+    }
+
+    private void copyGameFolder(File src, File dst, long[] copied, long total) throws IOException {
+        File[] files = src.listFiles();
+        if (files == null) throw new IOException("Cannot read " + src);
+        if (!dst.isDirectory() && !dst.mkdirs()) throw new IOException("Failed to create " + dst);
+        for (File f : files) {
+            if (!isCopiedFromDownload(f)) continue;
+            File target = new File(dst, f.getName());
+            if (f.isDirectory()) {
+                copyGameFolder(f, target, copied, total);
+                continue;
+            }
+            try (InputStream is = new FileInputStream(f);
+                 OutputStream os = new FileOutputStream(target)) {
+                byte[] buf = new byte[256 * 1024];
+                int r;
+                while ((r = is.read(buf)) != -1) {
+                    os.write(buf, 0, r);
+                    copied[0] += r;
+                    if (total > 0) onProgressUpdate(null, (int) (copied[0] * 100 / total), 100);
+                }
+            }
+        }
+    }
+
+    private static long folderSize(File dir) {
+        File[] files = dir.listFiles();
+        if (files == null) return 0;
+        long size = 0;
+        for (File f : files) {
+            if (!isCopiedFromDownload(f)) continue;
+            size += f.isDirectory() ? folderSize(f) : f.length();
+        }
+        return size;
+    }
+
+    private static boolean isCopiedFromDownload(File f) {
+        return !Files.isSymbolicLink(f.toPath()) && !f.getName().startsWith(".zomdroid_complete_");
     }
 
     // The size behind a URI, or -1: a content provider may not say, and a file:// URI has no

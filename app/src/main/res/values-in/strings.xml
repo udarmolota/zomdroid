@@ -618,6 +618,12 @@
     <string name="steam_dl_download_mods">Unduh mod</string>
     <string name="steam_dl_required">Wajib</string>
     <string name="steam_dl_mods_empty">Masukkan ID atau tautan Workshop (mod atau koleksi)</string>
+    <string name="copying_game_files">Menyalin file game…</string>
+    <string name="steam_dl_create_instance">Buat instance</string>
+    <string name="steam_dl_game_ready_title">Game sudah diunduh</string>
+    <string name="steam_dl_game_ready_message">Buat instance game dari %1$s sekarang? File akan disalin ke instance; setelah itu unduhan bisa dihapus.</string>
+    <string name="steam_dl_later">Nanti</string>
+    <string name="steam_dl_pick_download">Pilih unduhan</string>
     <string name="steam_dl_storage_title">Perlu akses penyimpanan</string>
     <string name="steam_dl_storage_message">Game dan mod disimpan ke folder publik Downloads/zomdroid agar bisa dilihat, dibagikan, dan diimpor. Berikan \"Akses ke semua file\" untuk Zomdroid, lalu ketuk Unduh lagi.</string>
     <string name="steam_dl_grant">Izinkan</string>

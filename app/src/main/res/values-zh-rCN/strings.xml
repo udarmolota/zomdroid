@@ -599,6 +599,12 @@
     <string name="steam_dl_download_mods">下载模组</string>
     <string name="steam_dl_required">必填</string>
     <string name="steam_dl_mods_empty">请输入创意工坊 ID 或链接（模组或合集）</string>
+    <string name="copying_game_files">正在复制游戏文件…</string>
+    <string name="steam_dl_create_instance">创建实例</string>
+    <string name="steam_dl_game_ready_title">游戏已下载</string>
+    <string name="steam_dl_game_ready_message">现在从 %1$s 创建游戏实例吗？文件会被复制到实例中，之后可以删除下载的文件。</string>
+    <string name="steam_dl_later">稍后</string>
+    <string name="steam_dl_pick_download">选择一个下载</string>
     <string name="steam_dl_storage_title">需要存储访问权限</string>
     <string name="steam_dl_storage_message">游戏和模组会保存到公共的 Downloads/zomdroid 文件夹，方便查看、分享和导入。请授予 Zomdroid「所有文件访问权限」，然后再次点击下载。</string>
     <string name="steam_dl_grant">授予</string>

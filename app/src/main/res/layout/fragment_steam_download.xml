@@ -267,6 +267,15 @@
                     android:visibility="gone"
                     android:text="@string/steam_dl_cancel"/>
 
+                <Button
+                    android:id="@+id/btn_dl_create_instance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="8dp"
+                    android:visibility="gone"
+                    android:text="@string/steam_dl_create_instance"/>
+
                 <TextView
                     android:id="@+id/tv_dl_status"
                     android:layout_width="match_parent"

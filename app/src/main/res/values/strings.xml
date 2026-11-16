@@ -129,6 +129,12 @@
     <string name="steam_dl_download_mods">Download mods</string>
     <string name="steam_dl_required">Required</string>
     <string name="steam_dl_mods_empty">Enter a Workshop ID or link (mod or collection)</string>
+    <string name="copying_game_files">Copying game files…</string>
+    <string name="steam_dl_create_instance">Create instance</string>
+    <string name="steam_dl_game_ready_title">Game downloaded</string>
+    <string name="steam_dl_game_ready_message">Create a game instance from %1$s now? The files are copied into the instance; you can delete the download afterwards.</string>
+    <string name="steam_dl_later">Later</string>
+    <string name="steam_dl_pick_download">Choose a download</string>
     <string name="steam_dl_storage_title">Storage access needed</string>
     <string name="steam_dl_storage_message">The game and mods are saved into the public Downloads/zomdroid folder so you can see, share and import them. Please grant \"All files access\" to Zomdroid, then tap Download again.</string>
     <string name="steam_dl_grant">Grant</string>

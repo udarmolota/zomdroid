@@ -53,6 +53,8 @@ public final class GogInstallerExtractor {
     public static final String KIND_GAME_ZIP = "GAME_ZIP";
     public static final String KIND_INSTALLER = "GOG_INSTALLER";
     public static final String KIND_BUNDLE = "GOG_BUNDLE";
+    /** An unpacked game folder on disk, e.g. what the Steam downloader leaves in Downloads. */
+    public static final String KIND_FOLDER = "GAME_FOLDER";
 
     /** GOG puts the game under this segment; the prefix up to and including it is stripped. */
     private static final String GAME_MARKER = "/game/";
