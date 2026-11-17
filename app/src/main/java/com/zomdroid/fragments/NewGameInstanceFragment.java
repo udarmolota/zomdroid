@@ -36,6 +36,7 @@ import com.zomdroid.game.GameInstanceManager;
 import com.zomdroid.game.PresetManager;
 import com.zomdroid.gog.GogInstallerExtractor;
 import com.zomdroid.gog.PrefixedZip;
+import com.zomdroid.steam.SteamGameDownloader;
 
 import java.io.File;
 import java.io.IOException;
@@ -80,6 +81,7 @@ public class NewGameInstanceFragment extends Fragment {
                     gameFilesZipUri = uri;
                     detectedPreset = null;
                     archiveKind = GogInstallerExtractor.KIND_GAME_ZIP;
+                    binding.newGameInstanceFilesTv.setText(R.string.game_instance_files);
                     binding.newGameInstanceBannerIv.setImageResource(R.drawable.banner_default);
                     String fileName = extractFileName(uri);
                     binding.newGameInstanceFilesPathEt.setText(fileName);
@@ -183,8 +185,7 @@ public class NewGameInstanceFragment extends Fragment {
         binding.newGameInstanceOpenSettingsTv.setVisibility(View.GONE);
 
         // Browse button for game ZIP
-        binding.newGameInstanceFilesBrowseIb.setOnClickListener(v ->
-                actionOpenDocumentLauncher.launch(ZIP_MIME));
+        binding.newGameInstanceFilesBrowseIb.setOnClickListener(v -> browseGameFiles());
 
         // Browse button for native libs ZIP
         binding.newGameInstanceNativeLibsBrowseIb.setOnClickListener(v ->
@@ -196,13 +197,7 @@ public class NewGameInstanceFragment extends Fragment {
         String preselected = getArguments() == null ? null : getArguments().getString(ARG_PRESELECTED_FILE);
         if (preselected != null) {
             File chosen = new File(preselected);
-            if (chosen.isFile() || chosen.isDirectory()) {
-                gameFilesZipUri = Uri.fromFile(chosen);
-                detectedPreset = null;
-                binding.newGameInstanceFilesPathEt.setText(chosen.getName());
-                if (chosen.isDirectory()) binding.newGameInstanceFilesTv.setText(R.string.game_instance_files_folder);
-                detectAndSelectPreset(gameFilesZipUri);
-            }
+            if (chosen.isFile() || chosen.isDirectory()) selectLocalGameFiles(chosen);
         }
 
         // Create button
@@ -248,6 +243,40 @@ public class NewGameInstanceFragment extends Fragment {
                 });
             }).start();
         });
+    }
+
+    // The browse button: games finished by the Steam downloader are offered first, so a player who
+    // starts here with "+" does not have to ZIP a 5 GB folder; the ZIP picker stays one tap away.
+    // Without a finished download (or All-files access to see one) it is the ZIP picker as before.
+    private void browseGameFiles() {
+        List<File> downloads = android.os.Environment.isExternalStorageManager()
+                ? SteamGameDownloader.listDownloadedGames() : new ArrayList<>();
+        if (downloads.isEmpty()) {
+            actionOpenDocumentLauncher.launch(ZIP_MIME);
+            return;
+        }
+        String[] items = new String[downloads.size() + 1];
+        for (int i = 0; i < downloads.size(); i++) items[i] = downloads.get(i).getName();
+        items[downloads.size()] = getString(R.string.game_instance_pick_zip);
+        new android.app.AlertDialog.Builder(requireActivity())
+                .setTitle(R.string.game_instance_pick_title)
+                .setItems(items, (d, which) -> {
+                    if (which < downloads.size()) selectLocalGameFiles(downloads.get(which));
+                    else actionOpenDocumentLauncher.launch(ZIP_MIME);
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    // A file or folder on disk chosen by path rather than through the picker: a GOG installer or a
+    // Steam download. The picker's ZIP-only rule does not apply; detection reads it in place.
+    private void selectLocalGameFiles(File chosen) {
+        gameFilesZipUri = Uri.fromFile(chosen);
+        detectedPreset = null;
+        binding.newGameInstanceFilesPathEt.setText(chosen.getName());
+        binding.newGameInstanceFilesTv.setText(chosen.isDirectory()
+                ? R.string.game_instance_files_folder : R.string.game_instance_files);
+        detectAndSelectPreset(gameFilesZipUri);
     }
 
     // Records the detected preset/GPU for post-install setup, then starts installation.

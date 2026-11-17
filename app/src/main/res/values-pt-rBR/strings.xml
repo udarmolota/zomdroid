@@ -38,6 +38,8 @@
     <string name="game_instance_preset">Preset</string>
     <string name="game_instance_files">Arquivos do jogo (.zip)</string>
     <string name="game_instance_files_folder">Arquivos do jogo (pasta)</string>
+    <string name="game_instance_pick_title">Arquivos do jogo</string>
+    <string name="game_instance_pick_zip">Escolher um arquivo ZIP…</string>
     <string name="game_instance_browse_files_hint">Procurar arquivos…</string>
     <string name="game_instance_no_file_selected">Nenhum arquivo selecionado</string>
     <string name="game_instance_name_invalid">Nome inválido</string>

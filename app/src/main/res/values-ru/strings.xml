@@ -38,6 +38,8 @@
     <string name="game_instance_preset">Пресет</string>
     <string name="game_instance_files">Файлы игры (.zip)</string>
     <string name="game_instance_files_folder">Файлы игры (папка)</string>
+    <string name="game_instance_pick_title">Файлы игры</string>
+    <string name="game_instance_pick_zip">Выбрать ZIP-файл…</string>
     <string name="game_instance_browse_files_hint">Выбрать файлы…</string>
     <string name="game_instance_no_file_selected">Файлы не выбраны</string>
     <string name="game_instance_name_invalid">Недопустимое название</string>
