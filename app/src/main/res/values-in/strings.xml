@@ -36,6 +36,7 @@
     <string name="game_instance_name">Nama</string>
     <string name="game_instance_preset">Preset</string>
     <string name="game_instance_files">File game (.zip)</string>
+    <string name="game_instance_files_folder">File game (folder)</string>
     <string name="game_instance_browse_files_hint">Cari file…</string>
     <string name="game_instance_no_file_selected">Tidak ada file dipilih</string>
     <string name="game_instance_name_invalid">Nama tidak valid</string>

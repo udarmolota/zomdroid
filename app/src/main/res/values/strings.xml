@@ -46,6 +46,7 @@
     <string name="game_instance_name">Name</string>
     <string name="game_instance_preset">Preset</string>
     <string name="game_instance_files">Game files (.zip)</string>
+    <string name="game_instance_files_folder">Game files (folder)</string>
     <string name="game_instance_browse_files_hint">Browse for files…</string>
     <string name="game_instance_no_file_selected">No files selected</string>
     <string name="game_instance_name_invalid">Invalid name</string>

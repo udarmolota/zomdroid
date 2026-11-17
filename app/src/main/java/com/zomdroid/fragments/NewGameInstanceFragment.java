@@ -200,6 +200,7 @@ public class NewGameInstanceFragment extends Fragment {
                 gameFilesZipUri = Uri.fromFile(chosen);
                 detectedPreset = null;
                 binding.newGameInstanceFilesPathEt.setText(chosen.getName());
+                if (chosen.isDirectory()) binding.newGameInstanceFilesTv.setText(R.string.game_instance_files_folder);
                 detectAndSelectPreset(gameFilesZipUri);
             }
         }
@@ -294,7 +295,10 @@ public class NewGameInstanceFragment extends Fragment {
         // Start the service before navigating: returning to the launcher immediately fires its
         // dependency re-check, and the install must already own the service by then.
         requireContext().startForegroundService(installerIntent);
-        Navigation.findNavController(binding.getRoot()).navigateUp();
+        // Back to the launcher, which shows the install progress - not merely one step back, which
+        // from the Steam or GOG downloader would land on a screen that shows nothing of it.
+        androidx.navigation.NavController nav = Navigation.findNavController(binding.getRoot());
+        if (!nav.popBackStack(R.id.launcher_fragment, false)) nav.navigateUp();
     }
 
     @Override

@@ -37,6 +37,7 @@
     <string name="game_instance_name">名称</string>
     <string name="game_instance_preset">预设</string>
     <string name="game_instance_files">游戏文件（.zip）</string>
+    <string name="game_instance_files_folder">游戏文件（文件夹）</string>
     <string name="game_instance_browse_files_hint">浏览文件…</string>
     <string name="game_instance_no_file_selected">未选择文件</string>
     <string name="game_instance_name_invalid">名称无效</string>

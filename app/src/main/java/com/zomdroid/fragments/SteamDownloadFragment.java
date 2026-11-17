@@ -166,6 +166,14 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
         updateCreateInstanceButton();
     }
 
+    // All-files access is granted in system Settings, outside this screen; check again on return so
+    // the "Create instance" button shows up without leaving and re-entering the screen.
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateCreateInstanceButton();
+    }
+
     @Override
     public void onDestroyView() {
         SteamDownloadState.get().clearView(this);
