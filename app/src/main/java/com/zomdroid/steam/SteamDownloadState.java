@@ -6,6 +6,7 @@ import android.os.Looper;
 
 import com.zomdroid.DownloadKeepAliveService;
 
+import java.io.File;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -43,9 +44,12 @@ public final class SteamDownloadState
     private volatile Cancellable active;
     private volatile Thread activeThread;
     private volatile boolean cancelling;
+    /** The game folder the current session downloaded, once it is complete; null otherwise. */
+    private volatile File downloadedGameDir;
 
     public boolean isDownloading() { return downloading; }
     public boolean isCancelling() { return cancelling; }
+    public File getDownloadedGameDir() { return downloadedGameDir; }
 
     /** Register the running downloader + its thread so the user can cancel it. */
     public void setActive(Cancellable c, Thread t) { active = c; activeThread = t; cancelling = false; }
@@ -72,6 +76,7 @@ public final class SteamDownloadState
         appCtx = context.getApplicationContext();
         synchronized (log) { log.setLength(0); }
         downloading = true;
+        downloadedGameDir = null;
         indeterminate = true;
         percent = -1;
         DownloadKeepAliveService.start(appCtx);
@@ -96,6 +101,11 @@ public final class SteamDownloadState
         percent = Math.max(0, Math.min(100, p));
         indeterminate = false;
         main.post(() -> { if (view != null) view.onPercent(percent, false); });
+    }
+
+    @Override
+    public void onGameDownloaded(File dir) {
+        downloadedGameDir = dir;
     }
 
     @Override

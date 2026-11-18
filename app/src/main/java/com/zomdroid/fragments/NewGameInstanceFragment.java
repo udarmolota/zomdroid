@@ -36,6 +36,7 @@ import com.zomdroid.game.GameInstanceManager;
 import com.zomdroid.game.PresetManager;
 import com.zomdroid.gog.GogInstallerExtractor;
 import com.zomdroid.gog.PrefixedZip;
+import com.zomdroid.steam.SteamGameDownloader;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,6 +58,8 @@ public class NewGameInstanceFragment extends Fragment {
      * Navigation argument: the absolute path of an archive to install, so the screen opens with the
      * file already chosen. The GOG downloader hands over the installer it fetched this way, because
      * the picker below is ZIP-only and most file managers would not show it a bare .sh anyway.
+     * The Steam downloader hands over the game FOLDER it downloaded; it is copied as it is, with no
+     * ZIP in between.
      */
     public static final String ARG_PRESELECTED_FILE = "preselected_file";
 
@@ -78,6 +81,7 @@ public class NewGameInstanceFragment extends Fragment {
                     gameFilesZipUri = uri;
                     detectedPreset = null;
                     archiveKind = GogInstallerExtractor.KIND_GAME_ZIP;
+                    binding.newGameInstanceFilesTv.setText(R.string.game_instance_files);
                     binding.newGameInstanceBannerIv.setImageResource(R.drawable.banner_default);
                     String fileName = extractFileName(uri);
                     binding.newGameInstanceFilesPathEt.setText(fileName);
@@ -181,8 +185,7 @@ public class NewGameInstanceFragment extends Fragment {
         binding.newGameInstanceOpenSettingsTv.setVisibility(View.GONE);
 
         // Browse button for game ZIP
-        binding.newGameInstanceFilesBrowseIb.setOnClickListener(v ->
-                actionOpenDocumentLauncher.launch(ZIP_MIME));
+        binding.newGameInstanceFilesBrowseIb.setOnClickListener(v -> browseGameFiles());
 
         // Browse button for native libs ZIP
         binding.newGameInstanceNativeLibsBrowseIb.setOnClickListener(v ->
@@ -194,12 +197,7 @@ public class NewGameInstanceFragment extends Fragment {
         String preselected = getArguments() == null ? null : getArguments().getString(ARG_PRESELECTED_FILE);
         if (preselected != null) {
             File chosen = new File(preselected);
-            if (chosen.isFile()) {
-                gameFilesZipUri = Uri.fromFile(chosen);
-                detectedPreset = null;
-                binding.newGameInstanceFilesPathEt.setText(chosen.getName());
-                detectAndSelectPreset(gameFilesZipUri);
-            }
+            if (chosen.isFile() || chosen.isDirectory()) selectLocalGameFiles(chosen);
         }
 
         // Create button
@@ -247,6 +245,40 @@ public class NewGameInstanceFragment extends Fragment {
         });
     }
 
+    // The browse button: games finished by the Steam downloader are offered first, so a player who
+    // starts here with "+" does not have to ZIP a 5 GB folder; the ZIP picker stays one tap away.
+    // Without a finished download (or All-files access to see one) it is the ZIP picker as before.
+    private void browseGameFiles() {
+        List<File> downloads = android.os.Environment.isExternalStorageManager()
+                ? SteamGameDownloader.listDownloadedGames() : new ArrayList<>();
+        if (downloads.isEmpty()) {
+            actionOpenDocumentLauncher.launch(ZIP_MIME);
+            return;
+        }
+        String[] items = new String[downloads.size() + 1];
+        for (int i = 0; i < downloads.size(); i++) items[i] = downloads.get(i).getName();
+        items[downloads.size()] = getString(R.string.game_instance_pick_zip);
+        new android.app.AlertDialog.Builder(requireActivity())
+                .setTitle(R.string.game_instance_pick_title)
+                .setItems(items, (d, which) -> {
+                    if (which < downloads.size()) selectLocalGameFiles(downloads.get(which));
+                    else actionOpenDocumentLauncher.launch(ZIP_MIME);
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    // A file or folder on disk chosen by path rather than through the picker: a GOG installer or a
+    // Steam download. The picker's ZIP-only rule does not apply; detection reads it in place.
+    private void selectLocalGameFiles(File chosen) {
+        gameFilesZipUri = Uri.fromFile(chosen);
+        detectedPreset = null;
+        binding.newGameInstanceFilesPathEt.setText(chosen.getName());
+        binding.newGameInstanceFilesTv.setText(chosen.isDirectory()
+                ? R.string.game_instance_files_folder : R.string.game_instance_files);
+        detectAndSelectPreset(gameFilesZipUri);
+    }
+
     // Records the detected preset/GPU for post-install setup, then starts installation.
     private void startInstall(String name, InstallationPreset selectedPreset) {
         boolean isBuild42 = "42".equals(selectedPreset.buildVersion);
@@ -292,7 +324,10 @@ public class NewGameInstanceFragment extends Fragment {
         // Start the service before navigating: returning to the launcher immediately fires its
         // dependency re-check, and the install must already own the service by then.
         requireContext().startForegroundService(installerIntent);
-        Navigation.findNavController(binding.getRoot()).navigateUp();
+        // Back to the launcher, which shows the install progress - not merely one step back, which
+        // from the Steam or GOG downloader would land on a screen that shows nothing of it.
+        androidx.navigation.NavController nav = Navigation.findNavController(binding.getRoot());
+        if (!nav.popBackStack(R.id.launcher_fragment, false)) nav.navigateUp();
     }
 
     @Override
@@ -373,6 +408,13 @@ public class NewGameInstanceFragment extends Fragment {
     // the extracted files. Returns null if the archive cannot be read (e.g. a non-seekable provider).
     private Detection detect(Context ctx, Uri uri) {
         long t0 = System.currentTimeMillis();
+        if (isFileUri(uri) && new File(uri.getPath()).isDirectory()) {
+            // A game folder (from the Steam downloader): the files are right there to look at.
+            InstallationPreset preset = PresetManager.detectFromGameDir(new File(uri.getPath()));
+            android.util.Log.i("PresetDetect", "detect folder: preset=" + (preset == null ? null : preset.name)
+                    + " took=" + (System.currentTimeMillis() - t0) + "ms");
+            return preset == null ? null : new Detection(preset, GogInstallerExtractor.KIND_FOLDER);
+        }
         List<String> names = entryNames(ctx, uri);
         if (names == null) return null;
         String kind = GogInstallerExtractor.KIND_GAME_ZIP;

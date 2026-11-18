@@ -37,6 +37,9 @@
     <string name="game_instance_name">Название</string>
     <string name="game_instance_preset">Пресет</string>
     <string name="game_instance_files">Файлы игры (.zip)</string>
+    <string name="game_instance_files_folder">Файлы игры (папка)</string>
+    <string name="game_instance_pick_title">Файлы игры</string>
+    <string name="game_instance_pick_zip">Выбрать ZIP-файл…</string>
     <string name="game_instance_browse_files_hint">Выбрать файлы…</string>
     <string name="game_instance_no_file_selected">Файлы не выбраны</string>
     <string name="game_instance_name_invalid">Недопустимое название</string>
@@ -617,6 +620,12 @@
     <string name="steam_dl_download_mods">Скачать моды</string>
     <string name="steam_dl_required">Обязательно</string>
     <string name="steam_dl_mods_empty">Введите ID или ссылку (мод или коллекция)</string>
+    <string name="copying_game_files">Копирование файлов игры…</string>
+    <string name="steam_dl_create_instance">Создать экземпляр</string>
+    <string name="steam_dl_game_ready_title">Игра загружена</string>
+    <string name="steam_dl_game_ready_message">Создать экземпляр игры из %1$s сейчас? Файлы будут скопированы в экземпляр, после этого загрузку можно удалить.</string>
+    <string name="steam_dl_later">Позже</string>
+    <string name="steam_dl_pick_download">Выберите загрузку</string>
     <string name="steam_dl_storage_title">Нужен доступ к файлам</string>
     <string name="steam_dl_storage_message">Игра и моды сохраняются в публичную папку Downloads/zomdroid, чтобы их можно было видеть, передавать и импортировать. Дайте Zomdroid «Доступ ко всем файлам» и нажмите «Скачать» снова.</string>
     <string name="steam_dl_grant">Разрешить</string>

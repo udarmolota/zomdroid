@@ -23,6 +23,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.zomdroid.R;
@@ -30,6 +31,7 @@ import com.zomdroid.steam.SteamDownloadState;
 import com.zomdroid.steam.SteamGameDownloader;
 import com.zomdroid.steam.SteamModDownloader;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -51,7 +53,7 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
     private String mpInstanceName;
 
     private EditText etUser, etPass, etManifest, etModsIds;
-    private Button btnStart, btnModsStart, btnCancel;
+    private Button btnStart, btnModsStart, btnCancel, btnCreateInstance;
     private ProgressBar progress;
     private TextView tvStatus;
     private android.view.View blockLogin, sectionGame, sectionMods;
@@ -76,6 +78,7 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
         btnStart = v.findViewById(R.id.btn_dl_start);
         btnModsStart = v.findViewById(R.id.btn_mods_start);
         btnCancel = v.findViewById(R.id.btn_dl_cancel);
+        btnCreateInstance = v.findViewById(R.id.btn_dl_create_instance);
         progress = v.findViewById(R.id.progress_dl);
         tvStatus = v.findViewById(R.id.tv_dl_status);
         blockLogin = v.findViewById(R.id.block_login);
@@ -86,12 +89,14 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
         btnStart.setOnClickListener(view -> startGame());
         btnModsStart.setOnClickListener(view -> startMods());
         btnCancel.setOnClickListener(view -> confirmCancel());
+        btnCreateInstance.setOnClickListener(view -> pickDownloadedGame());
 
         MaterialButtonToggleGroup toggle = v.findViewById(R.id.toggle_dl_type);
         toggle.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (!isChecked) return;
             boolean game = checkedId == R.id.btn_type_game;
             sectionGame.setVisibility(game ? View.VISIBLE : View.GONE);
+            updateCreateInstanceButton();
             sectionMods.setVisibility(game ? View.GONE : View.VISIBLE);
             blockLogin.setVisibility(game ? View.VISIBLE : View.GONE);
         });
@@ -158,6 +163,15 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
         } else {
             progress.setVisibility(View.GONE);
         }
+        updateCreateInstanceButton();
+    }
+
+    // All-files access is granted in system Settings, outside this screen; check again on return so
+    // the "Create instance" button shows up without leaving and re-entering the screen.
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateCreateInstanceButton();
     }
 
     @Override
@@ -276,6 +290,7 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
 
     private void beginUi() {
         setControlsEnabled(false);
+        btnCreateInstance.setVisibility(View.GONE);
         btnCancel.setVisibility(View.VISIBLE);
         tvStatus.setText("");
         progress.setVisibility(View.VISIBLE);
@@ -342,6 +357,64 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
         if (progress != null) progress.setVisibility(View.GONE);
         if (btnCancel != null) btnCancel.setVisibility(View.GONE);
         Toast.makeText(appCtx, message, Toast.LENGTH_LONG).show();
+        updateCreateInstanceButton();
+        // A game download is only useful as an instance: offer that right away, so nobody has to
+        // ZIP a 5 GB folder by hand to get it through the file picker.
+        File dir = SteamDownloadState.get().getDownloadedGameDir();
+        if (dir != null && dir.isDirectory() && isAdded() && isGameDownloadScreen()) {
+            new AlertDialog.Builder(requireActivity())
+                    .setTitle(R.string.steam_dl_game_ready_title)
+                    .setMessage(getString(R.string.steam_dl_game_ready_message, dir.getName()))
+                    .setPositiveButton(R.string.steam_dl_create_instance, (d, w) -> openNewInstance(dir))
+                    .setNegativeButton(R.string.steam_dl_later, null)
+                    .show();
+        }
+    }
+
+    // ---- create an instance from a downloaded game folder ----
+
+    // The macOS / multiplayer library modes reuse this screen for something else entirely.
+    private boolean isGameDownloadScreen() {
+        return macosInstanceName == null && mpInstanceName == null;
+    }
+
+    // Shown on the Game tab whenever a finished game download sits in Downloads/zomdroid, so it
+    // also works after the app was restarted, or for a download made by an earlier version.
+    private void updateCreateInstanceButton() {
+        if (btnCreateInstance == null) return;
+        boolean show = isGameDownloadScreen()
+                && sectionGame != null && sectionGame.getVisibility() == View.VISIBLE
+                && !SteamDownloadState.get().isDownloading()
+                && Environment.isExternalStorageManager()
+                && !SteamGameDownloader.listDownloadedGames().isEmpty();
+        btnCreateInstance.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    private void pickDownloadedGame() {
+        List<File> games = SteamGameDownloader.listDownloadedGames();
+        if (games.isEmpty()) {
+            updateCreateInstanceButton();
+            return;
+        }
+        if (games.size() == 1) {
+            openNewInstance(games.get(0));
+            return;
+        }
+        String[] names = new String[games.size()];
+        for (int i = 0; i < names.length; i++) names[i] = games.get(i).getName();
+        new AlertDialog.Builder(requireActivity())
+                .setTitle(R.string.steam_dl_pick_download)
+                .setItems(names, (d, which) -> openNewInstance(games.get(which)))
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    /** Hand the folder to the new-instance screen by path, the same way the GOG downloader does. */
+    private void openNewInstance(File gameDir) {
+        if (!isAdded()) return;
+        Bundle args = new Bundle();
+        args.putString(NewGameInstanceFragment.ARG_PRESELECTED_FILE, gameDir.getAbsolutePath());
+        NavHostFragment.findNavController(this).navigate(R.id.action_open_new_game_instance_fragment, args);
     }
 
     @Override

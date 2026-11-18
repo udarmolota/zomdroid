@@ -182,6 +182,18 @@
                     android:layout_gravity="center_horizontal"
                     android:minWidth="160dp"
                     android:text="@string/steam_dl_download_game"/>
+
+                <!-- A finished download in Downloads/zomdroid can become an instance directly. -->
+                <Button
+                    android:id="@+id/btn_dl_create_instance"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="4dp"
+                    android:minWidth="160dp"
+                    android:visibility="gone"
+                    android:text="@string/steam_dl_create_instance"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
