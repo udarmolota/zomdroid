@@ -63,6 +63,9 @@ public class GameLauncher {
         // draws its own static background instead of loading a Bink library that does not exist
         // for ARM64. Same deal as above — every launch, so older instances are covered too.
         com.zomdroid.patch.MainScreenStatePatchApplier.applyIfNeeded(gameInstance);
+        // Build 42.22's DoTileBuilding ignores the controller's A on tile cursors (harvest, dig,
+        // build): add our Lua wrapper while the game carries that branch, remove it once it doesn't.
+        com.zomdroid.patch.ControllerTileCursorFix.applyIfNeeded(gameInstance);
         // Mods that pin the game build by hashing the jar zombie.core.Core came from (Project
         // Viewpoint) need Core to come from the real projectzomboid.jar, not from the unpacked copy.
         com.zomdroid.patch.CoreFromGameJar.apply(gameInstance);
@@ -303,9 +306,11 @@ public class GameLauncher {
 
         if (rawArgs != null && !rawArgs.trim().isEmpty()) {
             String[] splitArgs = rawArgs.trim().split("\\s+");
-            for (String arg : splitArgs) {
-                jvmArgs.add(arg);
-            }
+            java.util.List<String> sized = com.zomdroid.game.HeapSizing.apply(
+                    java.util.Arrays.asList(splitArgs), rawArgs,
+                    com.zomdroid.game.HeapSizing.totalMemKb());
+            sized = com.zomdroid.game.GcThreads.apply(sized, rawArgs);
+            jvmArgs.addAll(sized);
         }
 
         File macosGame = new File(gameInstance.getGamePath());

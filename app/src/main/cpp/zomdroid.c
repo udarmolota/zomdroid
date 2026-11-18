@@ -20,6 +20,7 @@
 #include <fcntl.h>
 #include <unwind.h>
 #include "logger.h"
+#include "zomdroid_perf.h"
 
 #define LOG_TAG "zomdroid-main"
 
@@ -38,6 +39,19 @@ ZomdroidSurface g_zomdroid_surface = {.mutex = PTHREAD_MUTEX_INITIALIZER,
 Renderer g_zomdroid_renderer;
 
 atomic_ullong g_zomdroid_presented_frames;
+
+/** Every renderer presents through glfwSwapBuffers, which calls this after each frame. */
+void zomdroid_frame_presented(void) {
+    atomic_fetch_add_explicit(&g_zomdroid_presented_frames, 1, memory_order_relaxed);
+    zomdroid_perf_frame();
+}
+
+// Same routing as [ZMEM]: stdout lands in native.log in timeline order, except in the coop
+// process, where fd 1 carries the CoopSlave protocol.
+static void perf_emit(const char* line) {
+    if (getenv("ZOMDROID_COOP_OUTPUT")) LOGI("%s", line);
+    else printf("%s\n", line);
+}
 
 unsigned long long zomdroid_presented_frames() {
     return atomic_load_explicit(&g_zomdroid_presented_frames, memory_order_relaxed);
@@ -134,6 +148,7 @@ static void monitor_stdio_and_memory() {
     time_t last_mem_check = 0;
     time_t last_mem_log = 0;
     time_t last_mem_sample = 0;
+    time_t last_perf_sample = 0;
 
     while (1) {
         ssize_t i = read(pipefd[0], buffer, sizeof(buffer) - 1);
@@ -158,6 +173,11 @@ static void monitor_stdio_and_memory() {
                 last_mem_log = now;
                 LOGW("Low memory: only %ld MB available", free_mb);
             }
+        }
+
+        if (now - last_perf_sample >= 10) {
+            last_perf_sample = now;
+            zomdroid_perf_sample(perf_emit);
         }
 
         // Printed to stdout on purpose: this loop is what mirrors stdout into native.log, so the

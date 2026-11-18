@@ -1075,6 +1075,11 @@ public class InstallerService extends Service implements TaskProgressListener {
             String jvmArgs = LauncherPreferences.squashWhitespace(settings.getJvmArgs());
             writeLogUtf8(zos, "JVM args : " + (jvmArgs.isEmpty() ? "(none)" : jvmArgs)
                     + "  [" + LauncherPreferences.describeJvmArgsPreset(jvmArgs) + "]\n");
+            // The launch raises the preset's heap on 11 GB+ phones (HeapSizing); the stored args
+            // above do not show that, so say it.
+            if (com.zomdroid.game.HeapSizing.applies(settings.getJvmArgs(), com.zomdroid.game.HeapSizing.totalMemKb())) {
+                writeLogUtf8(zos, "           launched with -Xmx4096M, no SoftMaxHeapSize/MaxHeapFreeRatio (11 GB+ RAM)\n");
+            }
             // Env vars matter as much as the JVM args: knobs like LIBGL_SHRINK, LIBGL_TEXBUDGET and
             // ZINK_DEBUG travel around chats as folklore, and without this line a report gives no
             // way to tell an actual finding from something the player pasted in on someone's advice.
@@ -1097,6 +1102,8 @@ public class InstallerService extends Service implements TaskProgressListener {
             // this is the only record of whether it was a signal, a memory kill or a normal exit
             // (42.22.2: SIGNALED status=6 was the one clue to the signed-jar SecurityException).
             writeLogUtf8(zos, recentExits(context));
+            // Where the last run lost its frames: FPS, stalls, busy threads, swap, GC, heat.
+            writeLogUtf8(zos, com.zomdroid.game.PerfSummary.format(nativeLog, debugLog));
             writeLogUtf8(zos, "===========================\n");
             zos.closeEntry();
 
