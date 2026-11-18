@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.view.MotionEvent;
 
 import androidx.annotation.Nullable;
-import android.graphics.Path;
 
 public class MouseStickControlElement extends AbstractControlElement {
 
@@ -29,8 +28,6 @@ public class MouseStickControlElement extends AbstractControlElement {
     private double freeX = -1;
     private double freeY = -1;
 
-    private final Paint cursorFill   = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Paint cursorStroke = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     public MouseStickControlElement(InputControlsView parentView, ControlElementDescription desc) {
         super(parentView, desc);
@@ -40,16 +37,7 @@ public class MouseStickControlElement extends AbstractControlElement {
         this.sensitivity = (desc.sensitivity > 0f) ? desc.sensitivity : ControlElementDescription.DEFAULT_SENSITIVITY;
         this.drawable = new MouseStickDrawable(parentView, desc);
 
-        cursorFill.setStyle(Paint.Style.FILL);
-        cursorFill.setColor(Color.WHITE);
-        cursorFill.setAlpha(220);
 
-        cursorStroke.setStyle(Paint.Style.STROKE);
-        cursorStroke.setColor(Color.BLACK);
-        cursorStroke.setStrokeWidth(2f * parentView.pixelScale);
-        cursorStroke.setStrokeJoin(Paint.Join.ROUND);
-        cursorStroke.setStrokeCap(Paint.Cap.ROUND);
-        cursorStroke.setAlpha(220);
 
         cursorX = drawable.outerCenterX;
         cursorY = drawable.outerCenterY;
@@ -138,26 +126,8 @@ public class MouseStickControlElement extends AbstractControlElement {
         drawable.draw(canvas);
 
         if (cursorX >= 0 && cursorY >= 0 && !parentView.gameDrawsCursor) {
-            float x = (float) cursorX;
-            float y = (float) cursorY;
-            float s = parentView.pixelScale;
-            float scale = 0.55f;
-
-            float h = 75f * s * scale;
-            float w = 50f * s * scale;
-
-            float notchX = 0.55f;
-            float notchIn = 0.28f;
-
-            Path p = new Path();
-            p.moveTo(x, y);
-            p.lineTo(x + w,             y + h * 0.85f);
-            p.lineTo(x + w * notchX,    y + h - w * notchIn);
-            p.lineTo(x + w * 0.15f,     y + h);
-            p.close();
-
-            canvas.drawPath(p, cursorFill);
-            canvas.drawPath(p, cursorStroke);
+            CursorPainter.draw(canvas, parentView.getContext(), (float) cursorX, (float) cursorY,
+                    44f * parentView.pixelScale);
         }
     }
 

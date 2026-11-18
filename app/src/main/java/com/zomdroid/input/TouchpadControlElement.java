@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 import androidx.annotation.Nullable;
-import android.graphics.Path;
 
 public class TouchpadControlElement extends AbstractControlElement {
 
@@ -41,8 +40,6 @@ public class TouchpadControlElement extends AbstractControlElement {
     // Debug: draw a visible cursor dot on top of everything
     private static final boolean DEBUG_DRAW_CURSOR = true;
 
-    private final Paint debugCursorFill = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Paint debugCursorStroke = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     public TouchpadControlElement(InputControlsView parentView,
                                   ControlElementDescription description) {
@@ -51,14 +48,7 @@ public class TouchpadControlElement extends AbstractControlElement {
         this.tapDisabled = description.tapDisabled;
         this.fullScreen = description.fullScreen;
         this.drawable = new TouchpadDrawable(parentView, description);
-        debugCursorFill.setStyle(Paint.Style.FILL);
-        debugCursorFill.setColor(Color.WHITE);
-        debugCursorFill.setAlpha(220);
 
-        debugCursorStroke.setStyle(Paint.Style.STROKE);
-        debugCursorStroke.setStrokeWidth(3f * parentView.pixelScale);
-        debugCursorStroke.setColor(Color.BLACK);
-        debugCursorStroke.setAlpha(220);
         //Log.d(TAG, "created — rect=" + drawable.rect
         //        + " parentSize=" + parentView.getWidth() + "x" + parentView.getHeight()
         //        + " pixelScale=" + parentView.pixelScale);
@@ -176,30 +166,8 @@ public class TouchpadControlElement extends AbstractControlElement {
         if (parentView.gameDrawsCursor) return; // the game draws its own cursor
         if (cursorX < 0 || cursorY < 0) return;
 
-        float x = (float) cursorX;
-        float y = (float) cursorY;
-        float s = parentView.pixelScale;
-        float scale = 0.55f;
-
-        float h = 75f * s * scale;
-        float w = 50f * s * scale;
-
-        float notchX = 0.55f;
-        float notchIn = 0.28f;
-
-        Path p = new Path();
-        p.moveTo(x, y);
-        p.lineTo(x + w,          y + h * 0.85f);
-        p.lineTo(x + w * notchX, y + h - w * notchIn);
-        p.lineTo(x + w * 0.15f,  y + h);
-        p.close();
-
-        canvas.drawPath(p, debugCursorFill);
-        canvas.drawPath(p, debugCursorStroke);
-
-        //float dotR = 5f * s * scale;
-        //canvas.drawCircle(x, y, dotR, debugCursorFill);
-        //canvas.drawCircle(x, y, dotR, debugCursorStroke);
+        CursorPainter.draw(canvas, parentView.getContext(), (float) cursorX, (float) cursorY,
+                44f * parentView.pixelScale);
     }
     @Override public boolean isPointOver(float x, float y)      { return catchesWholeScreen() || drawable.isPointOver(x, y); }
 
