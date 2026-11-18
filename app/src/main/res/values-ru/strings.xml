@@ -8,7 +8,7 @@
     <string name="legal_notice_message">Этот лаунчер является сторонним инструментом и требует оригинальных файлов Project Zomboid для работы. Для использования этого программного обеспечения вы должны владеть лицензионной копией игры. Разработчик лаунчера не связан с создателями оригинальной игры и не несёт ответственности за какие-либо правовые последствия использования данного программного обеспечения.</string>
 
     <string name="fragment_label_launcher">Лаунчер</string>
-    <string name="fragment_label_new_game_instance">Новый экземпляр игры</string>
+    <string name="fragment_label_new_game_instance">Новый инстанс игры</string>
     <string name="fragment_label_settings">Настройки</string>
     <string name="fragment_label_controls_editor">Редактор управления</string>
     <string name="fragment_label_wiki">Вики</string>
@@ -53,15 +53,15 @@
     <string name="dialog_button_close">Закрыть</string>
     <string name="dialog_button_confirm">Подтвердить</string>
     <string name="dialog_button_cancel">Отмена</string>
-    <string name="dialog_title_delete_game_instance">Удалить экземпляр игры?</string>
+    <string name="dialog_title_delete_game_instance">Удалить инстанс игры?</string>
     <string name="dialog_title_info">Информация</string>
     <string name="dialog_title_fatal_error">Критическая ошибка</string>
-    <string name="dialog_title_creating_instance">Создание экземпляра игры…</string>
-    <string name="dialog_title_instance_created">Экземпляр успешно создан</string>
-    <string name="dialog_title_failed_to_create_instance">Не удалось создать экземпляр</string>
-    <string name="dialog_title_deleting_game_instance">Удаление экземпляра игры…</string>
-    <string name="dialog_title_instance_deleted">Экземпляр успешно удалён</string>
-    <string name="dialog_title_failed_to_delete_instance">Не удалось удалить экземпляр</string>
+    <string name="dialog_title_creating_instance">Создание инстанса игры…</string>
+    <string name="dialog_title_instance_created">Инстанс успешно создан</string>
+    <string name="dialog_title_failed_to_create_instance">Не удалось создать инстанс</string>
+    <string name="dialog_title_deleting_game_instance">Удаление инстанса игры…</string>
+    <string name="dialog_title_instance_deleted">Инстанс успешно удалён</string>
+    <string name="dialog_title_failed_to_delete_instance">Не удалось удалить инстанс</string>
     <string name="dialog_title_installing_dependencies">Установка зависимостей…</string>
     <string name="dialog_title_dependencies_installed">Зависимости успешно установлены</string>
     <string name="dialog_title_failed_to_install_dependencies">Не удалось установить зависимости</string>
@@ -112,7 +112,7 @@
     <string name="app_aborted">Приложение столкнулось с непредвиденной проблемой и было закрыто</string>
     <string name="share_logs">Поделиться файлом логов</string>
 
-    <string name="delete_game_instance">Все файлы игры и данные (сохранения, моды, избранные серверы и т.д.), связанные с этим экземпляром, будут безвозвратно удалены</string>
+    <string name="delete_game_instance">Все файлы игры и данные (сохранения, моды, избранные серверы и т.д.), связанные с этим инстансом, будут безвозвратно удалены</string>
     <string name="game_files_missing">Убедитесь, что ProjectZomboid64 находится на верхнем уровне .zip архива, использованного при установке. Следуйте гайду на вики для правильной упаковки файлов</string>
     <string name="game_files_not_for_linux">Требуется версия Project Zomboid для Linux. Следуйте гайду на вики для загрузки правильных файлов</string>
 
@@ -165,13 +165,13 @@
 
     <!-- Import Mod -->
     <string name="install_mod_title">Импорт модов</string>
-    <string name="install_mod_instance_label">Экземпляр игры</string>
+    <string name="install_mod_instance_label">Инстанс игры</string>
     <string name="install_mod_zip_label">ZIP с модом</string>
     <string name="install_mod_browse">Обзор…</string>
     <string name="install_mod_install">Импортировать</string>
 
-    <string name="install_mod_no_instances">Экземпляры игры не найдены</string>
-    <string name="install_mod_select_instance">Выберите экземпляр игры</string>
+    <string name="install_mod_no_instances">Инстансы игры не найдены</string>
+    <string name="install_mod_select_instance">Выберите инстанс игры</string>
     <string name="install_mod_select_zip">Выберите ZIP файл</string>
 
     <string name="dialog_title_installing_mods">Импорт модов</string>
@@ -218,7 +218,7 @@
     <!-- Controls layout -->
     <string name="menu_install_controls">Импорт/экспорт управления</string>
 
-    <string name="install_controls_instance_label">Экземпляр игры</string>
+    <string name="install_controls_instance_label">Инстанс игры</string>
     <string name="install_controls_zip_label">ZIP с управлением</string>
     <string name="install_controls_install">Импортировать</string>
 
@@ -231,7 +231,7 @@
     <string name="install_controls_zip_help_title">Формат ZIP с управлением</string>
     <string name="install_controls_zip_help_message">✅ Правильно:\n\ncontrols.json\n\n❌ Неправильно:\n\nSomeFolder/\n\u00A0\u00A0controls.json</string>
 
-    <string name="install_saves_instance_label">Выберите экземпляр игры</string>
+    <string name="install_saves_instance_label">Выберите инстанс игры</string>
     <string name="install_saves_zip_label">ZIP архив с сохранениями</string>
     <string name="install_saves_zip_warning">ZIP должен содержать папки сохранений напрямую (Sandbox, Survival и т.д.).</string>
     <string name="install_saves_install">Импортировать</string>
@@ -265,7 +265,7 @@
     <string name="settings_debug_mode">Режим отладки (-debug)</string>
     <string name="settings_memory_saver">Экономия памяти (NG_GL4ES)</string>
     <string name="settings_memory_saver_hint">Снижает детализацию текстур, когда памяти становится мало. Помогает избежать вылетов на устройствах с 8 ГБ ОЗУ и меньше; на устройствах с 12 ГБ не нужна. Действует для рендереров NG_GL4ES и MobileGlues на Build 42.</string>
-    <string name="select_instance">— Выберите экземпляр игры —</string>
+    <string name="select_instance">— Выберите инстанс игры —</string>
 
     <!-- Vulkan Driver dialogs -->
     <string name="vulkan_driver_freedreno_8xx_title">Freedreno 8xx</string>
@@ -401,11 +401,11 @@
     <string name="game_instance_files_help_title">Структура ZIP с файлами игры</string>
 
     <!-- New instance layout names -->
-    <string name="new_game_instance_group_name">Название экземпляра</string>
+    <string name="new_game_instance_group_name">Название инстанса</string>
     <string name="new_game_instance_group_preset">Пресет</string>
     <string name="new_game_instance_group_files">Файлы</string>
 
-    <string name="install_mod_group_instance">→ Экземпляр</string>
+    <string name="install_mod_group_instance">→ Инстанс</string>
     <string name="install_mod_group_file">Файл мода</string>
     <string name="install_controls_group_file">Файл раскладки</string>
     <string name="install_saves_group_import">Импорт сохранений</string>
@@ -417,7 +417,7 @@
     <string name="install_driver_group_export">Экспорт драйвера</string>
     <string name="install_driver_export_hint">Сохранить установленный кастомный драйвер как .so файл.</string>
     <string name="export_log_group_export">Экспорт лога</string>
-    <string name="export_log_hint">Экспортирует файл console.txt из выбранного экземпляра.</string>
+    <string name="export_log_hint">Экспортирует файл console.txt из выбранного инстанса.</string>
 
     <string name="new_game_instance_create">Создать</string>
     <string name="new_game_instance_select_preset">Выберите пресет…</string>
@@ -429,7 +429,7 @@
 
     <!-- Optimization page -->
     <string name="optimization_group_jvm">Аргументы JVM</string>
-    <string name="optimization_jvm_hint">Настройки памяти Java и сборщика мусора задаются для каждого экземпляра отдельно: Настройки → Advanced → JVM arguments.</string>
+    <string name="optimization_jvm_hint">Настройки памяти Java и сборщика мусора задаются для каждого инстанса отдельно: Настройки → Advanced → JVM arguments.</string>
     <string name="settings_jvm_args_reset">Сбросить по умолчанию</string>
     <string name="settings_jvm_args_clear">Очистить</string>
     <string name="settings_jvm_args_b42_recommendation">Рекомендуется для Build 42: ограничивает кучу Java и возвращает память системе, оставляя место рендереру. В некоторых случаях игра может упасть на старте без некоторых из этих параметров. Не для Build 41 — на устройствах с 4 ГБ вреда больше, чем пользы.</string>
@@ -621,9 +621,9 @@
     <string name="steam_dl_required">Обязательно</string>
     <string name="steam_dl_mods_empty">Введите ID или ссылку (мод или коллекция)</string>
     <string name="copying_game_files">Копирование файлов игры…</string>
-    <string name="steam_dl_create_instance">Создать экземпляр</string>
+    <string name="steam_dl_create_instance">Создать инстанс</string>
     <string name="steam_dl_game_ready_title">Игра загружена</string>
-    <string name="steam_dl_game_ready_message">Создать экземпляр игры из %1$s сейчас? Файлы будут скопированы в экземпляр, после этого загрузку можно удалить.</string>
+    <string name="steam_dl_game_ready_message">Создать инстанс игры из %1$s сейчас? Файлы будут скопированы в инстанс, после этого загрузку можно удалить.</string>
     <string name="steam_dl_later">Позже</string>
     <string name="steam_dl_pick_download">Выберите загрузку</string>
     <string name="steam_dl_storage_title">Нужен доступ к файлам</string>
@@ -686,11 +686,11 @@
     <!-- Button icons (icon packs) -->
     <string name="nav_menu_icon_packs">Иконки кнопок</string>
     <string name="icon_packs_title">Пакеты иконок</string>
-    <string name="icon_packs_note">Картинки сразу для всех экранных кнопок вместо их подписей. Выберите экземпляр игры и нажмите «Применить» у пакета; кнопки, для которых в пакете нет картинки, сохранят подпись. «Убрать» снимает картинки пакета. Для одной кнопки: редактор управления.</string>
+    <string name="icon_packs_note">Картинки сразу для всех экранных кнопок вместо их подписей. Выберите инстанс игры и нажмите «Применить» у пакета; кнопки, для которых в пакете нет картинки, сохранят подпись. «Убрать» снимает картинки пакета. Для одной кнопки: редактор управления.</string>
     <string name="icon_packs_howto">Как сделать свой пакет</string>
     <string name="icon_packs_format">Архив .zip с картинками PNG, квадратными, 256 пикселей, белыми на прозрачном фоне: кнопка окрашивает их как свою подпись. Чтобы картинки сохранили свои цвета, добавьте pack.json с \"tint\": false. Каждый файл называется по действию, которое он показывает: %1$s. Кнопка получает картинку, если на ней стандартная клавиша этого действия. Остальные PNG из архива тоже сохраняются. Необязательный pack.json задаёт название: {\"format\": 1, \"name\": \"Мои иконки\"}. Эти картинки ставятся на круглые кнопки. Для прямоугольных кнопок пак может добавить другие версии в папке rect внутри zip (rect/attack.png), с \"rectTint\" в pack.json для их окраски; прямоугольная кнопка без такой версии получает круглую картинку. ZIP с несколькими папками сверху (color/, bw/ …) станет отдельным паком на каждую папку. Некоторым действиям подходит больше одной картинки (левой кнопке мыши — мышь или кулак); кнопка получает первую, что есть в паке. Чтобы выбрать другую, откройте редактор раскладки, нажмите на эту кнопку и выберите «Pack».</string>
-    <string name="icon_packs_instance">Экземпляр игры</string>
-    <string name="icon_packs_no_instances">Экземпляров игры пока нет</string>
+    <string name="icon_packs_instance">Инстанс игры</string>
+    <string name="icon_packs_no_instances">Инстансов игры пока нет</string>
     <string name="icon_packs_apply">Применить</string>
     <string name="icon_packs_unapply">Убрать</string>
     <string name="icon_packs_delete">Удалить</string>
@@ -699,12 +699,12 @@
     <string name="icon_packs_count">Картинок: %1$d</string>
     <string name="icon_packs_builtin">встроенный</string>
     <string name="icon_packs_applied_count">применён к %1$d кнопкам</string>
-    <string name="icon_packs_applied">Иконки применены к %1$d кнопкам экземпляра %2$s</string>
+    <string name="icon_packs_applied">Иконки применены к %1$d кнопкам инстанса %2$s</string>
     <string name="icon_packs_applied_none">Ни одной кнопке этой раскладки нет картинки в пакете</string>
     <string name="icon_packs_apply_failed">Не удалось прочитать или сохранить раскладку</string>
     <string name="icon_packs_apply_confirm">Применить пакет «%1$s» к раскладке %2$s? Кнопки, для которых в пакете есть картинка, покажут её вместо нынешней иконки или подписи.</string>
     <string name="icon_packs_remove_confirm">Убрать иконки «%1$s» с раскладки %2$s? Эти кнопки снова покажут подписи.</string>
-    <string name="icon_packs_removed">Иконки убраны с %1$d кнопок экземпляра %2$s</string>
+    <string name="icon_packs_removed">Иконки убраны с %1$d кнопок инстанса %2$s</string>
     <string name="icon_packs_delete_confirm">Удалить пакет «%1$s»? Кнопки, на которых уже стоят его картинки, сохранят их.</string>
     <string name="icon_packs_imported">Пакет «%1$s» импортирован, картинок: %2$d</string>
     <string name="icon_packs_imported_many">Импортировано паков: %1$d, по одному на папку</string>
@@ -717,7 +717,7 @@
     <string name="optimization_pzopt_install">Установить / Обновить</string>
     <string name="optimization_pzopt_restore">Восстановить</string>
     <string name="optimization_pzopt_restore_title">Восстановить оригинальные файлы игры?</string>
-    <string name="optimization_pzopt_restore_message">PZ Optimization будет удалён из выбранного экземпляра, а заменённые им файлы игры вернутся на место.</string>
+    <string name="optimization_pzopt_restore_message">PZ Optimization будет удалён из выбранного инстанса, а заменённые им файлы игры вернутся на место.</string>
     <string name="optimization_pzopt_installing">Установка PZ Optimization…</string>
     <string name="optimization_pzopt_copying">Копирование архива…</string>
     <string name="optimization_pzopt_validating">Проверка выпуска и сохранение оригинальных файлов…</string>
@@ -725,8 +725,8 @@
     <string name="optimization_pzopt_installed_detail">Установлено файлов: %1$d; сохранено оригинальных: %2$d.</string>
     <string name="optimization_pzopt_restoring">Восстановление оригинальных файлов игры…</string>
     <string name="optimization_pzopt_restored">Оригинальные файлы игры восстановлены</string>
-    <string name="optimization_pzopt_status_installed">Установлен в этом экземпляре</string>
-    <string name="optimization_pzopt_status_none">Не установлен в этом экземпляре</string>
+    <string name="optimization_pzopt_status_installed">Установлен в этом инстансе</string>
+    <string name="optimization_pzopt_status_none">Не установлен в этом инстансе</string>
     <!-- Import mods: a mod with its own Optimization installer -->
     <string name="install_mod_helper_title">Лучше через Оптимизацию</string>
     <string name="install_mod_helper_message">Похоже, это %1$s. У него свой установщик в разделе «Оптимизация», он подгоняет мод под Android; импортированный отсюда, мод может не работать. Установить там?</string>
@@ -826,7 +826,7 @@
     <string name="crash_streak_open_settings">Настройки</string>
     <string name="crash_streak_start_anyway">Запустить так</string>
     <string name="custom_driver_missing_title">Кастомный Vulkan-драйвер не найден</string>
-    <string name="custom_driver_missing_message">Этот экземпляр использует кастомный Vulkan-драйвер, но файла драйвера нет, возможно, он был удалён при переустановке.</string>
+    <string name="custom_driver_missing_message">Этот инстанс использует кастомный Vulkan-драйвер, но файла драйвера нет, возможно, он был удалён при переустановке.</string>
     <string name="custom_driver_missing_load">Загрузить драйвер</string>
     <string name="release_notes_body">Новое\n\n• Build 42.22 снова запускается.\n\n• Steam Workshop прямо в лаунчере: нажмите ↓ на моде или коллекции, чтобы добавить в очередь, затем «Скачать (N)».\n\n• Нижняя панель: Главная, Игра, Воркшоп, Импорт, Проекты.\n\n• Импорт / экспорт на одном экране: сохранения, моды, настройки игры, управление и драйвер.\n\n• Перенос модов в другой инстанс того же билда, с выбором галочками.\n\n• Безопасный запуск (⋮ на карточке инстанса): один запуск без модов и с рекомендуемыми настройками. Если игра дошла до меню, проблема в ваших модах или настройках.\n\n• Turnip v26.2 для Adreno 7xx, выбирается автоматически для Adreno 630-690 на Android 15+.\n\n• С этой версии Zomdroid подписан собственным ключом. Скачивайте его только с GitHub.</string>
     <string name="bug_report_pick_instance">К какой игре относится этот отчёт?</string>
