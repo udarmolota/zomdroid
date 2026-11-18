@@ -1023,6 +1023,22 @@
                     android:textAppearance="?attr/textAppearanceBodySmall"
                     android:text="@string/vibrate_on_touch_switch_label"/>
 
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/reverse_landscape_switch"
+                    android:textStyle="bold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:text="@string/reverse_landscape_label"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/reverse_landscape_hint"
+                    android:textSize="12sp"
+                    android:textColor="?android:attr/textColorSecondary"/>
+
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

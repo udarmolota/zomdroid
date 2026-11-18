@@ -71,7 +71,10 @@ public class ControlsEditorActivity extends AppCompatActivity {
                     WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
         }
 
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+        // The same fixed landscape as the game, so the buttons sit where they will be played.
+        setRequestedOrientation(instanceName != null
+                ? new com.zomdroid.game.InstanceSettings(instanceName).screenOrientation()
+                : ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
         binding.inputControlsV.setEditMode(true);
         binding.inputControlsV.setBackgroundColor(0x00000000);

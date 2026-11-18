@@ -534,6 +534,9 @@ public class SettingsFragment extends Fragment {
         binding.vibrateOnTouchSwitch.setChecked(settings.isVibrateOnTouch());
         binding.vibrateOnTouchSwitch.setOnCheckedChangeListener((buttonView, isChecked) ->
                 settings.setVibrateOnTouch(isChecked));
+        binding.reverseLandscapeSwitch.setChecked(settings.isReverseLandscape());
+        binding.reverseLandscapeSwitch.setOnCheckedChangeListener((buttonView, isChecked) ->
+                settings.setReverseLandscape(isChecked));
 
         binding.settingsJargsInfo.setOnClickListener(v -> {
             new androidx.appcompat.app.AlertDialog.Builder(requireContext())

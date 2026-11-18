@@ -261,7 +261,7 @@
     <string name="controls_export_nothing_to_export">Nada para exportar: layout padrão está em uso.</string>
     <string name="settings_debug_mode">Modo de depuração (-debug)</string>
     <string name="settings_memory_saver">Economia de memória (NG_GL4ES)</string>
-    <string name="settings_memory_saver_hint">Reduz o detalhe das texturas quando a memória fica escassa. Ajuda a evitar travamentos em aparelhos com 8 GB de RAM ou menos; desnecessário com 12 GB. Vale para o renderizador NG_GL4ES na Build 42.</string>
+    <string name="settings_memory_saver_hint">Reduz o detalhe das texturas quando a memória fica escassa. Ajuda a evitar travamentos em aparelhos com 8 GB de RAM ou menos; desnecessário com 12 GB. Vale para os renderizadores NG_GL4ES e MobileGlues na Build 42.</string>
     <string name="select_instance">— Selecione uma instância do jogo —</string>
 
     <!-- Vulkan Driver dialogs -->
@@ -637,6 +637,8 @@
     <string name="control_element_icon_no_tint">Manter cores originais</string>
     <string name="control_element_icon_scale">Tamanho da imagem</string>
     <string name="vibrate_on_touch_switch_label">Vibrar ao pressionar botão</string>
+    <string name="reverse_landscape_label">Girar a imagem (180°)</string>
+    <string name="reverse_landscape_hint">O jogo fica fixo em uma orientação paisagem e não gira com o celular. Ative se o seu controle ou suporte segura o celular de cabeça para baixo.</string>
     <string name="new_game_instance_analyzing">Analisando o arquivo do jogo, aguarde…</string>
     <string name="new_game_instance_detect_failed">Não foi possível ler o ZIP do jogo. Verifique se é um arquivo válido do Project Zomboid e tente novamente.</string>
 
@@ -811,10 +813,6 @@
     <string name="app_settings_instance_hint">Renderizador, driver, argumentos Java, resolução e os controles na tela pertencem a uma instância do jogo. Abra-os pelo botão de engrenagem no cartão da instância.</string>
     <string name="game_instance_settings">Configurações da instância</string>
     <string name="release_notes_title">Novidades em %1$s</string>
-    <string name="crash_streak_title">O jogo continua travando</string>
-    <string name="crash_streak_message">Travamentos seguidos: %1$d. Vamos ver se o jogo carrega sem mods: na tela de mods toque em Desativar todos os mostrados e inicie de novo.</string>
-    <string name="crash_streak_message_macos">Travamentos seguidos: %1$d. Vamos ver se o jogo carrega sem mods e sem bibliotecas macOS: na tela de mods toque em Desativar todos os mostrados, desative as bibliotecas macOS nas configurações da instância e inicie de novo.</string>
-    <string name="crash_streak_open_mods">Mods</string>
     <string name="crash_streak_open_settings">Configurações</string>
     <string name="crash_streak_start_anyway">Iniciar assim</string>
     <string name="custom_driver_missing_title">Driver Vulkan personalizado não encontrado</string>

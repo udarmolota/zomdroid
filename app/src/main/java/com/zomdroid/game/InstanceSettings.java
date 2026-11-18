@@ -207,6 +207,26 @@ public class InstanceSettings {
         prefs.edit().putBoolean(keyPrefix + "vibrate_on_touch", enabled).apply();
     }
 
+    // --- Orientation -----------------------------------------------------------------------
+    // The game is held in one fixed landscape and ignores the rotation sensor: a 180° flip
+    // replaced the surface under a loading game and froze it (report 12112026_1701). Reversed is
+    // for a gamepad or cradle that holds the phone the other way up; it is just as fixed.
+
+    public boolean isReverseLandscape() {
+        return prefs.getBoolean(keyPrefix + "reverse_landscape", false);
+    }
+
+    public void setReverseLandscape(boolean enabled) {
+        prefs.edit().putBoolean(keyPrefix + "reverse_landscape", enabled).apply();
+    }
+
+    /** The fixed orientation the game and the controls editor are shown in. */
+    public int screenOrientation() {
+        return isReverseLandscape()
+                ? android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
+                : android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+    }
+
     // --- Texture compression (ETC2) ---------------------------------------------------------
     // NG_GL4ES and both ZINK variants can keep large textures as ETC2: a quarter of the memory,
     // encoded once and cached on disk. On by default - the devices it is for (6-8 GB, killed

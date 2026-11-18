@@ -261,7 +261,7 @@
     <string name="controls_export_nothing_to_export">Tidak ada yang diekspor: tata letak kontrol default digunakan.</string>
     <string name="settings_debug_mode">Mode debug (-debug)</string>
     <string name="settings_memory_saver">Hemat memori (NG_GL4ES)</string>
-    <string name="settings_memory_saver_hint">Menurunkan detail tekstur saat memori hampir habis. Membantu menghindari crash pada perangkat dengan RAM 8 GB atau kurang; tidak diperlukan pada 12 GB. Berlaku untuk renderer NG_GL4ES di Build 42.</string>
+    <string name="settings_memory_saver_hint">Menurunkan detail tekstur saat memori hampir habis. Membantu menghindari crash pada perangkat dengan RAM 8 GB atau kurang; tidak diperlukan pada 12 GB. Berlaku untuk renderer NG_GL4ES dan MobileGlues di Build 42.</string>
     <string name="select_instance">— Pilih instans game —</string>
 
     <!-- Vulkan Driver dialogs -->
@@ -638,6 +638,8 @@
     <string name="control_element_icon_no_tint">Pertahankan warna asli</string>
     <string name="control_element_icon_scale">Ukuran gambar</string>
     <string name="vibrate_on_touch_switch_label">Getar saat menekan tombol</string>
+    <string name="reverse_landscape_label">Balik gambar (180°)</string>
+    <string name="reverse_landscape_hint">Game tetap dalam satu orientasi lanskap dan tidak berputar mengikuti ponsel. Aktifkan jika gamepad atau penyangga memegang ponsel terbalik.</string>
     <string name="new_game_instance_analyzing">Menganalisis file game, harap tunggu…</string>
     <string name="new_game_instance_detect_failed">Tidak dapat membaca ZIP game. Pastikan itu arsip Project Zomboid yang valid dan coba lagi.</string>
 
@@ -812,10 +814,6 @@
     <string name="app_settings_instance_hint">Renderer, driver, argumen Java, resolusi, dan kontrol layar adalah milik sebuah instance game. Buka lewat tombol roda gigi di kartu instance.</string>
     <string name="game_instance_settings">Pengaturan instance</string>
     <string name="release_notes_title">Yang baru di %1$s</string>
-    <string name="crash_streak_title">Game terus crash</string>
-    <string name="crash_streak_message">Crash berturut-turut: %1$d. Mari cek apakah game bisa dimuat tanpa mod: di layar Mod tekan Nonaktifkan semua yang tampil, lalu mulai lagi.</string>
-    <string name="crash_streak_message_macos">Crash berturut-turut: %1$d. Mari cek apakah game bisa dimuat tanpa mod dan pustaka macOS: di layar Mod tekan Nonaktifkan semua yang tampil, matikan pustaka macOS di pengaturan instance, lalu mulai lagi.</string>
-    <string name="crash_streak_open_mods">Mod</string>
     <string name="crash_streak_open_settings">Pengaturan</string>
     <string name="crash_streak_start_anyway">Mulai saja</string>
     <string name="custom_driver_missing_title">Driver Vulkan kustom tidak ditemukan</string>

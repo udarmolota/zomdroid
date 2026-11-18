@@ -225,6 +225,12 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
         // Android drops the second one ("Can request only one set of permissions at a time", present
         // in every bug report we have). The manifest form starts the activity in landscape to begin
         // with, and configChanges keeps a rotation from tearing down the GL surface underneath us.
+        // The one exception is the opt-in reversed landscape (InstanceSettings): landscape to
+        // reversed landscape is an orientation change configChanges covers, so it recreates nothing.
+        if (gameInstanceName != null
+                && new com.zomdroid.game.InstanceSettings(gameInstanceName).isReverseLandscape()) {
+            setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
+        }
 
         //String gameInstanceName = getIntent().getStringExtra(EXTRA_GAME_INSTANCE_NAME);
         gameInstanceName = getIntent().getStringExtra(EXTRA_GAME_INSTANCE_NAME);
@@ -297,6 +303,14 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
                 GameLauncher.setSurface(gameSurface, width, height);
 
                 if (!isGameStarted) {
+                    // The ADPF session in zomdroid_perf.c targets one display refresh.
+                    android.view.Display display = getDisplay();
+                    float refreshHz = display != null ? display.getRefreshRate() : 60f;
+                    try {
+                        android.system.Os.setenv("ZOMDROID_REFRESH_HZ", String.valueOf(Math.round(refreshHz)), true);
+                    } catch (ErrnoException e) {
+                        Log.w(LOG_TAG, "Cannot pass the refresh rate to the game", e);
+                    }
                     Thread thread = new Thread(() -> {
                         try {
                             // Needs the app's assets, which GameLauncher has no Context to reach.
@@ -885,6 +899,20 @@ public class GameActivity extends AppCompatActivity implements GamepadManager.Ga
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         int kc = event.getKeyCode();
+        // Some phones (Nubia on Android 15, report 13112026_0734) turn the right mouse button into
+        // Back from a mouse source, which left the game for the home screen. Pojav and Zalith treat
+        // that Back as the right click, and so do we. When the click already came in as a mouse
+        // button (onGenericMotionEvent), it is not sent twice.
+        if (kc == KeyEvent.KEYCODE_BACK && event.isFromSource(InputDevice.SOURCE_MOUSE)) {
+            if (event.getRepeatCount() == 0) {
+                boolean pressed = event.getAction() == KeyEvent.ACTION_DOWN;
+                if (pressed != rightMouseDown) {
+                    rightMouseDown = pressed;
+                    InputNativeInterface.sendMouseButton(GLFWBinding.MOUSE_BUTTON_RIGHT.code, pressed);
+                }
+            }
+            return true;
+        }
         if (kc == KeyEvent.KEYCODE_BACK
                 || kc == KeyEvent.KEYCODE_VOLUME_UP
                 || kc == KeyEvent.KEYCODE_VOLUME_DOWN
