@@ -48,7 +48,8 @@ android {
                 storePassword = localProperties["RELEASE_STORE_PASSWORD"].toString()
                 keyAlias = localProperties["RELEASE_KEY_ALIAS"].toString()
                 keyPassword = localProperties["RELEASE_KEY_PASSWORD"].toString()
-
+                // The release key is a PKCS12 (.p12) file.
+                if (storeFile?.name?.endsWith(".p12", ignoreCase = true) == true) storeType = "pkcs12"
             }
         }
     }
@@ -57,8 +58,8 @@ android {
         applicationId = "com.zomdroid"
         minSdk = 30
         targetSdk = 35
-        versionCode = 153
-        versionName = "1.5.3"
+        versionCode = 154
+        versionName = "1.5.4"
 
         buildConfigField("String", "GIT_BUILD_ID", "\"$gitBuildId\"")
 
@@ -104,6 +105,10 @@ android {
         }
         debug {
             isDebuggable = true
+            // Since 1.5.3 releases carry the release key (rotated from the AOSP test key), and an
+            // APK with the old key no longer installs over them. With the key in local.properties a
+            // debug build is signed with it too, so it installs over an installed release.
+            if (hasSigningConfig) signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
