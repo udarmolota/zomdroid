@@ -106,6 +106,9 @@ public class LauncherActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.launcherNv, navController);
         NavigationUI.setupWithNavController(binding.bottomNav, navController);
+        // The activity's root already pads for the system bars; Material's bottom bar would add the
+        // navigation bar height a second time (a gap under it with 3-button navigation).
+        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav, (v, insets) -> insets);
         navController.addOnDestinationChangedListener((controller, destination, args) -> {
             boolean main = false;
             for (int id : BOTTOM_NAV_DESTINATIONS) if (id == destination.getId()) main = true;
