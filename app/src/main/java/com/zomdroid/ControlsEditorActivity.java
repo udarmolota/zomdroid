@@ -291,15 +291,21 @@ public class ControlsEditorActivity extends AppCompatActivity {
                 // apply UI for current type
                 applyInputType(element, element.getInputType());
 
-                // STICK_WASD / STICK_MOUSE: fixed MNK, не даём менять inputType
-                boolean fixedMnkStick = (element.getType() == AbstractControlElement.Type.STICK_WASD
-                        || element.getType() == AbstractControlElement.Type.STICK_MOUSE);
+                // Elements that only ever act as mouse/keyboard: the input type is not theirs to pick.
+                // The touchpad and the scroll bar always send mouse input whatever is stored, so the
+                // choice showed and did nothing (found by our Chinese tester, 2026-11-20).
+                boolean fixedMnk = (element.getType() == AbstractControlElement.Type.STICK_WASD
+                        || element.getType() == AbstractControlElement.Type.STICK_MOUSE
+                        || element.getType() == AbstractControlElement.Type.TOUCHPAD
+                        || element.getType() == AbstractControlElement.Type.SCROLL_BAR);
 
-                if (fixedMnkStick) {
+                if (fixedMnk) {
                     element.setInputType(AbstractControlElement.InputType.MNK);
                     applyInputType(element, AbstractControlElement.InputType.MNK);
                     binding.elementInputTypeS.setVisibility(View.GONE);
+                    binding.elementInputTypeTv.setVisibility(View.GONE);
                 } else {
+                    binding.elementInputTypeTv.setVisibility(View.VISIBLE);
                     ArrayAdapter<AbstractControlElement.InputType> inputTypeAdapter =
                             new ControlLabels.Adapter<>(ControlsEditorActivity.this, R.layout.spinner_item,
                                     AbstractControlElement.InputType.values(),
@@ -700,8 +706,9 @@ public class ControlsEditorActivity extends AppCompatActivity {
                     binding.elementStickBindingTv.setVisibility(View.GONE);
                     binding.elementStickBindingS.setVisibility(View.GONE);
 
-                } else if (element.getType() == AbstractControlElement.Type.STICK_WASD
-                        || element.getType() == AbstractControlElement.Type.STICK_MOUSE) {
+                } else {
+                    // STICK_WASD, STICK_MOUSE, TOUCHPAD, SCROLL_BAR: no key bindings to show, and
+                    // the rows of the element picked before must not stay on screen.
                     binding.elementBindingsTv.setVisibility(View.GONE);
                     binding.elementBindingsAddIb.setVisibility(View.GONE);
                     binding.elementBindingsContainerLl.removeAllViews();

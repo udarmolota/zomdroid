@@ -411,21 +411,9 @@ public class ButtonControlElement extends AbstractControlElement {
 
             boolean toggledOn = getToggle() && ButtonControlElement.this.isToggledOn && !parentView.isEditMode;
 
-            // --- Toggle-ON FILL: only for filled styles. OUTLINE buttons get an orange contour below
-            //     (so the ON indicator matches the button's drawing style). ---
-            if (!badge && toggledOn && (this.style == ControlElementDescription.Style.FILLED
-                    || this.style == ControlElementDescription.Style.GLASS)) {
-                Paint.Style onStyle = p.getStyle();
-                p.setStyle(Paint.Style.FILL);
-                p.setColor(TOGGLE_ON_COLOR);
-                p.setAlpha(200);
-                p.setColorFilter(null);
-                this.shapeDrawable.draw(canvas);
-                p.setStyle(onStyle);
-                p.setColor(oldColor);
-                p.setAlpha(oldAlpha);
-                p.setColorFilter(oldFilter);
-            }
+            // Toggle ON is shown by a thick orange contour only, on every style: the button is not
+            // filled and its icon and label keep their own colours, so they stay readable (design
+            // by our Chinese tester, 2026-11-20).
 
             if (!badge) {
                 p.setColor(android.graphics.Color.rgb(40, 40, 40));
@@ -436,11 +424,11 @@ public class ButtonControlElement extends AbstractControlElement {
                 this.shapeDrawable.draw(canvas);
             }
 
-            // --- Normal pass (contour). When toggled ON, draw the contour in the attention
-            //     color and a bit thicker — this is the ON indicator for OUTLINE style. ---
+            // --- Normal pass (contour). When toggled ON, the contour in the attention colour,
+            //     thicker and nearly opaque: the ON indicator for every style. ---
             p.setColor(toggledOn ? TOGGLE_ON_COLOR : oldColor);
-            p.setAlpha(oldAlpha);
-            p.setStrokeWidth(toggledOn ? oldStroke * 1.7f : oldStroke);
+            p.setAlpha(toggledOn ? 230 : oldAlpha);
+            p.setStrokeWidth(toggledOn ? oldStroke * 2.0f : oldStroke);
             p.setColorFilter(toggledOn ? null : oldFilter);
             if (!badge || toggledOn) {
                 this.shapeDrawable.draw(canvas);   // a badge keeps only the ON contour
@@ -458,15 +446,7 @@ public class ButtonControlElement extends AbstractControlElement {
             p.setColorFilter(oldFilter);
 
             if (this.iconDrawable != null) {
-                if (toggledOn) {
-                    // Tint the inner image/letter with the ON color too (not just the contour).
-                    this.iconDrawable.setColorFilter(new android.graphics.PorterDuffColorFilter(
-                            TOGGLE_ON_COLOR, android.graphics.PorterDuff.Mode.SRC_ATOP));
-                    this.iconDrawable.draw(canvas);
-                    this.iconDrawable.setColorFilter(this.colorFilter); // restore
-                } else {
-                    this.iconDrawable.draw(canvas);
-                }
+                this.iconDrawable.draw(canvas);
             } else if (this.text != null) {
                 float o = TEXT_OUTLINE_PX * parentView.pixelScale;
 
@@ -487,10 +467,10 @@ public class ButtonControlElement extends AbstractControlElement {
                 canvas.drawText(this.text, this.centerX, this.textY - o, this.textPaint);
                 canvas.drawText(this.text, this.centerX, this.textY + o, this.textPaint);
 
-                // normal pass: вернуть как было (но при включённом тогле — оранжевым, как контур)
-                this.textPaint.setColor(toggledOn ? TOGGLE_ON_COLOR : oldTextColor);
+                // normal pass: the label keeps its own colour, toggled or not
+                this.textPaint.setColor(oldTextColor);
                 this.textPaint.setAlpha(oldTextAlpha);
-                this.textPaint.setColorFilter(toggledOn ? null : oldTextFilter);
+                this.textPaint.setColorFilter(oldTextFilter);
                 canvas.drawText(this.text, this.centerX, this.textY, this.textPaint);
             }
         }
