@@ -44,7 +44,7 @@
             app:itemTextColor="@color/bottom_nav_item"
             app:labelVisibilityMode="labeled"
             app:menu="@menu/menu_bottom_nav"
-            app:paddingBottomSystemWindowInsets="false" />
+            app:paddingBottomSystemWindowInsets="true" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <LinearLayout

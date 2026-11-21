@@ -75,13 +75,10 @@ public class LauncherActivity extends AppCompatActivity {
             @Override
             public WindowInsets onApplyWindowInsets(@NonNull View v, @NonNull WindowInsets windowInsets) {
                 Insets insets = windowInsets.getInsets(WindowInsets.Type.systemBars());
-                v.setPadding(
-                        v.getPaddingLeft(),
-                        insets.top,
-                        v.getPaddingRight(),
-                        //v.getPaddingBottom()
-                        insets.bottom
-                );
+                // The bottom bar takes the navigation bar inset itself (its colour runs under the
+                // 3-button bar), so the root pads the bottom only while the bar is hidden.
+                boolean barShown = binding.bottomNav.getVisibility() == View.VISIBLE;
+                v.setPadding(v.getPaddingLeft(), insets.top, v.getPaddingRight(), barShown ? 0 : insets.bottom);
 
                 return windowInsets;
             }
@@ -106,13 +103,13 @@ public class LauncherActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.launcherNv, navController);
         NavigationUI.setupWithNavController(binding.bottomNav, navController);
-        // The activity's root already pads for the system bars; Material's bottom bar would add the
-        // navigation bar height a second time (a gap under it with 3-button navigation).
-        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav, (v, insets) -> insets);
         navController.addOnDestinationChangedListener((controller, destination, args) -> {
             boolean main = false;
             for (int id : BOTTOM_NAV_DESTINATIONS) if (id == destination.getId()) main = true;
-            binding.bottomNav.setVisibility(main ? View.VISIBLE : View.GONE);
+            if ((binding.bottomNav.getVisibility() == View.VISIBLE) != main) {
+                binding.bottomNav.setVisibility(main ? View.VISIBLE : View.GONE);
+                binding.appbarLayout.requestApplyInsets();   // move the bottom inset to the bar or back
+            }
         });
 
         binding.launcherNv.setNavigationItemSelectedListener(item -> {
