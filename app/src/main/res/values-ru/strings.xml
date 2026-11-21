@@ -606,6 +606,7 @@
     <string name="steam_dl_slow_warning">⚠️ Скачивание может быть медленным.</string>
     <string name="steam_dl_build_42">Build 42</string>
     <string name="steam_dl_build_41">Build 41</string>
+    <string name="steam_dl_known_good">Последняя версия, проверенная с Zomdroid</string>
     <string name="steam_dl_manifest_hint_41">id манифеста Build 41 (обязательно)</string>
     <string name="steam_dl_build41_needs_manifest">Build 41: введите id манифеста.</string>
     <string name="steam_dl_cancel">Отменить скачивание</string>

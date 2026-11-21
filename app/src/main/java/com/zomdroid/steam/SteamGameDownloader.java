@@ -91,6 +91,20 @@ public class SteamGameDownloader implements Runnable, Cancellable {
 
     private final String username, password;
     private final long manifestId;       // 0 = latest build on the branch; >0 = pin this build
+    private boolean knownGood;           // Build 42: the build known to work in Zomdroid, not the newest
+
+    /**
+     * The newest Build 42 known to work in Zomdroid, so a player is not handed a fresh TIS build
+     * (black screen, crashes) before we have tested it. Read from the repository at download time,
+     * so a newly tested build reaches every launcher without a release; the values below are the
+     * fallback when GitHub cannot be reached. Verified 2026-11-19 against the public branch:
+     * depot 108603, 42.22.2, pre-release 2026-11-06, public since 2026-11-09.
+     */
+    private static final String KNOWN_GOOD_URL =
+            "https://raw.githubusercontent.com/udarmolota/zomdroid/master/downloads/known_good.json";
+    private static final long B42_KNOWN_GOOD_MANIFEST = 7642676132386718371L;
+    private static final long B42_KNOWN_GOOD_BUILD = 26486631L;
+    private static final String B42_KNOWN_GOOD_VERSION = "42.22.2";
     private final String branch;         // Current branches: public = stable B42, legacy41 = B41.
     private final String buildLabel;     // "41" or "42" — for the output folder name only
     private final Listener listener;
@@ -141,6 +155,45 @@ public class SteamGameDownloader implements Runnable, Cancellable {
         this.branch = (branch != null && !branch.isEmpty()) ? branch : "public";
         this.buildLabel = (buildLabel != null && !buildLabel.isEmpty()) ? buildLabel : "41";
         this.listener = listener;
+    }
+
+    /** Build 42 game download: take the newest build known to work in Zomdroid instead of the newest on Steam. */
+    public SteamGameDownloader knownGoodBuild(boolean knownGood) {
+        this.knownGood = knownGood;
+        return this;
+    }
+
+    /** {manifest, build id} of the Build 42 known to work in Zomdroid: from GitHub, else built in. */
+    private long[] knownGoodB42() {
+        java.net.HttpURLConnection conn = null;
+        try {
+            conn = (java.net.HttpURLConnection) new java.net.URL(KNOWN_GOOD_URL).openConnection();
+            conn.setConnectTimeout(6000);
+            conn.setReadTimeout(6000);
+            conn.setUseCaches(false);
+            if (conn.getResponseCode() == java.net.HttpURLConnection.HTTP_OK) {
+                StringBuilder sb = new StringBuilder();
+                try (java.io.BufferedReader r = new java.io.BufferedReader(new java.io.InputStreamReader(
+                        conn.getInputStream(), java.nio.charset.StandardCharsets.UTF_8))) {
+                    for (String line; (line = r.readLine()) != null; ) sb.append(line).append('\n');
+                }
+                org.json.JSONObject o = new org.json.JSONObject(sb.toString()).getJSONObject("b42");
+                long gid = Long.parseUnsignedLong(o.getString("manifest"));
+                long build = o.optLong("build", 0L);
+                if (gid != 0L) {
+                    progress("Latest Build 42 tested with Zomdroid: " + o.optString("version", "?")
+                            + " (build " + build + ")");
+                    return new long[]{gid, build};
+                }
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "known-good list not fetched, using the built-in one", e);
+        } finally {
+            if (conn != null) conn.disconnect();
+        }
+        progress("Latest Build 42 tested with Zomdroid: " + B42_KNOWN_GOOD_VERSION + " (build "
+                + B42_KNOWN_GOOD_BUILD + ", built in)");
+        return new long[]{B42_KNOWN_GOOD_MANIFEST, B42_KNOWN_GOOD_BUILD};
     }
 
     /** Public Downloads/zomdroid folder (created on demand). Requires All-files access on Android 11+. */
@@ -422,8 +475,14 @@ public class SteamGameDownloader implements Runnable, Cancellable {
                 throw new java.io.IOException("Unexpected depot for " + libraryPack.id + ": " + info.depot);
 
             long gid = manifestId > 0 ? manifestId : info.gid;
-            if (gid == 0L) { done("Could not resolve a manifest to download."); running = false; return; }
             long buildId = manifestId > 0 ? 0 : info.buildId;
+            if (knownGood && manifestId <= 0 && libraryPack == null) {
+                long[] kg = knownGoodB42();
+                if (kg[0] != gid) progress("Steam's newest build " + buildId + " is not tested yet; downloading the tested one.");
+                gid = kg[0];
+                buildId = kg[1];
+            }
+            if (gid == 0L) { done("Could not resolve a manifest to download."); running = false; return; }
 
             int appId = PROJECT_ZOMBOID_APP_ID;
             int depot = info.depot;
@@ -633,7 +692,7 @@ public class SteamGameDownloader implements Runnable, Cancellable {
 
             org.json.JSONObject metadata = new org.json.JSONObject();
             // A manually pinned GID is not an app build ID.
-            metadata.put("appBuildId", manifestId > 0 ? 0 : info.buildId);
+            metadata.put("appBuildId", manifestId > 0 ? 0 : buildId);
             metadata.put("depotId", depot);
             metadata.put("manifestGid", Long.toUnsignedString(gid));
             metadata.put("branch", branch);

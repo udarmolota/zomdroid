@@ -118,6 +118,7 @@
     <string name="steam_dl_slow_warning">⚠️ Downloading can be slow.</string>
     <string name="steam_dl_build_42">Build 42</string>
     <string name="steam_dl_build_41">Build 41</string>
+    <string name="steam_dl_known_good">Latest version tested with Zomdroid</string>
     <string name="steam_dl_manifest_hint_41">Build 41 manifest id (required)</string>
     <string name="steam_dl_build41_needs_manifest">Build 41: enter its manifest id.</string>
     <string name="steam_dl_cancel">Cancel download</string>

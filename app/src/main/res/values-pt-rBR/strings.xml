@@ -606,6 +606,7 @@
     <string name="steam_dl_slow_warning">⚠️ O download pode ser lento.</string>
     <string name="steam_dl_build_42">Build 42</string>
     <string name="steam_dl_build_41">Build 41</string>
+    <string name="steam_dl_known_good">Última versão testada com o Zomdroid</string>
     <string name="steam_dl_manifest_hint_41">id do manifesto do Build 41 (obrigatório)</string>
     <string name="steam_dl_build41_needs_manifest">Build 41: digite o id do manifesto.</string>
     <string name="steam_dl_cancel">Cancelar download</string>

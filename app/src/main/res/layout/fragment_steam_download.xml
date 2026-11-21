@@ -157,6 +157,15 @@
                         android:text="@string/steam_dl_build_41"/>
                 </com.google.android.material.button.MaterialButtonToggleGroup>
 
+                <CheckBox
+                    android:id="@+id/cb_dl_known_good"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:checked="true"
+                    android:visibility="gone"
+                    android:text="@string/steam_dl_known_good"/>
+
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

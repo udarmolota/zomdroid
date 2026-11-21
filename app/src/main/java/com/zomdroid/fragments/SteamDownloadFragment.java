@@ -53,6 +53,7 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
     private String mpInstanceName;
 
     private EditText etUser, etPass, etManifest, etModsIds;
+    private android.widget.CheckBox cbKnownGood;   // Build 42: the build tested with Zomdroid
     private Button btnStart, btnModsStart, btnCancel, btnCreateInstance;
     private ProgressBar progress;
     private TextView tvStatus;
@@ -112,10 +113,14 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
 
         buildToggle = v.findViewById(R.id.toggle_dl_build);
         buildToggle.check(R.id.btn_build_41);   // legacy41 is the default selection
+        // Build 41 is frozen on legacy41, so the tested-build choice only means something for 42.
+        cbKnownGood = v.findViewById(R.id.cb_dl_known_good);
+        buildToggle.addOnButtonCheckedListener((group, checkedId, isChecked) -> updateKnownGoodVisibility());
         if (macosInstanceName != null || mpInstanceName != null) {
             toggle.setVisibility(View.GONE);
             buildToggle.setVisibility(View.GONE);
             etManifest.setVisibility(View.GONE);
+            cbKnownGood.setVisibility(View.GONE);
             v.findViewById(R.id.tv_slow_warning).setVisibility(View.GONE);
             ((TextView) v.findViewById(R.id.tv_login_note)).setText(getString(
                     mpInstanceName != null ? R.string.mp_libs_login : R.string.macos_libs_login,
@@ -141,6 +146,7 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
                 for (int i = 0; i < buildToggle.getChildCount(); i++) {
                     buildToggle.getChildAt(i).setEnabled(!pinned);
                 }
+                updateKnownGoodVisibility();
             }
         });
 
@@ -205,6 +211,15 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
         return m.find() ? m.group(1) : null;
     }
 
+    // Shown for a Build 42 game download with no manifest typed: a typed manifest decides the build.
+    private void updateKnownGoodVisibility() {
+        if (cbKnownGood == null || buildToggle == null || etManifest == null) return;
+        if (macosInstanceName != null || mpInstanceName != null) return;
+        boolean show = buildToggle.getCheckedButtonId() == R.id.btn_build_42
+                && text(etManifest).isEmpty();
+        cbKnownGood.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
     // ---- start ----
     private void startGame() {
         if (SteamDownloadState.get().isDownloading()) return;
@@ -241,6 +256,10 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
         SteamDownloadState st = SteamDownloadState.get();
         SteamGameDownloader dl = new SteamGameDownloader(text(etUser), etPass.getText().toString(),
                 manifestId, branch, buildLabel, st);
+        if (manifestId <= 0 && "42".equals(buildLabel) && macosInstanceName == null && mpInstanceName == null
+                && cbKnownGood != null && cbKnownGood.isChecked()) {
+            dl.knownGoodBuild(true);
+        }
         if (macosInstanceName != null) {
             com.zomdroid.game.GameInstance instance = com.zomdroid.game.GameInstanceManager.requireSingleton()
                     .getInstanceByName(macosInstanceName);
@@ -310,6 +329,7 @@ public class SteamDownloadFragment extends Fragment implements SteamDownloadStat
         if (etUser != null) etUser.setEnabled(enabled);
         if (etPass != null) etPass.setEnabled(enabled);
         if (etManifest != null) etManifest.setEnabled(enabled);
+        if (cbKnownGood != null) cbKnownGood.setEnabled(enabled);
         if (btnStart != null) btnStart.setEnabled(enabled);
         if (btnModsStart != null) btnModsStart.setEnabled(enabled);
     }

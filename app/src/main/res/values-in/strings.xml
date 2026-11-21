@@ -607,6 +607,7 @@
     <string name="steam_dl_slow_warning">⚠️ Pengunduhan bisa lambat.</string>
     <string name="steam_dl_build_42">Build 42</string>
     <string name="steam_dl_build_41">Build 41</string>
+    <string name="steam_dl_known_good">Versi terbaru yang sudah diuji dengan Zomdroid</string>
     <string name="steam_dl_manifest_hint_41">id manifest Build 41 (wajib)</string>
     <string name="steam_dl_build41_needs_manifest">Build 41: masukkan id manifest-nya.</string>
     <string name="steam_dl_cancel">Batalkan unduhan</string>

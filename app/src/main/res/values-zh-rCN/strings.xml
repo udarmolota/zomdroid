@@ -588,6 +588,7 @@
     <string name="steam_dl_slow_warning">⚠️ 下载可能很慢。</string>
     <string name="steam_dl_build_42">Build 42</string>
     <string name="steam_dl_build_41">Build 41</string>
+    <string name="steam_dl_known_good">Zomdroid 已测试过的最新版本</string>
     <string name="steam_dl_manifest_hint_41">Build 41 清单 id（必填）</string>
     <string name="steam_dl_build41_needs_manifest">Build 41：请输入其清单 id。</string>
     <string name="steam_dl_cancel">取消下载</string>
