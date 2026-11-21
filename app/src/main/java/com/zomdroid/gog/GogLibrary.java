@@ -44,6 +44,8 @@ public final class GogLibrary {
     // which is where GOG documents it; gameDetails is an account *page* and is served from www.
     private static final String OWNED_URL   = "https://embed.gog.com/user/data/games";
     private static final String DETAILS_URL = "https://www.gog.com/account/gameDetails/";
+    /** The library page's own search: owned games whose title matches, with ids and titles. */
+    private static final String SEARCH_URL  = "https://embed.gog.com/account/getFilteredProducts?mediaType=1&search=";
     private static final String WWW         = "https://www.gog.com";
 
     /** DLC are nested product records; stop before a malformed reply can nest forever. */
@@ -138,6 +140,30 @@ public final class GogLibrary {
         if (owned != null)
             for (int i = 0; i < owned.length(); i++) out.add(owned.optLong(i));
         Log.i(TAG, "library: " + out.size() + " products owned");
+        return out;
+    }
+
+    /**
+     * Ids of owned games whose title contains {@code query}, newest library order as GOG gives it.
+     * One request per result page however large the library is - unlike {@link #ownedIds()}, which
+     * only gives bare ids, so finding a title there means opening every product (an account with
+     * 350 games never got past the first 100, 2026-11-21).
+     */
+    public static List<Long> searchOwned(String query) throws IOException {
+        List<Long> out = new ArrayList<>();
+        String base = SEARCH_URL + java.net.URLEncoder.encode(query, "UTF-8");
+        int pages = 1;
+        for (int page = 1; page <= pages && page <= 10; page++) {
+            JSONObject j = getJson(base + "&page=" + page);
+            pages = Math.max(1, j.optInt("totalPages", 1));
+            JSONArray products = j.optJSONArray("products");
+            if (products == null) break;
+            for (int i = 0; i < products.length(); i++) {
+                JSONObject p = products.optJSONObject(i);
+                if (p != null && p.optLong("id") != 0L) out.add(p.optLong("id"));
+            }
+        }
+        Log.i(TAG, "library search '" + query + "': " + out.size() + " match(es)");
         return out;
     }
 

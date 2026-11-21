@@ -279,7 +279,19 @@ public class GogDownloadFragment extends Fragment implements GogDownloadQueue.Li
             List<GogLibrary.Product> anyLinux = new ArrayList<>();
             Throwable error = null;
             try {
-                List<Long> owned = GogLibrary.ownedIds();
+                // First ask GOG's library search for the game by name: one request whatever the
+                // library size. The walk below stays as the fallback (search failed or found
+                // nothing) and still fills the "other Linux games" list for an account without it.
+                try {
+                    for (Long id : GogLibrary.searchOwned("zomboid")) {
+                        GogLibrary.Product p = GogLibrary.details(id);
+                        if (p == null || p.linuxInstallers().isEmpty()) continue;
+                        if (isProjectZomboid(p.title)) zomboid.add(p);
+                    }
+                } catch (Exception searchFailed) {
+                    Log.w(TAG, "library search failed, walking the library instead", searchFailed);
+                }
+                List<Long> owned = zomboid.isEmpty() ? GogLibrary.ownedIds() : new ArrayList<>();
                 int of = Math.min(owned.size(), SCAN_LIMIT);
                 int scanned = 0;
                 for (Long id : owned) {
