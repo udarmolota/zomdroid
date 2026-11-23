@@ -50,6 +50,8 @@ final class ServerProbeLauncher {
         }
 
         // Same JNI bridge as the client, with the game's x86_64 libraries handled by box64.
+        // A server started before the game ever ran would still find our bundled jassimp.
+        GameLauncher.retireBundledJassimp();
         com.zomdroid.patch.ZNetStatisticsPatchApplier.applyIfNeeded(instance);
         com.zomdroid.patch.NativeLibraryWorkarounds.disableIncompleteNativeLibraries(instance);
         com.zomdroid.patch.PathfindingWorkaround.forceJavaPathfinderFor4212Plus(instance, root);

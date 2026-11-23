@@ -99,16 +99,7 @@ public class GameLauncher {
         // with jassimp on the emulated-lib list the dlopen hook would feed our ARM64 file to box64
         // and fail the whole load on B41. Renamed rather than deleted so this is reversible, and
         // re-checked every launch because a dependency bundle update re-extracts the file.
-        File bundledJassimp = new File(AppStorage.requireSingleton().getHomePath(),
-                C.deps.LIBS_ANDROID_ARM64_v8a + "/libjassimp64.so");
-        if (bundledJassimp.isFile()) {
-            File retired = new File(bundledJassimp.getParentFile(), "libjassimp64.so.zomdroid-543-off");
-            if (bundledJassimp.renameTo(retired)) {
-                Log.i("GameLauncher", "Bundled libjassimp64.so retired; the game's own importer will load");
-            } else {
-                Log.w("GameLauncher", "Failed to retire bundled libjassimp64.so - model bone offsets may be wrong");
-            }
-        }
+        retireBundledJassimp();
 
         // The game's own ARM64 jassimp (42.12+) is left ALONE, and so is our hybrid build. Both
         // were briefly wired up here on the theory that TIS's importer broke mod animation clips;
@@ -479,6 +470,24 @@ public class GameLauncher {
         //Log.d("zomdroid-main", ldLibraryPath);
         GameLauncher.startGame(gameInstance.getGamePath(), ldLibraryPath, jvmArgs.toArray(new String[0]),
                 gameInstance.getMainClassName(), args.toArray(new String[0]));
+    }
+
+    /**
+     * Takes our bundled libjassimp64.so (Assimp 5.4.3) off java.library.path so the game's own
+     * importer loads. Called before the game AND before the server JVM: the dedicated server
+     * loads models too, and on B41 the linker would feed our ARM64 file to box64 and the server
+     * stops with "Required Animation Asset not found: bob/bob_idle".
+     */
+    static void retireBundledJassimp() {
+        File bundledJassimp = new File(AppStorage.requireSingleton().getHomePath(),
+                C.deps.LIBS_ANDROID_ARM64_v8a + "/libjassimp64.so");
+        if (!bundledJassimp.isFile()) return;
+        File retired = new File(bundledJassimp.getParentFile(), "libjassimp64.so.zomdroid-543-off");
+        if (bundledJassimp.renameTo(retired)) {
+            Log.i("GameLauncher", "Bundled libjassimp64.so retired; the game's own importer will load");
+        } else {
+            Log.w("GameLauncher", "Failed to retire bundled libjassimp64.so - model bone offsets may be wrong");
+        }
     }
 
     private static boolean isLegacyRendererNeedingJre21(LauncherPreferences.Renderer r) {
