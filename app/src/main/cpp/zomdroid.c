@@ -117,6 +117,92 @@ static void get_self_mem_mb(long* rss_mb, long* swap_mb) {
     }
 }
 
+// Who holds the memory, by mapping kind, from /proc/self/smaps. [ZMEM] only gives the total,
+// and a footprint that runs away during loading (seen with PanVK: rss 0.4 -> 4.9 GB in three
+// minutes) can be the GPU driver, malloc (box64, LWJGL, Mesa) or the JVM. Reading smaps walks
+// every mapping, so this runs only when rss+swap first crosses each MEM_MAP_THRESHOLDS_MB step,
+// a handful of times per run, not on the 30 s timer.
+enum { MEM_GPU, MEM_MALLOC, MEM_ART, MEM_ANON, MEM_FILES, MEM_OTHER, MEM_KINDS };
+static const char* const MEM_KIND_NAMES[MEM_KINDS] = {"gpu", "malloc", "art", "anon", "files", "other"};
+static const long MEM_MAP_THRESHOLDS_MB[] = {2048, 3072, 4096, 5120, 6144};
+#define MEM_MAP_TOP 3
+
+static int mem_kind_of(const char* name) {
+    // Mali (kbase, also used by PanVK here), Adreno, DRM render nodes, and buffers shared with
+    // the compositor or the GPU.
+    if (strncmp(name, "/dev/mali", 9) == 0 || strncmp(name, "/dev/kgsl", 9) == 0
+        || strncmp(name, "/dev/dri", 8) == 0 || strstr(name, "dmabuf") || strstr(name, "dma_buf"))
+        return MEM_GPU;
+    if (strncmp(name, "[anon:scudo", 11) == 0 || strncmp(name, "[anon:libc_malloc", 17) == 0
+        || strncmp(name, "[anon:jemalloc", 14) == 0 || strcmp(name, "[heap]") == 0)
+        return MEM_MALLOC;
+    if (strncmp(name, "[anon:dalvik", 12) == 0) return MEM_ART;
+    // Unnamed anonymous memory: the HotSpot heap and metaspace, box64's own allocations, and
+    // any mmap a library did not name.
+    if (name[0] == '\0' || strncmp(name, "[anon:", 6) == 0) return MEM_ANON;
+    if (name[0] == '/') return MEM_FILES;
+    return MEM_OTHER;
+}
+
+static void mem_map_emit(long rss_mb, long swap_mb, long threshold_mb) {
+    FILE* f = fopen("/proc/self/smaps", "r");
+    if (!f) return;
+
+    long rss_kb[MEM_KINDS] = {0}, swap_kb[MEM_KINDS] = {0};
+    long top_kb[MEM_MAP_TOP] = {0};
+    char top_name[MEM_MAP_TOP][64] = {{0}};
+    int mappings = 0;
+
+    char line[512];
+    char name[256] = "";
+    int kind = MEM_OTHER;
+    while (fgets(line, sizeof(line), f)) {
+        long kb;
+        if (sscanf(line, "Rss: %ld kB", &kb) == 1) {
+            rss_kb[kind] += kb;
+            // Largest single mappings: a lone multi-GB block tells "one big allocation" from
+            // "thousands of small ones" without listing them all.
+            for (int i = 0; i < MEM_MAP_TOP; i++) {
+                if (kb <= top_kb[i]) continue;
+                for (int j = MEM_MAP_TOP - 1; j > i; j--) {
+                    top_kb[j] = top_kb[j - 1];
+                    memcpy(top_name[j], top_name[j - 1], sizeof(top_name[j]));
+                }
+                top_kb[i] = kb;
+                snprintf(top_name[i], sizeof(top_name[i]), "%s", name[0] ? name : "anon");
+                break;
+            }
+        } else if (sscanf(line, "Swap: %ld kB", &kb) == 1) {
+            swap_kb[kind] += kb;
+        } else if (strchr(line, '-') && line[0] != ' ' && (line[0] < 'A' || line[0] > 'Z')) {
+            // Mapping header: "start-end perms offset dev inode [name]"; field lines start with
+            // a capitalised key ("Rss:", "VmFlags:"), headers with a lower-case hex address.
+            mappings++;
+            const char* p = line;
+            for (int field = 0; field < 5 && *p; field++) {
+                while (*p && *p != ' ') p++;
+                while (*p == ' ') p++;
+            }
+            snprintf(name, sizeof(name), "%s", p);
+            size_t n = strlen(name);
+            while (n > 0 && (name[n - 1] == '\n' || name[n - 1] == ' ')) name[--n] = '\0';
+            kind = mem_kind_of(name);
+        }
+    }
+    fclose(f);
+
+    char out[640];
+    int len = snprintf(out, sizeof(out), "[ZMEM-MAP] past %ldMB: rss=%ldMB swap=%ldMB mappings=%d |",
+                       threshold_mb, rss_mb, swap_mb, mappings);
+    for (int k = 0; k < MEM_KINDS && len < (int)sizeof(out); k++)
+        len += snprintf(out + len, sizeof(out) - len, " %s=%ld+%ldMB", MEM_KIND_NAMES[k],
+                        rss_kb[k] / 1024, swap_kb[k] / 1024);
+    if (len < (int)sizeof(out)) len += snprintf(out + len, sizeof(out) - len, " | largest:");
+    for (int i = 0; i < MEM_MAP_TOP && top_kb[i] > 0 && len < (int)sizeof(out); i++)
+        len += snprintf(out + len, sizeof(out) - len, " %ldMB %s", top_kb[i] / 1024, top_name[i]);
+    perf_emit(out);
+}
+
 // Absolute path to a persistent file that mirrors the game's native stdout/stderr
 // (box64 SHOWSEGV/SHOWBT reports, NG [NGG] probes, etc). Unlike logcat it survives the
 // crash and app restarts, so diagnostic output always reaches the Bug Report zip.
@@ -149,6 +235,8 @@ static void monitor_stdio_and_memory() {
     time_t last_mem_log = 0;
     time_t last_mem_sample = 0;
     time_t last_perf_sample = 0;
+    time_t last_mem_map_check = 0;
+    int next_mem_map = 0;
 
     while (1) {
         ssize_t i = read(pipefd[0], buffer, sizeof(buffer) - 1);
@@ -178,6 +266,23 @@ static void monitor_stdio_and_memory() {
         if (now - last_perf_sample >= 10) {
             last_perf_sample = now;
             zomdroid_perf_sample(perf_emit);
+        }
+
+        // statm and status are cheap; the smaps breakdown runs once per threshold crossed.
+        if (next_mem_map < (int)(sizeof(MEM_MAP_THRESHOLDS_MB) / sizeof(MEM_MAP_THRESHOLDS_MB[0]))
+                && now - last_mem_map_check >= 2) {
+            last_mem_map_check = now;
+            long rss_mb = -1, swap_mb = -1;
+            get_self_mem_mb(&rss_mb, &swap_mb);
+            long total_mb = rss_mb + (swap_mb > 0 ? swap_mb : 0);
+            if (rss_mb >= 0 && total_mb >= MEM_MAP_THRESHOLDS_MB[next_mem_map]) {
+                long threshold_mb = MEM_MAP_THRESHOLDS_MB[next_mem_map];
+                // A jump over several steps at once is reported once, at the highest step passed.
+                while (next_mem_map < (int)(sizeof(MEM_MAP_THRESHOLDS_MB) / sizeof(MEM_MAP_THRESHOLDS_MB[0]))
+                       && total_mb >= MEM_MAP_THRESHOLDS_MB[next_mem_map])
+                    threshold_mb = MEM_MAP_THRESHOLDS_MB[next_mem_map++];
+                mem_map_emit(rss_mb, swap_mb, threshold_mb);
+            }
         }
 
         // Printed to stdout on purpose: this loop is what mirrors stdout into native.log, so the
