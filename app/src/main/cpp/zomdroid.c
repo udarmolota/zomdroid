@@ -497,6 +497,27 @@ static bool share_missing_library(const char* error) {
     return shared;
 }
 
+/*
+ * Last resort when sharing the named libraries one by one did not get the loader and driver in:
+ * make the whole default namespace and the vendor's whole sphal visible to zomdroid-ns, as
+ * xdroid360's private loader does (that is how PanVK loads there). zomdroid-ns still searches its
+ * own path first, so what box64, the JRE and the game already resolve stays the same; only
+ * libraries zomdroid-ns lacks are now found outside. Done once, and only for a custom driver.
+ */
+static bool share_all_libraries(void) {
+    static bool done;
+    if (done) return false;
+    done = true;
+    bool shared = linkernsbypass_link_namespace_to_default_all_libs(zomdroid_ns);
+    struct android_namespace_t* sphal =
+            android_get_exported_namespace ? android_get_exported_namespace("sphal") : NULL;
+    if (android_link_namespaces_all_libs && sphal && android_link_namespaces_all_libs(zomdroid_ns, sphal))
+        shared = true;
+    LOGI("Vulkan: all default%s libraries %s with zomdroid-ns", sphal ? " and sphal" : "",
+         shared ? "shared" : "could not be shared");
+    return shared;
+}
+
 static void (*prepare_macho_pathfind)(void);
 static int load_linker_hook() {
     void* zomdroid_linker = linkernsbypass_namespace_dlopen("libzomdroidlinker.so", RTLD_LOCAL, zomdroid_ns);
@@ -542,25 +563,26 @@ static int load_linker_hook() {
 
     if (g_zomdroid_vulkan_driver_name != NULL) {
         // A library the loader or driver cannot find is shared in (share_missing_library), a few
-        // times at most, since one missing library can hide the next. If they still do not load,
-        // the game starts on the phone's own driver instead of a black screen: with no handles
+        // times at most, since one missing library can hide the next; after that, everything in
+        // the default and sphal namespaces is shared once (share_all_libraries). If they still do
+        // not load, the game starts on the phone's own driver instead of a black screen: with no handles
         // set, libzomdroidlinker leaves libvulkan.so and the driver lookup to the system.
         void* vulkan_loader = NULL;
         void* vulkan_driver = NULL;
-        for (int i = 0; i < 4 && !vulkan_loader; i++) {
+        for (int i = 0; i < 5 && !vulkan_loader; i++) {
             vulkan_loader = linkernsbypass_namespace_dlopen_unique("/system/lib64/libvulkan.so",
                                                                    getenv("ZOMDROID_CACHE_DIR"), RTLD_LOCAL, zomdroid_ns);
             if (vulkan_loader) break;
             const char* error = dlerror();
             LOGW("Vulkan: private libvulkan.so did not load: %s", error);
-            if (!share_missing_library(error)) break;
+            if (!share_missing_library(error) && !share_all_libraries()) break;
         }
-        for (int i = 0; i < 4 && vulkan_loader && !vulkan_driver; i++) {
+        for (int i = 0; i < 5 && vulkan_loader && !vulkan_driver; i++) {
             vulkan_driver = linkernsbypass_namespace_dlopen(g_zomdroid_vulkan_driver_name, RTLD_LOCAL, zomdroid_ns);
             if (vulkan_driver) break;
             const char* error = dlerror();
             LOGW("Vulkan: driver %s did not load: %s", g_zomdroid_vulkan_driver_name, error);
-            if (!share_missing_library(error)) break;
+            if (!share_missing_library(error) && !share_all_libraries()) break;
         }
         if (vulkan_driver && !dlsym(vulkan_driver, "HMI")) {
             LOGW("Vulkan: %s has no HMI entry point, not an Android Vulkan driver", g_zomdroid_vulkan_driver_name);
