@@ -49,22 +49,41 @@
             android:visibility="gone"
             tools:visibility="visible"/>
 
-        <!-- Instance name bottom left -->
-        <TextView
-            android:id="@+id/game_instance_item_name_tv"
+        <!-- Instance name bottom left, the game version under it -->
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|start"
             android:layout_marginStart="16dp"
-            android:layout_marginBottom="16dp"
-            android:textColor="#FFFFFF"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:shadowColor="#80000000"
-            android:shadowDx="1"
-            android:shadowDy="1"
-            android:shadowRadius="4"
-            tools:text="Project Zomboid 41"/>
+            android:layout_marginBottom="12dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/game_instance_item_name_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:shadowColor="#80000000"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="4"
+                tools:text="Project Zomboid 41"/>
+
+            <TextView
+                android:id="@+id/game_instance_item_version_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:alpha="0.85"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                android:shadowColor="#80000000"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="4"
+                tools:text="42.22.2"/>
+        </LinearLayout>
 
         <!-- Buttons bottom right -->
         <LinearLayout

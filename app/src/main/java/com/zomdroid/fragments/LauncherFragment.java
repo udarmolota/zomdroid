@@ -166,6 +166,12 @@ public class LauncherFragment extends Fragment {
                 ImageButton moreIb = itemView.findViewById(R.id.game_instance_item_more_ib);
 
                 nameTv.setText(gameInstance.getName());
+                // The exact game version once the game has run (it writes Zomboid/version.txt),
+                // the build before that.
+                String gameVersion = com.zomdroid.mods.PzModList.gameVersion(
+                        new java.io.File(gameInstance.getHomePath(), "Zomboid"));
+                ((TextView) itemView.findViewById(R.id.game_instance_item_version_tv)).setText(
+                        gameVersion.isEmpty() ? "Build " + gameInstance.getBuildVersion() : gameVersion);
                 // The hosting switch lives in the instance settings; the card repeats it so the
                 // player sees why the game will open on the hosting profile before launching.
                 itemView.findViewById(R.id.game_instance_item_hosting_tv).setVisibility(
