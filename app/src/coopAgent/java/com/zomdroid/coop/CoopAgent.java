@@ -16,6 +16,7 @@ public final class CoopAgent {
             if (Boolean.getBoolean("zomdroid.server.absoluteLuaFiles")) {
                 instrumentation.addTransformer(new ServerAbsoluteLuaFiles());
                 instrumentation.addTransformer(new ServerModMediaPaths());
+                instrumentation.addTransformer(new ModFoldersRealPath());
             }
             instrumentation.addTransformer(new ServerInternetObserver());
             return;
@@ -26,8 +27,12 @@ public final class CoopAgent {
         // Host from the game: this client runs on the coop-probe profile too, where mods/ is the
         // same link, and joining reloads Lua and checksums mod animations - the server's failure
         // repeated on the client side. On Build 41 the method is not found and nothing changes.
-        if (!"hosting-off".equals(options))
+        // Same profile, same link: the mod folders are listed by their real path, see
+        // ModFoldersRealPath (scripts of a mixed-case mod, mods picked in the server settings).
+        if (!"hosting-off".equals(options)) {
             instrumentation.addTransformer(new ServerModMediaPaths());
+            instrumentation.addTransformer(new ModFoldersRealPath());
+        }
         // Hosting off: same call site, but it only tells the launcher that Host was pressed.
         final String processClass = "hosting-off".equals(options)
                 ? "com/zomdroid/coop/HostingOffProcess" : "com/zomdroid/coop/FileProcess";
