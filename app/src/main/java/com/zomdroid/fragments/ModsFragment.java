@@ -645,9 +645,22 @@ public class ModsFragment extends Fragment {
         if (e == null) return;
         try {
             PzModList.writeOrder(e.target.file, order);
+            // The world Continue opens: the game starts with default.txt and would copy this list
+            // there on its next exit anyway, so a mod switched off here is off from the start.
+            File zomboid = zomboidDir(e.instance);
+            if (PzModList.isLatestWorld(zomboid, e.target))
+                PzModList.writeOrder(new File(zomboid, "mods/default.txt"), order);
         } catch (IOException ex) {
             Toast.makeText(requireContext(), R.string.mods_switch_failed, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    /** Whether the "(new)" list, the one the game starts with, still has this mod. */
+    private boolean stillStartsWith(String id) {
+        Entry e = current();
+        if (e == null) return false;
+        List<String> start = PzModList.readOrder(new File(zomboidDir(e.instance), "mods/default.txt"));
+        return start != null && start.contains(id);
     }
 
     /** On: appended at the end of the load order, as the game does. Off: removed. */
@@ -659,9 +672,14 @@ public class ModsFragment extends Fragment {
         write(order);
         refresh();
         // A Java mod is loaded at game start from the "(new)" list and cannot be unloaded: off in
-        // one world's list only, it still ran in that world (Project Viewpoint, 2026-11-27).
-        if (!on && r.mod != null && r.mod.javaMod)
-            Toast.makeText(requireContext(), R.string.mods_java_off_hint, Toast.LENGTH_LONG).show();
+        // one world's list only, it still ran in that world (Project Viewpoint, 2026-11-27). Only
+        // said when that list still has it, i.e. not after an edit mirrored by write().
+        if (!on && r.mod != null && r.mod.javaMod && stillStartsWith(r.id))
+            new MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(r.mod.name)
+                    .setMessage(R.string.mods_java_off_hint)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show();
     }
 
     private String gameVersionOfList() {
@@ -930,9 +948,15 @@ public class ModsFragment extends Fragment {
     }
 
     /** The note under a mod's name: author, plus what is wrong with it in this list. */
-    private String note(Row r, Set<String> activeIds) {
+    private CharSequence note(Row r, Set<String> activeIds) {
         if (r.mod == null) return getString(R.string.mods_not_installed);
         List<String> parts = new ArrayList<>();
+        // The mod's own version, then the game versions it declares: green when this game is
+        // inside them (a mod for another build is drawn red as a whole by the adapter).
+        if (!r.mod.modVersion.isEmpty())
+            parts.add(Character.isDigit(r.mod.modVersion.charAt(0)) ? "v" + r.mod.modVersion : r.mod.modVersion);
+        String range = PzModList.gameRange(r.mod);
+        if (!range.isEmpty()) parts.add(range);
         if (!r.mod.fitsBuild) parts.add(getString(R.string.mods_wrong_build));
         if (r.active) {
             for (String d : r.mod.require)
@@ -946,7 +970,16 @@ public class ModsFragment extends Fragment {
             }
         }
         if (!r.mod.author.isEmpty()) parts.add(r.mod.author);
-        return String.join(" · ", parts);
+        android.text.SpannableString text = new android.text.SpannableString(String.join(" · ", parts));
+        if (!range.isEmpty() && r.mod.fitsBuild) {
+            int at = text.toString().indexOf(range);
+            text.setSpan(new android.text.style.ForegroundColorSpan(
+                            androidx.core.content.ContextCompat.getColor(requireContext(), R.color.mod_fits_build)),
+                    at, at + range.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            text.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD),
+                    at, at + range.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        return text;
     }
 
     private final RecyclerView.Adapter<RecyclerView.ViewHolder> adapter = new RecyclerView.Adapter<RecyclerView.ViewHolder>() {

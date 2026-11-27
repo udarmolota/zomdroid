@@ -49,6 +49,34 @@ public class PzModListTest {
     }
 
     @Test
+    public void theContinueWorldIsTheOneInLatestSave() throws Exception {
+        write("Saves/Sandbox/World/mods.txt", SAVE_MODS);
+        write("Saves/Rising/Other/mods.txt", SAVE_MODS);
+        write("latestSave.ini", "World\nSandbox\n");
+        PzModList.Target world = null, other = null, start = null;
+        for (PzModList.Target t : PzModList.targets(zomboid.toFile())) {
+            if (t.newWorlds) start = t;
+            else if (t.world.equals("World")) world = t;
+            else other = t;
+        }
+        assertTrue(PzModList.isLatestWorld(zomboid.toFile(), world));
+        assertFalse(PzModList.isLatestWorld(zomboid.toFile(), other));
+        assertFalse(PzModList.isLatestWorld(zomboid.toFile(), start));
+    }
+
+    @Test
+    public void build42TakesModInfoFromCommon() throws Exception {
+        // Project Viewpoint 0.1.7: mod.info only in common/, a 42/ folder with media only.
+        write("mods/Viewpoint/common/mod.info",
+                "id=Viewpoint\nname=Viewpoint\nversionMin=42.22\nversionMax=42.22\n");
+        write("mods/Viewpoint/42/media/x.txt", "x");
+        List<PzModList.Mod> mods = PzModList.installed(zomboid.toFile(), "42.22.2", true);
+        assertEquals(1, mods.size());
+        assertTrue(mods.get(0).fitsBuild);
+        assertFalse(PzModList.installed(zomboid.toFile(), "41.78.16", false).get(0).fitsBuild);
+    }
+
+    @Test
     public void aBoundCoversThePatchesItDoesNotName() {
         // Project Viewpoint 0.1.7: versionMin=42.22, versionMax=42.22, game 42.22.2.
         assertEquals(0, PzModList.compareToBound("42.22.2", "42.22"));

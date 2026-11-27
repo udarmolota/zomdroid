@@ -37,6 +37,8 @@ public final class PzModList {
         public final File infoDir;       // where mod.info was read: the folder or a version subfolder
         public final String id, name, author, description;
         public final String versionMin, versionMax;   // "" when not given
+        /** modversion: the mod's own version, not compared with anything; "" when not given. */
+        public final String modVersion;
         /** Build 42 loads a mod from a 42.x folder, Build 41 from mod.info at the top; false when this
          *  mod has none the instance's build reads, or the game version is outside versionMin/Max. */
         public final boolean fitsBuild;
@@ -63,6 +65,7 @@ public final class PzModList {
             this.description = info.getOrDefault("description", "").trim();
             this.versionMin = info.getOrDefault("versionmin", "").trim();
             this.versionMax = info.getOrDefault("versionmax", "").trim();
+            this.modVersion = info.getOrDefault("modversion", "").trim();
             this.poster = info.getOrDefault("poster", "").trim();
             this.javaMod = !info.getOrDefault("javajarfile", "").trim().isEmpty();
             this.fitsBuild = fitsBuild;
@@ -174,13 +177,18 @@ public final class PzModList {
             if (!folder.isDirectory() || Files.isSymbolicLink(folder.toPath())) continue;
             File versioned = versionFolder(folder, gameVersion, build42 ? 42 : 41);
             File root = new File(folder, "mod.info").isFile() ? folder : null;
-            // Build 42 reads only a 42.x folder; Build 41 only mod.info at the top. A mod the build
-            // cannot load is still listed (from whatever mod.info it has), marked as not fitting.
+            // Build 42 takes a mod whose mod.info is in its 42.x folder or in common/ (the game's
+            // getAllModFoldersAux checks both; Project Viewpoint 0.1.7 has it only in common/);
+            // Build 41 only mod.info at the top. A mod the build cannot load is still listed (from
+            // whatever mod.info it has), marked as not fitting.
+            File common = new File(folder, "common");
+            if (!new File(common, "mod.info").isFile()) common = null;
             File infoDir;
             boolean fits;
             if (build42) {
-                infoDir = versioned != null ? versioned : root != null ? root : anyVersionFolder(folder);
-                fits = versioned != null;
+                infoDir = versioned != null ? versioned : common != null ? common
+                        : root != null ? root : anyVersionFolder(folder);
+                fits = versioned != null || common != null;
             } else {
                 infoDir = root != null ? root : versioned != null ? versioned : anyVersionFolder(folder);
                 fits = root != null;
@@ -330,6 +338,35 @@ public final class PzModList {
         });
         out.addAll(worlds);
         return out;
+    }
+
+    /**
+     * Whether {@code target} is the world the game's Continue opens: Zomboid/latestSave.ini names
+     * its folder on the first line and its mode on the second. On exit the game copies the mods of
+     * the world it played into default.txt and starts with that list, so an edit to this world's
+     * list belongs in default.txt too - otherwise a mod switched off here still loads at start.
+     */
+    public static boolean isLatestWorld(File zomboidDir, Target target) {
+        if (target.newWorlds) return false;
+        try {
+            List<String> lines = Files.readAllLines(new File(zomboidDir, "latestSave.ini").toPath(), StandardCharsets.UTF_8);
+            return lines.size() >= 2 && lines.get(0).trim().equals(target.world)
+                    && lines.get(1).trim().equals(target.mode);
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    /**
+     * The game versions a mod declares, for display: "42.22", "42.13 – 42.22", "42.13+",
+     * "≤ 42.21"; "" when mod.info names neither bound.
+     */
+    public static String gameRange(Mod mod) {
+        String min = mod.versionMin, max = mod.versionMax;
+        if (min.isEmpty() && max.isEmpty()) return "";
+        if (max.isEmpty()) return min + "+";
+        if (min.isEmpty()) return "≤ " + max;
+        return min.equals(max) ? min : min + " – " + max;
     }
 
     /** The ids in load order, as normalizeId() gives them; empty for a missing default.txt; null

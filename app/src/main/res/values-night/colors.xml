@@ -142,4 +142,6 @@
     <color name="md_theme_surfaceContainerHighest_highContrast">#45474C</color>
     <color name="pz_orange">#faba69</color>
     <color name="pz_orange_dark">#ae6013</color>
+    <!-- Mods screen: the game version is inside the versions a mod declares. -->
+    <color name="mod_fits_build">#81C784</color>
 </resources>
