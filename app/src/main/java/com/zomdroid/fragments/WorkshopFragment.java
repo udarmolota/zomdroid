@@ -44,6 +44,7 @@ import java.util.regex.Pattern;
  */
 public class WorkshopFragment extends Fragment {
     private static final String START_URL = "https://steamcommunity.com/app/108600/workshop/";
+    private static final String STATE_URL = "workshop_url";
     /** Item pages: .../sharedfiles/filedetails/?id=N and .../workshop/filedetails/?id=N. */
     private static final Pattern ITEM_URL = Pattern.compile("/filedetails/\\?(?:[^#]*&)?id=(\\d+)");
 
@@ -170,15 +171,18 @@ public class WorkshopFragment extends Fragment {
                     }
                 });
 
-        if (savedInstanceState != null) web.restoreState(savedInstanceState);
-        else web.loadUrl(START_URL);
+        String savedUrl = savedInstanceState == null ? null : savedInstanceState.getString(STATE_URL);
+        web.loadUrl(savedUrl != null && savedUrl.startsWith("https://") ? savedUrl : START_URL);
         updateBar();
     }
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (web != null) web.saveState(outState);
+        // Only the address. WebView.saveState() put the whole browsing state here, over 500 KB
+        // after a few Workshop pages, and Android kills the app with TransactionTooLargeException
+        // the moment the launcher goes to the background (2026-11-27).
+        if (web != null && web.getUrl() != null) outState.putString(STATE_URL, web.getUrl());
     }
 
     @Override
