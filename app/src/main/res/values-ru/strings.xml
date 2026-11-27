@@ -796,6 +796,7 @@
     <string name="mods_drag">Перетащите, чтобы изменить порядок загрузки</string>
     <string name="mods_not_installed">Не установлен — есть в списке, но папки нет</string>
     <string name="mods_wrong_build">Не для этой версии игры</string>
+    <string name="mods_java_off_hint">Java-мод загружается при старте игры. Чтобы выключить его полностью, выключите его и в списке «(новый)» и перезапустите игру.</string>
     <string name="mods_wrong_build_detail">%1$s может не загрузить этот мод и убрать его из списка модов сейва.</string>
     <string name="mods_wrong_build_confirm">Мод заявлен для версий %1$s, у вас игра %2$s. Игра может его не загрузить. Всё равно включить?</string>
     <string name="mods_wrong_build_enable">Включить</string>

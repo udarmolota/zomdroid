@@ -795,6 +795,7 @@
     <string name="mods_drag">Arraste para mudar a ordem de carregamento</string>
     <string name="mods_not_installed">Não instalado — está na lista, mas a pasta não existe</string>
     <string name="mods_wrong_build">Não é para esta versão do jogo</string>
+    <string name="mods_java_off_hint">Mod Java: é carregado quando o jogo inicia. Para desligá-lo por completo, desligue-o também na lista “(novo)” e reinicie o jogo.</string>
     <string name="mods_wrong_build_detail">%1$s pode não carregar este mod e pode removê-lo da lista de mods do save.</string>
     <string name="mods_wrong_build_confirm">Este mod diz ser para as versões %1$s, seu jogo é %2$s. O jogo pode não carregá-lo. Ativar mesmo assim?</string>
     <string name="mods_wrong_build_enable">Ativar</string>

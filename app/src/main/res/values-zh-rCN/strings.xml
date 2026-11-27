@@ -789,6 +789,7 @@
     <string name="mods_drag">拖动以改变加载顺序</string>
     <string name="mods_not_installed">未安装——在列表中，但文件夹不存在</string>
     <string name="mods_wrong_build">不适用于此游戏版本</string>
+    <string name="mods_java_off_hint">Java 模组在游戏启动时加载。要完全关闭它，请在“（新）”列表中也将其关闭，然后重启游戏。</string>
     <string name="mods_wrong_build_detail">%1$s 可能不会加载此模组，并可能把它从存档的模组列表中移除。</string>
     <string name="mods_wrong_build_confirm">此模组声明适用于版本 %1$s，你的游戏是 %2$s。游戏可能不会加载它。仍要启用吗？</string>
     <string name="mods_wrong_build_enable">启用</string>

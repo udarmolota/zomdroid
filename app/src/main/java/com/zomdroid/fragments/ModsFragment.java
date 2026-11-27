@@ -658,6 +658,10 @@ public class ModsFragment extends Fragment {
         if (on) order.add(r.id);
         write(order);
         refresh();
+        // A Java mod is loaded at game start from the "(new)" list and cannot be unloaded: off in
+        // one world's list only, it still ran in that world (Project Viewpoint, 2026-11-27).
+        if (!on && r.mod != null && r.mod.javaMod)
+            Toast.makeText(requireContext(), R.string.mods_java_off_hint, Toast.LENGTH_LONG).show();
     }
 
     private String gameVersionOfList() {

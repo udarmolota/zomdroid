@@ -49,6 +49,9 @@ public final class PzModList {
         public final List<String> require = new ArrayList<>(), loadAfter = new ArrayList<>(),
                 loadBefore = new ArrayList<>(), incompatible = new ArrayList<>();
         public final String poster;      // file name relative to infoDir, "" when none
+        /** Loaded by ZombieBuddy as Java code (mod.info names a jar): once the game has started
+         *  with it, it stays active until the game exits, whatever a world's own list says. */
+        public final boolean javaMod;
 
         Mod(File folder, File infoDir, Map<String, String> info, boolean fitsBuild, boolean rangeOnly, boolean deletable) {
             this.folder = folder;
@@ -61,6 +64,7 @@ public final class PzModList {
             this.versionMin = info.getOrDefault("versionmin", "").trim();
             this.versionMax = info.getOrDefault("versionmax", "").trim();
             this.poster = info.getOrDefault("poster", "").trim();
+            this.javaMod = !info.getOrDefault("javajarfile", "").trim().isEmpty();
             this.fitsBuild = fitsBuild;
             this.rangeOnly = rangeOnly;
             this.deletable = deletable;

@@ -844,6 +844,7 @@
     <string name="mods_drag">Drag to change the load order</string>
     <string name="mods_not_installed">Not installed — in the list, but its folder is missing</string>
     <string name="mods_wrong_build">Not for this game build</string>
+    <string name="mods_java_off_hint">Java mod: it loads when the game starts. To switch it off completely, turn it off in the “(new)” list too and restart the game.</string>
     <string name="mods_wrong_build_detail">%1$s may not load this mod and may remove it from the save\'s mod list.</string>
     <string name="mods_wrong_build_confirm">This mod says it is for versions %1$s, your game is %2$s. The game may not load it. Switch it on anyway?</string>
     <string name="mods_wrong_build_enable">Switch on</string>

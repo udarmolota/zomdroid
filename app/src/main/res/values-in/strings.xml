@@ -796,6 +796,7 @@
     <string name="mods_drag">Seret untuk mengubah urutan muat</string>
     <string name="mods_not_installed">Tidak terpasang — ada di daftar, tapi foldernya tidak ada</string>
     <string name="mods_wrong_build">Bukan untuk versi game ini</string>
+    <string name="mods_java_off_hint">Mod Java dimuat saat game dimulai. Untuk mematikannya sepenuhnya, matikan juga di daftar “(baru)” lalu mulai ulang game.</string>
     <string name="mods_wrong_build_detail">%1$s mungkin tidak memuat mod ini dan mungkin menghapusnya dari daftar mod save.</string>
     <string name="mods_wrong_build_confirm">Mod ini menyatakan untuk versi %1$s, game Anda %2$s. Game mungkin tidak memuatnya. Tetap aktifkan?</string>
     <string name="mods_wrong_build_enable">Aktifkan</string>
