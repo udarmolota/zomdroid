@@ -96,9 +96,9 @@ public final class PzModList {
             int eq = line.indexOf('=');
             String key = eq > 0 ? line.substring(0, eq).trim().toLowerCase(java.util.Locale.ROOT) : "";
             String value = eq > 0 ? line.substring(eq + 1).trim() : "";
-            if (key.equals("versionmin") && !value.isEmpty() && compareVersions(gameVersion, value) < 0) {
+            if (key.equals("versionmin") && !value.isEmpty() && compareToBound(gameVersion, value) < 0) {
                 out.add(line.substring(0, eq + 1) + gameVersion);
-            } else if (key.equals("versionmax") && !value.isEmpty() && compareVersions(gameVersion, value) > 0) {
+            } else if (key.equals("versionmax") && !value.isEmpty() && compareToBound(gameVersion, value) > 0) {
                 out.add(line.substring(0, eq + 1) + gameVersion);
             } else {
                 out.add(line);
@@ -186,8 +186,8 @@ public final class PzModList {
             if (info == null || normalizeId(info.get("id")).isEmpty()) continue;
             String min = info.getOrDefault("versionmin", "").trim(), max = info.getOrDefault("versionmax", "").trim();
             boolean inRange = gameVersion.isEmpty()
-                    || ((min.isEmpty() || compareVersions(gameVersion, min) >= 0)
-                    && (max.isEmpty() || compareVersions(gameVersion, max) <= 0));
+                    || ((min.isEmpty() || compareToBound(gameVersion, min) >= 0)
+                    && (max.isEmpty() || compareToBound(gameVersion, max) <= 0));
             out.add(new Mod(folder, infoDir, info, fits && inRange, fits && !inRange, deletable));
         }
     }
@@ -226,6 +226,21 @@ public final class PzModList {
         for (int i = 0; i < Math.max(pa.length, pb.length); i++) {
             int na = i < pa.length ? num(pa[i]) : 0, nb = i < pb.length ? num(pb[i]) : 0;
             if (na != nb) return Integer.compare(na, nb);
+        }
+        return 0;
+    }
+
+    /**
+     * The game version against a versionMin / versionMax of mod.info, looking only at as many
+     * numbers as the bound spells out: "versionMax=42.22" covers every 42.22.x, as the game itself
+     * reads it (Project Viewpoint 0.1.7 declares 42.22 and loads on 42.22.2), while "42.21.0"
+     * still means that one patch.
+     */
+    static int compareToBound(String gameVersion, String bound) {
+        String[] game = gameVersion.trim().split("\\."), limit = bound.trim().split("\\.");
+        for (int i = 0; i < limit.length; i++) {
+            int g = i < game.length ? num(game[i]) : 0, l = num(limit[i]);
+            if (g != l) return Integer.compare(g, l);
         }
         return 0;
     }

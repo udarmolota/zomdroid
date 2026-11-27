@@ -49,6 +49,17 @@ public class PzModListTest {
     }
 
     @Test
+    public void aBoundCoversThePatchesItDoesNotName() {
+        // Project Viewpoint 0.1.7: versionMin=42.22, versionMax=42.22, game 42.22.2.
+        assertEquals(0, PzModList.compareToBound("42.22.2", "42.22"));
+        assertTrue(PzModList.compareToBound("42.23.0", "42.22") > 0);
+        assertTrue(PzModList.compareToBound("42.21.9", "42.22") < 0);
+        // A bound that names the patch still means that patch.
+        assertTrue(PzModList.compareToBound("42.21.1", "42.21.0") > 0);
+        assertTrue(PzModList.compareToBound("42.22", "42.22.1") < 0);
+    }
+
+    @Test
     public void keepsWindowsLineEndings() throws Exception {
         Path txt = write("mods/default.txt", SAVE_MODS.replace("\n", "\r\n"));
         PzModList.writeOrder(txt.toFile(), Arrays.asList("ZombieBuddy"));
