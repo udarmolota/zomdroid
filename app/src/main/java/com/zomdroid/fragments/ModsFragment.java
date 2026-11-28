@@ -690,12 +690,13 @@ public class ModsFragment extends Fragment {
     /** Switching on a mod not made for this build: say so, then let the player decide. */
     private void confirmWrongBuild(Row r) {
         String game = gameVersionOfList();
-        String range = (r.mod.versionMin.isEmpty() ? "…" : r.mod.versionMin) + " – "
-                + (r.mod.versionMax.isEmpty() ? "…" : r.mod.versionMax);
+        Entry e = current();
+        if (game.isEmpty()) game = e == null ? getString(R.string.mods_this_game) : "Build " + e.instance.getBuildVersion();
+        String range = PzModList.gameRange(r.mod);
+        if (range.isEmpty()) range = "…";
         new MaterialAlertDialogBuilder(requireContext())
                 .setTitle(r.mod.name)
-                .setMessage(getString(R.string.mods_wrong_build_confirm, range,
-                        game.isEmpty() ? getString(R.string.mods_this_game) : game))
+                .setMessage(getString(R.string.mods_wrong_build_confirm, range, game))
                 .setNegativeButton(android.R.string.cancel, (d, w) -> refresh())
                 .setOnCancelListener(d -> refresh())
                 .setPositiveButton(R.string.mods_wrong_build_enable, (d, w) -> toggle(r, true))
@@ -952,12 +953,12 @@ public class ModsFragment extends Fragment {
         if (r.mod == null) return getString(R.string.mods_not_installed);
         List<String> parts = new ArrayList<>();
         // The mod's own version, then the game versions it declares: green when this game is
-        // inside them (a mod for another build is drawn red as a whole by the adapter).
+        // inside them, red when not. A mod that names no versions but still does not fit (a
+        // Build 41 mod on Build 42) says so on a line of its own, so the row never cuts it off.
         if (!r.mod.modVersion.isEmpty())
             parts.add(Character.isDigit(r.mod.modVersion.charAt(0)) ? "v" + r.mod.modVersion : r.mod.modVersion);
         String range = PzModList.gameRange(r.mod);
         if (!range.isEmpty()) parts.add(range);
-        if (!r.mod.fitsBuild) parts.add(getString(R.string.mods_wrong_build));
         if (r.active) {
             for (String d : r.mod.require)
                 if (!activeIds.contains(d)) { parts.add(getString(R.string.mods_needs, d)); break; }
@@ -970,14 +971,26 @@ public class ModsFragment extends Fragment {
             }
         }
         if (!r.mod.author.isEmpty()) parts.add(r.mod.author);
-        android.text.SpannableString text = new android.text.SpannableString(String.join(" · ", parts));
-        if (!range.isEmpty() && r.mod.fitsBuild) {
-            int at = text.toString().indexOf(range);
-            text.setSpan(new android.text.style.ForegroundColorSpan(
-                            androidx.core.content.ContextCompat.getColor(requireContext(), R.color.mod_fits_build)),
+        String line = String.join(" · ", parts);
+        String wrongBuild = !r.mod.fitsBuild && range.isEmpty() ? getString(R.string.mods_wrong_build) : "";
+        android.text.SpannableString text = new android.text.SpannableString(
+                wrongBuild.isEmpty() ? line : line.isEmpty() ? wrongBuild : line + "\n" + wrongBuild);
+        int error = com.google.android.material.color.MaterialColors.getColor(requireContext(),
+                androidx.appcompat.R.attr.colorError, android.graphics.Color.RED);
+        if (!range.isEmpty()) {
+            int at = line.indexOf(range);
+            int color = r.mod.fitsBuild
+                    ? androidx.core.content.ContextCompat.getColor(requireContext(), R.color.mod_fits_build)
+                    : error;
+            text.setSpan(new android.text.style.ForegroundColorSpan(color),
                     at, at + range.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             text.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD),
                     at, at + range.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        if (!wrongBuild.isEmpty()) {
+            int at = text.length() - wrongBuild.length();
+            text.setSpan(new android.text.style.ForegroundColorSpan(error),
+                    at, text.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         return text;
     }
@@ -1014,15 +1027,9 @@ public class ModsFragment extends Fragment {
             name.setText(r.mod != null ? r.mod.name : r.id);
             sub.setText(note(r, activeIds));
             sub.setVisibility(sub.getText().length() == 0 ? View.GONE : View.VISIBLE);
-            // A mod the game will not load is marked in red: the game drops it from the list on save.
-            if (sub.getTag() == null) sub.setTag(sub.getTextColors());
+            // A mod the game will not load is marked in red by note() - its game versions, or the
+            // "not for this build" line: the game drops such a mod from the list on save.
             boolean wrongBuild = r.mod != null && !r.mod.fitsBuild;
-            if (wrongBuild) {
-                sub.setTextColor(com.google.android.material.color.MaterialColors.getColor(sub,
-                        androidx.appcompat.R.attr.colorError));
-            } else {
-                sub.setTextColor((android.content.res.ColorStateList) sub.getTag());
-            }
 
             android.widget.CheckBox cb = v.findViewById(R.id.cb_mod);
             MaterialSwitch sw = v.findViewById(R.id.sw_mod);

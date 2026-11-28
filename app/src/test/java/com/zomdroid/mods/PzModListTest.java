@@ -49,6 +49,16 @@ public class PzModListTest {
     }
 
     @Test
+    public void build41VersionComesFromTheConsoleLog() throws Exception {
+        assertEquals("", PzModList.gameVersion(zomboid.toFile()));
+        write("console.txt", "LOG  : General     , 1795869306738> java.class.version=65.0\n"
+                + "LOG  : General     , 1795869306738> version=41.78.21 demo=false\n");
+        assertEquals("41.78.21", PzModList.gameVersion(zomboid.toFile()));
+        write("version.txt", "42.22.2 3d39148846\n");
+        assertEquals("42.22.2", PzModList.gameVersion(zomboid.toFile()));
+    }
+
+    @Test
     public void theContinueWorldIsTheOneInLatestSave() throws Exception {
         write("Saves/Sandbox/World/mods.txt", SAVE_MODS);
         write("Saves/Rising/Other/mods.txt", SAVE_MODS);

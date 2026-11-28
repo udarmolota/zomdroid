@@ -277,16 +277,36 @@ public final class PzModList {
         }
     }
 
-    /** "42.21.0" from Zomboid/version.txt ("42.21.0 4a0e9546ec"), "" when there is none. */
+    /**
+     * "42.21.0" from Zomboid/version.txt ("42.21.0 4a0e9546ec"). Build 41 writes no such file, so
+     * then the "version=41.78.21" line near the top of the last run's console.txt. "" when the
+     * game has never run.
+     */
     public static String gameVersion(File zomboidDir) {
         try {
             String text = new String(Files.readAllBytes(new File(zomboidDir, "version.txt").toPath()),
                     StandardCharsets.UTF_8).trim();
             String first = text.split("\\s+")[0];
-            return first.matches("\\d+(\\.\\d+)*") ? first : "";
+            if (first.matches("\\d+(\\.\\d+)*")) return first;
+        } catch (IOException ignored) {
+            // Build 41, or never run: try the log below.
+        }
+        return versionFromConsole(new File(zomboidDir, "console.txt"));
+    }
+
+    /** The version the game logs at start ("...> version=41.78.21 demo=false"); "" when absent. */
+    static String versionFromConsole(File console) {
+        byte[] head = new byte[64 * 1024];
+        int n;
+        try (java.io.InputStream in = new java.io.FileInputStream(console)) {
+            n = in.read(head);
         } catch (IOException e) {
             return "";
         }
+        if (n <= 0) return "";
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("> version=(\\d+(?:\\.\\d+)*)")
+                .matcher(new String(head, 0, n, StandardCharsets.UTF_8));
+        return m.find() ? m.group(1) : "";
     }
 
     /** id -> mod, the first folder winning, as for the rows of the active list. */

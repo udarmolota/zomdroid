@@ -49,7 +49,7 @@
                 android:layout_height="wrap_content"
                 android:alpha="0.7"
                 android:ellipsize="end"
-                android:maxLines="1"
+                android:maxLines="2"
                 android:textSize="12sp" />
         </LinearLayout>
 
