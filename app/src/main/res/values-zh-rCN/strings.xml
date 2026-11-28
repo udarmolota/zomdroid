@@ -823,7 +823,7 @@
     <string name="custom_driver_missing_title">未找到自定义 Vulkan 驱动</string>
     <string name="custom_driver_missing_message">此实例使用自定义 Vulkan 驱动，但驱动文件不存在，可能在重新安装时被删除了。</string>
     <string name="custom_driver_missing_load">加载驱动</string>
-    <string name="release_notes_body">新增\n\n• Build 42.22 可以再次启动。\n\n• 启动器内置 Steam 创意工坊：点击模组或合集上的 ↓ 加入队列，然后点“下载 (N)”。\n\n• 底部栏：首页、游戏、创意工坊、导入、项目。\n\n• 导入 / 导出合并为一个页面：存档、模组、游戏设置、按键布局和驱动。\n\n• 将模组复制到同一版本的另一个实例，可勾选要复制的模组。\n\n• 安全启动（实例卡片上的 ⋮）：不加载模组、使用推荐设置启动一次。如果能进入主菜单，问题出在你的模组或设置上。\n\n• 适用于 Adreno 7xx 的 Turnip v26.2；在 Android 15+ 上的 Adreno 630-690 会自动选用。\n\n• 从此版本起，Zomdroid 使用作者自己的密钥签名。请只从 GitHub 下载。</string>
+    <string name="release_notes_body">新增\n\n• 可直接用通过 Steam 下载的游戏创建实例。\n\n• 通过 Steam 下载 Build 42 时，默认获取经 Zomdroid 测试的最新版本。\n\n• Project Viewpoint 可在 42.22.2 上运行：Snapdragon，ZINK_OSMESA + FREEDRENO_840。\n\n• 模组界面：显示模组版本及其适用的游戏版本，与你的游戏匹配时显示为绿色。\n\n• 实例卡片显示游戏版本。\n\n• 固定横屏，并可切换旋转 180°。\n\n修复\n\n• 模组联机托管：模组物品正常加载，服务器设置中选择的模组会被保存。\n\n• 42.22 手柄：A 键重新可用于采集、挖掘和建造。\n\n• Workshop 标签页不再导致启动器关闭。</string>
     <string name="bug_report_pick_instance">这份报告是关于哪个游戏的？</string>
     <string name="credits_third_party">捐助图标：“Donate”，作者 Edward Boatman，来自 the Noun Project，CC BY 3.0。\nhttps://thenounproject.com/icon/donate-285/\n\nMobileGlues 渲染器：Willing-Upstairs-580（constantinrarinca3-sketch）制作的 MobileGL-Dev/MobileGlues “astra” 分支，LGPL v2.1。\nhttps://github.com/constantinrarinca3-sketch/MobileGlues</string>
     <string name="rimdroid_dialog_message">RimDroid 用与本启动器运行 Project Zomboid 相同的方式在 Android 上运行 RimWorld。同一作者，同样的思路。\n\nhttps://github.com/udarmolota/RimDroid/releases</string>
